@@ -1,4 +1,4 @@
-package com.example.graduation_project_group_2_mobileworld.controller;
+package com.example.graduation_project_group_2_mobileworld.Controller;
 
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,7 +12,7 @@ public class Test {
 
     @GetMapping("/hello")
     public String sayHello() {
-        return "Hello!";
+        return "Bạn Huan mua da`u bưởi!";
     }
 
 }
