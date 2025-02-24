@@ -399,7 +399,7 @@
             <button
               @click="toggleDropdown4"
               class="flex items-center w-full px-6 py-2 mt-4 duration-200 border-l-4"
-              :class="[isOpen3 ? activeClass : inactiveClass]"
+              :class="[isOpen4 ? activeClass : inactiveClass]"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -414,7 +414,7 @@
               <span class="mx-4">Quản lý phiếu Giảm giá</span>
               <svg
                 class="w-4 h-4 ml-auto transform transition-transform"
-                :class="{ 'rotate-180': isOpen3 }"
+                :class="{ 'rotate-180': isOpen4 }"
                 fill="currentColor"
                 viewBox="0 0 20 20"
               >
@@ -426,7 +426,7 @@
               </svg>
             </button>
 
-            <div v-if="isOpen3" class="ml-8">
+            <div v-if="isOpen4" class="ml-8">
               <router-link
                 class="flex items-center gap-x-3 block px-6 py-2 mt-2 duration-200 border-l-4"
                 :class="[
