@@ -1,35 +1,19 @@
-# front-end
+# VueBoard
 
-This template should help get you started developing with Vue 3 in Vite.
+Dashboard starter template built Vue 3, Tailwind CSS and TypeScript.
 
-## Recommended IDE Setup
+![Dashboard](./dashboard.png)
+![Dashboard](./dashboard2.png)
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+## Usage
 
-## Customize configuration
+```bash
+# Install dependencies
+$ npm install
 
-See [Vite Configuration Reference](https://vite.dev/config/).
+# Compiles and hot-reloads for development
+$ npm run serve
 
-## Project Setup
-
-```sh
-npm install
-```
-
-### Compile and Hot-Reload for Development
-
-```sh
-npm run dev
-```
-
-### Compile and Minify for Production
-
-```sh
-npm run build
-```
-
-### Lint with [ESLint](https://eslint.org/)
-
-```sh
-npm run lint
+# Compiles and minifies for production
+$ npm run build
 ```
