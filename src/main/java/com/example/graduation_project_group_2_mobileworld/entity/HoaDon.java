@@ -3,8 +3,12 @@ package com.example.graduation_project_group_2_mobileworld.entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 import org.hibernate.annotations.Nationalized;
 
 import java.math.BigDecimal;
@@ -13,6 +17,10 @@ import java.time.Instant;
 @Getter
 @Setter
 @Entity
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString
+@Builder
 @Table(name = "hoa_don")
 public class HoaDon {
     @Id

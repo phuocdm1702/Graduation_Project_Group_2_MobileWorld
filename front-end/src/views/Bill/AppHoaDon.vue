@@ -1,4 +1,5 @@
 <template>
+  <p class="mt-4 text-lg font-semibold text-red-500">{{ message }}</p>
   <div class="mt-8 max-w-screen-xl mx-auto">
     <h4 class="text-xl font-semibold text-gray-700">📋 Danh sách Hóa Đơn</h4>
 
@@ -59,8 +60,18 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
+import axios from "axios";
 
+const message = ref("");
+
+onMounted(async () => {
+  try {
+    message.value = (await axios.get("http://localhost:8080/api/hello")).data;
+  } catch (error) {
+    console.error("Lỗi:", error);
+  }
+});
 const bills = ref([
   {
     customerId: "KH001",
