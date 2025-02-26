@@ -1,9 +1,6 @@
 package com.example.graduation_project_group_2_mobileworld.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
@@ -16,7 +13,7 @@ import org.hibernate.annotations.Nationalized;
 @Table(name = "dong_san_pham")
 public class DongSanPham {
     @Id
-    @Column(name = "id", nullable = false)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     @Size(max = 255)
@@ -28,7 +25,7 @@ public class DongSanPham {
     @Size(max = 255)
     @NotNull
     @Nationalized
-    @Column(name = "dong_san_pham", nullable = false)
+    @Column(name = "ten_dong_san_pham", nullable = false)
     private String dongSanPham;
 
     @NotNull

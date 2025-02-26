@@ -28,18 +28,17 @@ public class HoaDon {
     @Column(name = "id", nullable = false)
     private Integer id;
 
-    @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "id_khach_hang", nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "id_khach_hang", referencedColumnName = "id")
     private KhachHang idKhachHang;
 
     @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "id_nhan_vien", nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "id_nhan_vien",referencedColumnName = "id")
     private NhanVien idNhanVien;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_phieu_giam_gia")
+    @ManyToOne
+    @JoinColumn(name = "id_phieu_giam_gia", referencedColumnName = "id")
     private PhieuGiamGia idPhieuGiamGia;
 
     @Size(max = 255)
@@ -119,7 +118,7 @@ public class HoaDon {
     private Integer createdBy;
 
     @Column(name = "updated_at")
-    private Instant updatedAt;
+    private Date updatedAt;
 
     @Column(name = "updated_by")
     private Integer updatedBy;
