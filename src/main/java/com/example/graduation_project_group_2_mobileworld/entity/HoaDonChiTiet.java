@@ -19,17 +19,17 @@ public class HoaDonChiTiet {
     private Integer id;
 
     @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "id_hoa_don", nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "id_hoa_don",referencedColumnName = "id")
     private HoaDon idHoaDon;
 
     @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "id_chi_tiet_san_pham", nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "id_chi_tiet_san_pham", referencedColumnName = "id")
     private ChiTietSanPham idChiTietSanPham;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_imel_da_ban")
+    @ManyToOne
+    @JoinColumn(name = "id_imel_da_ban", referencedColumnName = "id")
     private ImelDaBan idImelDaBan;
 
     @Size(max = 255)

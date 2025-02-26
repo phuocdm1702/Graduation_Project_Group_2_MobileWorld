@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.Nationalized;
 
+import java.sql.Time;
 import java.time.Instant;
 
 @Getter
@@ -19,7 +20,7 @@ public class LichSuHoaDon {
     private Integer id;
 
     @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne
     @JoinColumn(name = "id_hoa_don", nullable = false)
     private HoaDon idHoaDon;
 
@@ -38,7 +39,7 @@ public class LichSuHoaDon {
     private String hanhDong;
 
     @Column(name = "thoi_gian")
-    private Instant thoiGian;
+    private Time thoiGian;
 
     @Column(name = "deleted")
     private Boolean deleted;

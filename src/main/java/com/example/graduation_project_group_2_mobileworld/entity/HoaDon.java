@@ -28,18 +28,17 @@ public class HoaDon {
     @Column(name = "id", nullable = false)
     private Integer id;
 
-    @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "id_khach_hang", nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "id_khach_hang", referencedColumnName = "id")
     private KhachHang idKhachHang;
 
     @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "id_nhan_vien", nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "id_nhan_vien",referencedColumnName = "id")
     private NhanVien idNhanVien;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_phieu_giam_gia")
+    @ManyToOne
+    @JoinColumn(name = "id_phieu_giam_gia", referencedColumnName = "id")
     private PhieuGiamGia idPhieuGiamGia;
 
     @Size(max = 255)
@@ -102,7 +101,7 @@ public class HoaDon {
     private Date ngayTao;
 
     @Column(name = "ngay_thanh_toan")
-    private Instant ngayThanhToan;
+    private Date ngayThanhToan;
 
     @Column(name = "trang_thai", columnDefinition = "tinyint not null")
     private Short trangThai;
