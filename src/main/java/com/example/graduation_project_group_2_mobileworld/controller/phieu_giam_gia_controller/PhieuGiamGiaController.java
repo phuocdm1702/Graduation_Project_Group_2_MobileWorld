@@ -5,6 +5,7 @@ import com.example.graduation_project_group_2_mobileworld.entity.PhieuGiamGia;
 import com.example.graduation_project_group_2_mobileworld.service.khach_hang_service.KhachHangService;
 import com.example.graduation_project_group_2_mobileworld.service.phieu_giam_gia_service.PhieuGiamGiaService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -12,7 +13,7 @@ import java.util.List;
 
 @RequestMapping("/phieu-giam-gia")
 @RestController
-@CrossOrigin("http://localhost:3000/")
+@CrossOrigin("*")
 public class PhieuGiamGiaController {
 
     @Autowired
@@ -30,7 +31,8 @@ public class PhieuGiamGiaController {
     }
 
     @PostMapping("/addPhieuGiamGia")
-    public PhieuGiamGia addPGG(@ModelAttribute("addPGGForm") PhieuGiamGia phieuGiamGia) {
-        return phieuGiamGiaService.addPGG(phieuGiamGia);
+    public ResponseEntity<PhieuGiamGia> addPGG(@RequestBody PhieuGiamGia phieuGiamGia) {
+        PhieuGiamGia newPgg = phieuGiamGiaService.addPGG(phieuGiamGia);
+        return ResponseEntity.ok(newPgg);
     }
 }
