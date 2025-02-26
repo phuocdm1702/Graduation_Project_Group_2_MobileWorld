@@ -1,4 +1,4 @@
-package com.example.graduation_project_group_2_mobileworld.Controller;
+package com.example.graduation_project_group_2_mobileworld.controller;
 
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
