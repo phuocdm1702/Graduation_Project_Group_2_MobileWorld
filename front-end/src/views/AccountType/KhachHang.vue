@@ -58,6 +58,7 @@
           <thead>
             <tr class="bg-gray-200 text-gray-700">
               <th class="px-4 py-2">ID</th>
+              <th class="px-4 py-2">ID_TK</th>
               <th class="px-4 py-2">Mã</th>
               <th class="px-4 py-2">Tên Khách Hàng</th>
               <th class="px-4 py-2">Giới tính</th>
@@ -66,12 +67,13 @@
             </tr>
           </thead>
           <tbody>
-            <tr class="border-t text-center" v-for="customer in customers" :key="customer.id">
+            <tr class="border-t text-center" v-for="customer in dataTable" :key="customer.id">
               <td class="px-4 py-2">{{ customer.id }}</td>
-              <td class="px-4 py-2">{{ customer.code }}</td>
-              <td class="px-4 py-2">{{ customer.name }}</td>
-              <td class="px-4 py-2">{{ customer.gender }}</td>
-              <td class="px-4 py-2">{{ customer.dob }}</td>
+              <td class="px-4 py-2">{{ customer.idTaiKhoan.id }}</td>
+              <td class="px-4 py-2">{{ customer.ma }}</td>
+              <td class="px-4 py-2">{{ customer.ten }}</td>
+              <td class="px-4 py-2">{{ customer.gioiTinh }}</td>
+              <td class="px-4 py-2">{{ customer.ngaySinh }}</td>
               <td class="px-4 py-2">
                 <button class="text-blue-600 hover:underline mr-2">Sửa</button>
                 <button class="text-red-600 hover:underline">Xóa</button>
@@ -84,11 +86,20 @@
   </div>
 </template>
 
-<script setup lang="ts">
-import { ref } from "vue";
+<script setup>
+import { ref, onMounted } from "vue";
+import axios from "axios";
 
-const customers = ref([
-  { id: "C001", code: "KH001", name: "Nguyễn Văn A", gender: "Nam", dob: "1990-05-20" },
-  { id: "C002", code: "KH002", name: "Trần Thị B", gender: "Nữ", dob: "1995-08-15" }
-]);
+const dataTable = ref([]);
+
+onMounted(async () => {
+  try {
+    const res = await axios.get("http://localhost:8080/khach-hang/home");
+    console.log("Dữ liệu từ API:", res.data);
+    dataTable.value = res.data;
+  } catch (error) {
+    console.error("Lỗi:", error);
+  }
+});
 </script>
+
