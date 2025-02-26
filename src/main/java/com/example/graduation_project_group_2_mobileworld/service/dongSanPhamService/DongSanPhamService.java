@@ -20,8 +20,8 @@ public class DongSanPhamService {
 
     // Lấy tất cả dòng sản phẩm
     public List<DongSanPhamDTO> getAllDongSanPham() {
-        List<DongSanPham> entityList = dongSanPhamRepository.findByDeletedFalse();
-        return entityList.stream()
+        return dongSanPhamRepository.findByDeletedFalse()
+                .stream()
                 .map(dsp -> new DongSanPhamDTO(dsp.getId(), dsp.getMa(), dsp.getDongSanPham()))
                 .collect(Collectors.toList());
     }
@@ -38,29 +38,32 @@ public class DongSanPhamService {
 
     // Cập nhật dòng sản phẩm
     public DongSanPhamDTO updateDongSanPham(Integer id, DongSanPhamDTO dto) {
-        Optional<DongSanPham> existingDSP = dongSanPhamRepository.findById(id);
-
-        if (existingDSP.isPresent()) {
-            DongSanPham dsp = existingDSP.get();
-            dsp.setMa(dto.getMa());
-            dsp.setDongSanPham(dto.getDongSanPham());
-
-            DongSanPham updatedDSP = dongSanPhamRepository.save(dsp);
-            return new DongSanPhamDTO(updatedDSP.getId(), updatedDSP.getMa(), updatedDSP.getDongSanPham());
-        }
-        throw new RuntimeException("Dòng sản phẩm không tồn tại!");
+        return dongSanPhamRepository.findById(id)
+                .map(dsp -> {
+                    dsp.setMa(dto.getMa());
+                    dsp.setDongSanPham(dto.getDongSanPham());
+                    DongSanPham updatedDSP = dongSanPhamRepository.save(dsp);
+                    return new DongSanPhamDTO(updatedDSP.getId(), updatedDSP.getMa(), updatedDSP.getDongSanPham());
+                })
+                .orElseThrow(() -> new RuntimeException("Dòng sản phẩm không tồn tại!"));
     }
 
-    // Xóa dòng sản phẩm
-    public void deleteDongSanPham(Integer id) {
-        Optional<DongSanPham> existingDSP = dongSanPhamRepository.findById(id);
-        if (existingDSP.isPresent()) {
-            DongSanPham dsp = existingDSP.get();
-            dsp.setDeleted(true); // Đánh dấu là đã xóa
-            dongSanPhamRepository.save(dsp);
-        } else {
-            throw new RuntimeException("Dòng sản phẩm không tồn tại!");
-        }
+    // Xóa dòng sản phẩm (Chuyển trạng thái deleted = true)
+    public boolean deleteDongSanPham(Integer id) {
+        return dongSanPhamRepository.findById(id)
+                .map(dsp -> {
+                    dsp.setDeleted(true);
+                    dongSanPhamRepository.save(dsp);
+                    return true;
+                })
+                .orElse(false);
     }
 
+    // Tìm kiếm dòng sản phẩm theo keyword
+    public List<DongSanPhamDTO> searchDongSanPham(String keyword) {
+        return dongSanPhamRepository.searchByKeyword(keyword)
+                .stream()
+                .map(dsp -> new DongSanPhamDTO(dsp.getId(), dsp.getMa(), dsp.getDongSanPham()))
+                .collect(Collectors.toList());
+    }
 }
