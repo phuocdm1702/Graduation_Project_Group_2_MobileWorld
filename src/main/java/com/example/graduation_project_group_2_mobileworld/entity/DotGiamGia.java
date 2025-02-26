@@ -63,7 +63,6 @@ public class DotGiamGia {
     @Column(name = "deleted", nullable = false)
     private Boolean deleted = false;
 
-    @OneToMany(mappedBy = "dotGiamGia", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ChiTietDotGiamGia> chiTietDotGiamGiaList = new ArrayList<>();
+
 
 }

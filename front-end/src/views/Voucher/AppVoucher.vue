@@ -94,26 +94,32 @@
             <th class="px-4 py-2">Mã</th>
             <th class="px-4 py-2">Tên Phiếu</th>
             <th class="px-4 py-2">Loại Phiếu</th>
-            <th class="px-4 py-2">Giá trị</th>
+            <th class="px-4 py-2">Phần trăm giảm giá</th>
             <th class="px-4 py-2">Số tiền giảm tối đa</th>
+            <th class="px-4 py-2">Số lượng</th>
             <th class="px-4 py-2">Hóa đơn tối thiểu</th>
             <th class="px-4 py-2">Ngày bắt đầu</th>
             <th class="px-4 py-2">Ngày kết thúc</th>
             <th class="px-4 py-2">Trạng thái</th>
+            <th class="px-4 py-2">Riêng tư</th>
+            <th class="px-4 py-2">Mô tả</th>
             <th class="px-4 py-2">Hành động</th>
           </tr>
           </thead>
           <tbody>
           <tr class="border-t text-center" v-for="voucher in vouchers" :key="voucher.id">
-            <td class="px-4 py-2">{{ voucher.id }}</td>
-            <td class="px-4 py-2">{{ voucher.name }}</td>
-            <td class="px-4 py-2">{{ voucher.type }}</td>
-            <td class="px-4 py-2">{{ voucher.value }}</td>
-            <td class="px-4 py-2">{{ voucher.maxDiscount }}</td>
-            <td class="px-4 py-2">{{ voucher.minOrder }}</td>
-            <td class="px-4 py-2">{{ voucher.startDate }}</td>
-            <td class="px-4 py-2">{{ voucher.endDate }}</td>
-            <td class="px-4 py-2">{{ voucher.status }}</td>
+            <td class="px-4 py-2">{{ voucher.ma }}</td>
+            <td class="px-4 py-2">{{ voucher.tenPhieuGiamGia }}</td>
+            <td class="px-4 py-2">{{ voucher.loaiPhieuGiamGia }}</td>
+            <td class="px-4 py-2">{{ voucher.phanTramGiamGia }}</td>
+            <td class="px-4 py-2">{{ voucher.soTienGiamToiDa }}</td>
+            <td class="px-4 py-2">{{ voucher.soLuongDung }}</td>
+            <td class="px-4 py-2">{{ voucher.hoaDonToiThieu }}</td>
+            <td class="px-4 py-2">{{ new Date(voucher.ngayBatDau).toLocaleDateString('vi-VN') }}</td>
+            <td class="px-4 py-2">{{ new Date(voucher.ngayKetThuc).toLocaleDateString('vi-VN') }}</td>
+            <td class="px-4 py-2">{{ voucher.trangThai }}</td>
+            <td class="px-4 py-2">{{ voucher.riengTu }}</td>
+            <td class="px-4 py-2">{{ voucher.moTa }}</td>
             <td class="px-4 py-2">
               <button class="text-blue-600 hover:underline mr-2">Sửa</button>
               <button class="text-red-600 hover:underline">Xóa</button>
@@ -130,7 +136,7 @@
         <div
           class="w-full max-w-4xl overflow-hidden bg-white border rounded-md shadow-md"
         >
-          <form>
+          <form action="addPGGForm">
             <div
               class="flex items-center justify-between px-5 py-3 text-gray-700 border-b"
             >
@@ -146,6 +152,7 @@
                 <input
                   type="text"
                   class="w-full px-4 py-2 mt-2 border rounded-md"
+                  v-model="Ma"
                 />
               </div>
               <div>
@@ -153,6 +160,7 @@
                 <input
                   type="text"
                   class="w-full px-4 py-2 mt-2 border rounded-md"
+                  v-model="tenPhieu"
                 />
               </div>
               <div>
@@ -181,10 +189,11 @@
                 </div>
               </div>
               <div>
-                <label class="text-xs">Giá trị</label>
+                <label class="text-xs">Phần trăm giảm giá</label>
                 <input
                   type="text"
                   class="w-full px-4 py-2 mt-2 border rounded-md"
+                  v-model="phanTram"
                 />
               </div>
               <div>
@@ -192,6 +201,7 @@
                 <input
                   type="text"
                   class="w-full px-4 py-2 mt-2 border rounded-md"
+                  v-model="soTienGiamToiDa"
                 />
               </div>
               <div>
@@ -199,6 +209,15 @@
                 <input
                   type="text"
                   class="w-full px-4 py-2 mt-2 border rounded-md"
+                  v-model="hoaDonToiThieu"
+                />
+              </div>
+              <div>
+                <label class="text-xs">Số lượng</label>
+                <input
+                  type="text"
+                  class="w-full px-4 py-2 mt-2 border rounded-md"
+                  v-model="soLuongDung"
                 />
               </div>
               <div>
@@ -206,6 +225,7 @@
                 <input
                   type="date"
                   class="w-full px-4 py-2 mt-2 border rounded-md"
+                  v-model="ngayBatDau"
                 />
               </div>
               <div>
@@ -213,11 +233,12 @@
                 <input
                   type="date"
                   class="w-full px-4 py-2 mt-2 border rounded-md"
+                  v-model="ngayKetThuc"
                 />
               </div>
               <div>
                 <label class="text-xs">Trạng thái</label>
-                <select class="w-full px-4 py-2 mt-2 border rounded-md">
+                <select class="w-full px-4 py-2 mt-2 border rounded-md" v-model="trangThai">
                   <option>Hoạt động</option>
                   <option>Hết hạn</option>
                 </select>
@@ -231,45 +252,48 @@
                 Hủy
               </button>
               <button
+                @click="submitForm"
                 class="px-3 py-1 text-sm text-white bg-indigo-600 rounded-md hover:bg-indigo-500"
               >
                 Lưu
               </button>
             </div>
-          </form>
-        </div>
 
-        <div
-          v-if="voucherType === 'Cá nhân'"
-          class="ml-4 bg-white border rounded-md shadow-md p-4 customer-table-container"
-        >
-        <h4 class="text-gray-600 mb-2">Chọn Khách Hàng</h4>
-          <table class="w-full bg-white rounded-md shadow-md">
-            <thead>
-            <tr class="bg-gray-200 text-gray-700">
-              <th class="px-4 py-2">Chọn</th>
-              <th class="px-4 py-2">Mã KH</th>
-              <th class="px-4 py-2">Tên Khách Hàng</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr
-              v-for="customer in customers"
-              :key="customer.id"
-              class="border-t text-center"
+            <div
+              v-if="voucherType === 'Cá nhân'"
+              class="ml-4 bg-white border rounded-md shadow-md p-4 customer-table-container"
             >
-              <td class="px-4 py-2">
-                <input
-                  type="checkbox"
-                  v-model="selectedCustomers"
-                  :value="customer.id"
-                />
-              </td>
-              <td class="px-4 py-2">{{ customer.id }}</td>
-              <td class="px-4 py-2">{{ customer.name }}</td>
-            </tr>
-            </tbody>
-          </table>
+              <h4 class="text-gray-600 mb-2">Chọn Khách Hàng</h4>
+              <table class="w-full bg-white rounded-md shadow-md">
+                <thead>
+                <tr class="bg-gray-200 text-gray-700">
+                  <th class="px-4 py-2">Chọn</th>
+                  <th class="px-4 py-2">Mã KH</th>
+                  <th class="px-4 py-2">Tên Khách Hàng</th>
+                  <th class="px-4 py-2">Ngày sinh</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr
+                  v-for="customer in customers"
+                  :key="customer.id"
+                  class="border-t text-center"
+                >
+                  <td class="px-4 py-2">
+                    <input
+                      type="checkbox"
+                      v-model="selectedCustomers"
+                      :value="customer.id"
+                    />
+                  </td>
+                  <td class="px-4 py-2">{{ customer.ma }}</td>
+                  <td class="px-4 py-2">{{ customer.ten }}</td>
+                  <td class="px-4 py-2">{{ customer.ngaySinh }}</td>
+                </tr>
+                </tbody>
+              </table>
+            </div>
+          </form>
         </div>
       </div>
     </div>
@@ -279,7 +303,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
+import axios from "axios";
+import PhieuGGService from "@/MobieWorldService/PhieuGiamGiaService/PhieuGGService.js"
+import KhachHangService from "@/MobieWorldService/KhachHangService/KhachHangService.js"
+const vouchers = ref([]);
+const customers = ref([]);
 
 const isModalOpen = ref(false);
 
@@ -291,38 +320,34 @@ const closeModal = () => {
   isModalOpen.value = false;
 };
 
-const vouchers = ref([
-  {
-    id: "VC001",
-    name: "Giảm 10%",
-    type: "Phần trăm",
-    value: "10%",
-    maxDiscount: "50,000đ",
-    minOrder: "200,000đ",
-    startDate: "2024-02-20",
-    endDate: "2024-03-20",
-    status: "Hoạt động",
-  },
-  {
-    id: "VC002",
-    name: "Giảm 50k",
-    type: "Tiền mặt",
-    value: "50,000đ",
-    maxDiscount: "50,000đ",
-    minOrder: "500,000đ",
-    startDate: "2024-02-25",
-    endDate: "2024-03-25",
-    status: "Hết hạn",
-  },
-]);
+// Load data
+const fetchDataPGG = async () => {
+  try {
+    const response = await PhieuGGService.getData();
+    vouchers.value = response.data;
+  } catch (error) {
+    console.log("Error data");
+  }
+};
+const fetchDataKH = async () => {
+  try {
+    const response = await KhachHangService.getData();
+    customers.value = response.data;
+  } catch (error) {
+    console.log("Error data");
+  }
+};
+onMounted(fetchDataPGG);
+onMounted(fetchDataKH);
+
+
+// Add data
+
+  
 
 const voucherType = ref("Chung");
 const selectedCustomers = ref([]);
-const customers = ref([
-  { id: "KH001", name: "Nguyễn Văn A", email: "a@example.com" },
-  { id: "KH002", name: "Trần Thị B", email: "b@example.com" },
-  { id: "KH003", name: "Lê Văn C", email: "c@example.com" },
-]);
+
 
 
 </script>

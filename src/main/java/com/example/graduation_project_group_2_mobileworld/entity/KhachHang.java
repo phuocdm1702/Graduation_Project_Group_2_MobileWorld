@@ -7,6 +7,7 @@ import lombok.Setter;
 import org.hibernate.annotations.Nationalized;
 
 import java.time.Instant;
+import java.util.Date;
 
 @Getter
 @Setter
@@ -35,7 +36,7 @@ public class KhachHang {
     private Short gioiTinh;
 
     @Column(name = "ngay_sinh")
-    private Instant ngaySinh;
+    private Date ngaySinh;
 
     @Column(name = "deleted")
     private Boolean deleted;
