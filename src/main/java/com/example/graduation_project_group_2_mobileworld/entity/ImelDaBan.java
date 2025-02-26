@@ -11,6 +11,7 @@ import lombok.Setter;
 import org.hibernate.annotations.Nationalized;
 
 import java.time.Instant;
+import java.util.Date;
 
 @Getter
 @Setter
@@ -35,7 +36,7 @@ public class ImelDaBan {
 
     @NotNull
     @Column(name = "ngay_ban", nullable = false)
-    private Instant ngayBan;
+    private Date ngayBan;
 
     @Size(max = 255)
     @Nationalized

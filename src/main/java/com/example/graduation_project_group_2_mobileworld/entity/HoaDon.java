@@ -13,6 +13,7 @@ import org.hibernate.annotations.Nationalized;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.Date;
 
 @Getter
 @Setter
@@ -27,18 +28,17 @@ public class HoaDon {
     @Column(name = "id", nullable = false)
     private Integer id;
 
-    @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "id_khach_hang", nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "id_khach_hang", referencedColumnName = "id")
     private KhachHang idKhachHang;
 
     @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "id_nhan_vien", nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "id_nhan_vien",referencedColumnName = "id")
     private NhanVien idNhanVien;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_phieu_giam_gia")
+    @ManyToOne
+    @JoinColumn(name = "id_phieu_giam_gia", referencedColumnName = "id")
     private PhieuGiamGia idPhieuGiamGia;
 
     @Size(max = 255)
@@ -98,10 +98,10 @@ public class HoaDon {
 
     @NotNull
     @Column(name = "ngay_tao", nullable = false)
-    private Instant ngayTao;
+    private Date ngayTao;
 
     @Column(name = "ngay_thanh_toan")
-    private Instant ngayThanhToan;
+    private Date ngayThanhToan;
 
     @Column(name = "trang_thai", columnDefinition = "tinyint not null")
     private Short trangThai;
@@ -112,13 +112,13 @@ public class HoaDon {
 
     @NotNull
     @Column(name = "created_at", nullable = false)
-    private Instant createdAt;
+    private Date createdAt;
 
     @Column(name = "created_by")
     private Integer createdBy;
 
     @Column(name = "updated_at")
-    private Instant updatedAt;
+    private Date updatedAt;
 
     @Column(name = "updated_by")
     private Integer updatedBy;

@@ -9,6 +9,7 @@ import org.hibernate.annotations.Nationalized;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.Date;
 
 @Getter
 @Setter
@@ -20,106 +21,106 @@ public class ChiTietSanPham {
     private Integer id;
 
     @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "id_imel", nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "id_imel", referencedColumnName = "id")
     private Imel idImel;
 
     @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "id_anh_san_pham", nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "id_anh_san_pham", referencedColumnName = "id")
     private AnhSanPham idAnhSanPham;
 
     @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "id_nha_san_xuat", nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "id_nha_san_xuat", referencedColumnName = "id")
     private NhaSanXuat idNhaSanXuat;
 
     @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "id_dong_san_pham", nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "id_dong_san_pham", referencedColumnName = "id")
     private DongSanPham idDongSanPham;
 
     @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "id_mau_sac", nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "id_mau_sac", referencedColumnName = "id")
     private MauSac idMauSac;
 
     @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "id_pin", nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "id_pin", referencedColumnName = "id")
     private Pin idPin;
 
     @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "id_man_hinh", nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "id_man_hinh", referencedColumnName = "id")
     private ManHinh idManHinh;
 
     @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "id_ram", nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "id_ram", referencedColumnName = "id")
     private Ram idRam;
 
     @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "id_bo_nho_trong", nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "id_bo_nho_trong", referencedColumnName = "id")
     private BoNhoTrong idBoNhoTrong;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_ho_tro_bo_nho_ngoai")
+    @ManyToOne
+    @JoinColumn(name = "id_ho_tro_bo_nho_ngoai",referencedColumnName = "id")
     private HoTroBoNhoNgoai idHoTroBoNhoNgoai;
 
     @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "id_cpu", nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "id_cpu", referencedColumnName = "id")
     private Cpu idCpu;
 
     @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "id_gpu", nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "id_gpu", referencedColumnName = "id")
     private Gpu idGpu;
 
     @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "id_cum_camera", nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "id_cum_camera",referencedColumnName = "id")
     private CumCamera idCumCamera;
 
     @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "id_he_dieu_hanh", nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "id_he_dieu_hanh", referencedColumnName = "id")
     private HeDieuHanh idHeDieuHanh;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_chi_so_khang_bui_va_nuoc")
+    @ManyToOne
+    @JoinColumn(name = "id_chi_so_khang_bui_va_nuoc",referencedColumnName = "id")
     private ChiSoKhangBuiVaNuoc idChiSoKhangBuiVaNuoc;
 
     @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "id_thiet_ke", nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "id_thiet_ke", referencedColumnName = "id")
     private ThietKe idThietKe;
 
     @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "id_sim", nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "id_sim", referencedColumnName = "id")
     private Sim idSim;
 
     @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "id_cong_sac", nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "id_cong_sac", referencedColumnName = "id")
     private CongSac idCongSac;
 
     @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "id_ho_tro_cong_nghe_sac", nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "id_ho_tro_cong_nghe_sac", referencedColumnName = "id")
     private HoTroCongNgheSac idHoTroCongNgheSac;
 
     @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "id_cong_nghe_mang", nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "id_cong_nghe_mang", referencedColumnName = "id")
     private CongNgheMang idCongNgheMang;
 
     @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "id_loai_tinh_trang", nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "id_loai_tinh_trang", referencedColumnName = "id")
     private TinhTrang idLoaiTinhTrang;
 
     @Size(max = 255)
@@ -137,13 +138,13 @@ public class ChiTietSanPham {
 
     @NotNull
     @Column(name = "created_at", nullable = false)
-    private Instant createdAt;
+    private Date createdAt;
 
     @Column(name = "created_by")
     private Integer createdBy;
 
     @Column(name = "updated_at")
-    private Instant updatedAt;
+    private Date updatedAt;
 
     @Column(name = "updated_by")
     private Integer updatedBy;
