@@ -1,78 +1,99 @@
 <template>
   <div>
-    <!-- Breadcrumb -->
-    <Breadcrumb breadcrumb="Quản lý Dòng Sản Phẩm" />
-
+    <h4 class="text-gray-600">Quản lý Dòng Sản Phẩm</h4>
     <div class="mt-4">
-      <h4 class="text-gray-600">Quản lý Dòng Sản Phẩm</h4>
-      <div class="mt-4">
-        <div class="w-full max-w-4xl overflow-hidden bg-white border rounded-md shadow-md">
-          <form>
-            <div class="flex items-center justify-between px-5 py-3 text-gray-700 border-b">
-              <h3 class="text-sm">Thêm Dòng Sản Phẩm</h3>
-              <button>
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-            <div class="p-5 text-gray-700 bg-gray-200 border-b grid grid-cols-2 gap-4">
-              <div>
-                <label class="text-xs">ID</label>
-                <input type="text" class="w-full px-4 py-2 mt-2 border rounded-md" />
-              </div>
-              <div>
-                <label class="text-xs">Mã</label>
-                <input type="text" class="w-full px-4 py-2 mt-2 border rounded-md" />
-              </div>
-              <div>
-                <label class="text-xs">Tên Dòng Sản Phẩm</label>
-                <input type="text" class="w-full px-4 py-2 mt-2 border rounded-md" />
-              </div>
-            </div>
-            <div class="px-5 py-3 flex justify-between">
-              <button class="px-3 py-1 text-sm text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300">Hủy</button>
-              <button class="px-3 py-1 text-sm text-white bg-indigo-600 rounded-md hover:bg-indigo-500">Lưu</button>
-            </div>
-          </form>
+      <form @submit.prevent="saveProductLine">
+        <div class="grid grid-cols-2 gap-4">
+          <input v-model="productLine.ma" type="text" placeholder="Mã" class="border p-2 rounded" />
+          <input v-model="productLine.dongSanPham" type="text" placeholder="Tên Dòng Sản Phẩm" class="border p-2 rounded" />
         </div>
-      </div>
+        <div class="mt-2">
+          <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded">{{ editing ? 'Cập nhật' : 'Thêm' }}</button>
+          <button v-if="editing" @click="cancelEdit" class="ml-2 bg-gray-400 text-white px-4 py-2 rounded">Hủy</button>
+        </div>
+      </form>
     </div>
-
     <div class="mt-8">
-      <h4 class="text-gray-600">Danh sách Dòng Sản Phẩm</h4>
-      <div class="mt-4">
-        <table class="w-full bg-white rounded-md shadow-md">
-          <thead>
-            <tr class="bg-gray-200 text-gray-700">
-              <th class="px-4 py-2">ID</th>
-              <th class="px-4 py-2">Mã</th>
-              <th class="px-4 py-2">Tên Dòng Sản Phẩm</th>
-              <th class="px-4 py-2">Hành động</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr class="border-t text-center" v-for="productLine in productLines" :key="productLine.id">
-              <td class="px-4 py-2">{{ productLine.id }}</td>
-              <td class="px-4 py-2">{{ productLine.code }}</td>
-              <td class="px-4 py-2">{{ productLine.name }}</td>
-              <td class="px-4 py-2">
-                <button class="text-blue-600 hover:underline mr-2">Sửa</button>
-                <button class="text-red-600 hover:underline">Xóa</button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      <table class="w-full bg-white rounded-md shadow-md">
+        <thead>
+        <tr class="bg-gray-200 text-gray-700">
+          <th>ID</th>
+          <th>Mã</th>
+          <th>Tên Dòng Sản Phẩm</th>
+          <th>Hành động</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr v-for="product in productLines" :key="product.id" class="border-t text-center">
+          <td>{{ product.id }}</td>
+          <td>{{ product.ma }}</td>
+          <td>{{ product.dongSanPham }}</td>
+          <td>
+            <button @click="editProductLine(product)" class="text-blue-600 hover:underline mr-2">Sửa</button>
+            <button @click="deleteProductLine(product.id)" class="text-red-600 hover:underline">Xóa</button>
+          </td>
+        </tr>
+        </tbody>
+      </table>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
+import axios from "axios";
 
-const productLines = ref([
-  { id: "PL001", code: "SP001", name: "Dòng sản phẩm A" },
-  { id: "PL002", code: "SP002", name: "Dòng sản phẩm B" }
-]);
+const productLines = ref([]);
+const productLine = ref({ id: null, ma: "", dongSanPham: "" });
+const editing = ref(false);
+
+const fetchData = async () => {
+  try {
+    const response = await axios.get("http://localhost:8080/api/dong-san-pham");
+    productLines.value = response.data;
+  } catch (error) {
+    console.error("Lỗi khi tải dữ liệu!", error);
+  }
+};
+
+const saveProductLine = async () => {
+  try {
+    if (editing.value) {
+      await axios.put(`http://localhost:8080/api/dong-san-pham/${productLine.value.id}`, productLine.value);
+    } else {
+      await axios.post("http://localhost:8080/api/dong-san-pham", productLine.value);
+    }
+    await fetchData();
+    resetForm();
+  } catch (error) {
+    console.error("Lỗi khi lưu dữ liệu!", error);
+  }
+};
+
+const editProductLine = (product) => {
+  productLine.value = { ...product };
+  editing.value = true;
+};
+
+const cancelEdit = () => {
+  resetForm();
+};
+
+const deleteProductLine = async (id) => {
+  if (confirm("Bạn có chắc muốn xóa?")) {
+    try {
+      await axios.delete(`http://localhost:8080/api/dong-san-pham/${id}`);
+      await fetchData();
+    } catch (error) {
+      console.error("Lỗi khi xóa dữ liệu!", error);
+    }
+  }
+};
+
+const resetForm = () => {
+  productLine.value = { id: null, ma: "", dongSanPham: "" };
+  editing.value = false;
+};
+
+onMounted(fetchData);
 </script>

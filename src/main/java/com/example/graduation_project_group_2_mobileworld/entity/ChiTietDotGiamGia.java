@@ -16,10 +16,9 @@ public class ChiTietDotGiamGia {
     @Column(name = "id", nullable = false)
     private Integer id;
 
-    @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "id_dot_giam_gia", nullable = false)
-    private DotGiamGia idDotGiamGia;
+    private DotGiamGia dotGiamGia;
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
