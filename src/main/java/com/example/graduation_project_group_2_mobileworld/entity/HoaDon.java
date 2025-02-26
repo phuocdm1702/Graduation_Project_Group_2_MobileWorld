@@ -13,6 +13,7 @@ import org.hibernate.annotations.Nationalized;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.Date;
 
 @Getter
 @Setter
@@ -98,7 +99,7 @@ public class HoaDon {
 
     @NotNull
     @Column(name = "ngay_tao", nullable = false)
-    private Instant ngayTao;
+    private Date ngayTao;
 
     @Column(name = "ngay_thanh_toan")
     private Instant ngayThanhToan;
@@ -112,13 +113,13 @@ public class HoaDon {
 
     @NotNull
     @Column(name = "created_at", nullable = false)
-    private Instant createdAt;
+    private Date createdAt;
 
     @Column(name = "created_by")
     private Integer createdBy;
 
     @Column(name = "updated_at")
-    private Instant updatedAt;
+    private Date updatedAt;
 
     @Column(name = "updated_by")
     private Integer updatedBy;

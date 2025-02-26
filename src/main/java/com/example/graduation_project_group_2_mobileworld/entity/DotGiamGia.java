@@ -3,19 +3,25 @@ package com.example.graduation_project_group_2_mobileworld.entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.Nationalized;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Getter
 @Setter
 @Entity
 @Table(name = "dot_giam_gia")
+@NoArgsConstructor
+@AllArgsConstructor
 public class DotGiamGia {
     @Id
     @Column(name = "id", nullable = false)
@@ -49,11 +55,11 @@ public class DotGiamGia {
 
     @NotNull
     @Column(name = "ngay_bat_dau", nullable = false)
-    private Instant ngayBatDau;
+    private Date ngayBatDau;
 
     @NotNull
     @Column(name = "ngay_ket_thuc", nullable = false)
-    private Instant ngayKetThuc;
+    private Date ngayKetThuc;
 
     @NotNull
     @Column(name = "trang_thai", nullable = false)
@@ -62,8 +68,5 @@ public class DotGiamGia {
     @NotNull
     @Column(name = "deleted", nullable = false)
     private Boolean deleted = false;
-
-    @OneToMany(mappedBy = "dotGiamGia", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ChiTietDotGiamGia> chiTietDotGiamGiaList = new ArrayList<>();
 
 }

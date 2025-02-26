@@ -74,14 +74,22 @@
       </div>
     </div>
 
-
     <div class="mt-4 flex justify-between items-center">
-      <button @click="openModal" class="bg-blue-600 text-white px-4 py-2 rounded-md flex items-center hover:bg-blue-700 btn-modal">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+      <RouterLink
+        to="/ViewAddDotGiamGia"
+        class="bg-blue-600 text-white px-4 py-2 rounded-md flex items-center hover:bg-blue-700 btn-modal"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="h-5 w-5 mr-2"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
         </svg>
         Thêm Đợt Giảm Giá
-      </button>
+      </RouterLink>
     </div>
 
     <div class="mt-8">
@@ -101,160 +109,62 @@
           </tr>
           </thead>
           <tbody>
-          <tr class="border-t text-center" v-for="discount in discounts" :key="discount.id">
+          <tr class="border-t text-center" v-for="discount in dataTable" :key="discount.id">
             <td class="px-4 py-2">{{ discount.id }}</td>
-            <td class="px-4 py-2">{{ discount.name }}</td>
-            <td class="px-4 py-2">{{ discount.type }}</td>
-            <td class="px-4 py-2">{{ discount.value }}</td>
-            <td class="px-4 py-2">{{ discount.maxDiscount }}</td>
-            <td class="px-4 py-2">{{ discount.startDate }}</td>
-            <td class="px-4 py-2">{{ discount.endDate }}</td>
-            <td class="px-4 py-2">{{ discount.status }}</td>
+            <td class="px-4 py-2">{{ discount.tenDotGiamGia }}</td>
+            <td class="px-4 py-2">{{ discount.loaiGiamGiaApDung }}</td>
+            <td class="px-4 py-2">{{ discount.giaTriGiamGia }}</td>
+            <td class="px-4 py-2">{{ discount.soTienGiamToiDa }}</td>
+            <td class="px-4 py-2">
+              {{ new Date(discount.ngayBatDau).toLocaleDateString("vi-VN") }}
+            </td>
+            <td class="px-4 py-2">
+              {{ new Date(discount.ngayKetThuc).toLocaleDateString("vi-VN") }}
+            </td>
+            <td class="px-4 py-2">{{ discount.trangThai }}</td>
           </tr>
           </tbody>
         </table>
       </div>
     </div>
 
-    <div v-if="isModalOpen" class="modal">
-      <div class="mt-8">
-        <h4 class="text-gray-600">Quản lý Đợt Giảm Giá</h4>
 
-        <div class="mt-6 flex gap-3">
-          <div class="w-3/5 overflow-hidden bg-white border rounded-md shadow-md p-4">
-            <form>
-              <div class="flex items-center justify-between px-4 py-3 text-gray-700 border-b">
-                <h3 class="text-md">Thêm Đợt Giảm Giá</h3>
-                <button>
-                  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
-
-              <div class="p-4 text-gray-700 bg-gray-200 border-b grid grid-cols-2 gap-4">
-                <div>
-                  <label class="text-xs">Mã</label>
-                  <input type="text" class="w-full px-3 py-2 mt-2 border rounded-md" />
-                </div>
-                <div>
-                  <label class="text-xs">Tên đợt giảm giá</label>
-                  <input type="text" class="w-full px-3 py-2 mt-2 border rounded-md" />
-                </div>
-                <div>
-                  <label class="text-xs">Loại giảm giá</label>
-                  <select class="w-full px-3 py-2 mt-2 border rounded-md">
-                    <option>Phần trăm</option>
-                    <option>Giảm giá cố định</option>
-                  </select>
-                </div>
-                <div>
-                  <label class="text-xs">Giá trị</label>
-                  <input type="text" class="w-full px-3 py-2 mt-2 border rounded-md" />
-                </div>
-                <div>
-                  <label class="text-xs">Số tiền giảm tối đa</label>
-                  <input type="text" class="w-full px-3 py-2 mt-2 border rounded-md" />
-                </div>
-                <div>
-                  <label class="text-xs">Ngày bắt đầu</label>
-                  <input type="date" class="w-full px-3 py-2 mt-2 border rounded-md" />
-                </div>
-                <div>
-                  <label class="text-xs">Ngày kết thúc</label>
-                  <input type="date" class="w-full px-3 py-2 mt-2 border rounded-md" />
-                </div>
-                <div class="col-span-2">
-                  <label class="text-xs">Trạng thái</label>
-                  <select class="w-full px-3 py-2 mt-2 border rounded-md">
-                    <option>Đang diễn ra</option>
-                    <option>Sắp diễn ra</option>
-                    <option>Đã kết thúc</option>
-                  </select>
-                </div>
-              </div>
-
-              <div class="px-4 py-3 flex justify-between">
-                <button class="px-3 py-2 text-sm text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300">Hủy</button>
-                <button class="px-3 py-2 text-sm text-white bg-indigo-600 rounded-md hover:bg-indigo-500">Lưu</button>
-              </div>
-            </form>
-          </div>
-
-          <div class="w-3/5 bg-white rounded-md shadow-md">
-            <h4 class="px-4 py-3 text-gray-700 border-b">Dòng Sản Phẩm</h4>
-            <table class="w-full bg-white text-sm">
-              <thead>
-              <tr class="bg-gray-200 text-gray-700">
-                <th class="px-4 py-2">Mã</th>
-                <th class="px-4 py-2">Tên Sản Phẩm</th>
-                <th class="px-4 py-2">Trạng thái</th>
-              </tr>
-              </thead>
-              <tbody>
-              <tr class="border-t text-center" v-for="product in products" :key="product.id">
-                <td class="px-4 py-2">{{ product.id }}</td>
-                <td class="px-4 py-2">{{ product.name }}</td>
-                <td class="px-4 py-2">{{ product.status }}</td>
-              </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      <div class="mt-8">
-        <div class="mt-4">
-          <table class="w-full bg-white rounded-md shadow-md text-sm">
-            <thead>
-            <tr class="bg-gray-200 text-gray-700">
-              <th class="px-4 py-2">Thương hiệu</th>
-              <th class="px-4 py-2">Ảnh</th>
-              <th class="px-4 py-2">Hệ điều hành</th>
-              <th class="px-4 py-2">Chip</th>
-              <th class="px-4 py-2">Camera</th>
-              <th class="px-4 py-2">SSD</th>
-              <th class="px-4 py-2">Sạc</th>
-              <th class="px-4 py-2">Màn hình</th>
-              <th class="px-4 py-2">Màu</th>
-              <th class="px-4 py-2">Pin</th>
-              <th class="px-4 py-2">Trạng thái</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr class="border-t text-center" v-for="product in products" :key="product.id">
-              <td class="px-4 py-2">{{ product.brand }}</td>
-              <td class="px-4 py-2"><img :src="product.image" alt="Ảnh sản phẩm" class="h-10" /></td>
-              <td class="px-4 py-2">{{ product.os }}</td>
-              <td class="px-4 py-2">{{ product.chip }}</td>
-              <td class="px-4 py-2">{{ product.camera }}</td>
-              <td class="px-4 py-2">{{ product.ssd }}</td>
-              <td class="px-4 py-2">{{ product.charge }}</td>
-              <td class="px-4 py-2">{{ product.screen }}</td>
-              <td class="px-4 py-2">{{ product.color }}</td>
-              <td class="px-4 py-2">{{ product.battery }}</td>
-              <td class="px-4 py-2">{{ product.status }}</td>
-            </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-    
-    <div v-if="isModalOpen" class="overlay"></div>
+    <!--    <div v-if="isModalOpen" class="overlay"></div>-->
   </div>
 </template>
 
+
+
 <script setup lang="ts">
-import { ref } from "vue";
+import axios from "axios";
+import {onMounted, ref} from "vue";
+
+import { useRouter } from "vue-router";
+
+const router = useRouter();
+
+const goToAddView = () => {
+  router.push("/ViewAddDotGiamGia"); 
+};
+
+
 const isModalOpen = ref(false);
 
 const openModal = () => {
   isModalOpen.value = true;
-};
+}
 
+const dataTable = ref([]);
 
-
+onMounted(async () => {
+  try {
+    const res = await axios.get("http://localhost:8080/dot_giam_gia/home");
+    console.log("Dữ liệu từ API:", res.data);
+    dataTable.value = res.data;
+  } catch (error) {
+    console.error("Lỗi:", error);
+  }
+});
 </script>
 
 <style src="@/assets/VoucherCss/dotVoucher.css"></style>

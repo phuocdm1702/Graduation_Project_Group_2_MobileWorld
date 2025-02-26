@@ -18,4 +18,6 @@ public class HoaDonService {
     public List<HoaDon> getAllData(){
         return hoaDonRepository.findAll();
     }
+
+
 }

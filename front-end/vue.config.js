@@ -1,4 +1,5 @@
 const { defineConfig } = require('@vue/cli-service')
+
 module.exports = defineConfig({
   configureWebpack: {
     resolve: {
@@ -8,7 +9,14 @@ module.exports = defineConfig({
     }
   },
   devServer: {
-    port: 3000
+    port: 3000,
+    proxy: {
+      '/dot_giam_gia': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+        secure: false
+      }
+    }
   },
   transpileDependencies: true
 })
