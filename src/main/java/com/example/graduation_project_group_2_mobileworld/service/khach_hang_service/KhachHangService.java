@@ -21,5 +21,8 @@ public class KhachHangService {
         return khachHangRepository.findAll();
     }
 
+    public KhachHang findById(Integer id) {
+        return khachHangRepository.findById(id).orElse(null);
+    }
 
 }

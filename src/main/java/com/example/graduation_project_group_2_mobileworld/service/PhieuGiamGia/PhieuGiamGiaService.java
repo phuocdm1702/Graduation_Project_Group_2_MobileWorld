@@ -1,4 +1,4 @@
-package com.example.graduation_project_group_2_mobileworld.service.phieu_giam_gia_service;
+package com.example.graduation_project_group_2_mobileworld.service.PhieuGiamGia;
 
 import com.example.graduation_project_group_2_mobileworld.entity.PhieuGiamGia;
 import com.example.graduation_project_group_2_mobileworld.entity.PhieuGiamGiaCaNhan;
@@ -15,27 +15,18 @@ public class PhieuGiamGiaService {
     @Autowired
     private PhieuGiamGiaRepository phieuGiamGiaRepository;
 
-    @Autowired
-    private PhieuGiamGiaCaNhanRepository phieuGiamGiaCaNhanRepository;
 
-    public PhieuGiamGiaService(PhieuGiamGiaRepository phieuGiamGiaRepository, PhieuGiamGiaCaNhanRepository phieuGiamGiaCaNhanRepository) {
+    public PhieuGiamGiaService(PhieuGiamGiaRepository phieuGiamGiaRepository) {
         this.phieuGiamGiaRepository = phieuGiamGiaRepository;
-        this.phieuGiamGiaCaNhanRepository = phieuGiamGiaCaNhanRepository;
     }
 
     public List<PhieuGiamGia> getPGG() {
         return phieuGiamGiaRepository.findAll();
     }
 
-    public List<PhieuGiamGiaCaNhan> getPGGCN() {
-        return phieuGiamGiaCaNhanRepository.findAll();
-    }
-
     public PhieuGiamGia addPGG(PhieuGiamGia phieuGiamGia) {
         return phieuGiamGiaRepository.save(phieuGiamGia);
     }
 
-    public PhieuGiamGiaCaNhan addPGGCN(PhieuGiamGiaCaNhan phieuGiamGiaCaNhan) {
-        return phieuGiamGiaCaNhanRepository.save(phieuGiamGiaCaNhan);
-    }
+
 }

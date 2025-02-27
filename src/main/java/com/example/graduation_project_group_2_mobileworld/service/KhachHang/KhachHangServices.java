@@ -1,7 +1,7 @@
 package com.example.graduation_project_group_2_mobileworld.service.KhachHang;
 
 import com.example.graduation_project_group_2_mobileworld.entity.KhachHang;
-import com.example.graduation_project_group_2_mobileworld.repository.KhachHang.KhachHangRepository;
+import com.example.graduation_project_group_2_mobileworld.repository.khachHang.KhachHangRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,4 +18,6 @@ public class KhachHangServices {
     public List<KhachHang> getall() {
         return khachHangRepository.findAll();
     }
+
+
 }
