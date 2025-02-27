@@ -142,7 +142,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import axios from 'axios'
 import ToastNotification from '@/components/ToastNotification.vue'
 import Pagination from '@/components/Pagination.vue'
@@ -157,8 +157,13 @@ const pageSize = ref(5)
 const totalItems = ref(0)
 const selectedProducts = ref([])
 const selectAll = ref(false)
+const isSearching = ref(false)
 
 const totalPages = computed(() => Math.ceil(totalItems.value / pageSize.value))
+
+watch(searchKeyword, (newValue) => {
+  isSearching.value = !!newValue.trim()
+})
 
 const fetchData = async () => {
   try {
@@ -173,17 +178,25 @@ const fetchData = async () => {
   }
 }
 
-const goToPage = (page) => {
+const goToPage = async (page) => {
   currentPage.value = page
-  fetchData()
+  if (isSearching.value && searchKeyword.value.trim()) {
+    await searchProductLine()
+  } else {
+    await fetchData()
+  }
 }
 
 const searchProductLine = async () => {
   const keyword = searchKeyword.value.replace(/\s+/g, '').trim()
   if (!keyword) {
-    fetchData()
+    isSearching.value = false
+    currentPage.value = 0 // Reset về trang 1 khi không có từ khóa
+    await fetchData()
     return
   }
+  isSearching.value = true
+  currentPage.value = 0 // Reset về trang 1 khi tìm kiếm mới
   try {
     const { data } = await axios.get('http://localhost:8080/api/dong-san-pham/search', {
       params: { keyword, page: currentPage.value, size: pageSize.value }
@@ -197,6 +210,7 @@ const searchProductLine = async () => {
 
 const resetSearch = () => {
   searchKeyword.value = ''
+  isSearching.value = false
   currentPage.value = 0
   fetchData()
 }
@@ -235,17 +249,14 @@ const saveProductLine = async () => {
     let response
     if (editing.value) {
       response = await axios.put(`http://localhost:8080/api/dong-san-pham/${productLine.value.id}`, productLine.value)
-      // Cập nhật bản ghi trong danh sách
       const index = productLines.value.findIndex(p => p.id === productLine.value.id)
       if (index !== -1) {
         productLines.value[index] = response.data
       }
     } else {
       response = await axios.post('http://localhost:8080/api/dong-san-pham', productLine.value)
-      // Thêm sản phẩm mới vào đầu danh sách
       productLines.value.unshift(response.data)
-      totalItems.value += 1 // Tăng tổng số bản ghi
-      // Nếu danh sách vượt quá pageSize, xóa phần tử cuối
+      totalItems.value += 1
       if (productLines.value.length > pageSize.value) {
         productLines.value.pop()
       }
