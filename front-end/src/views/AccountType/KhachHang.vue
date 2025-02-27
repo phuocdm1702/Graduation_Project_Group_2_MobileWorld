@@ -162,9 +162,9 @@ const addCustomer = async () => {
     return;
   }
   try {
-    await axios.post("http://localhost:8080/khach-hang/add", khachhang.value);
+   const res = await axios.post("http://localhost:8080/khach-hang/add", khachhang.value);
     showToast("success", "Thêm khách hàng thành công!");
-    fetchCustomers();
+    dataTable.value.unshift(res.data);
   } catch (error) {
     console.error("Lỗi khi thêm khách hàng:", error);
     showToast("error", "Không thể thêm khách hàng. Vui lòng thử lại!");
@@ -178,7 +178,7 @@ const deleteKhachhang = async (id) => {
   }
   try {
     await axios.delete(`http://localhost:8080/khach-hang/delete/${id}`);
-    showToast("success","Xóa thành công!");
+    showToast("success", "Xóa thành công!");
     fetchCustomers();
   } catch (error){
     console.error("Lỗi khi xóa khách hàng:", error);
