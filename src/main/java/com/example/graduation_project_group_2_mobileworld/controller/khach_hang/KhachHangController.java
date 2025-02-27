@@ -33,6 +33,11 @@ public class KhachHangController {
         public ResponseEntity<String> deleteKhachHang(@PathVariable Integer id){
         return khachHangServices.delete(id);
     }
+    @PutMapping("/update/{id}")
+    public ResponseEntity<?> updateKH(@PathVariable Integer id,@RequestBody  KhachHang khachHang){
+        KhachHang khachHang1 = khachHangServices.updateKH(id,khachHang);
+        return ResponseEntity.ok(khachHang1);
+    }
 //    @GetMapping()
 //    public List<KhachHang> getall(){
 //        return khachHangServices.getall();
