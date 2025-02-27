@@ -1,5 +1,5 @@
 <template>
-  <div class="mt-8">
+  <div class="mt-8 max-w-screen-xl mx-auto">
     <h4 class="text-gray-600">Hóa Đơn Chi Tiết</h4>
 
     <!-- Bộ lọc -->
@@ -19,29 +19,35 @@
     </div>
 
     <!-- Bảng dữ liệu -->
-    <div class="mt-4">
-      <table class="w-full bg-white rounded-md shadow-md">
+    <div class="overflow-x-auto mt-6 bg-white shadow-lg rounded-lg p-4">
+      <table class="w-full min-w-max table-auto border-collapse">
         <thead>
-          <tr class="bg-gray-200 text-gray-700">
-            <th class="px-4 py-2">ID</th>
-            <th class="px-4 py-2">ID Hóa đơn</th>
-            <th class="px-4 py-2">ID Chi tiết Sản Phẩm</th>
-            <th class="px-4 py-2">Mã</th>
-            <th class="px-4 py-2">Tổng tiền</th>
-            <th class="px-4 py-2">Trạng thái</th>
-            <th class="px-4 py-2">Ghi chú</th>
-          </tr>
+        <tr class="bg-gray-100 text-gray-700 text-sm font-semibold">
+          <th class="th-cell">STT</th>
+          <th class="th-cell">ID</th>
+          <th class="th-cell">ID Hóa đơn</th>
+          <th class="th-cell">ID Chi tiết Sản Phẩm</th>
+          <th class="th-cell">Mã</th>
+          <th class="th-cell">Tổng tiền</th>
+          <th class="th-cell">Trạng thái</th>
+          <th class="th-cell">Ghi chú</th>
+        </tr>
         </thead>
         <tbody>
-          <tr class="border-t text-center" v-for="(hdct, index) in dataTableHDCT" :key="index">
-            <td class="px-4 py-2">{{ hdct.id }}</td>
-            <td class="px-4 py-2">{{ hdct.idHoaDon.id }}</td>
-            <td class="px-4 py-2">{{ hdct.idChiTietSanPham.id }}</td>
-            <td class="px-4 py-2">{{ hdct.ma }}</td>
-            <td class="px-4 py-2">{{ hdct.gia }}</td>
-            <td class="px-4 py-2">{{ hdct.trangThai === 1 ? 'Đã thanh toán' : 'Chờ thanh toán'}}</td>
-            <td class="px-4 py-2">{{ hdct.ghiChu }}</td>
-          </tr>
+        <tr v-for="(hdct, index) in dataTableHDCT" :key="hdct.id" class="text-gray-700 border-b hover:bg-gray-50">
+          <td class="td-cell">{{ index + 1 }}</td>
+          <td class="td-cell">{{ hdct.id }}</td>
+          <td class="td-cell">{{ hdct.idHoaDon.id }}</td>
+          <td class="td-cell">{{ hdct.idChiTietSanPham.id }}</td>
+          <td class="td-cell">{{ hdct.ma }}</td>
+          <td class="td-cell">{{ hdct.gia.toLocaleString() }} VND</td>
+          <td class="td-cell">
+              <span :class="hdct.trangThai === 1 ? 'text-green-500' : 'text-red-500'">
+                {{ hdct.trangThai === 1 ? 'Đã thanh toán' : 'Chờ thanh toán' }}
+              </span>
+          </td>
+          <td class="td-cell">{{ hdct.ghiChu || 'Không có' }}</td>
+        </tr>
         </tbody>
       </table>
     </div>
