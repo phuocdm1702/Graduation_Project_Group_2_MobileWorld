@@ -2,7 +2,7 @@ package com.example.graduation_project_group_2_mobileworld.controller.phieu_giam
 
 import com.example.graduation_project_group_2_mobileworld.entity.KhachHang;
 import com.example.graduation_project_group_2_mobileworld.entity.PhieuGiamGia;
-import com.example.graduation_project_group_2_mobileworld.service.khach_hang_service.KhachHangService;
+import com.example.graduation_project_group_2_mobileworld.service.khach_hang.KhachHangServices;
 import com.example.graduation_project_group_2_mobileworld.service.phieu_giam_gia.PhieuGiamGiaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +20,7 @@ public class PhieuGiamGiaController {
     private PhieuGiamGiaService phieuGiamGiaService;
 
     @Autowired
-    private KhachHangService khachHangService;
+    private KhachHangServices khachHangService;
 
     @GetMapping("/data")
     public List<PhieuGiamGia> fetchData() {

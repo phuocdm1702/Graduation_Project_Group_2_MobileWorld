@@ -1,4 +1,4 @@
-package com.example.graduation_project_group_2_mobileworld.dto.dong_san_pham;
+package com.example.graduation_project_group_2_mobileworld.dto.san_pham.dong_san_pham;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;

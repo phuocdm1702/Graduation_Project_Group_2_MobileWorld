@@ -2,7 +2,7 @@
   <div class="container mx-auto p-4">
     <ToastNotification ref="toast" />
 
-    <h4 class="text-xl text-gray-600 mb-6">Quản lý Dòng Sản Phẩm</h4>
+    <h2 class="text-xl text-gray-600 mb-6">Quản lý Dòng Sản Phẩm</h2>
 
     <!-- Search Section -->
     <div class="flex gap-3 mb-6">

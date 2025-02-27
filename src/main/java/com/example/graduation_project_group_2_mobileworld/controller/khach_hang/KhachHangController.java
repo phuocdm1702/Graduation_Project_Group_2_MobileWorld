@@ -21,7 +21,7 @@ public class KhachHangController {
 
     @GetMapping("/home")
     public List<KhachHang> getall(){
-      List<KhachHang> khachHangList = khachHangServices.getall();
+      List<KhachHang> khachHangList = khachHangServices.getAll();
       return khachHangList;
     }
 //    @GetMapping()

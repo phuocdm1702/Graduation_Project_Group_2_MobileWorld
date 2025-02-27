@@ -1,4 +1,4 @@
-package com.example.graduation_project_group_2_mobileworld.repository.dong_san_pham;
+package com.example.graduation_project_group_2_mobileworld.repository.san_pham.dong_san_pham;
 
 import com.example.graduation_project_group_2_mobileworld.entity.DongSanPham;
 import org.springframework.data.domain.Page;

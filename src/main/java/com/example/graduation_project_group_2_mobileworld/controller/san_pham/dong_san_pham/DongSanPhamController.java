@@ -1,7 +1,7 @@
-package com.example.graduation_project_group_2_mobileworld.controller;
+package com.example.graduation_project_group_2_mobileworld.controller.san_pham.dong_san_pham;
 
-import com.example.graduation_project_group_2_mobileworld.dto.dong_san_pham.DongSanPhamDTO;
-import com.example.graduation_project_group_2_mobileworld.service.dong_san_pham.DongSanPhamService;
+import com.example.graduation_project_group_2_mobileworld.dto.san_pham.dong_san_pham.DongSanPhamDTO;
+import com.example.graduation_project_group_2_mobileworld.service.san_pham.dong_san_pham.DongSanPhamService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
