@@ -1,7 +1,7 @@
-package com.example.graduation_project_group_2_mobileworld.controller.san_pham.nha_san_xuat;
+package com.example.graduation_project_group_2_mobileworld.controller.san_pham.imel;
 
-import com.example.graduation_project_group_2_mobileworld.dto.san_pham.nha_san_xuat.NhaSanXuatDTO;
-import com.example.graduation_project_group_2_mobileworld.service.san_pham.nha_san_xuat.NhaSanXuatService;
+import com.example.graduation_project_group_2_mobileworld.dto.san_pham.imel.ImelDTO;
+import com.example.graduation_project_group_2_mobileworld.service.san_pham.Imel.ImelService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -14,32 +14,32 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/nha-san-xuat")
+@RequestMapping("/api/imel")
 @CrossOrigin(origins = "*")
-public class NhaSanXuatController {
+public class ImelController {
 
-    private final NhaSanXuatService service;
+    private final ImelService service;
 
-    public NhaSanXuatController(NhaSanXuatService service) {
+    public ImelController(ImelService service) {
         this.service = service;
     }
 
     @GetMapping
-    public ResponseEntity<Page<NhaSanXuatDTO>> getAll(
-            @RequestParam(defaultValue = "0") Integer page,
-            @RequestParam(required = false) Integer size) {
-        return ResponseEntity.ok(service.getAllNhaSanXuat(page, size));
+    public ResponseEntity<Page<ImelDTO>> getAll(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size) {
+        return ResponseEntity.ok(service.getAllImel(page, size));
     }
 
     @PostMapping
     public ResponseEntity<?> create(
-            @Valid @RequestBody NhaSanXuatDTO dto,
+            @Valid @RequestBody ImelDTO dto,
             BindingResult result) {
         if (result.hasErrors()) {
             return ResponseEntity.badRequest().body(getErrorMap(result));
         }
         try {
-            NhaSanXuatDTO created = service.createNhaSanXuat(dto);
+            ImelDTO created = service.createImel(dto);
             return ResponseEntity.status(HttpStatus.CREATED).body(created);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
@@ -49,13 +49,13 @@ public class NhaSanXuatController {
     @PutMapping("/{id}")
     public ResponseEntity<?> update(
             @PathVariable Integer id,
-            @Valid @RequestBody NhaSanXuatDTO dto,
+            @Valid @RequestBody ImelDTO dto,
             BindingResult result) {
         if (result.hasErrors()) {
             return ResponseEntity.badRequest().body(getErrorMap(result));
         }
         try {
-            NhaSanXuatDTO updated = service.updateNhaSanXuat(id, dto);
+            ImelDTO updated = service.updateImel(id, dto);
             return ResponseEntity.ok(updated);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
@@ -65,7 +65,7 @@ public class NhaSanXuatController {
     @DeleteMapping("/{id}")
     public ResponseEntity<?> delete(@PathVariable Integer id) {
         try {
-            service.deleteNhaSanXuat(id);
+            service.deleteImel(id);
             return ResponseEntity.ok(Map.of("message", "Xóa thành công!"));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
@@ -79,19 +79,19 @@ public class NhaSanXuatController {
             return ResponseEntity.badRequest().body(Map.of("error", "Danh sách ID không hợp lệ!"));
         }
         try {
-            service.deleteMultipleNhaSanXuat(ids);
-            return ResponseEntity.ok(Map.of("message", "Xóa " + ids.size() + " nhà sản xuất thành công!"));
+            service.deleteMultipleImel(ids);
+            return ResponseEntity.ok(Map.of("message", "Xóa " + ids.size() + " imel thành công!"));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
 
     @GetMapping("/search")
-    public ResponseEntity<Page<NhaSanXuatDTO>> search(
+    public ResponseEntity<Page<ImelDTO>> search(
             @RequestParam String keyword,
-            @RequestParam(defaultValue = "0") Integer page,
-            @RequestParam(required = false) Integer size) {
-        return ResponseEntity.ok(service.searchNhaSanXuat(keyword, page, size));
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size) {
+        return ResponseEntity.ok(service.searchImel(keyword, page, size));
     }
 
     @GetMapping("/exists/ma")
@@ -99,9 +99,9 @@ public class NhaSanXuatController {
         return ResponseEntity.ok(service.existsByMa(ma));
     }
 
-    @GetMapping("/exists/nhaSanXuat")
-    public ResponseEntity<Boolean> checkNhaSanXuat(@RequestParam String nhaSanXuat) {
-        return ResponseEntity.ok(service.existsByNhaSanXuat(nhaSanXuat));
+    @GetMapping("/exists/imel")
+    public ResponseEntity<Boolean> checkImel(@RequestParam String imel) {
+        return ResponseEntity.ok(service.existsByImel(imel));
     }
 
     private Map<String, String> getErrorMap(BindingResult result) {

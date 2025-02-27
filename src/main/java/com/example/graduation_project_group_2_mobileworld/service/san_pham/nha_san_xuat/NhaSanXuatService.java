@@ -20,13 +20,6 @@ public class NhaSanXuatService {
         this.repository = repository;
     }
 
-    public List<NhaSanXuatDTO> getAllNhaSanXuat() {
-        return repository.findByDeletedFalse()
-                .stream()
-                .map(this::toDTO)
-                .toList();
-    }
-
     public Page<NhaSanXuatDTO> getAllNhaSanXuat(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         return repository.findByDeletedFalse(pageable).map(this::toDTO);

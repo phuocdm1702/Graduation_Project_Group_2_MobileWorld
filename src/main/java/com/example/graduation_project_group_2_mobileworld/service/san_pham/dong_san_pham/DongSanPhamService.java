@@ -20,13 +20,6 @@ public class DongSanPhamService {
         this.repository = repository;
     }
 
-    public List<DongSanPhamDTO> getAllDongSanPham() {
-        return repository.findByDeletedFalse()
-                .stream()
-                .map(this::toDTO)
-                .toList();
-    }
-
     public Page<DongSanPhamDTO> getAllDongSanPham(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         return repository.findByDeletedFalse(pageable).map(this::toDTO);
