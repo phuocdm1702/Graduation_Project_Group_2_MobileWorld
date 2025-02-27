@@ -88,7 +88,6 @@
               <th class="px-4 py-2">Ngày sinh</th>
               <th class="px-4 py-2">Ảnh nhân viên</th>
               <th class="px-4 py-2">Ghi chú</th>
-              <th class="px-4 py-2">Email</th>
               <th class="px-4 py-2">Thành phố</th>
               <th class="px-4 py-2">Quận</th>
               <th class="px-4 py-2">Phường</th>
@@ -98,20 +97,19 @@
             </tr>
           </thead>
           <tbody>
-            <tr class="border-t text-center" v-for="employee in employees" :key="employee.id">
-              <td class="px-4 py-2">{{ employee.id }}</td>
-              <td class="px-4 py-2">{{ employee.accountId }}</td>
-              <td class="px-4 py-2">{{ employee.code }}</td>
-              <td class="px-4 py-2">{{ employee.name }}</td>
-              <td class="px-4 py-2">{{ employee.dob }}</td>
-              <td class="px-4 py-2"><img :src="employee.image" class="w-10 h-10 rounded-md" /></td>
-              <td class="px-4 py-2">{{ employee.note }}</td>
-              <td class="px-4 py-2">{{ employee.email }}</td>
-              <td class="px-4 py-2">{{ employee.city }}</td>
-              <td class="px-4 py-2">{{ employee.district }}</td>
-              <td class="px-4 py-2">{{ employee.ward }}</td>
-              <td class="px-4 py-2">{{ employee.address }}</td>
-              <td class="px-4 py-2">{{ employee.cccd }}</td>
+            <tr class="border-t text-center" v-for="nv in dataTable" :key="nv.id">
+              <td class="px-4 py-2">{{ nv.id }}</td>
+              <td class="px-4 py-2">{{ nv.idTaiKhoan.id }}</td>
+              <td class="px-4 py-2">{{ nv.ma }}</td>
+              <td class="px-4 py-2">{{ nv.tenNhanVien }}</td>
+              <td class="px-4 py-2">{{ nv.ngaySinh }}</td>
+              <td class="px-4 py-2"><img :src="nv.anhNhanVien" class="w-10 h-10 rounded-md" /></td>
+              <td class="px-4 py-2">{{ nv.ghiChu }}</td>
+              <td class="px-4 py-2">{{ nv.thanhPho }}</td>
+              <td class="px-4 py-2">{{ nv.quan }}</td>
+              <td class="px-4 py-2">{{ nv.phuong }}</td>
+              <td class="px-4 py-2">{{ nv.diaChiCuThe }}</td>
+              <td class="px-4 py-2">{{ nv.cccd }}</td>
               <td class="px-4 py-2">
                 <button class="text-blue-600 hover:underline mr-2">Sửa</button>
                 <button class="text-red-600 hover:underline">Xóa</button>
@@ -124,11 +122,19 @@
   </div>
 </template>
 
-<script setup lang="ts">
-import { ref } from "vue";
+<script setup>
+import { ref, onMounted } from "vue";
+import axios from "axios";
 
-const employees = ref([
-  { id: "E001", accountId: "A001", code: "NV001", name: "Nguyễn Văn A", dob: "1990-05-20", image: "img1.jpg", note: "Ghi chú 1", email: "a@example.com", city: "Hà Nội", district: "Ba Đình", ward: "Phúc Xá", address: "Số 1, Phố A", cccd: "123456789" },
-  { id: "E002", accountId: "A002", code: "NV002", name: "Trần Thị B", dob: "1995-08-15", image: "img2.jpg", note: "Ghi chú 2", email: "b@example.com", city: "Hồ Chí Minh", district: "Quận 1", ward: "Bến Nghé", address: "Số 2, Phố B", cccd: "987654321" }
-]);
+const dataTable = ref([]);
+
+onMounted(async () => {
+  try {
+    const res = await axios.get("http://localhost:8080/nhan-vien/home");
+    console.log("Dữ liệu từ API:", res.data);
+    dataTable.value = res.data;
+  } catch (error) {
+    console.error("Lỗi:", error);
+  }
+});
 </script>

@@ -63,4 +63,6 @@ public class DotGiamGia {
     @Column(name = "deleted", nullable = false)
     private Boolean deleted = false;
 
+
+
 }

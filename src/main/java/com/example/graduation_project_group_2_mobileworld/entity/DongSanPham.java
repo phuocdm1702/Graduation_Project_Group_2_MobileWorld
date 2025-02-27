@@ -33,11 +33,10 @@ public class DongSanPham {
     @Size(max = 255)
     @NotNull
     @Nationalized
-    @Column(name = "dong_san_pham", nullable = false)
+    @Column(name = "ten_dong_san_pham", nullable = false)
     private String dongSanPham;
 
     @NotNull
     @Column(name = "deleted", nullable = false)
     private Boolean deleted = false;
-
 }
