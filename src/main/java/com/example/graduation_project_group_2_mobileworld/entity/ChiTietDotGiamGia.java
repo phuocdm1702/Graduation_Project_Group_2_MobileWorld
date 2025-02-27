@@ -16,13 +16,13 @@ public class ChiTietDotGiamGia {
     @Column(name = "id", nullable = false)
     private Integer id;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "id_dot_giam_gia", nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "id_dot_giam_gia", referencedColumnName = "id")
     private DotGiamGia dotGiamGia;
 
     @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "id_dong_san_pham", nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "id_dong_san_pham", referencedColumnName = "id")
     private DongSanPham idDongSanPham;
 
     @NotNull
