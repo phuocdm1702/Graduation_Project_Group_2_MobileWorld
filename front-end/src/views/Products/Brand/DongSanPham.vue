@@ -82,11 +82,11 @@
       <table class="w-full text-sm text-gray-500">
         <thead class="bg-blue-100 text-blue-700 uppercase">
         <tr>
-          <th class="px-6 py-3">ID</th>
-          <th class="px-6 py-3">Mã</th>
-          <th class="px-6 py-3">Tên Dòng Sản Phẩm</th>
-          <th class="px-6 py-3">Hành động</th>
-          <th class="px-6 py-3">
+          <th class="px-6 py-3 text-center">ID</th>
+          <th class="px-6 py-3 text-center">Mã</th>
+          <th class="px-6 py-3 text-center">Tên Dòng Sản Phẩm</th>
+          <th class="px-6 py-3 text-center">Hành động</th>
+          <th class="px-6 py-3 text-center">
             <input
               type="checkbox"
               v-model="selectAll"
