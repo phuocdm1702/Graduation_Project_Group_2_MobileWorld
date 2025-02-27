@@ -3,91 +3,93 @@ package com.example.graduation_project_group_2_mobileworld.service.dongSanPhamSe
 import com.example.graduation_project_group_2_mobileworld.dto.dongSanPhamDTO.DongSanPhamDTO;
 import com.example.graduation_project_group_2_mobileworld.entity.DongSanPham;
 import com.example.graduation_project_group_2_mobileworld.repository.dongSanPham.DongSanPhamRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class DongSanPhamService {
 
-    private final DongSanPhamRepository dongSanPhamRepository;
+    private final DongSanPhamRepository repository;
 
-    public DongSanPhamService(DongSanPhamRepository dongSanPhamRepository) {
-        this.dongSanPhamRepository = dongSanPhamRepository;
+    public DongSanPhamService(DongSanPhamRepository repository) {
+        this.repository = repository;
     }
 
-    // Lấy tất cả dòng sản phẩm chưa bị xóa
     public List<DongSanPhamDTO> getAllDongSanPham() {
-        return dongSanPhamRepository.findByDeletedFalse()
+        return repository.findByDeletedFalse()
                 .stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
+                .map(this::toDTO)
+                .toList();
     }
 
-    // Lấy danh sách dòng sản phẩm chưa bị xóa với phân trang
     public Page<DongSanPhamDTO> getAllDongSanPham(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<DongSanPham> productPage = dongSanPhamRepository.findByDeletedFalse(pageable);
-        return productPage.map(this::convertToDTO);
+        return repository.findByDeletedFalse(pageable).map(this::toDTO);
     }
 
-    // Thêm mới dòng sản phẩm
+    @Transactional
     public DongSanPhamDTO createDongSanPham(DongSanPhamDTO dto) {
-        DongSanPham newDSP = new DongSanPham();
-        newDSP.setMa(dto.getMa());
-        newDSP.setDongSanPham(dto.getDongSanPham());
-        newDSP.setDeleted(false); // Mặc định chưa bị xóa
-
-        DongSanPham savedDSP = dongSanPhamRepository.save(newDSP);
-        return convertToDTO(savedDSP);
+        DongSanPham entity = new DongSanPham();
+        entity.setMa(dto.getMa());
+        entity.setDongSanPham(dto.getDongSanPham());
+        entity.setDeleted(false);
+        return toDTO(repository.save(entity));
     }
 
-    // Cập nhật dòng sản phẩm
+    @Transactional
     public DongSanPhamDTO updateDongSanPham(Integer id, DongSanPhamDTO dto) {
-        return dongSanPhamRepository.findById(id)
+        return repository.findById(id)
+                .filter(d -> !d.getDeleted())
                 .map(dsp -> {
                     dsp.setMa(dto.getMa());
                     dsp.setDongSanPham(dto.getDongSanPham());
-                    DongSanPham updatedDSP = dongSanPhamRepository.save(dsp);
-                    return convertToDTO(updatedDSP);
+                    return toDTO(repository.save(dsp));
                 })
-                .orElseThrow(() -> new RuntimeException("Dòng sản phẩm không tồn tại!"));
+                .orElseThrow(() -> new RuntimeException("Dòng sản phẩm không tồn tại hoặc đã bị xóa!"));
     }
 
-    // Xóa dòng sản phẩm (Chuyển trạng thái deleted = true)
-    public boolean deleteDongSanPham(Integer id) {
-        return dongSanPhamRepository.findById(id)
-                .map(dsp -> {
-                    dsp.setDeleted(true);
-                    dongSanPhamRepository.save(dsp);
-                    return true;
-                })
-                .orElse(false);
+    @Transactional
+    public void deleteDongSanPham(Integer id) {
+        repository.findById(id)
+                .filter(d -> !d.getDeleted())
+                .ifPresentOrElse(
+                        dsp -> {
+                            dsp.setDeleted(true);
+                            repository.save(dsp);
+                        },
+                        () -> {
+                            throw new RuntimeException("Dòng sản phẩm không tồn tại hoặc đã bị xóa!");
+                        }
+                );
     }
 
-    // Tìm kiếm dòng sản phẩm theo keyword và phân trang
+    @Transactional
+    public void deleteMultipleDongSanPham(List<Integer> ids) {
+        int updatedCount = repository.softDeleteByIds(ids);
+        if (updatedCount == 0) {
+            throw new RuntimeException("Không tìm thấy dòng sản phẩm nào để xóa!");
+        }
+    }
+
     public Page<DongSanPhamDTO> searchDongSanPham(String keyword, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<DongSanPham> resultPage = dongSanPhamRepository.searchByKeyword(keyword, pageable);
-        return resultPage.map(this::convertToDTO);
+        return repository.searchByKeyword(keyword, pageable).map(this::toDTO);
     }
 
-    // Hàm chuyển đổi từ Entity sang DTO
-    private DongSanPhamDTO convertToDTO(DongSanPham dongSanPham) {
-        return new DongSanPhamDTO(dongSanPham.getId(), dongSanPham.getMa(), dongSanPham.getDongSanPham());
-    }
-
-    // Kiểm tra mã dòng sản phẩm đã tồn tại chưa
     public boolean existsByMa(String ma) {
-        return dongSanPhamRepository.existsByMa(ma);
+        return repository.existsByMa(ma);
     }
 
-    // Kiểm tra tên dòng sản phẩm đã tồn tại chưa
     public boolean existsByDongSanPham(String dongSanPham) {
-        return dongSanPhamRepository.existsByDongSanPham(dongSanPham);
+        return repository.existsByDongSanPham(dongSanPham);
+    }
+
+    private DongSanPhamDTO toDTO(DongSanPham entity) {
+        return new DongSanPhamDTO(entity.getId(), entity.getMa(), entity.getDongSanPham());
     }
 }

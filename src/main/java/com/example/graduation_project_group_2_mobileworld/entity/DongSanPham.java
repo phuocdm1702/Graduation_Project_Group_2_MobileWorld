@@ -31,5 +31,4 @@ public class DongSanPham {
     @NotNull
     @Column(name = "deleted", nullable = false)
     private Boolean deleted = false;
-
 }

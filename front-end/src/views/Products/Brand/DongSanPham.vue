@@ -1,227 +1,314 @@
 <template>
-  <div>
-    <!-- Toast thông báo -->
-    <ToastNotification ref="toastRef" />
+  <div class="container mx-auto p-4">
+    <ToastNotification ref="toast" />
 
-    <!-- Tiêu đề -->
-    <h4 class="text-gray-600">Quản lý Dòng Sản Phẩm</h4>
+    <h4 class="text-xl text-gray-600 mb-6">Quản lý Dòng Sản Phẩm</h4>
 
-    <!-- Ô tìm kiếm -->
-    <div class="mt-4 flex gap-2">
-      <input v-model="searchKeyword" type="text" placeholder="Tìm kiếm theo mã hoặc tên..."
-             class="border p-2 rounded flex-1" />
-      <button @click="searchProductLine" class="bg-blue-500 text-white px-4 py-2 rounded">Tìm kiếm</button>
-      <button @click="resetSearch" class="bg-gray-400 text-white px-4 py-2 rounded">Xóa</button>
+    <!-- Search Section -->
+    <div class="flex gap-3 mb-6">
+      <input
+        v-model.trim="searchKeyword"
+        type="text"
+        placeholder="Tìm kiếm theo mã hoặc tên..."
+        class="flex-1 border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+      />
+      <button
+        @click="searchProductLine"
+        class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition"
+      >
+        Tìm kiếm
+      </button>
+      <button
+        @click="resetSearch"
+        class="bg-gray-400 text-white px-4 py-2 rounded-lg hover:bg-gray-500 transition"
+      >
+        Đặt lại
+      </button>
     </div>
 
-    <!-- Khung nhập liệu -->
-    <div class="mt-6 p-4 border rounded-md bg-gray-100 shadow-md">
-      <h5 class="text-lg font-semibold mb-3">Thêm Mới Dòng Sản Phẩm</h5>
-      <form @submit.prevent="saveProductLine">
-        <div class="grid grid-cols-2 gap-4">
-          <input v-model="productLine.ma" type="text" placeholder="Mã" class="border p-2 rounded" />
-          <input v-model="productLine.dongSanPham" type="text" placeholder="Tên Dòng Sản Phẩm"
-                 class="border p-2 rounded" />
+    <!-- Form Section -->
+    <div class="bg-gray-50 p-6 rounded-lg shadow-md mb-6">
+      <h5 class="text-lg font-semibold mb-4">
+        {{ editing ? 'Cập nhật Dòng Sản Phẩm' : 'Thêm Dòng Sản Phẩm' }}
+      </h5>
+      <form @submit.prevent="saveProductLine" class="space-y-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <input
+            v-model.trim="productLine.ma"
+            type="text"
+            placeholder="Mã dòng sản phẩm"
+            class="border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-green-500"
+            required
+          />
+          <input
+            v-model.trim="productLine.dongSanPham"
+            type="text"
+            placeholder="Tên dòng sản phẩm"
+            class="border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-green-500"
+            required
+          />
         </div>
-        <div class="mt-2 flex justify-end">
-          <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition">
-            {{ editing ? 'Cập nhật' : 'Thêm' }}
+        <div class="flex justify-end gap-3">
+          <button
+            type="submit"
+            class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition"
+          >
+            {{ editing ? 'Cập nhật' : 'Thêm mới' }}
           </button>
-          <button v-if="editing" @click="cancelEdit" class="ml-2 bg-gray-400 text-white px-4 py-2 rounded">Hủy</button>
+          <button
+            v-if="editing"
+            @click="cancelEdit"
+            type="button"
+            class="bg-gray-400 text-white px-4 py-2 rounded-lg hover:bg-gray-500 transition"
+          >
+            Hủy
+          </button>
         </div>
       </form>
     </div>
 
-    <!-- Danh sách dòng sản phẩm -->
-    <div class="mt-8 relative overflow-x-auto shadow-md sm:rounded-lg">
-      <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-        <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-        <tr class="bg-blue-200 text-blue-700 text-center items-center">
-          <th scope="col" class="px-6 py-3">ID</th>
-          <th scope="col" class="px-6 py-3">Mã</th>
-          <th scope="col" class="px-6 py-3">Tên Dòng Sản Phẩm</th>
-          <th scope="col" class="px-6 py-3">Hành động</th>
+    <!-- Bulk Delete Button -->
+    <div v-if="selectedProducts.length" class="mb-6 flex justify-end">
+      <button
+        @click="deleteSelectedProducts"
+        class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition"
+      >
+        Xóa {{ selectedProducts.length }} dòng sản phẩm đã chọn
+      </button>
+    </div>
+
+    <!-- Product Lines Table -->
+    <div class="overflow-x-auto shadow-md rounded-lg">
+      <table class="w-full text-sm text-gray-500">
+        <thead class="bg-blue-100 text-blue-700 uppercase">
+        <tr>
+          <th class="px-6 py-3">ID</th>
+          <th class="px-6 py-3">Mã</th>
+          <th class="px-6 py-3">Tên Dòng Sản Phẩm</th>
+          <th class="px-6 py-3">Hành động</th>
+          <th class="px-6 py-3">
+            <input
+              type="checkbox"
+              v-model="selectAll"
+              @change="toggleSelectAll"
+              class="w-4 h-4 rounded"
+            />
+          </th>
         </tr>
         </thead>
         <tbody>
-        <tr v-for="product in productLines" :key="product.id"
-            class="bg-white border-b text-center hover:bg-gray-100 transition">
-          <td class="px-6 py-4">{{ product.id }}</td>
-          <td class="px-6 py-4">{{ product.ma }}</td>
-          <td class="px-6 py-4">{{ product.dongSanPham }}</td>
-          <td class="px-6 py-4">
-            <button @click="editProductLine(product)" class="text-blue-600 hover:scale-110 transition">
+        <tr
+          v-for="product in productLines"
+          :key="product.id"
+          class="bg-white border-b hover:bg-gray-50 transition"
+        >
+          <td class="px-6 py-4 text-center">{{ product.id }}</td>
+          <td class="px-6 py-4 text-center">{{ product.ma }}</td>
+          <td class="px-6 py-4 text-center">{{ product.dongSanPham }}</td>
+          <td class="px-6 py-4 text-center space-x-4">
+            <button
+              @click="editProductLine(product)"
+              class="text-blue-600 hover:text-blue-800 transition"
+            >
               <i class="fa-solid fa-edit"></i>
             </button>
-            <button @click="deleteProductLine(product.id)" class="text-red-600 hover:scale-110 transition ml-4">
+            <button
+              @click="deleteProductLine(product.id)"
+              class="text-red-600 hover:text-red-800 transition"
+            >
               <i class="fa-solid fa-trash"></i>
             </button>
+          </td>
+          <td class="px-6 py-4 text-center">
+            <input
+              type="checkbox"
+              v-model="selectedProducts"
+              :value="product.id"
+              class="w-4 h-4 rounded"
+            />
           </td>
         </tr>
         </tbody>
       </table>
     </div>
 
-    <!-- Phân trang -->
-    <Pagination :currentPage="currentPage" :totalPages="totalPages" @page-changed="goToPage" />
+    <Pagination
+      :current-page="currentPage"
+      :total-pages="totalPages"
+      @page-changed="goToPage"
+      class="mt-6"
+    />
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from "vue";
-import axios from "axios";
-import ToastNotification from "@/components/ToastNotification.vue";
-import Pagination from "@/components/Pagination.vue"; // Import component phân trang
+import { ref, onMounted, computed } from 'vue'
+import axios from 'axios'
+import ToastNotification from '@/components/ToastNotification.vue'
+import Pagination from '@/components/Pagination.vue'
 
-// Refs
-const toastRef = ref();
-const productLines = ref([]);
-const productLine = ref({ id: null, ma: "", dongSanPham: "" });
-const searchKeyword = ref("");
-const editing = ref(false);
-const currentPage = ref(0);
-const pageSize = ref(5);
-const totalItems = ref(0);
+const toast = ref(null)
+const productLines = ref([])
+const productLine = ref({ id: null, ma: '', dongSanPham: '' })
+const searchKeyword = ref('')
+const editing = ref(false)
+const currentPage = ref(0)
+const pageSize = ref(5)
+const totalItems = ref(0)
+const selectedProducts = ref([])
+const selectAll = ref(false)
 
-// Computed properties
-const totalPages = computed(() => Math.ceil(totalItems.value / pageSize.value));
+const totalPages = computed(() => Math.ceil(totalItems.value / pageSize.value))
 
-// Hàm fetch dữ liệu
 const fetchData = async () => {
   try {
-    const response = await axios.get("http://localhost:8080/api/dong-san-pham", {
+    const { data } = await axios.get('http://localhost:8080/api/dong-san-pham', {
       params: { page: currentPage.value, size: pageSize.value }
-    });
-    productLines.value = response.data.content;
-    totalItems.value = response.data.totalElements;
-  } catch {
-    toastRef.value?.showToast("error", "Lỗi khi tải dữ liệu!");
+    })
+    productLines.value = data.content
+    totalItems.value = data.totalElements
+  } catch (error) {
+    toast.value?.showToast('error', 'Không thể tải dữ liệu!')
+    console.error('Fetch error:', error)
   }
-};
+}
 
-// Hàm chuyển trang
 const goToPage = (page) => {
-  currentPage.value = page;
-  fetchData();
-};
+  currentPage.value = page
+  fetchData()
+}
 
-// Hàm tìm kiếm
 const searchProductLine = async () => {
-  if (!searchKeyword.value.trim()) {
-    fetchData();
-    return;
+  const keyword = searchKeyword.value.replace(/\s+/g, '').trim()
+  if (!keyword) {
+    fetchData()
+    return
   }
-
   try {
-    const response = await axios.get("http://localhost:8080/api/dong-san-pham/search", {
-      params: { keyword: searchKeyword.value, page: currentPage.value, size: pageSize.value }
-    });
-    productLines.value = response.data.content;
-    totalItems.value = response.data.totalElements;
-  } catch {
-    toastRef.value?.showToast("error", "Lỗi khi tìm kiếm!");
+    const { data } = await axios.get('http://localhost:8080/api/dong-san-pham/search', {
+      params: { keyword, page: currentPage.value, size: pageSize.value }
+    })
+    productLines.value = data.content
+    totalItems.value = data.totalElements
+  } catch (error) {
+    toast.value?.showToast('error', 'Lỗi tìm kiếm!')
   }
-};
+}
 
-// Hàm reset tìm kiếm
 const resetSearch = () => {
-  searchKeyword.value = "";
-  currentPage.value = 0;
-  fetchData();
-};
+  searchKeyword.value = ''
+  currentPage.value = 0
+  fetchData()
+}
 
-// Hàm kiểm tra mã dòng sản phẩm đã tồn tại chưa
-const checkMaExists = async (ma) => {
+const checkDuplicate = async (field, value) => {
   try {
-    const response = await axios.get(`http://localhost:8080/api/dong-san-pham/exists/ma`, {
-      params: { ma }
-    });
-    return response.data; // Trả về true nếu mã đã tồn tại, ngược lại trả về false
-  } catch {
-    toastRef.value?.showToast("error", "Lỗi khi kiểm tra mã!");
-    return false;
+    const { data } = await axios.get(`http://localhost:8080/api/dong-san-pham/exists/${field}`, {
+      params: { [field]: value }
+    })
+    return data
+  } catch (error) {
+    toast.value?.showToast('error', `Lỗi kiểm tra ${field}!`)
+    return false
   }
-};
+}
 
-// Hàm kiểm tra tên dòng sản phẩm đã tồn tại chưa
-const checkDongSanPhamExists = async (dongSanPham) => {
-  try {
-    const response = await axios.get(`http://localhost:8080/api/dong-san-pham/exists/dongSanPham`, {
-      params: { dongSanPham }
-    });
-    return response.data; // Trả về true nếu tên đã tồn tại, ngược lại trả về false
-  } catch {
-    toastRef.value?.showToast("error", "Lỗi khi kiểm tra tên!");
-    return false;
-  }
-};
-
-// Hàm lưu dòng sản phẩm
 const saveProductLine = async () => {
-  if (!productLine.value.ma.trim() || !productLine.value.dongSanPham.trim()) {
-    toastRef.value?.showToast("error", "Vui lòng nhập đầy đủ thông tin!");
-    return;
+  const { ma, dongSanPham } = productLine.value
+  if (!ma || !dongSanPham) {
+    toast.value?.showToast('error', 'Vui lòng nhập đầy đủ thông tin!')
+    return
   }
 
-  // Kiểm tra mã dòng sản phẩm đã tồn tại chưa (nếu không phải đang chỉnh sửa)
-  if (!editing.value && (await checkMaExists(productLine.value.ma))) {
-    toastRef.value?.showToast("error", "Mã dòng sản phẩm đã tồn tại!");
-    return;
-  }
-
-  // Kiểm tra tên dòng sản phẩm đã tồn tại chưa (nếu không phải đang chỉnh sửa)
-  if (!editing.value && (await checkDongSanPhamExists(productLine.value.dongSanPham))) {
-    toastRef.value?.showToast("error", "Tên dòng sản phẩm đã tồn tại!");
-    return;
+  if (!editing.value) {
+    if (await checkDuplicate('ma', ma)) {
+      toast.value?.showToast('error', 'Mã dòng sản phẩm đã tồn tại!')
+      return
+    }
+    if (await checkDuplicate('dongSanPham', dongSanPham)) {
+      toast.value?.showToast('error', 'Tên dòng sản phẩm đã tồn tại!')
+      return
+    }
   }
 
   try {
+    let response
     if (editing.value) {
-      await axios.put(`http://localhost:8080/api/dong-san-pham/${productLine.value.id}`, productLine.value);
-      toastRef.value?.showToast("success", "Cập nhật thành công!");
+      response = await axios.put(`http://localhost:8080/api/dong-san-pham/${productLine.value.id}`, productLine.value)
+      // Cập nhật bản ghi trong danh sách
+      const index = productLines.value.findIndex(p => p.id === productLine.value.id)
+      if (index !== -1) {
+        productLines.value[index] = response.data
+      }
     } else {
-      await axios.post("http://localhost:8080/api/dong-san-pham", productLine.value);
-      toastRef.value?.showToast("success", "Thêm thành công!");
+      response = await axios.post('http://localhost:8080/api/dong-san-pham', productLine.value)
+      // Thêm sản phẩm mới vào đầu danh sách
+      productLines.value.unshift(response.data)
+      totalItems.value += 1 // Tăng tổng số bản ghi
+      // Nếu danh sách vượt quá pageSize, xóa phần tử cuối
+      if (productLines.value.length > pageSize.value) {
+        productLines.value.pop()
+      }
     }
 
-    // Reset form sau khi lưu thành công
-    productLine.value = { id: null, ma: "", dongSanPham: "" };
-    editing.value = false;
-
-    // Fetch lại dữ liệu và reset tìm kiếm
-    await fetchData();
-    resetSearch();
-  } catch {
-    toastRef.value?.showToast("error", "Lỗi khi lưu dữ liệu!");
+    toast.value?.showToast('success', editing.value ? 'Cập nhật thành công!' : 'Thêm mới thành công!')
+    resetForm()
+  } catch (error) {
+    toast.value?.showToast('error', 'Lỗi khi lưu dữ liệu!')
   }
-};
+}
 
-// Hàm chỉnh sửa dòng sản phẩm
 const editProductLine = (product) => {
-  productLine.value = { ...product };
-  editing.value = true;
-};
+  productLine.value = { ...product }
+  editing.value = true
+}
 
-// Hàm hủy chỉnh sửa
 const cancelEdit = () => {
-  productLine.value = { id: null, ma: "", dongSanPham: "" };
-  editing.value = false;
-  toastRef.value?.showToast("info", "Hủy chỉnh sửa!");
-};
+  resetForm()
+  toast.value?.showToast('info', 'Đã hủy chỉnh sửa')
+}
 
-// Hàm xóa dòng sản phẩm
 const deleteProductLine = async (id) => {
-  if (confirm("Bạn có chắc muốn xóa?")) {
-    try {
-      await axios.delete(`http://localhost:8080/api/dong-san-pham/${id}`);
-      toastRef.value?.showToast("success", "Xóa thành công!");
-      await fetchData();
-    } catch {
-      toastRef.value?.showToast("error", "Lỗi khi xóa!");
-    }
+  if (!confirm('Bạn có chắc chắn muốn xóa dòng sản phẩm này?')) return
+  try {
+    await axios.delete(`http://localhost:8080/api/dong-san-pham/${id}`)
+    toast.value?.showToast('success', 'Xóa thành công!')
+    await fetchData()
+  } catch (error) {
+    toast.value?.showToast('error', 'Lỗi khi xóa!')
   }
-};
+}
 
-// Gọi dữ liệu khi load trang
-onMounted(fetchData);
+const deleteSelectedProducts = async () => {
+  if (!selectedProducts.value.length) {
+    toast.value?.showToast('error', 'Vui lòng chọn ít nhất một dòng sản phẩm!')
+    return
+  }
+  if (!confirm(`Xác nhận xóa ${selectedProducts.value.length} dòng sản phẩm?`)) return
+
+  try {
+    await axios.delete('http://localhost:8080/api/dong-san-pham/bulk', {
+      data: { ids: selectedProducts.value }
+    })
+    toast.value?.showToast('success', 'Xóa thành công!')
+    selectedProducts.value = []
+    selectAll.value = false
+    await fetchData()
+  } catch (error) {
+    toast.value?.showToast('error', 'Lỗi khi xóa nhiều sản phẩm!')
+  }
+}
+
+const toggleSelectAll = () => {
+  selectedProducts.value = selectAll.value
+    ? productLines.value.map(p => p.id)
+    : []
+}
+
+const resetForm = () => {
+  productLine.value = { id: null, ma: '', dongSanPham: '' }
+  editing.value = false
+}
+
+onMounted(fetchData)
 </script>
