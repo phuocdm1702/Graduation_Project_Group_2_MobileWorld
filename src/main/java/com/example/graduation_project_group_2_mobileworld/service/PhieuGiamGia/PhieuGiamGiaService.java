@@ -1,8 +1,4 @@
-<<<<<<<< HEAD:src/main/java/com/example/graduation_project_group_2_mobileworld/service/PhieuGiamGia/PhieuGiamGiaService.java
 package com.example.graduation_project_group_2_mobileworld.service.PhieuGiamGia;
-========
-package com.example.graduation_project_group_2_mobileworld.service.phieu_giam_gia;
->>>>>>>> 6d62e844a95aff6ea5e022df6ece1d09f0503cd0:src/main/java/com/example/graduation_project_group_2_mobileworld/service/phieu_giam_gia/PhieuGiamGiaService.java
 
 import com.example.graduation_project_group_2_mobileworld.entity.PhieuGiamGia;
 import com.example.graduation_project_group_2_mobileworld.entity.PhieuGiamGiaCaNhan;

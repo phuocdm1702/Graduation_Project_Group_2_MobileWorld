@@ -6,7 +6,7 @@ import com.example.graduation_project_group_2_mobileworld.entity.PhieuGiamGia;
 import com.example.graduation_project_group_2_mobileworld.entity.PhieuGiamGiaCaNhan;
 import com.example.graduation_project_group_2_mobileworld.service.PhieuGiamGia.PhieuGiamGiaCaNhanService;
 import com.example.graduation_project_group_2_mobileworld.service.PhieuGiamGia.PhieuGiamGiaService;
-import com.example.graduation_project_group_2_mobileworld.service.khach_hang_service.KhachHangService;
+import com.example.graduation_project_group_2_mobileworld.service.khach_hang.KhachHangServices;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,7 +20,7 @@ import java.util.List;
 public class AddKhachHangPGGController {
 
     @Autowired
-    private KhachHangService khachHangService;
+    private KhachHangServices khachHangService;
 
     @Autowired
     private PhieuGiamGiaService phieuGiamGiaService;
