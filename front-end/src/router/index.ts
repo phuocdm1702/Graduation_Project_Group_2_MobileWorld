@@ -5,7 +5,8 @@ import Dashboard from "../views/ThongKe/AppDashboard.vue";
 // Giảm giá
 import Voucher from "../views/Voucher/AppVoucher.vue";
 import DotVoucher from "../views/Voucher/DotVoucher.vue"
-import FormAddPgg from "@/views/Voucher/ViewAddPgg/FormAddPgg.vue";
+import FormAddPgg from "@/views/Voucher/FormAddPgg.vue";
+import PhieuBaoHanh from "@/views/Voucher/PhieuBaoHanh.vue";
 
 // View Login
 import Login from "../views/LoginView/AppLogin.vue";
@@ -65,6 +66,7 @@ const routes: Array<RouteRecordRaw> = [
 
   // Giam gia
   { path: "/phieu-giam-gia", name: "Voucher", component: Voucher },
+  { path: "/phieu-bao-hanh", name: "PhieuBaoHanh", component: PhieuBaoHanh },
   { path: "/dot-giam-gia", name: "DotVoucher", component: DotVoucher },
   { path: "/add-phieu-giam-gia", name: "FormAddPgg", component: FormAddPgg },
 
