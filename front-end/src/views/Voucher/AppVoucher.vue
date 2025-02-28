@@ -2,7 +2,10 @@
   <div>
     <!-- Breadcrumb -->
     <Breadcrumb breadcrumb="Phiếu Giảm Giá" />
+
     
+
+
     <div class="mt-8">
       <h4 class="text-gray-600">Danh sách Phiếu Giảm Giá</h4>
       
@@ -39,7 +42,7 @@
             </svg>
             <select v-model="filterStatus" class="border px-10 py-2 rounded-md w-full">
               <option value="">Tất cả trạng thái</option>
-              <option value="Hoạt động">Hoạt động</option>
+              <option value="Hoạt động">Còn hạn</option>
               <option value="Hết hạn">Hết hạn</option>
             </select>
           </div>
@@ -121,41 +124,146 @@
             <td class="px-4 py-2">{{ voucher.riengTu == "1" ? "Có" : "Không" }}</td>
             <td class="px-4 py-2">{{ voucher.moTa }}</td>
             <td class="px-4 py-2">
-              <button class="text-blue-600 hover:underline mr-2">Sửa</button>
-              <button class="text-red-600 hover:underline">Xóa</button>
+              <button @click="editPGG(voucher)" class="text-blue-600 hover:underline mr-2">Sửa</button>
+              <button @click="deletePGG(voucher.id)" class="text-red-600 hover:underline">Xóa</button>
             </td>
           </tr>
           </tbody>
         </table>
       </div>
-    </div>
 
-    
-    
+      <!-- Modal chỉnh sửa -->
+      <div v-if="isEditing" class="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50">
+        <div class="bg-white p-6 rounded-lg shadow-lg w-1/2">
+          <h3 class="text-lg font-semibold mb-4">Chỉnh sửa Phiếu Giảm Giá</h3>
+
+          <div class="mb-3">
+            <label class="block text-gray-700">Tên phiếu:</label>
+            <input v-model="editingVoucher.tenPhieuGiamGia" type="text" class="border px-3 py-2 rounded-md w-full" />
+          </div>
+
+          <div class="mb-3">
+            <label class="block text-gray-700">Loại phiếu:</label>
+            <select v-model="editingVoucher.loaiPhieuGiamGia" class="border px-3 py-2 rounded-md w-full">
+              <option value="Phần trăm">Phần trăm</option>
+              <option value="Tiền mặt">Tiền mặt</option>
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label class="block text-gray-700">Số tiền giảm tối đa:</label>
+            <input v-model="editingVoucher.soTienGiamToiDa" type="number" class="border px-3 py-2 rounded-md w-full" />
+          </div>
+
+          <div class="mb-3">
+            <label class="block text-gray-700">Hóa đơn tối thiểu:</label>
+            <input v-model="editingVoucher.hoaDonToiThieu" type="number" class="border px-3 py-2 rounded-md w-full" />
+          </div>
+
+          <div class="mb-3">
+            <label class="block text-gray-700">Ngày bắt đầu:</label>
+            <input v-model="editingVoucher.ngayBatDau" type="date" class="border px-3 py-2 rounded-md w-full" />
+          </div>
+
+          <div class="mb-3">
+            <label class="block text-gray-700">Ngày kết thúc:</label>
+            <input v-model="editingVoucher.ngayKetThuc" type="date" class="border px-3 py-2 rounded-md w-full" />
+          </div>
+
+          <div class="flex justify-end gap-3 mt-4">
+            <button @click="isEditing = false" class="px-4 py-2 bg-gray-400 text-white rounded-md">Hủy</button>
+            <button @click="updatePGG" class="px-4 py-2 bg-blue-600 text-white rounded-md">Cập nhật</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
     
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { ref, onMounted } from "vue";
-
-import PhieuGGService from "@/views/Voucher/PhieuGiamGiaService/PhieuGGService.js"
+import axios from "axios";
 const vouchers = ref([]);
+const isEditing = ref(false);
+const editingVoucher = ref({});
+
+const visible = ref(false);
+const message = ref("");
+const type = ref("success");
+
+const showToast = (toastType, msg) => {
+  message.value = msg;
+  type.value = toastType;
+  visible.value = true;
+  setTimeout(() => {
+    visible.value = false;
+  }, 3000);
+};
 
 // Load data
 const fetchDataPGG = async () => {
   try {
-    const response = await PhieuGGService.getData();
+    const response = await axios.get("http://localhost:8080/phieu-giam-gia/data");
     vouchers.value = response.data;
   } catch (error) {
     console.log("Error data");
   }
 };
+
+const deletePGG = async (id) => {
+  try {
+    await axios.delete(`http://localhost:8080/phieu-giam-gia/delete/${id}`);
+    showToast("success", "Xóa phiếu giảm giá thành công!");
+    await fetchDataPGG();
+  } catch(error) {
+    console.log("Lỗi khi xóa mềm:", error);
+    showToast("error", "Xóa thất bại, vui lòng kiểm tra lại!");
+  }
+}
+
+const editPGG = (voucher) => {
+  editingVoucher.value = { ...voucher }; 
+  isEditing.value = true;
+};
+
+const updatePGG = async () => {
+  try {
+    await axios.put(`http://localhost:8080/phieu-giam-gia/update/${editingVoucher.value.id}`, editingVoucher.value);
+    showToast("success", "Cập nhật thành công!");
+    isEditing.value = false;
+    await fetchDataPGG(); 
+  } catch (error) {
+    showToast("error", "Cập nhật thất bại!");
+  }
+};
+
 onMounted(fetchDataPGG);
 
 </script>
 
-<style src="@/assets/VoucherCss/voucher.css"></style>
+<style>
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+th, td {
+  padding: 5px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+th {
+  background-color: #f2f2f2;
+}
+
+tr:hover {
+  background-color: #f5f5f5;
+}
+</style>
 
 
 

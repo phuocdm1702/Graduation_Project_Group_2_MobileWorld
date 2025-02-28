@@ -1,4 +1,9 @@
 <template>
+  <div v-if="visible" :class="`toast ${type}`">
+    <span v-if="type === 'success'" class="checkmark">✔</span>
+    <span v-if="type === 'error'" class="crossmark">✖</span>
+    {{ message }}
+  </div>
   <div class="flex h-screen p-6 bg-gray-100">
     <!-- Form container -->
     <div class="w-3/4 p-6 bg-white border rounded-md shadow-md">
@@ -79,7 +84,7 @@
             Hủy
           </button>
           <button
-            @click="submitForm"
+            
             class="px-4 py-2 text-sm text-white bg-indigo-600 rounded-md hover:bg-indigo-500"
           >
             Thêm
@@ -117,10 +122,24 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import {ref, onMounted} from "vue";
 import {useRouter} from "vue-router";
-import PhieuGGService from "@/views/Voucher/PhieuGiamGiaService/PhieuGGService.js"
+import axios from "axios";
+
+const visible = ref(false);
+const message = ref("");
+const type = ref("success");
+
+const showToast = (toastType, msg) => {
+  message.value = msg;
+  type.value = toastType;
+  visible.value = true;
+  setTimeout(() => {
+    visible.value = false;
+  }, 3000);
+};
+
 const customers = ref([]);
 const selectedCustomers = ref([]);
 const router = useRouter();
@@ -138,6 +157,15 @@ const trangThai = ref(false); // Boolean
 const riengTu = ref(false); // Boolean
 const moTa = ref("");
 const deleted = ref(false); // Mặc định là false
+
+const fetchDataKH = async () => {
+  try {
+    const response = await axios.get("http://localhost:8080/add-phieu-giam-gia/data-kh")
+    customers.value = response.data;
+  } catch (error) {
+    console.log("Error: ", error);
+  }
+}
 
 const submitForm = async () => {
   const newPgg = {
@@ -160,24 +188,16 @@ const submitForm = async () => {
   console.log("Dữ liệu gửi lên:", newPgg);
 
   try {
-    const response = await PhieuGGService.createPgg(newPgg);
+    const response = await axios.post("http://localhost:8080/add-phieu-giam-gia/addPhieuGiamGia", newPgg);
     console.log("Response: ", response);
     alert("Thêm phiếu giảm giá thành công!");
-    window.location.href = "http://localhost:3000/phieu-giam-gia";
+    await router.push("/phieu-giam-gia");
   } catch (error) {
     console.error("Lỗi khi thêm phiếu giảm giá:", error);
     alert("Thêm thất bại, vui lòng kiểm tra lại!");
   }
 };
 
-const fetchDataKH = async () => {
-  try {
-    const response = await PhieuGGService.getDataKH();
-    customers.value = response.data;
-  } catch (error) {
-    console.log("Error: ", error);
-  }
-}
 
 onMounted(fetchDataKH);
 </script>
