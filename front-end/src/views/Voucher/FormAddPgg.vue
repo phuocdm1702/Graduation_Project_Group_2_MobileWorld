@@ -120,7 +120,7 @@
 <script setup lang="ts">
 import {ref, onMounted} from "vue";
 import {useRouter} from "vue-router";
-import PhieuGGService from "@/MobieWorldService/PhieuGiamGiaService/PhieuGGService.js"
+import PhieuGGService from "@/views/Voucher/PhieuGiamGiaService/PhieuGGService.js"
 const customers = ref([]);
 const selectedCustomers = ref([]);
 const router = useRouter();
