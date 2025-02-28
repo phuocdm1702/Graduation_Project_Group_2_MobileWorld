@@ -12,7 +12,7 @@ import java.util.Date;
 @Getter
 @Setter
 public class HoaDonDTO {
-    private Integer id;
+
     private KhachHang idKhachHang;
     private NhanVien idNhanVien;
     private PhieuGiamGia idPhieuGiamGia;
@@ -24,8 +24,7 @@ public class HoaDonDTO {
     private BigDecimal tongTienSauGiam;
     private Short trangThai;
 
-    public HoaDonDTO(Integer id, KhachHang idKhachHang, NhanVien idNhanVien, PhieuGiamGia idPhieuGiamGia, String ma, String soDienThoaiKhachHang, String loaiDon, BigDecimal tongTien, Date ngayTao, BigDecimal tongTienSauGiam, Short trangThai) {
-        this.id = id;
+    public HoaDonDTO( KhachHang idKhachHang, NhanVien idNhanVien, PhieuGiamGia idPhieuGiamGia, String ma, String soDienThoaiKhachHang, String loaiDon, BigDecimal tongTien, Date ngayTao, BigDecimal tongTienSauGiam, Short trangThai) {
         this.idKhachHang = idKhachHang;
         this.idNhanVien = idNhanVien;
         this.idPhieuGiamGia = idPhieuGiamGia;

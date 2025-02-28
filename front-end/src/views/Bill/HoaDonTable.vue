@@ -1,5 +1,4 @@
 <template>
-  <div class="mt-8 max-w-screen-xl mx-auto">
   <!-- Bảng dữ liệu -->
   <div class="overflow-x-auto mt-6 bg-white shadow-lg rounded-lg p-4">
     <table class="w-full min-w-max table-auto border-collapse">
@@ -38,13 +37,9 @@
       </tbody>
     </table>
   </div>
-  </div>
 
 </template>
 
-// export default {
-//   name: "HoaDonTable"
-// }
 <script setup>
   import { ref, onMounted } from "vue";
   import axios from "axios";

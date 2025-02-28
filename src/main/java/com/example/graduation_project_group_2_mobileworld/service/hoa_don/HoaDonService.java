@@ -26,7 +26,6 @@ public class HoaDonService {
 
     private HoaDonDTO toDTO(HoaDon hoaDon){
         return new HoaDonDTO(
-                hoaDon.getId(),
                 hoaDon.getIdKhachHang(),
                 hoaDon.getIdNhanVien(),
                 hoaDon.getIdPhieuGiamGia(),

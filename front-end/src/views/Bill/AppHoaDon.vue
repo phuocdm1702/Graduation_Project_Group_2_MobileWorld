@@ -1,5 +1,5 @@
 <template>
-
+  <div class="mt-8 max-w-screen-xl mx-auto">
   <h4 class="text-xl font-semibold text-gray-700">📋 Danh sách Hóa Đơn</h4>
 
   <!-- Form lọc -->
@@ -26,6 +26,7 @@
 
   <HoaDonTable/>
   <AppHoaDonChiTiet/>
+  </div>
 </template>
 
 <script setup>
