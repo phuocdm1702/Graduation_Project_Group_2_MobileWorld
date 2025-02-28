@@ -10,6 +10,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class DongSanPhamService {
@@ -27,11 +28,30 @@ public class DongSanPhamService {
 
     @Transactional
     public DongSanPhamDTO createDongSanPham(DongSanPhamDTO dto) {
-        DongSanPham entity = new DongSanPham();
-        entity.setMa(dto.getMa());
-        entity.setDongSanPham(dto.getDongSanPham());
-        entity.setDeleted(false);
-        return toDTO(repository.save(entity));
+        // Kiểm tra xem có bản ghi đã xóa mềm với ma hoặc dongSanPham không
+        Optional<DongSanPham> existingDongSanPhamByMa = repository.findByMaAndDeletedTrue(dto.getMa());
+        Optional<DongSanPham> existingDongSanPhamByName = repository.findByDongSanPhamAndDeletedTrue(dto.getDongSanPham());
+
+        if (existingDongSanPhamByMa.isPresent()) {
+            // Khôi phục bản ghi đã xóa mềm với ma
+            DongSanPham entity = existingDongSanPhamByMa.get();
+            entity.setDeleted(false);
+            entity.setDongSanPham(dto.getDongSanPham()); // Cập nhật giá trị mới
+            return toDTO(repository.save(entity));
+        } else if (existingDongSanPhamByName.isPresent()) {
+            // Khôi phục bản ghi đã xóa mềm với dongSanPham
+            DongSanPham entity = existingDongSanPhamByName.get();
+            entity.setDeleted(false);
+            entity.setMa(dto.getMa()); // Cập nhật giá trị mới
+            return toDTO(repository.save(entity));
+        } else {
+            // Nếu không có bản ghi nào bị xóa mềm, tạo mới
+            DongSanPham entity = new DongSanPham();
+            entity.setMa(dto.getMa());
+            entity.setDongSanPham(dto.getDongSanPham());
+            entity.setDeleted(false);
+            return toDTO(repository.save(entity));
+        }
     }
 
     @Transactional

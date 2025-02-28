@@ -22,6 +22,10 @@ export default function useProductLineList() {
 
   watch(searchKeyword, (newValue) => {
     isSearching.value = !!newValue.trim();
+    if (newValue !== searchKeyword.value) {
+      currentPage.value = 0;
+      searchProductLine();
+    }
   });
 
   const fetchData = async () => {
@@ -55,7 +59,6 @@ export default function useProductLineList() {
       return;
     }
     isSearching.value = true;
-    currentPage.value = 0;
     try {
       const { data } = await axios.get('http://localhost:8080/api/dong-san-pham/search', {
         params: { keyword, page: currentPage.value, size: pageSize.value },
@@ -64,6 +67,7 @@ export default function useProductLineList() {
       totalItems.value = data.totalElements;
     } catch (error) {
       toast.value?.showToast('error', 'Lỗi tìm kiếm!');
+      console.error('Search error:', error);
     }
   };
 
@@ -92,14 +96,6 @@ export default function useProductLineList() {
       toast.value?.showToast('error', 'Vui lòng nhập đầy đủ thông tin!');
       return;
     }
-    if (await checkDuplicate('ma', ma)) {
-      toast.value?.showToast('error', 'Mã dòng sản phẩm đã tồn tại!');
-      return;
-    }
-    if (await checkDuplicate('dongSanPham', dongSanPham)) {
-      toast.value?.showToast('error', 'Tên dòng sản phẩm đã tồn tại!');
-      return;
-    }
     try {
       const response = await axios.post('http://localhost:8080/api/dong-san-pham', productLine.value);
       toast.value?.showToast('success', 'Thêm mới thành công!');
@@ -110,7 +106,8 @@ export default function useProductLineList() {
       }
       closeModal();
     } catch (error) {
-      toast.value?.showToast('error', 'Lỗi khi lưu dữ liệu!');
+      toast.value?.showToast('error', 'Lỗi khi lưu dữ liệu: ' + (error.response?.data || error.message));
+      console.error('Save error:', error);
     }
   };
 
@@ -141,7 +138,8 @@ export default function useProductLineList() {
       }
       closeModal();
     } catch (error) {
-      toast.value?.showToast('error', 'Lỗi khi cập nhật dữ liệu!');
+      toast.value?.showToast('error', 'Lỗi khi cập nhật dữ liệu: ' + (error.response?.data || error.message));
+      console.error('Update error:', error);
     }
   };
 
@@ -149,7 +147,17 @@ export default function useProductLineList() {
     try {
       await axios.delete(`http://localhost:8080/api/dong-san-pham/${id}`);
       toast.value?.showToast('success', 'Xóa thành công!');
-      await fetchData();
+      totalItems.value -= 1;
+      if (totalItems.value > 0 && currentPage.value >= totalPages.value) {
+        currentPage.value = totalPages.value - 1;
+      } else if (totalItems.value <= 0) {
+        currentPage.value = 0;
+      }
+      if (isSearching.value && searchKeyword.value.trim()) {
+        await searchProductLine();
+      } else {
+        await fetchData();
+      }
     } catch (error) {
       toast.value?.showToast('error', 'Lỗi khi xóa!');
     }
@@ -161,9 +169,19 @@ export default function useProductLineList() {
         data: { ids: selectedProducts.value },
       });
       toast.value?.showToast('success', 'Xóa thành công!');
+      totalItems.value -= selectedProducts.value.length;
+      if (totalItems.value > 0 && currentPage.value >= totalPages.value) {
+        currentPage.value = totalPages.value - 1;
+      } else if (totalItems.value <= 0) {
+        currentPage.value = 0;
+      }
       selectedProducts.value = [];
       selectAll.value = false;
-      await fetchData();
+      if (isSearching.value && searchKeyword.value.trim()) {
+        await searchProductLine();
+      } else {
+        await fetchData();
+      }
     } catch (error) {
       toast.value?.showToast('error', 'Lỗi khi xóa nhiều sản phẩm!');
     }
@@ -183,9 +201,8 @@ export default function useProductLineList() {
     showAddModal.value = false;
     showEditModal.value = false;
   };
-  
+
   const handleFormSubmit = (data) => {
-    console.log('Received data from form:', data); // Debug dữ liệu nhận được
     productLine.value = data;
     if (showAddModal.value) {
       confirmAction('Bạn có chắc chắn muốn thêm dòng sản phẩm này?', saveProductLine);

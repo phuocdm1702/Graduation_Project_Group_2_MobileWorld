@@ -26,6 +26,10 @@ export default function useImel() {
 
   watch(searchKeyword, (newValue) => {
     isSearching.value = !!newValue.trim();
+    if (newValue !== searchKeyword.value) {
+      currentPage.value = 0;
+      searchImel();
+    }
   });
 
   const fetchData = async () => {
@@ -59,7 +63,6 @@ export default function useImel() {
       return;
     }
     isSearching.value = true;
-    currentPage.value = 0;
     try {
       const { data } = await axios.get('http://localhost:8080/api/imel/search', {
         params: { keyword, page: currentPage.value, size: pageSize.value },
@@ -68,6 +71,7 @@ export default function useImel() {
       totalItems.value = data.totalElements;
     } catch (error) {
       toast.value?.showToast('error', 'Lỗi tìm kiếm!');
+      console.error('Search error:', error);
     }
   };
 
@@ -155,7 +159,18 @@ export default function useImel() {
     try {
       await axios.delete(`http://localhost:8080/api/imel/${id}`);
       toast.value?.showToast('success', 'Xóa thành công!');
-      await fetchData();
+      totalItems.value -= 1; // Giảm số lượng bản ghi
+      // Kiểm tra xem trang hiện tại có hợp lệ không
+      if (totalItems.value > 0 && currentPage.value >= totalPages.value) {
+        currentPage.value = totalPages.value - 1; // Chuyển về trang cuối cùng còn dữ liệu
+      } else if (totalItems.value <= 0) {
+        currentPage.value = 0; // Nếu không còn dữ liệu, đặt về trang 0
+      }
+      if (isSearching.value && searchKeyword.value.trim()) {
+        await searchImel();
+      } else {
+        await fetchData();
+      }
     } catch (error) {
       toast.value?.showToast('error', 'Lỗi khi xóa!');
       console.error('Delete error:', error);
@@ -168,9 +183,20 @@ export default function useImel() {
         data: { ids: selectedImels.value },
       });
       toast.value?.showToast('success', 'Xóa thành công!');
+      totalItems.value -= selectedImels.value.length; // Giảm số lượng bản ghi
+      // Kiểm tra xem trang hiện tại có hợp lệ không
+      if (totalItems.value > 0 && currentPage.value >= totalPages.value) {
+        currentPage.value = totalPages.value - 1; // Chuyển về trang cuối cùng còn dữ liệu
+      } else if (totalItems.value <= 0) {
+        currentPage.value = 0; // Nếu không còn dữ liệu, đặt về trang 0
+      }
       selectedImels.value = [];
       selectAll.value = false;
-      await fetchData();
+      if (isSearching.value && searchKeyword.value.trim()) {
+        await searchImel();
+      } else {
+        await fetchData();
+      }
     } catch (error) {
       toast.value?.showToast('error', 'Lỗi khi xóa nhiều Imel!');
       console.error('Bulk delete error:', error);

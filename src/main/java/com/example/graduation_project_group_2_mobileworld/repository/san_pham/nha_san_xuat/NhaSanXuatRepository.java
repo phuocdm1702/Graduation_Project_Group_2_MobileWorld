@@ -10,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface NhaSanXuatRepository extends JpaRepository<NhaSanXuat, Integer> {
@@ -33,4 +34,20 @@ public interface NhaSanXuatRepository extends JpaRepository<NhaSanXuat, Integer>
     @Modifying
     @Query("UPDATE NhaSanXuat d SET d.deleted = true WHERE d.id IN :ids AND d.deleted = false")
     int softDeleteByIds(@Param("ids") List<Integer> ids);
+
+    // Thêm phương thức để kiểm tra xem có bản ghi đã xóa mềm với ma không
+    @Query("SELECT COUNT(n) > 0 FROM NhaSanXuat n WHERE n.ma = :ma AND n.deleted = true")
+    boolean existsByMaAndDeletedTrue(@Param("ma") String ma);
+
+    // Thêm phương thức để kiểm tra xem có bản ghi đã xóa mềm với nhaSanXuat không
+    @Query("SELECT COUNT(n) > 0 FROM NhaSanXuat n WHERE n.nhaSanXuat = :nhaSanXuat AND n.deleted = true")
+    boolean existsByNhaSanXuatAndDeletedTrue(@Param("nhaSanXuat") String nhaSanXuat);
+
+    // Thêm phương thức để tìm bản ghi đã xóa mềm với ma
+    @Query("SELECT n FROM NhaSanXuat n WHERE n.ma = :ma AND n.deleted = true")
+    Optional<NhaSanXuat> findByMaAndDeletedTrue(@Param("ma") String ma);
+
+    // Thêm phương thức để tìm bản ghi đã xóa mềm với nhaSanXuat
+    @Query("SELECT n FROM NhaSanXuat n WHERE n.nhaSanXuat = :nhaSanXuat AND n.deleted = true")
+    Optional<NhaSanXuat> findByNhaSanXuatAndDeletedTrue(@Param("nhaSanXuat") String nhaSanXuat);
 }

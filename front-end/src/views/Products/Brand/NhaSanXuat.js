@@ -1,15 +1,19 @@
 import { ref, onMounted, computed, watch } from 'vue';
 import axios from 'axios';
+import ToastNotification from '@/components/ToastNotification.vue';
+import Pagination from '@/components/Pagination.vue';
+import ProductLineFormModal from '@/components/FormModal.vue';
+import ConfirmModal from '@/components/ConfirmModal.vue';
 
 export default function useNhaSanXuat() {
   const toast = ref(null);
-  const manufacturers = ref([]); // Tương tự productLines
-  const manufacturer = ref({ id: null, ma: '', nhaSanXuat: '' }); // Tương tự productLine
+  const manufacturers = ref([]);
+  const manufacturer = ref({ id: null, ma: '', nhaSanXuat: '' });
   const searchKeyword = ref('');
   const currentPage = ref(0);
   const pageSize = ref(5);
   const totalItems = ref(0);
-  const selectedManufacturers = ref([]); // Tương tự selectedProducts
+  const selectedManufacturers = ref([]);
   const selectAll = ref(false);
   const isSearching = ref(false);
   const showAddModal = ref(false);
@@ -22,6 +26,10 @@ export default function useNhaSanXuat() {
 
   watch(searchKeyword, (newValue) => {
     isSearching.value = !!newValue.trim();
+    if (newValue !== searchKeyword.value) {
+      currentPage.value = 0;
+      searchManufacturer();
+    }
   });
 
   const fetchData = async () => {
@@ -55,7 +63,6 @@ export default function useNhaSanXuat() {
       return;
     }
     isSearching.value = true;
-    currentPage.value = 0;
     try {
       const { data } = await axios.get('http://localhost:8080/api/nha-san-xuat/search', {
         params: { keyword, page: currentPage.value, size: pageSize.value },
@@ -64,6 +71,7 @@ export default function useNhaSanXuat() {
       totalItems.value = data.totalElements;
     } catch (error) {
       toast.value?.showToast('error', 'Lỗi tìm kiếm!');
+      console.error('Search error:', error);
     }
   };
 
@@ -92,14 +100,6 @@ export default function useNhaSanXuat() {
       toast.value?.showToast('error', 'Vui lòng nhập đầy đủ thông tin!');
       return;
     }
-    if (await checkDuplicate('ma', ma)) {
-      toast.value?.showToast('error', 'Mã nhà sản xuất đã tồn tại!');
-      return;
-    }
-    if (await checkDuplicate('nhaSanXuat', nhaSanXuat)) {
-      toast.value?.showToast('error', 'Tên nhà sản xuất đã tồn tại!');
-      return;
-    }
     try {
       const response = await axios.post('http://localhost:8080/api/nha-san-xuat', manufacturer.value);
       toast.value?.showToast('success', 'Thêm mới thành công!');
@@ -110,7 +110,7 @@ export default function useNhaSanXuat() {
       }
       closeModal();
     } catch (error) {
-      toast.value?.showToast('error', 'Lỗi khi lưu dữ liệu!');
+      toast.value?.showToast('error', 'Lỗi khi lưu dữ liệu: ' + (error.response?.data || error.message));
       console.error('Save error:', error);
     }
   };
@@ -142,7 +142,7 @@ export default function useNhaSanXuat() {
       }
       closeModal();
     } catch (error) {
-      toast.value?.showToast('error', 'Lỗi khi cập nhật dữ liệu!');
+      toast.value?.showToast('error', 'Lỗi khi cập nhật dữ liệu: ' + (error.response?.data || error.message));
       console.error('Update error:', error);
     }
   };
@@ -151,7 +151,17 @@ export default function useNhaSanXuat() {
     try {
       await axios.delete(`http://localhost:8080/api/nha-san-xuat/${id}`);
       toast.value?.showToast('success', 'Xóa thành công!');
-      await fetchData();
+      totalItems.value -= 1;
+      if (totalItems.value > 0 && currentPage.value >= totalPages.value) {
+        currentPage.value = totalPages.value - 1;
+      } else if (totalItems.value <= 0) {
+        currentPage.value = 0;
+      }
+      if (isSearching.value && searchKeyword.value.trim()) {
+        await searchManufacturer();
+      } else {
+        await fetchData();
+      }
     } catch (error) {
       toast.value?.showToast('error', 'Lỗi khi xóa!');
       console.error('Delete error:', error);
@@ -164,9 +174,19 @@ export default function useNhaSanXuat() {
         data: { ids: selectedManufacturers.value },
       });
       toast.value?.showToast('success', 'Xóa thành công!');
+      totalItems.value -= selectedManufacturers.value.length;
+      if (totalItems.value > 0 && currentPage.value >= totalPages.value) {
+        currentPage.value = totalPages.value - 1;
+      } else if (totalItems.value <= 0) {
+        currentPage.value = 0;
+      }
       selectedManufacturers.value = [];
       selectAll.value = false;
-      await fetchData();
+      if (isSearching.value && searchKeyword.value.trim()) {
+        await searchManufacturer();
+      } else {
+        await fetchData();
+      }
     } catch (error) {
       toast.value?.showToast('error', 'Lỗi khi xóa nhiều nhà sản xuất!');
       console.error('Bulk delete error:', error);

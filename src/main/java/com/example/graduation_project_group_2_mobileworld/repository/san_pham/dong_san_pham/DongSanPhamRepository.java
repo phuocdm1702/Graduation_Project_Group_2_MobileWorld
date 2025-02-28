@@ -10,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface DongSanPhamRepository extends JpaRepository<DongSanPham, Integer> {
@@ -33,4 +34,20 @@ public interface DongSanPhamRepository extends JpaRepository<DongSanPham, Intege
     @Modifying
     @Query("UPDATE DongSanPham d SET d.deleted = true WHERE d.id IN :ids AND d.deleted = false")
     int softDeleteByIds(@Param("ids") List<Integer> ids);
+
+    // Thêm phương thức để kiểm tra xem có bản ghi đã xóa mềm với ma không
+    @Query("SELECT COUNT(d) > 0 FROM DongSanPham d WHERE d.ma = :ma AND d.deleted = true")
+    boolean existsByMaAndDeletedTrue(@Param("ma") String ma);
+
+    // Thêm phương thức để kiểm tra xem có bản ghi đã xóa mềm với dongSanPham không
+    @Query("SELECT COUNT(d) > 0 FROM DongSanPham d WHERE d.dongSanPham = :dongSanPham AND d.deleted = true")
+    boolean existsByDongSanPhamAndDeletedTrue(@Param("dongSanPham") String dongSanPham);
+
+    // Thêm phương thức để tìm bản ghi đã xóa mềm với ma
+    @Query("SELECT d FROM DongSanPham d WHERE d.ma = :ma AND d.deleted = true")
+    Optional<DongSanPham> findByMaAndDeletedTrue(@Param("ma") String ma);
+
+    // Thêm phương thức để tìm bản ghi đã xóa mềm với dongSanPham
+    @Query("SELECT d FROM DongSanPham d WHERE d.dongSanPham = :dongSanPham AND d.deleted = true")
+    Optional<DongSanPham> findByDongSanPhamAndDeletedTrue(@Param("dongSanPham") String dongSanPham);
 }
