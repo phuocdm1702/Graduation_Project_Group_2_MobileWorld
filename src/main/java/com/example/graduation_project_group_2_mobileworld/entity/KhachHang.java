@@ -7,12 +7,14 @@ import lombok.Setter;
 import org.hibernate.annotations.Nationalized;
 
 import java.time.Instant;
+import java.util.Date;
 
 @Getter
 @Setter
 @Entity
 @Table(name = "khach_hang")
 public class KhachHang {
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     @Column(name = "id", nullable = false)
     private Integer id;
@@ -35,7 +37,7 @@ public class KhachHang {
     private Short gioiTinh;
 
     @Column(name = "ngay_sinh")
-    private Instant ngaySinh;
+    private Date ngaySinh;
 
     @Column(name = "deleted")
     private Boolean deleted;

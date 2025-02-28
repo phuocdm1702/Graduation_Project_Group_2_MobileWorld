@@ -79,12 +79,12 @@
 
 
       <div class="mt-4 flex justify-between items-center">
-        <button @click="openModal" class="bg-blue-600 text-white px-4 py-2 rounded-md flex items-center hover:bg-blue-700 btn-modal">
+        <router-link to="/add-phieu-giam-gia" class="bg-blue-600 text-white px-4 py-2 rounded-md flex items-center hover:bg-blue-700 btn-modal">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
           </svg>
           Thêm Phiếu
-        </button>
+        </router-link>
       </div>
       
       <div class="mt-4">
@@ -94,26 +94,32 @@
             <th class="px-4 py-2">Mã</th>
             <th class="px-4 py-2">Tên Phiếu</th>
             <th class="px-4 py-2">Loại Phiếu</th>
-            <th class="px-4 py-2">Giá trị</th>
+            <th class="px-4 py-2">Phần trăm giảm giá</th>
             <th class="px-4 py-2">Số tiền giảm tối đa</th>
+            <th class="px-4 py-2">Số lượng</th>
             <th class="px-4 py-2">Hóa đơn tối thiểu</th>
             <th class="px-4 py-2">Ngày bắt đầu</th>
             <th class="px-4 py-2">Ngày kết thúc</th>
             <th class="px-4 py-2">Trạng thái</th>
+            <th class="px-4 py-2">Riêng tư</th>
+            <th class="px-4 py-2">Mô tả</th>
             <th class="px-4 py-2">Hành động</th>
           </tr>
           </thead>
           <tbody>
           <tr class="border-t text-center" v-for="voucher in vouchers" :key="voucher.id">
-            <td class="px-4 py-2">{{ voucher.id }}</td>
-            <td class="px-4 py-2">{{ voucher.name }}</td>
-            <td class="px-4 py-2">{{ voucher.type }}</td>
-            <td class="px-4 py-2">{{ voucher.value }}</td>
-            <td class="px-4 py-2">{{ voucher.maxDiscount }}</td>
-            <td class="px-4 py-2">{{ voucher.minOrder }}</td>
-            <td class="px-4 py-2">{{ voucher.startDate }}</td>
-            <td class="px-4 py-2">{{ voucher.endDate }}</td>
-            <td class="px-4 py-2">{{ voucher.status }}</td>
+            <td class="px-4 py-2">{{ voucher.ma }}</td>
+            <td class="px-4 py-2">{{ voucher.tenPhieuGiamGia }}</td>
+            <td class="px-4 py-2">{{ voucher.loaiPhieuGiamGia }}</td>
+            <td class="px-4 py-2">{{ voucher.phanTramGiamGia }}%</td>
+            <td class="px-4 py-2">{{ voucher.soTienGiamToiDa }}</td>
+            <td class="px-4 py-2">{{ voucher.soLuongDung }}</td>
+            <td class="px-4 py-2">{{ voucher.hoaDonToiThieu }}</td>
+            <td class="px-4 py-2">{{ new Date(voucher.ngayBatDau).toLocaleDateString('vi-VN') }}</td>
+            <td class="px-4 py-2">{{ new Date(voucher.ngayKetThuc).toLocaleDateString('vi-VN') }}</td>
+            <td class="px-4 py-2">{{ voucher.trangThai == "1" ? "Còn hạn" : "Hết hạn" }}</td>
+            <td class="px-4 py-2">{{ voucher.riengTu == "1" ? "Có" : "Không" }}</td>
+            <td class="px-4 py-2">{{ voucher.moTa }}</td>
             <td class="px-4 py-2">
               <button class="text-blue-600 hover:underline mr-2">Sửa</button>
               <button class="text-red-600 hover:underline">Xóa</button>
@@ -125,205 +131,27 @@
     </div>
 
     
-    <div v-if="isModalOpen" class="mt-4 modal">
-      <div class="mt-4 flex">
-        <div
-          class="w-full max-w-4xl overflow-hidden bg-white border rounded-md shadow-md"
-        >
-          <form>
-            <div
-              class="flex items-center justify-between px-5 py-3 text-gray-700 border-b"
-            >
-              <h3 class="text-sm">Thêm Phiếu Giảm Giá</h3>
-              <button @click="closeModal">&times;</button>
-            </div>
-
-            <div
-              class="p-5 text-gray-700 bg-gray-200 border-b grid grid-cols-3 gap-4"
-            >
-              <div>
-                <label class="text-xs">Mã</label>
-                <input
-                  type="text"
-                  class="w-full px-4 py-2 mt-2 border rounded-md"
-                />
-              </div>
-              <div>
-                <label class="text-xs">Tên Phiếu</label>
-                <input
-                  type="text"
-                  class="w-full px-4 py-2 mt-2 border rounded-md"
-                />
-              </div>
-              <div>
-                <label class="text-xs">Loại Phiếu</label>
-                <div class="mt-2 flex items-center space-x-4">
-                  <label class="flex items-center">
-                    <input
-                      type="radio"
-                      name="voucherType"
-                      value="Chung"
-                      v-model="voucherType"
-                      class="mr-2"
-                    />
-                    Chung
-                  </label>
-                  <label class="flex items-center">
-                    <input
-                      type="radio"
-                      name="voucherType"
-                      value="Cá nhân"
-                      v-model="voucherType"
-                      class="mr-2"
-                    />
-                    Cá nhân
-                  </label>
-                </div>
-              </div>
-              <div>
-                <label class="text-xs">Giá trị</label>
-                <input
-                  type="text"
-                  class="w-full px-4 py-2 mt-2 border rounded-md"
-                />
-              </div>
-              <div>
-                <label class="text-xs">Số tiền giảm tối đa</label>
-                <input
-                  type="text"
-                  class="w-full px-4 py-2 mt-2 border rounded-md"
-                />
-              </div>
-              <div>
-                <label class="text-xs">Hóa đơn tối thiểu</label>
-                <input
-                  type="text"
-                  class="w-full px-4 py-2 mt-2 border rounded-md"
-                />
-              </div>
-              <div>
-                <label class="text-xs">Ngày bắt đầu</label>
-                <input
-                  type="date"
-                  class="w-full px-4 py-2 mt-2 border rounded-md"
-                />
-              </div>
-              <div>
-                <label class="text-xs">Ngày kết thúc</label>
-                <input
-                  type="date"
-                  class="w-full px-4 py-2 mt-2 border rounded-md"
-                />
-              </div>
-              <div>
-                <label class="text-xs">Trạng thái</label>
-                <select class="w-full px-4 py-2 mt-2 border rounded-md">
-                  <option>Hoạt động</option>
-                  <option>Hết hạn</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="px-5 py-3 flex justify-between">
-              <button
-                class="px-3 py-1 text-sm text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300"
-              >
-                Hủy
-              </button>
-              <button
-                class="px-3 py-1 text-sm text-white bg-indigo-600 rounded-md hover:bg-indigo-500"
-              >
-                Lưu
-              </button>
-            </div>
-          </form>
-        </div>
-
-        <div
-          v-if="voucherType === 'Cá nhân'"
-          class="ml-4 bg-white border rounded-md shadow-md p-4 customer-table-container"
-        >
-        <h4 class="text-gray-600 mb-2">Chọn Khách Hàng</h4>
-          <table class="w-full bg-white rounded-md shadow-md">
-            <thead>
-            <tr class="bg-gray-200 text-gray-700">
-              <th class="px-4 py-2">Chọn</th>
-              <th class="px-4 py-2">Mã KH</th>
-              <th class="px-4 py-2">Tên Khách Hàng</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr
-              v-for="customer in customers"
-              :key="customer.id"
-              class="border-t text-center"
-            >
-              <td class="px-4 py-2">
-                <input
-                  type="checkbox"
-                  v-model="selectedCustomers"
-                  :value="customer.id"
-                />
-              </td>
-              <td class="px-4 py-2">{{ customer.id }}</td>
-              <td class="px-4 py-2">{{ customer.name }}</td>
-            </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
     
-    <div v-if="isModalOpen" class="overlay"></div>
+    
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 
-const isModalOpen = ref(false);
+import PhieuGGService from "@/MobieWorldService/PhieuGiamGiaService/PhieuGGService.js"
+const vouchers = ref([]);
 
-const openModal = () => {
-  isModalOpen.value = true;
+// Load data
+const fetchDataPGG = async () => {
+  try {
+    const response = await PhieuGGService.getData();
+    vouchers.value = response.data;
+  } catch (error) {
+    console.log("Error data");
+  }
 };
-
-const closeModal = () => {
-  isModalOpen.value = false;
-};
-
-const vouchers = ref([
-  {
-    id: "VC001",
-    name: "Giảm 10%",
-    type: "Phần trăm",
-    value: "10%",
-    maxDiscount: "50,000đ",
-    minOrder: "200,000đ",
-    startDate: "2024-02-20",
-    endDate: "2024-03-20",
-    status: "Hoạt động",
-  },
-  {
-    id: "VC002",
-    name: "Giảm 50k",
-    type: "Tiền mặt",
-    value: "50,000đ",
-    maxDiscount: "50,000đ",
-    minOrder: "500,000đ",
-    startDate: "2024-02-25",
-    endDate: "2024-03-25",
-    status: "Hết hạn",
-  },
-]);
-
-const voucherType = ref("Chung");
-const selectedCustomers = ref([]);
-const customers = ref([
-  { id: "KH001", name: "Nguyễn Văn A", email: "a@example.com" },
-  { id: "KH002", name: "Trần Thị B", email: "b@example.com" },
-  { id: "KH003", name: "Lê Văn C", email: "c@example.com" },
-]);
-
+onMounted(fetchDataPGG);
 
 </script>
 
