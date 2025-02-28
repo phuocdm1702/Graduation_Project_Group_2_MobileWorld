@@ -1,5 +1,6 @@
 package com.example.graduation_project_group_2_mobileworld.controller.nhan_vien;
 
+import com.example.graduation_project_group_2_mobileworld.entity.KhachHang;
 import com.example.graduation_project_group_2_mobileworld.entity.NhanVien;
 import com.example.graduation_project_group_2_mobileworld.service.nhan_vien.NhanVienServices;
 import org.springframework.http.ResponseEntity;
@@ -20,17 +21,29 @@ public class NhanVienController {
 
     //Lay tat ca du lieu
     @GetMapping("/home")
-    public List<NhanVien> getAllnv() {
-        List<NhanVien> nv = nhanVienServices.getall();
-        System.out.println("Danh sách nv: " + nv);
-        return nv;
+    public ResponseEntity<List<NhanVien>> getAllCustomers() {
+        List<NhanVien> kh = nhanVienServices.getall();
+        return ResponseEntity.ok(kh);
     }
     @PostMapping("/add")
     public NhanVien addNhanVien(@RequestBody NhanVien nhanVien){
         return nhanVienServices.add(nhanVien);
     }
-    @DeleteMapping("/delete/{id}")
-    public ResponseEntity<String> delete(@PathVariable Integer id){
-       return nhanVienServices.delete(id);
+    @PutMapping("/delete/{id}")
+    public ResponseEntity<String> softDelete(@PathVariable Integer id) {
+        boolean deleted = nhanVienServices.delete(id);
+        if (deleted) {
+            return ResponseEntity.ok("Xóa mềm thành công");
+        }
+        return ResponseEntity.badRequest().body("nv không tồn tại");
+    }
+    @PutMapping("/update/{id}")
+    public ResponseEntity<NhanVien> updateNv(@PathVariable Integer id, @RequestBody NhanVien nhanVien) {
+        try {
+            NhanVien updatedKhachHang = nhanVienServices.updatenv(id, nhanVien);
+            return ResponseEntity.ok(updatedKhachHang);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(404).body(null);
+        }
     }
 }

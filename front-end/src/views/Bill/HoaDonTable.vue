@@ -15,7 +15,7 @@
       </tr>
       </thead>
       <tbody>
-      <tr v-for="(baoHanh) in dataTable" :key="baoHanh.id" class="text-gray-700 border-b hover:bg-gray-50">
+      <tr v-for="baoHanh in dataTable" :key="baoHanh.id" class="text-gray-700 border-b hover:bg-gray-50">
         <td class="td-cell">{{ baoHanh.id }}</td>
         <td class="td-cell">{{ baoHanh.idPhieuBaoHanh }}</td>
         <td class="td-cell">{{ baoHanh.ma }}</td>

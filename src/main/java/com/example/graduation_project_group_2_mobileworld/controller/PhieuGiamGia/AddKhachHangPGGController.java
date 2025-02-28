@@ -29,11 +29,11 @@ public class AddKhachHangPGGController {
     private PhieuGiamGiaCaNhanService phieuGiamGiaCaNhanService;
 
 
-    @GetMapping("/data-kh")
-    public List<KhachHang> fetchDataKH() {
-        List<KhachHang> listKH = khachHangService.getAll();
-        return listKH;
-    }
+//    @GetMapping("/data-kh")
+//    public List<KhachHang> fetchDataKH() {
+//        List<KhachHang> listKH = khachHangService.getAll();
+//        return listKH;
+//    }
 
     @PostMapping("/addPhieuGiamGia")
     public ResponseEntity<String> addPGG(@RequestBody PhieuGiamGiaDTO dtoPGG) {
