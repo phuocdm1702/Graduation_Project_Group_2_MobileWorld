@@ -26,31 +26,7 @@ public class NhanVienServices {
         return nhanVienRepository.save(nhanVien);
     }
 
-    public ResponseEntity<Object> updateNV(Integer id, NhanVien nhanVien) {
-        Optional<NhanVien> existingNhanVien = nhanVienRepository.findById(id);
-        if (!existingNhanVien.isPresent()) {
-            return ResponseEntity.status(404).body("Không tìm thấy nhân viên với ID: " + id);
-        }
 
-        NhanVien nv = existingNhanVien.get();
-
-        if (nhanVienRepository.existsByMaAndNotId(nhanVien.getMa(), id)) {
-            return ResponseEntity.status(400).body("Mã nhân viên đã tồn tại: " + nhanVien.getMa());
-        }
-
-        nv.setMa(nhanVien.getMa());
-        nv.setTenNhanVien(nhanVien.getTenNhanVien());
-        nv.setNgaySinh(nhanVien.getNgaySinh());
-        nv.setAnhNhanVien(nhanVien.getAnhNhanVien());
-        nv.setGhiChu(nhanVien.getGhiChu());
-        nv.setThanhPho(nhanVien.getThanhPho());
-        nv.setQuan(nhanVien.getQuan());
-        nv.setPhuong(nhanVien.getPhuong());
-        nv.setDiaChiCuThe(nhanVien.getDiaChiCuThe());
-        nv.setCccd(nhanVien.getCccd());
-
-        return ResponseEntity.ok(nhanVienRepository.save(nv));
-    }
 
 
 //    public boolean softDeleteNhanVien(Integer id) {
@@ -74,4 +50,28 @@ public class NhanVienServices {
         }
         return false;
     }
+
+    public NhanVien updatenv(Integer id, NhanVien nhanVien) {
+        Optional<NhanVien> existingKhachHang = nhanVienRepository.findById(id);
+        if (existingKhachHang.isPresent()) {
+            NhanVien kh = existingKhachHang.get();
+            // Kiểm tra trùng mã với các khách hàng khác (trừ chính nó)
+            if (nhanVienRepository.existsByMaAndNotId(nhanVien.getMa(), id)) {
+                throw new RuntimeException("Mã khách hàng đã tồn tại: " + nhanVien.getMa());
+            }
+            kh.setMa(nhanVien.getMa());
+            kh.setTenNhanVien(nhanVien.getTenNhanVien());
+            kh.setNgaySinh(nhanVien.getNgaySinh());
+            kh.setAnhNhanVien(nhanVien.getAnhNhanVien());
+            kh.setGhiChu(nhanVien.getGhiChu());
+            kh.setThanhPho(nhanVien.getThanhPho());
+            kh.setQuan(nhanVien.getQuan());
+            kh.setPhuong(nhanVien.getPhuong());
+            kh.setDiaChiCuThe(nhanVien.getDiaChiCuThe());
+            kh.setCccd(nhanVien.getCccd());
+            return nhanVienRepository.save(kh);
+        } else {
+            throw new RuntimeException("Không tìm thấy khách hàng với ID: " + id);
+        }
     }
+}

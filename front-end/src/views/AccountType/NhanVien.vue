@@ -72,9 +72,16 @@
               </div>
             </div>
             <div class="px-5 py-3 flex justify-between">
-              <button type="reset" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">Reset thông tin</button>
-              <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">
+              <button type="reset" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition"
+                      @click="isEditing = false">Reset thông tin</button>
+
+              <button v-if="!isEditing" type="submit" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">
                 Thêm nhân viên
+              </button>
+
+              <button v-if="isEditing" @click="updateNhanVien" type="button"
+                      class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition">
+                Sửa nhân viên
               </button>
             </div>
           </form>
@@ -131,7 +138,7 @@
             <td class="px-4 py-3">{{ nv.diaChiCuThe }}</td>
             <td class="px-4 py-3">{{ nv.cccd }}</td>
             <td class="px-4 py-3">
-              <button class="text-blue-600 hover:text-blue-800 font-semibold px-2">Sửa</button>
+              <button @click="editNhanVien(nv)" class="text-blue-600 hover:text-blue-800 font-semibold px-2">Sửa</button>
               <button @click="showDeleteConfirm(nv.id)" class="text-red-600 hover:text-red-800 font-semibold px-2">Xóa</button>
             </td>
           </tr>
@@ -226,10 +233,6 @@ const addNhanVien = async () => {
     showToast("error","Tên nhân viên chỉ được chứa chữ!");
     return;
   }
-  if (!nhanvien.value.ghiChu.trim()){
-    showToast("error","Vui lòng nhập ghi chú!");
-    return;
-  }
   if (!nhanvien.value.thanhPho.trim()){
     showToast("error","Vui lòng nhập thành phố!");
     return;
@@ -255,7 +258,7 @@ const addNhanVien = async () => {
     return;
   }
   if (Ngaysinh > ngaySinhHt){
-    showToast("error","Ngay` sinh khong hop le!");
+    showToast("error","Ngay` sinh khong quá ngày hiện tại!");
     return;
   }
   if (dataTable.value.some(nv => nv.ma === nhanvien.value.ma)) {
@@ -299,6 +302,38 @@ const btnSearch = () => {
     nhanvien.cccd.toLowerCase().includes(searchNV.value.toLowerCase()) 
   );
 }
+
+//MouclickDulieu
+const isEditing = ref(false);
+const editNhanVien = (customer) => {
+  nhanvien.value = {
+    ...customer,
+    ngaySinh: customer.ngaySinh ? new Date(customer.ngaySinh).toISOString().split("T")[0] : ""
+  };
+  isEditing.value = true;
+};
+
+
+//UpdateNV
+const updateNhanVien = async () => {
+  try {
+    const res = await axios.put(`http://localhost:8080/nhan-vien/update/${nhanvien.value.id}`, nhanvien.value);
+    showToast("success", "Cập nhật nhân viên thành công!");
+
+    // Cập nhật lại danh sách
+    const index = dataTable.value.findIndex(nv => nv.id === nhanvien.value.id);
+    if (index !== -1) {
+      dataTable.value[index] = { ...res.data }; 
+    }
+
+    isEditing.value = false;
+  } catch (error) {
+    console.error("Lỗi khi cập nhật nhân viên:", error);
+    showToast("error", "Không thể cập nhật nhân viên!");
+  }
+};
+
+
 </script>
 <style scoped>
 .toast {

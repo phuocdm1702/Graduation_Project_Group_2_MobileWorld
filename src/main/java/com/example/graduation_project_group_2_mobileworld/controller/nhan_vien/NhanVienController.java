@@ -37,13 +37,13 @@ public class NhanVienController {
         }
         return ResponseEntity.badRequest().body("nv không tồn tại");
     }
-//    @PutMapping("/update/{id}")
-//    public ResponseEntity<Object> updateNv(@PathVariable Integer id, @RequestBody NhanVien nhanVien) {
-//        try {
-//            NhanVien nhanVien1 = nhanVienServices.updateNV(id, nhanVien);
-//            return ResponseEntity.ok(nhanVien1);
-//        } catch (RuntimeException e) {
-//            return ResponseEntity.status(404).body("Lỗi: " + e.getMessage());
-//        }
-//    }
+    @PutMapping("/update/{id}")
+    public ResponseEntity<NhanVien> updateNv(@PathVariable Integer id, @RequestBody NhanVien nhanVien) {
+        try {
+            NhanVien updatedKhachHang = nhanVienServices.updatenv(id, nhanVien);
+            return ResponseEntity.ok(updatedKhachHang);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(404).body(null);
+        }
+    }
 }
