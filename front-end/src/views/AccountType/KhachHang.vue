@@ -64,9 +64,19 @@
       </div>
     </div>
 
-    <div class="flex items-center space-x-2">
-      <input v-model="searchKH" placeholder="Search theo ma va ten..." type="text" class="w-full px-4 py-2 border rounded-md" />
-      <button @click="BtnSearch" type="reset" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition">Search</button>
+    <div class="flex items-center gap-2 flex-nowrap">
+      <input v-model="searchKH" placeholder="Search theo ma va ten..." type="text"
+             class="flex-1 px-4 py-2 border rounded-md" />
+
+      <button @click="BtnSearch" type="button"
+              class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition">
+        Tìm kiếm
+      </button>
+
+      <button @click="backSearch" type="reset"
+              class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition">
+        Đặt lại
+      </button>
     </div>
 
 
@@ -230,15 +240,19 @@ const searchKH = ref("");
 const BtnSearch =  () => {
   if (!searchKH.value.trim()){
     showToast("error","Vui long` nhap ten muon tim kiem!");
-    fetchCustomers();
     return;
   }
   dataTable.value = dataTable.value.filter(khachhang =>
-    khachhang.ten.toLowerCase().includes(searchKH.value.toLowerCase()) ||
-    khachhang.ma.toLowerCase().includes(searchKH.value.toLowerCase())
+    khachhang.ten?.toLowerCase().includes(searchKH.value.toLowerCase()) ||
+    khachhang.ma?.toLowerCase().includes(searchKH.value.toLowerCase())
   );
 }
-
+//backSearch
+const backSearch = () => {
+  fetchCustomers();
+  searchKH.value = "";
+  return;
+}
 const isEditing = ref(false);
 //hiendulieuoTable
 const editCustomer = (customer) => {

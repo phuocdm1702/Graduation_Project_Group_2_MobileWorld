@@ -73,7 +73,7 @@
             </div>
             <div class="px-5 py-3 flex justify-between">
               <button type="reset" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition"
-                      @click="isEditing = false">Reset thông tin</button>
+                      @click="isEditing = false">Đặt lại thông tin</button>
 
               <button v-if="!isEditing" type="submit" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">
                 Thêm nhân viên
@@ -89,11 +89,22 @@
       </div>
     </div>
     <br>
-    
-    <div class="flex items-center space-x-2">
-      <input v-model="searchNV" placeholder="Search theo ma va ten..." type="text" class="w-full px-4 py-2 border rounded-md" />
-      <button @click="btnSearch" type="reset" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition">Search</button>
+
+    <div class="flex items-center gap-2 flex-nowrap">
+      <input v-model="searchNV" placeholder="Search theo ma va ten..." type="text"
+             class="flex-1 px-4 py-2 border rounded-md" />
+
+      <button @click="btnSearch" type="button"
+              class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition">
+        Tìm kiếm
+      </button>
+
+      <button @click="backSearch" type="reset"
+              class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition">
+        Đặt lại
+      </button>
     </div>
+
 
     <div class="mt-8">
       <h4 class="text-gray-700 font-semibold text-lg">Danh sách Nhân Viên</h4>
@@ -301,6 +312,12 @@ const btnSearch = () => {
     nhanvien.tenNhanVien.toLowerCase().includes(searchNV.value.toLowerCase()) || 
     nhanvien.cccd.toLowerCase().includes(searchNV.value.toLowerCase()) 
   );
+}
+//backSearch
+const backSearch = () => {
+  fetchNhanVien();
+  searchNV.value = "";
+  return;
 }
 
 //MouclickDulieu
