@@ -2,11 +2,15 @@ package com.example.graduation_project_group_2_mobileworld.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 import org.hibernate.annotations.Nationalized;
 
-import java.time.Instant;
+import java.sql.Date;
 
 @Getter
 @Setter
@@ -17,15 +21,20 @@ public class PhieuBaoHanh {
     @Column(name = "id", nullable = false)
     private Integer id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_imel_da_ban")
+    @ManyToOne
+    @JoinColumn(name = "id_imel_da_ban", referencedColumnName = "id")
     private ImelDaBan idImelDaBan;
 
+    @Size(max = 255)
+    @Nationalized
+    @Column(name = "ma")
+    private String ma;
+
     @Column(name = "ngay_bat_dau")
-    private Instant ngayBatDau;
+    private Date ngayBatDau;
 
     @Column(name = "ngay_ket_thuc")
-    private Instant ngayKetThuc;
+    private Date ngayKetThuc;
 
     @Size(max = 255)
     @Nationalized
