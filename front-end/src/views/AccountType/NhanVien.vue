@@ -94,7 +94,7 @@
         <table class="w-full bg-white rounded-lg shadow-lg overflow-hidden">
           <thead>
           <tr class="bg-gradient-to-r from-gray-300 to-gray-200 text-gray-800 uppercase text-sm tracking-wider">
-            <th class="px-4 py-3 text-center">ID</th>
+            <th class="px-4 py-3 text-center">STT</th>
             <th class="px-4 py-3 text-center">ID Tài khoản</th>
             <th class="px-4 py-3 text-center">Mã</th>
             <th class="px-4 py-3 text-center">Tên Nhân viên</th>
@@ -110,12 +110,13 @@
           </tr>
           </thead>
           <tbody>
+          
           <tr
-            v-for="nv in dataTable" :key="nv.id"
+            v-for="(nv,index) in dataTable" :key="nv.id"
             class="border-t text-center hover:bg-gray-100 transition-all duration-200"
             :class="{'bg-gray-50': nv.id % 2 === 0}"
           >
-            <td class="px-4 py-3">{{ nv.id }}</td>
+            <td class="px-4 py-3">{{ index+1 }}</td>
             <td class="px-4 py-3">{{ nv.idTaiKhoan.id }}</td>
             <td class="px-4 py-3">{{ nv.ma }}</td>
             <td class="px-4 py-3">{{ nv.tenNhanVien }}</td>
@@ -197,15 +198,14 @@ const showToast = (toastType, msg) => {
     visible.value = false;
   }, 3000);
 };
-const fetchNhanVien = (async () => {
+const fetchNhanVien = async () => {
   try {
     const res = await axios.get("http://localhost:8080/nhan-vien/home");
-    console.log("Dữ liệu từ API:", res.data);
-    dataTable.value = res.data;
+    dataTable.value = res.data.filter(kh => !kh.deleted);
   } catch (error) {
-    console.error("Lỗi:", error);
+    console.error("Lỗi khi lấy danh sách khách hàng:", error);
   }
-});
+};
 onMounted(fetchNhanVien);
 //add
 const addNhanVien = async () => {
@@ -277,8 +277,8 @@ const addNhanVien = async () => {
 
 const deleteNv = async (id) => {
   try {
-     await axios.delete(`http://localhost:8080/nhan-vien/delete/${selectedNVId.value}`)
-    showToast("success", "Xóa thành công!");
+     await axios.put(`http://localhost:8080/nhan-vien/delete/${selectedNVId.value}`)
+       showToast("success", "Xóa thành công!");
       fetchNhanVien();
   } catch (e) {
     showToast("loi");

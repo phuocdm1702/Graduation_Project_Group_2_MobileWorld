@@ -15,10 +15,9 @@ public class KhachHangServices {
         this.khachHangRepository = khachHangRepository;
     }
 
-    public List<KhachHang> getAll() {
-        return khachHangRepository.findAll();
+    public List<KhachHang> getAllCustomers() {
+        return khachHangRepository.findAllActiveCustomers(); // Chỉ lấy khách hàng chưa bị xóa mềm
     }
-
     public KhachHang findById(Integer id) {
         Optional<KhachHang> khachHang = khachHangRepository.findById(id);
         return khachHang.orElseThrow(() -> new RuntimeException("Không tìm thấy khách hàng với ID: " + id));
@@ -49,13 +48,15 @@ public class KhachHangServices {
         }
     }
 
-    public String delete(Integer id) {
-        Optional<KhachHang> khachHang = khachHangRepository.findById(id);
-        if (khachHang.isPresent()) {
-            khachHangRepository.deleteById(id);
-            return "Xóa khách hàng thành công!";
-        } else {
-            throw new RuntimeException("Không tìm thấy khách hàng với ID: " + id);
+    public boolean delete(Integer id) {
+        Optional<KhachHang> optionalKH = khachHangRepository.findById(id);
+        if (optionalKH.isPresent()) {
+            KhachHang kh = optionalKH.get();
+            kh.setDeleted(true); // Đánh dấu khách hàng đã bị xóa mềm
+            khachHangRepository.save(kh);
+            return true;
         }
+        return false;
     }
+
 }

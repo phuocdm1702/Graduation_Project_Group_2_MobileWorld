@@ -22,11 +22,10 @@ public class KhachHangController {
 
     // Lấy danh sách tất cả khách hàng
     @GetMapping("/home")
-    public ResponseEntity<List<KhachHang>> getAll() {
-        List<KhachHang> khachHangList = khachHangServices.getAll();
-        return ResponseEntity.ok(khachHangList);
+    public ResponseEntity<List<KhachHang>> getAllCustomers() {
+        List<KhachHang> customers = khachHangServices.getAllCustomers();
+        return ResponseEntity.ok(customers);
     }
-
     // Thêm mới khách hàng
     @PostMapping("/add")
     public ResponseEntity<KhachHang> addKhachHang(@RequestBody KhachHang khachHang) {
@@ -50,13 +49,13 @@ public class KhachHangController {
     }
 
     // Xóa khách hàng
-    @DeleteMapping("/delete/{id}")
-    public ResponseEntity<String> deleteKhachHang(@PathVariable Integer id) {
-        try {
-            String message = khachHangServices.delete(id);
-            return ResponseEntity.ok(message);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(404).body(e.getMessage());
+    @PutMapping("/delete/{id}")
+    public ResponseEntity<String> softDelete(@PathVariable Integer id) {
+        boolean deleted = khachHangServices.delete(id);
+        if (deleted) {
+            return ResponseEntity.ok("Xóa mềm thành công");
         }
+        return ResponseEntity.badRequest().body("Khách hàng không tồn tại");
     }
+
 }

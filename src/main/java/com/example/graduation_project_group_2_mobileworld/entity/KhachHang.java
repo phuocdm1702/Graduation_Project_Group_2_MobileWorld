@@ -54,4 +54,94 @@ public class KhachHang {
     @Column(name = "updated_by")
     private Integer updatedBy;
 
+    public KhachHang() {
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public TaiKhoan getIdTaiKhoan() {
+        return idTaiKhoan;
+    }
+
+    public void setIdTaiKhoan(TaiKhoan idTaiKhoan) {
+        this.idTaiKhoan = idTaiKhoan;
+    }
+
+    public @Size(max = 255) String getMa() {
+        return ma;
+    }
+
+    public void setMa(@Size(max = 255) String ma) {
+        this.ma = ma;
+    }
+
+    public @Size(max = 255) String getTen() {
+        return ten;
+    }
+
+    public void setTen(@Size(max = 255) String ten) {
+        this.ten = ten;
+    }
+
+    public Short getGioiTinh() {
+        return gioiTinh;
+    }
+
+    public void setGioiTinh(Short gioiTinh) {
+        this.gioiTinh = gioiTinh;
+    }
+
+    public Date getNgaySinh() {
+        return ngaySinh;
+    }
+
+    public void setNgaySinh(Date ngaySinh) {
+        this.ngaySinh = ngaySinh;
+    }
+
+    public Boolean getDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(Boolean deleted) {
+        this.deleted = deleted;
+    }
+
+    public Instant getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Instant createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public Integer getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(Integer createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    public Instant getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(Instant updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
+    public Integer getUpdatedBy() {
+        return updatedBy;
+    }
+
+    public void setUpdatedBy(Integer updatedBy) {
+        this.updatedBy = updatedBy;
+    }
 }
