@@ -32,7 +32,7 @@ import axios from "axios";
 
 const dataTableLSHD = ref([]);
 
-onMounted(async () => {
+  onMounted(async () => {
   try {
     const res = await axios.get("http://localhost:8080/lich-su-hoa-don/home");
     console.log("Dữ liệu từ API:", res.data);
