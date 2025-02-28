@@ -119,7 +119,7 @@
             <td class="px-4 py-3">{{ nv.idTaiKhoan.id }}</td>
             <td class="px-4 py-3">{{ nv.ma }}</td>
             <td class="px-4 py-3">{{ nv.tenNhanVien }}</td>
-            <td class="px-4 py-3">{{ nv.ngaySinh }}</td>
+            <td class="px-4 py-3">{{ new Date(nv.ngaySinh).toLocaleDateString() }}</td>
             <td class="px-4 py-3">
               <img :src="nv.anhNhanVien" class="anh-nhan-vien rounded-md shadow-sm border border-gray-300" />
             </td>

@@ -98,7 +98,7 @@
               {{ customer.gioiTinh == 0 ? 'Nam' : 'Nữ' }}
             </span>
             </td>
-            <td class="px-6 py-3">{{ customer.ngaySinh }}</td>
+            <td class="px-6 py-3">{{ new Date(customer.ngaySinh).toLocaleDateString() }}</td>
             <td class="px-6 py-3 text-center">
               <button @click="editCustomer(customer)" class="text-blue-600 hover:text-blue-800 font-semibold px-2">Sửa</button>
               <button @click="showDeleteConfirm(customer.id)" class="text-red-600 hover:text-red-800 font-semibold px-2">Xóa</button>
