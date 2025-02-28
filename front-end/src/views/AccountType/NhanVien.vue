@@ -81,6 +81,12 @@
         </div>
       </div>
     </div>
+    <br>
+    
+    <div class="flex items-center space-x-2">
+      <input v-model="searchNV" placeholder="Search theo ma va ten..." type="text" class="w-full px-4 py-2 border rounded-md" />
+      <button @click="btnSearch" type="reset" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition">Search</button>
+    </div>
 
     <div class="mt-8">
       <h4 class="text-gray-700 font-semibold text-lg">Danh sách Nhân Viên</h4>
@@ -125,7 +131,7 @@
             <td class="px-4 py-3">{{ nv.cccd }}</td>
             <td class="px-4 py-3">
               <button class="text-blue-600 hover:text-blue-800 font-semibold px-2">Sửa</button>
-              <button @click="deleteNv(nv.id)" class="text-red-600 hover:text-red-800 font-semibold px-2">Xóa</button>
+              <button @click="showDeleteConfirm(nv.id)" class="text-red-600 hover:text-red-800 font-semibold px-2">Xóa</button>
             </td>
           </tr>
           </tbody>
@@ -134,9 +140,18 @@
     </div>
 
   </div>
+
+  <ConfirmModal
+    :show="showConfirmModal"
+    :message="'Bạn có chắc chắn muốn xóa khách hàng này không?'"
+    @confirm="deleteNv"
+    @cancel="showConfirmModal = false"
+  />
 </template>
 
 <script setup>
+import ConfirmModal from "@/components/ConfirmModal.vue";
+
 const visible = ref(false);
 const message = ref("");
 const type = ref("success");
@@ -158,6 +173,14 @@ const nhanvien = ref({
   cccd: "",
   deleted: 1,
 });
+//Confirm
+const showConfirmModal = ref(false);
+const selectedNVId = ref(null);
+const showDeleteConfirm = (id) => {
+  selectedNVId.value = id;
+  showConfirmModal.value = true;
+};
+
 const handleFileUpload = (event) => {
   const file = event.target.files[0];
   if (file) {
@@ -235,6 +258,10 @@ const addNhanVien = async () => {
     showToast("error","Ngay` sinh khong hop le!");
     return;
   }
+  if (dataTable.value.some(nv => nv.ma === nhanvien.value.ma)) {
+    showToast("error", "Mã nhân viên đã tồn tại!");
+    return;
+  }
 
   try {
     const res = await axios.post("http://localhost:8080/nhan-vien/add", nhanvien.value);
@@ -249,16 +276,28 @@ const addNhanVien = async () => {
 //delete
 
 const deleteNv = async (id) => {
-  if (!confirm("Ban co chac chan muon xoa!")){
-    return;
-  }
   try {
-     await axios.delete(`http://localhost:8080/nhan-vien/delete/${id}`)
+     await axios.delete(`http://localhost:8080/nhan-vien/delete/${selectedNVId.value}`)
     showToast("success", "Xóa thành công!");
       fetchNhanVien();
   } catch (e) {
     showToast("loi");
   }
+  showConfirmModal.value = false;
+}
+//Search 
+const searchNV = ref("");
+const btnSearch = () => {
+  if (!searchNV.value.trim()){
+    showToast("error","Vui long nhap search!");
+    fetchNhanVien();
+    return;
+  } 
+  dataTable.value = dataTable.value.filter(nhanvien =>
+    nhanvien.ma.toLowerCase().includes(searchNV.value.toLowerCase()) || 
+    nhanvien.tenNhanVien.toLowerCase().includes(searchNV.value.toLowerCase()) || 
+    nhanvien.cccd.toLowerCase().includes(searchNV.value.toLowerCase()) 
+  );
 }
 </script>
 <style scoped>
