@@ -139,7 +139,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 
-import PhieuGGService from "@/MobieWorldService/PhieuGiamGiaService/PhieuGGService.js"
+import PhieuGGService from "@/views/Voucher/PhieuGiamGiaService/PhieuGGService.js"
 const vouchers = ref([]);
 
 // Load data

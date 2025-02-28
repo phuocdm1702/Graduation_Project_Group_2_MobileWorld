@@ -98,10 +98,10 @@
               {{ customer.gioiTinh == 0 ? 'Nam' : 'Nữ' }}
             </span>
             </td>
-            <td class="px-6 py-3">{{ customer.ngaySinh }}</td>
+            <td class="px-6 py-3">{{ new Date(customer.ngaySinh).toLocaleDateString() }}</td>
             <td class="px-6 py-3 text-center">
               <button @click="editCustomer(customer)" class="text-blue-600 hover:text-blue-800 font-semibold px-2">Sửa</button>
-              <button @click="deleteKhachhang(customer.id)" class="text-red-600 hover:text-red-800 font-semibold px-2">Xóa</button>
+              <button @click="showDeleteConfirm(customer.id)" class="text-red-600 hover:text-red-800 font-semibold px-2">Xóa</button>
             </td>
           </tr>
           </tbody>
@@ -110,11 +110,19 @@
     </div>
 
   </div>
+
+  <ConfirmModal
+    :show="showConfirmModal"
+    :message="'Bạn có chắc chắn muốn xóa khách hàng này không?'"
+    @confirm="confirmDelete"
+    @cancel="showConfirmModal = false"
+  />
 </template>
 
 <script setup>
 import { ref, onMounted } from "vue";
 import axios from "axios";
+import ConfirmModal from "@/components/ConfirmModal.vue";
 
 //du lieu add
 const dataTable = ref([]);
@@ -126,6 +134,13 @@ const khachhang = ref({
   ngaySinh: "",
   deleted: 1,
 });
+//Confirm
+const showConfirmModal = ref(false);
+const selectedCustomerId = ref(null);
+const showDeleteConfirm = (id) => {
+  selectedCustomerId.value = id;
+  showConfirmModal.value = true;
+};
 
 //Getall Du lieu
 const fetchCustomers = async () => {
@@ -177,6 +192,9 @@ const addCustomer = async () => {
   } else if (NamSinh > NamSinhHienTai){
     showToast("error","Ngày Sinh ko hợp lệ!");
     return;
+  } else if (dataTable.value.some(kh => kh.ma === khachhang.value.ma)) {
+    showToast("error", "Mã KH đã tồn tại!");
+    return;
   }
   try {
    const res = await axios.post("http://localhost:8080/khach-hang/add", khachhang.value);
@@ -189,19 +207,18 @@ const addCustomer = async () => {
 };
 
 //delete
-const deleteKhachhang = async (id) => {
-  if (!confirm("Bạn có chắc chắn muốn xóa Khách Hàng này ko?")) {
-    return;
-  }
+const confirmDelete = async () => {
   try {
-    await axios.delete(`http://localhost:8080/khach-hang/delete/${id}`);
+    await axios.delete(`http://localhost:8080/khach-hang/delete/${selectedCustomerId.value}`);
     showToast("success", "Xóa thành công!");
     fetchCustomers();
-  } catch (error){
+  } catch (error) {
     console.error("Lỗi khi xóa khách hàng:", error);
     showToast("error", "Không thể xóa khách hàng. Vui lòng thử lại!");
   }
-}
+  showConfirmModal.value = false;
+};
+
 
 const searchKH = ref("");
 
