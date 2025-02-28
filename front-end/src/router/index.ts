@@ -113,6 +113,13 @@ const routes: Array<RouteRecordRaw> = [
   { path: "/imel-da-ban", name: "Imel đã bán", component: ImelDaBan },
 
   { path: "/:pathMatch(.*)*", component: NotFound },
+
+  {
+    path: "/ViewAddDotGiamGia",
+    name: "ViewAddDotGiamGia",
+    component: () => import("@/views/Voucher/ViewAddDotGiamGia.vue"),
+  }
+
 ];
 
 const router = createRouter({

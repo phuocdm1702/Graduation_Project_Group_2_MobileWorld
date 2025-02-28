@@ -14,16 +14,21 @@ import java.math.BigDecimal;
 public class ChiTietDotGiamGia {
     @Id
     @Column(name = "id", nullable = false)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "id_dot_giam_gia", nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "id_dot_giam_gia", referencedColumnName = "id")
     private DotGiamGia dotGiamGia;
 
     @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "id_dong_san_pham", nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "id_dong_san_pham", referencedColumnName = "id")
     private DongSanPham idDongSanPham;
+
+    @NotNull
+    @Column(name="ma", nullable = false)
+    private String ma;
 
     @NotNull
     @Column(name = "gia_ban_dau", nullable = false, precision = 18, scale = 2)
@@ -36,5 +41,6 @@ public class ChiTietDotGiamGia {
     @NotNull
     @Column(name = "deleted", nullable = false)
     private Boolean deleted = false;
+
 
 }

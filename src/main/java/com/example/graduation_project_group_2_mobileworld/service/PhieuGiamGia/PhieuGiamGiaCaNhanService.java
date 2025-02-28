@@ -1,7 +1,7 @@
 package com.example.graduation_project_group_2_mobileworld.service.PhieuGiamGia;
 
 import com.example.graduation_project_group_2_mobileworld.entity.PhieuGiamGiaCaNhan;
-import com.example.graduation_project_group_2_mobileworld.repository.giamGia.PhieuGiamGiaCaNhanRepository;
+import com.example.graduation_project_group_2_mobileworld.repository.giam_gia.PhieuGiamGiaCaNhanRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

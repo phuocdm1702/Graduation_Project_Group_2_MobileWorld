@@ -14,6 +14,7 @@ import java.util.Date;
 @Entity
 @Table(name = "khach_hang")
 public class KhachHang {
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     @Column(name = "id", nullable = false)
     private Integer id;
