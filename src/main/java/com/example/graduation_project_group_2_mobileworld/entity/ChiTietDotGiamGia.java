@@ -14,6 +14,7 @@ import java.math.BigDecimal;
 public class ChiTietDotGiamGia {
     @Id
     @Column(name = "id", nullable = false)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     @ManyToOne
@@ -26,6 +27,10 @@ public class ChiTietDotGiamGia {
     private DongSanPham idDongSanPham;
 
     @NotNull
+    @Column(name="ma", nullable = false)
+    private String ma;
+
+    @NotNull
     @Column(name = "gia_ban_dau", nullable = false, precision = 18, scale = 2)
     private BigDecimal giaBanDau;
 
@@ -36,5 +41,6 @@ public class ChiTietDotGiamGia {
     @NotNull
     @Column(name = "deleted", nullable = false)
     private Boolean deleted = false;
+
 
 }

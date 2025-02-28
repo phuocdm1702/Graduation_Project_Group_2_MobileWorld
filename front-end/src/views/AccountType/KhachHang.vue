@@ -1,3 +1,4 @@
+
 <template>
   <div v-if="visible" :class="`toast ${type}`">
     <span v-if="type === 'success'" class="checkmark">✔</span>
@@ -9,6 +10,7 @@
 
     <div class="mb-3">
       <h4 class="text-gray-600 text-4xl font-bold">Quản lý Khách Hàng</h4>
+      
       <div class="mt-4">
         <div class="w-full overflow-hidden bg-white border rounded-md shadow-md">
           <form @submit.prevent="addCustomer">
@@ -20,7 +22,6 @@
                 </svg>
               </button>
             </div>
-
             <div class="p-5 text-gray-700 grid grid-cols-2 gap-4 bg-white">
               <div>
                 <label class="text-xs">Mã</label>
@@ -33,7 +34,7 @@
               <div>
                 <label class="text-xs">Giới tính</label>
                 <select v-model="khachhang.gioiTinh" class="w-full px-4 py-2 mt-2 border rounded-md">
-                  <option value="">----Chọn giới tính----</option>
+                  <option value="null">----Chọn giới tính----</option>
                   <option value="0">Nam</option>
                   <option value="1">Nữ</option>
                 </select>
@@ -45,15 +46,30 @@
             </div>
 
             <div class="px-5 py-3 flex justify-between">
-              <button type="reset" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">Reset thông tin</button>
-              <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">
+              <button type="reset" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition"
+                      @click="isEditing = false">Reset thông tin</button>
+
+              <button v-if="!isEditing" type="submit" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">
                 Thêm khách hàng
               </button>
+
+              <button v-if="isEditing" @click="updateCustomer" type="button"
+                      class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition">
+                Sửa khách hàng
+              </button>
             </div>
+
           </form>
         </div>
       </div>
     </div>
+
+    <div class="flex items-center space-x-2">
+      <input v-model="searchKH" placeholder="Search theo ma va ten..." type="text" class="w-full px-4 py-2 border rounded-md" />
+      <button @click="BtnSearch" type="reset" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition">Search</button>
+    </div>
+
+
 
     <div class="mt-8">
       <h4 class="text-gray-600 text-2xl font-semibold">Danh sách Khách Hàng</h4>
@@ -84,7 +100,7 @@
             </td>
             <td class="px-6 py-3">{{ customer.ngaySinh }}</td>
             <td class="px-6 py-3 text-center">
-              <button class="text-blue-600 hover:text-blue-800 font-semibold px-2">Sửa</button>
+              <button @click="editCustomer(customer)" class="text-blue-600 hover:text-blue-800 font-semibold px-2">Sửa</button>
               <button @click="deleteKhachhang(customer.id)" class="text-red-600 hover:text-red-800 font-semibold px-2">Xóa</button>
             </td>
           </tr>
@@ -99,7 +115,7 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import axios from "axios";
-import {map} from "core-js/internals/array-iteration";
+
 //du lieu add
 const dataTable = ref([]);
 const khachhang = ref({
@@ -110,6 +126,7 @@ const khachhang = ref({
   ngaySinh: "",
   deleted: 1,
 });
+
 //Getall Du lieu
 const fetchCustomers = async () => {
   try {
@@ -162,9 +179,9 @@ const addCustomer = async () => {
     return;
   }
   try {
-    await axios.post("http://localhost:8080/khach-hang/add", khachhang.value);
+   const res = await axios.post("http://localhost:8080/khach-hang/add", khachhang.value);
     showToast("success", "Thêm khách hàng thành công!");
-    fetchCustomers();
+    dataTable.value.unshift(res.data);
   } catch (error) {
     console.error("Lỗi khi thêm khách hàng:", error);
     showToast("error", "Không thể thêm khách hàng. Vui lòng thử lại!");
@@ -178,13 +195,62 @@ const deleteKhachhang = async (id) => {
   }
   try {
     await axios.delete(`http://localhost:8080/khach-hang/delete/${id}`);
-    showToast("success","Xóa thành công!");
+    showToast("success", "Xóa thành công!");
     fetchCustomers();
   } catch (error){
     console.error("Lỗi khi xóa khách hàng:", error);
     showToast("error", "Không thể xóa khách hàng. Vui lòng thử lại!");
   }
 }
+
+const searchKH = ref("");
+
+//SearchKH
+const BtnSearch =  () => {
+  if (!searchKH.value.trim()){
+    showToast("error","Vui long` nhap ten muon tim kiem!");
+    fetchCustomers();
+    return;
+  }
+  dataTable.value = dataTable.value.filter(khachhang =>
+    khachhang.ten.toLowerCase().includes(searchKH.value.toLowerCase()) ||
+    khachhang.ma.toLowerCase().includes(searchKH.value.toLowerCase())
+  );
+}
+
+const isEditing = ref(false);
+//hiendulieuoTable
+const editCustomer = (customer) => {
+  khachhang.value = {
+    ...customer,
+    ngaySinh: customer.ngaySinh ? new Date(customer.ngaySinh).toISOString().split("T")[0] : ""
+  };
+  isEditing.value = true;
+};
+
+//UpdateKH
+const updateCustomer = async () => {
+  try {
+    await axios.put(`http://localhost:8080/khach-hang/update/${khachhang.value.id}`, khachhang.value);
+    showToast("success", "Cập nhật khách hàng thành công!");
+    fetchCustomers();
+    reseatKH();
+    isEditing.value = false; //Thay doi ve add
+  } catch (error) {
+    showToast("error", "Không thể cập nhật khách hàng. Vui lòng thử lại!");
+  }
+};
+
+//ReseatKH
+const  reseatKH = () => {
+  khachhang.value = {
+    ma: "",
+    ten: "",
+    gioiTinh: null,
+    ngaySinh: "", 
+  }
+};
+
 </script>
 //Css thong bao
 <style scoped>

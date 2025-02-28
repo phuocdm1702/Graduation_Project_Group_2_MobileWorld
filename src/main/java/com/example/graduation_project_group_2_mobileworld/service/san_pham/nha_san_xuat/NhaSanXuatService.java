@@ -10,6 +10,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class NhaSanXuatService {
@@ -27,21 +28,40 @@ public class NhaSanXuatService {
 
     @Transactional
     public NhaSanXuatDTO createNhaSanXuat(NhaSanXuatDTO dto) {
-        NhaSanXuat entity = new NhaSanXuat();
-        entity.setMa(dto.getMa());
-        entity.setNhaSanXuat(dto.getNhaSanXuat());
-        entity.setDeleted(false);
-        return toDTO(repository.save(entity));
+        // Kiểm tra xem có bản ghi đã xóa mềm với ma hoặc nhaSanXuat không
+        Optional<NhaSanXuat> existingNhaSanXuatByMa = repository.findByMaAndDeletedTrue(dto.getMa());
+        Optional<NhaSanXuat> existingNhaSanXuatByName = repository.findByNhaSanXuatAndDeletedTrue(dto.getNhaSanXuat());
+
+        if (existingNhaSanXuatByMa.isPresent()) {
+            // Khôi phục bản ghi đã xóa mềm với ma
+            NhaSanXuat entity = existingNhaSanXuatByMa.get();
+            entity.setDeleted(false);
+            entity.setNhaSanXuat(dto.getNhaSanXuat()); // Cập nhật giá trị mới
+            return toDTO(repository.save(entity));
+        } else if (existingNhaSanXuatByName.isPresent()) {
+            // Khôi phục bản ghi đã xóa mềm với nhaSanXuat
+            NhaSanXuat entity = existingNhaSanXuatByName.get();
+            entity.setDeleted(false);
+            entity.setMa(dto.getMa()); // Cập nhật giá trị mới
+            return toDTO(repository.save(entity));
+        } else {
+            // Nếu không có bản ghi nào bị xóa mềm, tạo mới
+            NhaSanXuat entity = new NhaSanXuat();
+            entity.setMa(dto.getMa());
+            entity.setNhaSanXuat(dto.getNhaSanXuat());
+            entity.setDeleted(false);
+            return toDTO(repository.save(entity));
+        }
     }
 
     @Transactional
     public NhaSanXuatDTO updateNhaSanXuat(Integer id, NhaSanXuatDTO dto) {
         return repository.findById(id)
                 .filter(d -> !d.getDeleted())
-                .map(dsp -> {
-                    dsp.setMa(dto.getMa());
-                    dsp.setNhaSanXuat(dto.getNhaSanXuat());
-                    return toDTO(repository.save(dsp));
+                .map(nsx -> {
+                    nsx.setMa(dto.getMa());
+                    nsx.setNhaSanXuat(dto.getNhaSanXuat());
+                    return toDTO(repository.save(nsx));
                 })
                 .orElseThrow(() -> new RuntimeException("Nhà sản xuất không tồn tại hoặc đã bị xóa!"));
     }
@@ -51,9 +71,9 @@ public class NhaSanXuatService {
         repository.findById(id)
                 .filter(d -> !d.getDeleted())
                 .ifPresentOrElse(
-                        dsp -> {
-                            dsp.setDeleted(true);
-                            repository.save(dsp);
+                        nsx -> {
+                            nsx.setDeleted(true);
+                            repository.save(nsx);
                         },
                         () -> {
                             throw new RuntimeException("Nhà sản xuất không tồn tại hoặc đã bị xóa!");

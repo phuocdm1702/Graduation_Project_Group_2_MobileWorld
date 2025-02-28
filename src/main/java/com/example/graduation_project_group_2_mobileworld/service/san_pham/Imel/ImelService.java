@@ -10,6 +10,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ImelService {
@@ -27,21 +28,40 @@ public class ImelService {
 
     @Transactional
     public ImelDTO createImel(ImelDTO dto) {
-        Imel entity = new Imel();
-        entity.setMa(dto.getMa());
-        entity.setImel(dto.getImel());
-        entity.setDeleted(false);
-        return toDTO(repository.save(entity));
+        // Kiểm tra xem có bản ghi đã xóa mềm với ma hoặc imel không
+        Optional<Imel> existingImelByMa = repository.findByMaAndDeletedTrue(dto.getMa());
+        Optional<Imel> existingImelByImel = repository.findByImelAndDeletedTrue(dto.getImel());
+
+        if (existingImelByMa.isPresent()) {
+            // Khôi phục bản ghi đã xóa mềm với ma
+            Imel entity = existingImelByMa.get();
+            entity.setDeleted(false);
+            entity.setImel(dto.getImel()); // Cập nhật giá trị mới
+            return toDTO(repository.save(entity));
+        } else if (existingImelByImel.isPresent()) {
+            // Khôi phục bản ghi đã xóa mềm với imel
+            Imel entity = existingImelByImel.get();
+            entity.setDeleted(false);
+            entity.setMa(dto.getMa()); // Cập nhật giá trị mới
+            return toDTO(repository.save(entity));
+        } else {
+            // Nếu không có bản ghi nào bị xóa mềm, tạo mới
+            Imel entity = new Imel();
+            entity.setMa(dto.getMa());
+            entity.setImel(dto.getImel());
+            entity.setDeleted(false);
+            return toDTO(repository.save(entity));
+        }
     }
 
     @Transactional
     public ImelDTO updateImel(Integer id, ImelDTO dto) {
         return repository.findById(id)
                 .filter(d -> !d.getDeleted())
-                .map(dsp -> {
-                    dsp.setMa(dto.getMa());
-                    dsp.setImel(dto.getImel());
-                    return toDTO(repository.save(dsp));
+                .map(imel -> {
+                    imel.setMa(dto.getMa());
+                    imel.setImel(dto.getImel());
+                    return toDTO(repository.save(imel));
                 })
                 .orElseThrow(() -> new RuntimeException("Imel không tồn tại hoặc đã bị xóa!"));
     }
@@ -51,9 +71,9 @@ public class ImelService {
         repository.findById(id)
                 .filter(d -> !d.getDeleted())
                 .ifPresentOrElse(
-                        dsp -> {
-                            dsp.setDeleted(true);
-                            repository.save(dsp);
+                        imel -> {
+                            imel.setDeleted(true);
+                            repository.save(imel);
                         },
                         () -> {
                             throw new RuntimeException("Imel không tồn tại hoặc đã bị xóa!");
@@ -65,7 +85,7 @@ public class ImelService {
     public void deleteMultipleImel(List<Integer> ids) {
         int updatedCount = repository.softDeleteByIds(ids);
         if (updatedCount == 0) {
-            throw new RuntimeException("Không tìm thấy imel nào để xóa!");
+            throw new RuntimeException("Không tìm thấy Imel nào để xóa!");
         }
     }
 

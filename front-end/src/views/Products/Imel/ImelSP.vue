@@ -1,8 +1,18 @@
 <template>
-  <div class="container mx-auto p-4">
+  <div class="container mx-auto p-4 relative">
+    <!-- Toast thông báo -->
     <ToastNotification ref="toast" />
 
-    <h2 class="text-xl text-gray-600 mb-6">Quản lý Imel</h2>
+    <!-- Tiêu đề và nút mở modal -->
+    <div class="flex justify-between items-center mb-6">
+      <h2 class="text-xl text-gray-600">Quản lý Imel</h2>
+      <button
+        @click="openAddModal"
+        class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition"
+      >
+        Thêm mới
+      </button>
+    </div>
 
     <!-- Search Section -->
     <div class="flex gap-3 mb-6">
@@ -26,51 +36,10 @@
       </button>
     </div>
 
-    <!-- Form Section -->
-    <div class="bg-gray-50 p-6 rounded-lg shadow-md mb-6">
-      <h5 class="text-lg font-semibold mb-4">
-        {{ editing ? 'Cập nhật Imel' : 'Thêm Imel' }}
-      </h5>
-      <form @submit.prevent="saveImel" class="space-y-4">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <input
-            v-model.trim="imel.ma"
-            type="text"
-            placeholder="Mã Imel"
-            class="border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-green-500"
-            required
-          />
-          <input
-            v-model.trim="imel.imel"
-            type="text"
-            placeholder="Tên Imel"
-            class="border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-green-500"
-            required
-          />
-        </div>
-        <div class="flex justify-end gap-3">
-          <button
-            type="submit"
-            class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition"
-          >
-            {{ editing ? 'Cập nhật' : 'Thêm mới' }}
-          </button>
-          <button
-            v-if="editing"
-            @click="cancelEdit"
-            type="button"
-            class="bg-gray-400 text-white px-4 py-2 rounded-lg hover:bg-gray-500 transition"
-          >
-            Hủy
-          </button>
-        </div>
-      </form>
-    </div>
-
     <!-- Bulk Delete Button -->
     <div v-if="selectedImels.length" class="mb-6 flex justify-end">
       <button
-        @click="deleteSelectedImels"
+        @click="confirmDeleteSelected"
         class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition"
       >
         Xóa {{ selectedImels.length }} Imel đã chọn
@@ -107,13 +76,13 @@
           <td class="px-6 py-4 text-center">{{ imel.imel }}</td>
           <td class="px-6 py-4 text-center space-x-4">
             <button
-              @click="editImel(imel)"
+              @click="openEditModal(imel)"
               class="text-blue-600 hover:text-blue-800 transition"
             >
               <i class="fa-solid fa-edit"></i>
             </button>
             <button
-              @click="deleteImel(imel.id)"
+              @click="confirmDelete(imel.id)"
               class="text-red-600 hover:text-red-800 transition"
             >
               <i class="fa-solid fa-trash"></i>
@@ -132,194 +101,109 @@
       </table>
     </div>
 
+    <!-- Pagination -->
     <Pagination
       :current-page="currentPage"
       :total-pages="totalPages"
       @page-changed="goToPage"
       class="mt-6"
     />
+
+    <!-- Modal Form (Thêm mới và Cập nhật) -->
+    <ProductLineFormModal
+      :show="showAddModal || showEditModal"
+      :is-edit="showEditModal"
+      :entity-name="'Imel'"
+      :entity-data="imel"
+      :icon-class="showEditModal ? 'fa-edit' : 'fa-plus-circle'"
+      :icon-color="showEditModal ? 'text-blue-500' : 'text-green-500'"
+      @submit="handleFormSubmit"
+      @close="closeModal"
+    >
+      <template #default="{ entityData }">
+        <div class="grid grid-cols-1 gap-6">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Mã Imel</label>
+            <input
+              v-model.trim="entityData.ma"
+              type="text"
+              placeholder="Nhập mã Imel"
+              class="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-[var(--ring-color)] focus:border-transparent transition-all duration-200"
+              required
+            />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Tên Imel</label>
+            <input
+              v-model.trim="entityData.imel"
+              type="text"
+              placeholder="Nhập tên Imel"
+              class="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-[var(--ring-color)] focus:border-transparent transition-all duration-200"
+              required
+            />
+          </div>
+        </div>
+      </template>
+    </ProductLineFormModal>
+
+    <!-- Modal Confirm -->
+    <ConfirmModal
+      :show="showConfirmModal"
+      :message="confirmMessage"
+      @confirm="executeConfirmedAction"
+      @cancel="closeConfirmModal"
+    />
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, computed, watch } from 'vue'
-import axios from 'axios'
-import ToastNotification from '@/components/ToastNotification.vue'
-import Pagination from '@/components/Pagination.vue'
+import useImel from './Imel.js';
+import ToastNotification from '@/components/ToastNotification.vue';
+import Pagination from '@/components/Pagination.vue';
+import ProductLineFormModal from '@/components/FormModal.vue';
+import ConfirmModal from '@/components/ConfirmModal.vue';
 
-const toast = ref(null)
-const imels = ref([])
-const imel = ref({ id: null, ma: '', imel: '' })
-const searchKeyword = ref('')
-const editing = ref(false)
-const currentPage = ref(0)
-const pageSize = ref(5)
-const totalItems = ref(0)
-const selectedImels = ref([])
-const selectAll = ref(false)
-const isSearching = ref(false)
-
-const totalPages = computed(() => Math.ceil(totalItems.value / pageSize.value))
-
-watch(searchKeyword, (newValue) => {
-  isSearching.value = !!newValue.trim()
-})
-
-const fetchData = async () => {
-  try {
-    const { data } = await axios.get('http://localhost:8080/api/imel', {
-      params: { page: currentPage.value, size: pageSize.value }
-    })
-    imels.value = data.content
-    totalItems.value = data.totalElements
-  } catch (error) {
-    toast.value?.showToast('error', 'Không thể tải dữ liệu!')
-    console.error('Fetch error:', error)
-  }
-}
-
-const goToPage = async (page) => {
-  currentPage.value = page
-  if (isSearching.value && searchKeyword.value.trim()) {
-    await searchImel()
-  } else {
-    await fetchData()
-  }
-}
-
-const searchImel = async () => {
-  const keyword = searchKeyword.value.replace(/\s+/g, '').trim()
-  if (!keyword) {
-    isSearching.value = false
-    currentPage.value = 0
-    await fetchData()
-    return
-  }
-  isSearching.value = true
-  currentPage.value = 0
-  try {
-    const { data } = await axios.get('http://localhost:8080/api/imel/search', {
-      params: { keyword, page: currentPage.value, size: pageSize.value }
-    })
-    imels.value = data.content
-    totalItems.value = data.totalElements
-  } catch (error) {
-    toast.value?.showToast('error', 'Lỗi tìm kiếm!')
-  }
-}
-
-const resetSearch = () => {
-  searchKeyword.value = ''
-  isSearching.value = false
-  currentPage.value = 0
-  fetchData()
-}
-
-const checkDuplicate = async (field, value) => {
-  try {
-    const { data } = await axios.get(`http://localhost:8080/api/imel/exists/${field}`, {
-      params: { [field]: value }
-    })
-    return data
-  } catch (error) {
-    toast.value?.showToast('error', `Lỗi kiểm tra ${field}!`)
-    return false
-  }
-}
-
-const saveImel = async () => {
-  const { ma, imel } = imel.value
-  if (!ma || !imel) {
-    toast.value?.showToast('error', 'Vui lòng nhập đầy đủ thông tin!')
-    return
-  }
-
-  if (!editing.value) {
-    if (await checkDuplicate('ma', ma)) {
-      toast.value?.showToast('error', 'Mã Imel đã tồn tại!')
-      return
-    }
-    if (await checkDuplicate('imel', imel)) {
-      toast.value?.showToast('error', 'Tên Imel đã tồn tại!')
-      return
-    }
-  }
-
-  try {
-    let response
-    if (editing.value) {
-      response = await axios.put(`http://localhost:8080/api/imel/${imel.value.id}`, imel.value)
-      const index = imels.value.findIndex(p => p.id === imel.value.id)
-      if (index !== -1) {
-        imels.value[index] = response.data
-      }
-    } else {
-      response = await axios.post('http://localhost:8080/api/imel', imel.value)
-      imels.value.unshift(response.data)
-      totalItems.value += 1
-      if (imels.value.length > pageSize.value) {
-        imels.value.pop()
-      }
-    }
-
-    toast.value?.showToast('success', editing.value ? 'Cập nhật thành công!' : 'Thêm mới thành công!')
-    resetForm()
-  } catch (error) {
-    toast.value?.showToast('error', 'Lỗi khi lưu dữ liệu!')
-  }
-}
-
-const editImel = (imel) => {
-  imel.value = { ...imel }
-  editing.value = true
-}
-
-const cancelEdit = () => {
-  resetForm()
-  toast.value?.showToast('info', 'Đã hủy chỉnh sửa')
-}
-
-const deleteImel = async (id) => {
-  if (!confirm('Bạn có chắc chắn muốn xóa Imel này?')) return
-  try {
-    await axios.delete(`http://localhost:8080/api/imel/${id}`)
-    toast.value?.showToast('success', 'Xóa thành công!')
-    await fetchData()
-  } catch (error) {
-    toast.value?.showToast('error', 'Lỗi khi xóa!')
-  }
-}
-
-const deleteSelectedImels = async () => {
-  if (!selectedImels.value.length) {
-    toast.value?.showToast('error', 'Vui lòng chọn ít nhất một Imel!')
-    return
-  }
-  if (!confirm(`Xác nhận xóa ${selectedImels.value.length} Imel?`)) return
-
-  try {
-    await axios.delete('http://localhost:8080/api/imel/bulk', {
-      data: { ids: selectedImels.value }
-    })
-    toast.value?.showToast('success', 'Xóa thành công!')
-    selectedImels.value = []
-    selectAll.value = false
-    await fetchData()
-  } catch (error) {
-    toast.value?.showToast('error', 'Lỗi khi xóa nhiều Imel!')
-  }
-}
-
-const toggleSelectAll = () => {
-  selectedImels.value = selectAll.value
-    ? imels.value.map(p => p.id)
-    : []
-}
-
-const resetForm = () => {
-  imel.value = { id: null, ma: '', imel: '' }
-  editing.value = false
-}
-
-onMounted(fetchData)
+// Lấy tất cả từ useImel
+const {
+  toast,
+  imels,
+  imel,
+  searchKeyword,
+  currentPage,
+  pageSize,
+  totalItems,
+  selectedImels,
+  selectAll,
+  isSearching,
+  showAddModal,
+  showEditModal,
+  showConfirmModal,
+  confirmMessage,
+  totalPages,
+  fetchData,
+  goToPage,
+  searchImel,
+  resetSearch,
+  checkDuplicate,
+  saveImel,
+  updateImel,
+  deleteImel,
+  deleteSelectedImels,
+  openAddModal,
+  openEditModal,
+  closeModal,
+  handleFormSubmit,
+  confirmDelete,
+  confirmDeleteSelected,
+  confirmAction,
+  executeConfirmedAction,
+  closeConfirmModal,
+  toggleSelectAll,
+} = useImel();
 </script>
+
+<style scoped>
+.fixed.inset-0 {
+  overflow-y: auto;
+}
+</style>

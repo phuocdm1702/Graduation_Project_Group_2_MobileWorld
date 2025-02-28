@@ -2,10 +2,8 @@ package com.example.graduation_project_group_2_mobileworld.controller.nhan_vien;
 
 import com.example.graduation_project_group_2_mobileworld.entity.NhanVien;
 import com.example.graduation_project_group_2_mobileworld.service.nhan_vien.NhanVienServices;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -26,5 +24,13 @@ public class NhanVienController {
         List<NhanVien> nv = nhanVienServices.getall();
         System.out.println("Danh sách nv: " + nv);
         return nv;
+    }
+    @PostMapping("/add")
+    public NhanVien addNhanVien(@RequestBody NhanVien nhanVien){
+        return nhanVienServices.add(nhanVien);
+    }
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<String> delete(@PathVariable Integer id){
+       return nhanVienServices.delete(id);
     }
 }
