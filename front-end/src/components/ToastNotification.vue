@@ -33,7 +33,7 @@ const toastDetails = {
   info: { icon: "fa-info-circle" },
 };
 
-const showToast = (type, message) => {
+const kshowToast = (type, message) => {
   const id = Date.now();
   toasts.value.push({ id, type, message, icon: toastDetails[type].icon });
 
@@ -44,7 +44,8 @@ const removeToast = (id) => {
   toasts.value = toasts.value.filter((toast) => toast.id !== id);
 };
 
-defineExpose({ showToast });
+// Expose kshowToast method
+defineExpose({ kshowToast });
 </script>
 
 <style scoped>

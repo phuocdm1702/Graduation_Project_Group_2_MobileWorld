@@ -9,12 +9,17 @@ import com.example.graduation_project_group_2_mobileworld.repository.chiTietDotG
 import com.example.graduation_project_group_2_mobileworld.repository.dot_giam_gia_repo.dot_giam_gia_repository;
 
 import com.example.graduation_project_group_2_mobileworld.repository.dot_giam_gia_repo.repoDongSanPhamDGG;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.sql.Date;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -37,8 +42,12 @@ public class dot_giam_gia_service{
     }
 
 
-    public List<DotGiamGia> getAll(){
-        return repository.hienThi();
+    public Page<DotGiamGia> HienThi(Pageable pageable){
+        return repository.hienThi(pageable);
+    }
+
+    public Page<DotGiamGia> hienThiFinish(Pageable pageable){
+        return repository.hienThiFinish(pageable);
     }
 
     public List<DongSanPham> getDSP(String timKiem){
@@ -47,6 +56,10 @@ public class dot_giam_gia_service{
 
     public List<viewCTSPDTO> getAllCTSP(List<Integer> ids) {
         return repository.getAllCTSP(ids);
+    }
+
+    public Boolean existByMa(String ma){
+        return  repository.existsByMaAndDeletedTrue(ma);
     }
 
     @Transactional
@@ -105,36 +118,51 @@ public class dot_giam_gia_service{
                 List<ChiTietDotGiamGia> existingChiTietList = repo2.findByIdDongSanPhamAndGiaBanDau(dongSanPham, giaBanDau);
 
                 boolean isLowerPrice = false;
-                for (ChiTietDotGiamGia existingChiTiet : existingChiTietList) {
-                    if (giaSauKhiGiam.compareTo(existingChiTiet.getGiaSauKhiGiam()) < 0) {
-                        existingChiTiet.setDeleted(true);
-                        isLowerPrice = true;
-                    }
-                }
-
-                // Nếu có bản ghi cũ cần cập nhật, lưu tất cả lại 1 lần
-                if (isLowerPrice) {
-                    repo2.saveAll(existingChiTietList);
+                if (existingChiTietList.isEmpty()) {
+                    // Nếu không có bản ghi cũ, trực tiếp tạo và lưu chi tiết giảm giá mới
+                    String newMaChiTiet = String.format("CTDGG%05d", nextNumber++);
+                    ChiTietDotGiamGia chiTiet = new ChiTietDotGiamGia();
+                    chiTiet.setMa(newMaChiTiet);
+                    chiTiet.setDotGiamGia(dotGiamGia);
+                    chiTiet.setIdDongSanPham(dongSanPham);
+                    chiTiet.setGiaBanDau(giaBanDau);
+                    chiTiet.setGiaSauKhiGiam(giaSauKhiGiam);
+                    chiTiet.setDeleted(false);
+                    repo2.save(chiTiet);
+                    addedDSP.add(key); // Thêm key vào danh sách đã thêm
+                    System.out.println("Thêm giảm giá cho sản phẩm mới: " + idDSP);
                 } else {
-                    System.out.println("Giá không thấp hơn bản ghi cũ, bỏ qua: " + idDSP);
-                    continue;
+                    // Nếu có bản ghi cũ, thực hiện so sánh giá
+                    for (ChiTietDotGiamGia existingChiTiet : existingChiTietList) {
+                        if (giaSauKhiGiam.compareTo(existingChiTiet.getGiaSauKhiGiam()) < 0) {
+                            existingChiTiet.setDeleted(true);
+                            isLowerPrice = true;
+                        }
+                    }
+
+                    // Nếu có bản ghi cũ cần cập nhật, lưu tất cả lại 1 lần
+                    if (isLowerPrice) {
+                        repo2.saveAll(existingChiTietList);
+                    } else {
+                        System.out.println("Giá không thấp hơn bản ghi cũ, bỏ qua: " + idDSP);
+                        continue;
+                    }
+
+                    // Tạo mới mã giảm giá
+                    String newMaChiTiet = String.format("CTDGG%05d", nextNumber++);
+                    ChiTietDotGiamGia chiTiet = new ChiTietDotGiamGia();
+                    chiTiet.setMa(newMaChiTiet);
+                    chiTiet.setDotGiamGia(dotGiamGia);
+                    chiTiet.setIdDongSanPham(dongSanPham);
+                    chiTiet.setGiaBanDau(giaBanDau);
+                    chiTiet.setGiaSauKhiGiam(giaSauKhiGiam);
+                    chiTiet.setDeleted(false);
+                    repo2.save(chiTiet);
+                    addedDSP.add(key); // Thêm key vào danh sách đã thêm
+                    System.out.println("Thêm giảm giá cho sản phẩm: " + idDSP);
                 }
-
-                // Tạo mới mã giảm giá
-                String newMaChiTiet = String.format("CTDGG%05d", nextNumber++);
-                ChiTietDotGiamGia chiTiet = new ChiTietDotGiamGia();
-                chiTiet.setMa(newMaChiTiet);
-                chiTiet.setDotGiamGia(dotGiamGia);
-                chiTiet.setIdDongSanPham(dongSanPham);
-                chiTiet.setGiaBanDau(giaBanDau);
-                chiTiet.setGiaSauKhiGiam(giaSauKhiGiam);
-                chiTiet.setDeleted(false);
-                repo2.save(chiTiet);
-
-                // Thêm key sau khi đã lưu thành công
-                addedDSP.add(key);
-                System.out.println("Thêm giảm giá cho sản phẩm: " + idDSP);
             }
+
 
             System.out.println("Thêm tất cả chi tiết giảm giá thành công!");
         } catch (Exception e) {
@@ -204,52 +232,95 @@ public class dot_giam_gia_service{
             Map<Integer, DongSanPham> sanPhamMap = dsSanPham.stream()
                     .collect(Collectors.toMap(DongSanPham::getId, dsp -> dsp));
 
+            // Lấy mã lớn nhất hiện có trong database
+            String maxMaChiTiet = repo2.findMaxMa();
+            int nextNumber = 1;
+            if (maxMaChiTiet != null && maxMaChiTiet.startsWith("CTDGG")) {
+                try {
+                    nextNumber = Integer.parseInt(maxMaChiTiet.substring(5)) + 1;
+                } catch (NumberFormatException e) {
+                    System.err.println("Lỗi khi parse mã CTDGG: " + e.getMessage());
+                }
+            }
+
+            Set<String> addedDSP = new HashSet<>();
+
+            // Lấy danh sách các dòng sản phẩm đã chọn từ DB
+            Set<Integer> selectedProductIds = dsCTSP.stream()
+                    .map(ctsp -> ctsp.getDsp().getId())
+                    .collect(Collectors.toSet());
+
+            // Cập nhật hoặc xóa chi tiết đợt giảm giá
+            List<ChiTietDotGiamGia> existingChiTietList = repo2.findByDotGiamGia(dotGiamGia);
+
+            // Xóa các chi tiết đợt giảm giá cho sản phẩm không còn được chọn
+            for (ChiTietDotGiamGia chiTiet : existingChiTietList) {
+                Integer idDSP = chiTiet.getIdDongSanPham().getId();
+                if (!selectedProductIds.contains(idDSP)) {
+                    chiTiet.setDeleted(true); // Đánh dấu là đã xóa
+                }
+            }
+
+            // Lưu lại những chi tiết đợt giảm giá bị xóa hoặc cập nhật
+            repo2.saveAll(existingChiTietList);
+
             for (viewCTSPDTO ctsp : dsCTSP) {
                 Integer idDSP = ctsp.getDsp().getId();
                 BigDecimal giaBanDau = ctsp.getCtsp().getGiaBan();
                 BigDecimal giaSauKhiGiam = ctsp.getGiaSauKhiGiam();
+                String key = idDSP + "_" + giaBanDau;
+
+                if (addedDSP.contains(key)) continue;
 
                 DongSanPham dongSanPham = sanPhamMap.get(idDSP);
                 if (dongSanPham == null) continue;
 
                 // Lấy danh sách bản ghi cũ có cùng idDongSanPham và giaBanDau
-                List<ChiTietDotGiamGia> existingChiTietList = repo2.findByIdDongSanPhamAndGiaBanDau(dongSanPham, giaBanDau);
+                List<ChiTietDotGiamGia> existingChiTietListForDSP = repo2.findByIdDongSanPhamAndGiaBanDau(dongSanPham, giaBanDau);
 
                 boolean isLowerPrice = false;
-                for (ChiTietDotGiamGia existingChiTiet : existingChiTietList) {
-                    if (giaSauKhiGiam.compareTo(existingChiTiet.getGiaSauKhiGiam()) < 0) {
-                        existingChiTiet.setDeleted(true);
-                        isLowerPrice = true;
-                    }
-                }
-
-                // Nếu có bản ghi cũ cần cập nhật, lưu tất cả lại 1 lần
-                if (isLowerPrice) {
-                    repo2.saveAll(existingChiTietList);
-                } else {
-                    System.out.println("Giá không thấp hơn bản ghi cũ, bỏ qua: " + idDSP);
-                    continue;
-                }
-
-                // Kiểm tra nếu có bản ghi trùng giá ban đầu, cập nhật giá
-                Optional<ChiTietDotGiamGia> existingChiTietOpt = existingChiTietList.stream()
-                        .filter(c -> c.getGiaBanDau().compareTo(giaBanDau) == 0)
-                        .findFirst();
-
-                if (existingChiTietOpt.isPresent()) {
-                    ChiTietDotGiamGia chiTiet = existingChiTietOpt.get();
-                    chiTiet.setGiaSauKhiGiam(giaSauKhiGiam);
-                    chiTiet.setDeleted(false);
-                    repo2.save(chiTiet);
-                } else {
-                    // Thêm mới nếu chưa có bản ghi nào trùng giá ban đầu
+                if (existingChiTietListForDSP.isEmpty()) {
+                    // Nếu không có bản ghi cũ, trực tiếp tạo và lưu chi tiết giảm giá mới
+                    String newMaChiTiet = String.format("CTDGG%05d", nextNumber++);
                     ChiTietDotGiamGia chiTiet = new ChiTietDotGiamGia();
+                    chiTiet.setMa(newMaChiTiet);
                     chiTiet.setDotGiamGia(dotGiamGia);
                     chiTiet.setIdDongSanPham(dongSanPham);
                     chiTiet.setGiaBanDau(giaBanDau);
                     chiTiet.setGiaSauKhiGiam(giaSauKhiGiam);
                     chiTiet.setDeleted(false);
                     repo2.save(chiTiet);
+                    addedDSP.add(key); // Thêm key vào danh sách đã thêm
+                    System.out.println("Thêm giảm giá cho sản phẩm mới: " + idDSP);
+                } else {
+                    // Nếu có bản ghi cũ, thực hiện so sánh giá
+                    for (ChiTietDotGiamGia existingChiTiet : existingChiTietListForDSP) {
+                        if (giaSauKhiGiam.compareTo(existingChiTiet.getGiaSauKhiGiam()) < 0) {
+                            existingChiTiet.setDeleted(true);
+                            isLowerPrice = true;
+                        }
+                    }
+
+                    // Nếu có bản ghi cũ cần cập nhật, lưu tất cả lại 1 lần
+                    if (isLowerPrice) {
+                        repo2.saveAll(existingChiTietListForDSP);
+                    } else {
+                        System.out.println("Giá không thấp hơn bản ghi cũ, bỏ qua: " + idDSP);
+                        continue;
+                    }
+
+                    // Tạo mới mã giảm giá
+                    String newMaChiTiet = String.format("CTDGG%05d", nextNumber++);
+                    ChiTietDotGiamGia chiTiet = new ChiTietDotGiamGia();
+                    chiTiet.setMa(newMaChiTiet);
+                    chiTiet.setDotGiamGia(dotGiamGia);
+                    chiTiet.setIdDongSanPham(dongSanPham);
+                    chiTiet.setGiaBanDau(giaBanDau);
+                    chiTiet.setGiaSauKhiGiam(giaSauKhiGiam);
+                    chiTiet.setDeleted(false);
+                    repo2.save(chiTiet);
+                    addedDSP.add(key); // Thêm key vào danh sách đã thêm
+                    System.out.println("Thêm giảm giá cho sản phẩm: " + idDSP);
                 }
             }
 
@@ -258,6 +329,24 @@ public class dot_giam_gia_service{
             System.err.println("Lỗi khi cập nhật đợt giảm giá: " + e.getMessage());
             throw e;
         }
+    }
+
+
+    public Page<DotGiamGia> timKiem(Pageable pageable, String maDGG, String tenDGG, String loaiGiamGiaApDung,BigDecimal giaTriGiamGia, BigDecimal soTienGiamToiDa, Date ngayBatDau,Date ngayKetThuc,Boolean trangThai, Boolean deleted){
+        return repository.timKiem(pageable, maDGG,tenDGG, loaiGiamGiaApDung, giaTriGiamGia,soTienGiamToiDa,ngayBatDau,ngayKetThuc,trangThai,deleted);
+    }
+
+    @PostConstruct //Chạy sau khi khởi động
+    public void initUpdate() {
+        updateStatusAutomatically();
+    }
+
+    @Scheduled(cron = "0 0 * * * *") // Chạy mỗi giờ
+    @Transactional
+    public void updateStatusAutomatically() {
+        Date today = java.sql.Date.valueOf(LocalDate.now());
+        repository.updateStatusIfStartDatePassed(today);
+        repository.updateDeletedIfEndDatePassed(today);
     }
 
 }
