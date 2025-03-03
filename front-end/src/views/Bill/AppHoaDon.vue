@@ -25,13 +25,11 @@
   </div>
 
   <HoaDonTable/>
-  <AppHoaDonChiTiet/>
   </div>
 </template>
 
 <script setup>
 import HoaDonTable from "@/views/Bill/HoaDonTable.vue";
-import AppHoaDonChiTiet from "@/views/Bill/AppHoaDonChiTiet.vue";
 </script>
 
 <style scoped>

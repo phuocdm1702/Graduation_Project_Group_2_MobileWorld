@@ -19,7 +19,6 @@
 </template>
 
 <script setup>
-
 import LichSuHoaDonTable from "@/views/Bill/LichSuHoaDonTable.vue";
 </script>
 

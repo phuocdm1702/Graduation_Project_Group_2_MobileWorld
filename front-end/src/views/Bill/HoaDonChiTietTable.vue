@@ -1,4 +1,5 @@
 <template>
+  <div class="mt-8 max-w-screen-xl mx-auto">
     <!-- Bảng dữ liệu -->
     <div class="overflow-x-auto mt-6 bg-white shadow-lg rounded-lg p-4">
       <table class="w-full min-w-max table-auto border-collapse">
@@ -23,21 +24,22 @@
           <td class="td-cell">{{ hdct.idImelDaBan.imel }}</td>
           <td class="td-cell">{{ hdct.gia.toLocaleString() }} VND</td>
           <td class="td-cell">
-              <span :class="hdct.trangThai === 1 ? 'text-green-500' : 'text-red-500'">
-                {{ hdct.trangThai === 1 ? 'Đã thanh toán' : 'Chờ thanh toán' }}
-              </span>
+            <span :class="hdct.trangThai === 1 ? 'text-green-500' : 'text-red-500'">
+              {{ hdct.trangThai === 1 ? 'Đã thanh toán' : 'Chờ thanh toán' }}
+            </span>
           </td>
           <td class="td-cell">{{ hdct.ghiChu || 'Không có' }}</td>
         </tr>
         </tbody>
       </table>
     </div>
+  </div>
 </template>
-
 
 <script setup>
 import { ref, onMounted } from "vue";
 import axios from "axios";
+
 const dataTableHDCT = ref([]);
 
 onMounted(async () => {
@@ -49,17 +51,14 @@ onMounted(async () => {
     console.error("Lỗi:", error);
   }
 });
-
 </script>
 
-<style>
-.table-container {
-  display: flex;
-  justify-content: center;
-  padding: 20px;
+<style scoped>
+.th-cell {
+  @apply px-4 py-3 text-left border-b;
 }
-.table {
-  width: 80%;
-  border-collapse: collapse;
+
+.td-cell {
+  @apply px-4 py-2 text-sm;
 }
 </style>

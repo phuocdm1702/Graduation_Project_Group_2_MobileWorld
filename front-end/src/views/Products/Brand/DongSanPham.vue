@@ -118,7 +118,7 @@
       :icon-class="showEditModal ? 'fa-edit' : 'fa-plus-circle'"
       :icon-color="showEditModal ? 'text-blue-500' : 'text-green-500'"
       @submit="handleFormSubmit"
-      @close="closeModal"
+      @close="closeModal"                              
     >
       <template #default="{ entityData }">
         <div class="grid grid-cols-1 gap-6">

@@ -1,5 +1,6 @@
 <template>
   <div>
+
     <!-- Breadcrumb -->
     <Breadcrumb breadcrumb="Phiếu Bảo Hành" />
 
@@ -27,7 +28,7 @@
                 <label class="text-xs">ID Imel Đã Bán</label>
                 <select class="w-full px-4 py-2 mt-2 border rounded-md">
                   <option value="">Chọn Imel</option>
-                  <option v-for="imel in imelsSold" :key="imel.id" :value="imel.id">{{ imel.name }}</option>
+                  <option v-for="cbo in dataCBO" :key="cbo.id" :value="cbo.id">{{ cbo.imel }}</option>
                 </select>
               </div>
               <div>
@@ -58,6 +59,10 @@
 </template>
 
 <script setup>
-
 import PhieuBaoHanhTable from "@/views/BaoHanh/PhieuBaoHanhTable.vue";
+import usePhieuBaoHanhLineList from "@/views/BaoHanh/PhieuBaoHanh";
+
+const {
+  dataCBO
+} = usePhieuBaoHanhLineList();
 </script>
