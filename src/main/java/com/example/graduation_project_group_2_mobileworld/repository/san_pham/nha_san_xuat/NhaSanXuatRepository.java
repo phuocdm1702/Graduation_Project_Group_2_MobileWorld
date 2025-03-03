@@ -15,8 +15,6 @@ import java.util.Optional;
 @Repository
 public interface NhaSanXuatRepository extends JpaRepository<NhaSanXuat, Integer> {
 
-    List<NhaSanXuat> findByDeletedFalse();
-
     Page<NhaSanXuat> findByDeletedFalse(Pageable pageable);
 
     @Query("SELECT d FROM NhaSanXuat d " +
