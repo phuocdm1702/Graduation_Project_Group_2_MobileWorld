@@ -5,7 +5,7 @@ import Dashboard from "../views/ThongKe/AppDashboard.vue";
 // Giảm giá
 import Voucher from "../views/Voucher/AppVoucher.vue";
 import DotVoucher from "../views/Voucher/DotVoucher.vue"
-import FormAddPgg from "../views/Voucher/FormAddPgg.vue";
+import FormAddPgg from "../views/Voucher/components/FormAddPgg.vue";
 import PhieuBaoHanh from "../views/BaoHanh/PhieuBaoHanh.vue";
 
 // View Login

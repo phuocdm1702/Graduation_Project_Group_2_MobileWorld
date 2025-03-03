@@ -3,6 +3,7 @@ package com.example.graduation_project_group_2_mobileworld.controller.PhieuGiamG
 import com.example.graduation_project_group_2_mobileworld.entity.PhieuGiamGia;
 import com.example.graduation_project_group_2_mobileworld.service.PhieuGiamGia.PhieuGiamGiaService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.repository.query.Param;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,6 +21,12 @@ public class PhieuGiamGiaController {
     public ResponseEntity<List<PhieuGiamGia>> fetchData() {
         List<PhieuGiamGia> listPGG = phieuGiamGiaService.getPGG();
         return ResponseEntity.ok(listPGG);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<PhieuGiamGia>> searchData(@RequestParam("keyword") String keyword){
+        List<PhieuGiamGia> listSearch = phieuGiamGiaService.searchData(keyword);
+        return ResponseEntity.ok(listSearch);
     }
 
     @DeleteMapping("/delete/{id}")
@@ -41,5 +48,7 @@ public class PhieuGiamGiaController {
             return ResponseEntity.badRequest().body("Lỗi cập nhật: " + e.getMessage());
         }
     }
+
+
 
 }

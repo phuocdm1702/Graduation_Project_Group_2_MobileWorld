@@ -25,6 +25,13 @@ public class PhieuGiamGiaService {
         return phieuGiamGiaRepository.findAll();
     }
 
+    public List<PhieuGiamGia> searchData(String keyword) {
+        if(keyword != null) {
+            return phieuGiamGiaRepository.search(keyword);
+        }
+        return phieuGiamGiaRepository.findAll();
+    }
+
     public PhieuGiamGia addPGG(PhieuGiamGia phieuGiamGia) {
         return phieuGiamGiaRepository.save(phieuGiamGia);
     }

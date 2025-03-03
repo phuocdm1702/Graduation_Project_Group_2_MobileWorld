@@ -84,7 +84,7 @@
             Hủy
           </button>
           <button
-            
+            @click="submitForm"
             class="px-4 py-2 text-sm text-white bg-indigo-600 rounded-md hover:bg-indigo-500"
           >
             Thêm
@@ -153,7 +153,7 @@ const hoaDonToiThieu = ref("");
 const soLuongDung = ref("");
 const ngayBatDau = ref("");
 const ngayKetThuc = ref("");
-const trangThai = ref(false); // Boolean
+const trangThai = ref(true); // Boolean
 const riengTu = ref(false); // Boolean
 const moTa = ref("");
 const deleted = ref(false); // Mặc định là false
