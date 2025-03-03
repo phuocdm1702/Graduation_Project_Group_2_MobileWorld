@@ -36,16 +36,8 @@
 
 
 <script setup>
-import {onMounted, ref} from "vue";
-import axios from "axios";
-const dataTablePBH = ref([]);
-onMounted(async () => {
-  try {
-    const res = await axios.get("http://localhost:8080/phieu-bao-hanh/home");
-    console.log("Dữ liệu từ API:", res.data);
-    dataTablePBH.value = res.data;
-  }catch (error){
-    console.error("Lỗi:", error);
-  }
-})
+import usePhieuBaoHanhLineList from "@/views/BaoHanh/PhieuBaoHanh";
+const {
+  dataTablePBH
+} = usePhieuBaoHanhLineList();
 </script>
