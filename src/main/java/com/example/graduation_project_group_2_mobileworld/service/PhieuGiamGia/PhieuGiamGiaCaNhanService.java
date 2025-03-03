@@ -1,11 +1,13 @@
 package com.example.graduation_project_group_2_mobileworld.service.PhieuGiamGia;
 
+import com.example.graduation_project_group_2_mobileworld.entity.PhieuGiamGia;
 import com.example.graduation_project_group_2_mobileworld.entity.PhieuGiamGiaCaNhan;
 import com.example.graduation_project_group_2_mobileworld.repository.giam_gia.PhieuGiamGiaCaNhanRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class PhieuGiamGiaCaNhanService {
@@ -24,5 +26,7 @@ public class PhieuGiamGiaCaNhanService {
     public PhieuGiamGiaCaNhan addPGGCN(PhieuGiamGiaCaNhan phieuGiamGiaCaNhan) {
         return phieuGiamGiaCaNhanRepository.save(phieuGiamGiaCaNhan);
     }
+
+
 
 }

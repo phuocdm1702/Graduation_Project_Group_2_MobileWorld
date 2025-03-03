@@ -15,8 +15,8 @@ public class LichSuBaoHanh {
     @Column(name = "id", nullable = false)
     private Integer id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_phieu_bao_hanh")
+    @ManyToOne
+    @JoinColumn(name = "id_phieu_bao_hanh", referencedColumnName = "id")
     private PhieuBaoHanh idPhieuBaoHanh;
 
     @Size(max = 255)

@@ -7,11 +7,18 @@ import com.example.graduation_project_group_2_mobileworld.entity.DongSanPham;
 import com.example.graduation_project_group_2_mobileworld.entity.DotGiamGia;
 import com.example.graduation_project_group_2_mobileworld.service.dot_giam_gia_service.dot_giam_gia_service;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
+import java.sql.Date;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,10 +30,46 @@ public class dot_giam_gia_controller {
     private dot_giam_gia_service sr;
 
     @GetMapping("/home")
-    public List<DotGiamGia> hienThi(Model model) {
-        List<DotGiamGia> ds=sr.getAll();
-        return ds;
+    public Page<DotGiamGia> hienThi(@RequestParam(defaultValue = "0") int page,
+                                    @RequestParam(defaultValue = "5") int size,
+                                    Model model) {
+        Pageable pageable = PageRequest.of(page, size);
+        return sr.HienThi(pageable);
     }
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<DotGiamGia>> search(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size,
+            @RequestParam(required = false) String maDGG,
+            @RequestParam(required = false) String tenDGG,
+            @RequestParam(required = false) String loaiGiamGiaApDung,
+            @RequestParam(required = false) BigDecimal giaTriGiamGia,
+            @RequestParam(required = false) BigDecimal soTienGiamToiDa,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate ngayBatDau,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate ngayKetThuc,
+            @RequestParam(required = false) Boolean trangThai,
+            @RequestParam(required = false) Boolean deleted
+    ) {
+        Pageable pageable = PageRequest.of(page, size);
+
+        Date sqlNgayBatDau = ngayBatDau != null ? java.sql.Date.valueOf(ngayBatDau) : null;
+        Date sqlNgayKetThuc = ngayKetThuc != null ? java.sql.Date.valueOf(ngayKetThuc) : null;
+
+        Page<DotGiamGia> result = sr.timKiem(
+                pageable, maDGG, tenDGG, loaiGiamGiaApDung,giaTriGiamGia, soTienGiamToiDa, sqlNgayBatDau, sqlNgayKetThuc, trangThai,deleted);
+
+        return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/showFinish")
+    public Page<DotGiamGia> showFinish(@RequestParam(defaultValue = "0") int page,
+                                       @RequestParam(defaultValue = "5") int size){
+        Pageable pageable = PageRequest.of(page, size);
+        return sr.hienThiFinish(pageable);
+    }
+
+
 
     @PostMapping("/ViewAddDotGiamGia")
     public ResponseEntity<CombinedResponse> hienThiAdd(@RequestBody RequestDTO request) {
@@ -65,6 +108,12 @@ public class dot_giam_gia_controller {
         }
     }
 
+    @GetMapping("/ViewAddDotGiamGia/exists/ma")
+    public ResponseEntity<Boolean> checkMa(@RequestParam String ma){
+        System.out.println(ma);
+        return ResponseEntity.ok(sr.existByMa(ma));
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteDotGiamGia(@PathVariable("id") Integer id) {
         try {
@@ -80,7 +129,6 @@ public class dot_giam_gia_controller {
     public ResponseEntity<?> viewUpdateDotGiamGia(@RequestParam Integer id) {
         try {
             List<DongSanPham> dspList = sr.getThatDongSanPham(id);
-            System.out.println("Id dợt giảm giá:"+id);
             return ResponseEntity.ok(dspList);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Lỗi: " + e.getMessage());

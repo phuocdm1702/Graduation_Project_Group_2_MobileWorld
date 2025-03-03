@@ -8,9 +8,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@RequestMapping("/phieu-giam-gia")
 @RestController
-@CrossOrigin("*")
+@RequestMapping("/phieu-giam-gia")
+@CrossOrigin("http://localhost:3000")
 public class PhieuGiamGiaController {
 
     @Autowired
@@ -21,4 +21,25 @@ public class PhieuGiamGiaController {
         List<PhieuGiamGia> listPGG = phieuGiamGiaService.getPGG();
         return ResponseEntity.ok(listPGG);
     }
+
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<String> deletePGG(@PathVariable Integer id) {
+        try {
+            phieuGiamGiaService.softDelete(id);
+            return ResponseEntity.ok("Xóa thành công!");
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body("Phiếu giảm giá không tồn tại!");
+        }
+    }
+
+    @PutMapping("/update/{id}")
+    public ResponseEntity<String> updatePGG(@PathVariable Integer id, @RequestBody PhieuGiamGia phieuGiamGia) {
+        try {
+            phieuGiamGiaService.updatePGG(id, phieuGiamGia);
+            return ResponseEntity.ok("Cập nhật thành công!");
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body("Lỗi cập nhật: " + e.getMessage());
+        }
+    }
+
 }

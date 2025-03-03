@@ -16,7 +16,7 @@ import java.util.List;
 
 @RequestMapping("/add-phieu-giam-gia")
 @RestController
-@CrossOrigin("*")
+@CrossOrigin("http://localhost:3000")
 public class AddKhachHangPGGController {
 
     @Autowired
@@ -29,11 +29,11 @@ public class AddKhachHangPGGController {
     private PhieuGiamGiaCaNhanService phieuGiamGiaCaNhanService;
 
 
-    @GetMapping("/data-kh")
-    public List<KhachHang> fetchDataKH() {
-        List<KhachHang> listKH = khachHangService.getAll();
-        return listKH;
-    }
+//    @GetMapping("/data-kh")
+//    public List<KhachHang> fetchDataKH() {
+//        List<KhachHang> listKH = khachHangService.getAll();
+//        return listKH;
+//    }
 
     @PostMapping("/addPhieuGiamGia")
     public ResponseEntity<String> addPGG(@RequestBody PhieuGiamGiaDTO dtoPGG) {
@@ -47,8 +47,8 @@ public class AddKhachHangPGGController {
         pgg.setSoLuongDung(dtoPGG.getSoLuongDung());
         pgg.setNgayBatDau(dtoPGG.getNgayBatDau());
         pgg.setNgayKetThuc(dtoPGG.getNgayKetThuc());
-        pgg.setTrangThai(dtoPGG.getTrangThai() != null && dtoPGG.getTrangThai() == 1);
-        pgg.setRiengTu(dtoPGG.getRiengTu() != null && dtoPGG.getRiengTu() == 1);
+        pgg.setTrangThai(dtoPGG.getTrangThai() != null ? dtoPGG.getTrangThai() == 1 : false);
+        pgg.setRiengTu(dtoPGG.getRiengTu() != null ? dtoPGG.getRiengTu() == 1 : false);
         pgg.setMoTa(dtoPGG.getMoTa());
         pgg.setDeleted(false);
 
@@ -71,7 +71,7 @@ public class AddKhachHangPGGController {
             }
         }
 
-        return ResponseEntity.ok("Theme thành công!");
+        return ResponseEntity.ok("Thêm thành công !");
     }
 
 }

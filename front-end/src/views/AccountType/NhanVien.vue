@@ -72,9 +72,16 @@
               </div>
             </div>
             <div class="px-5 py-3 flex justify-between">
-              <button type="reset" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">Reset thông tin</button>
-              <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">
+              <button type="reset" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition"
+                      @click="isEditing = false">Đặt lại thông tin</button>
+
+              <button v-if="!isEditing" type="submit" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">
                 Thêm nhân viên
+              </button>
+
+              <button v-if="isEditing" @click="updateNhanVien" type="button"
+                      class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition">
+                Sửa nhân viên
               </button>
             </div>
           </form>
@@ -82,11 +89,22 @@
       </div>
     </div>
     <br>
-    
-    <div class="flex items-center space-x-2">
-      <input v-model="searchNV" placeholder="Search theo ma va ten..." type="text" class="w-full px-4 py-2 border rounded-md" />
-      <button @click="btnSearch" type="reset" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition">Search</button>
+
+    <div class="flex items-center gap-2 flex-nowrap">
+      <input v-model="searchNV" placeholder="Search theo ma va ten..." type="text"
+             class="flex-1 px-4 py-2 border rounded-md" />
+
+      <button @click="btnSearch" type="button"
+              class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition">
+        Tìm kiếm
+      </button>
+
+      <button @click="backSearch" type="reset"
+              class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition">
+        Đặt lại
+      </button>
     </div>
+
 
     <div class="mt-8">
       <h4 class="text-gray-700 font-semibold text-lg">Danh sách Nhân Viên</h4>
@@ -94,7 +112,7 @@
         <table class="w-full bg-white rounded-lg shadow-lg overflow-hidden">
           <thead>
           <tr class="bg-gradient-to-r from-gray-300 to-gray-200 text-gray-800 uppercase text-sm tracking-wider">
-            <th class="px-4 py-3 text-center">ID</th>
+            <th class="px-4 py-3 text-center">STT</th>
             <th class="px-4 py-3 text-center">ID Tài khoản</th>
             <th class="px-4 py-3 text-center">Mã</th>
             <th class="px-4 py-3 text-center">Tên Nhân viên</th>
@@ -110,12 +128,13 @@
           </tr>
           </thead>
           <tbody>
+          
           <tr
-            v-for="nv in dataTable" :key="nv.id"
+            v-for="(nv,index) in dataTable" :key="nv.id"
             class="border-t text-center hover:bg-gray-100 transition-all duration-200"
             :class="{'bg-gray-50': nv.id % 2 === 0}"
           >
-            <td class="px-4 py-3">{{ nv.id }}</td>
+            <td class="px-4 py-3">{{ index+1 }}</td>
             <td class="px-4 py-3">{{ nv.idTaiKhoan.id }}</td>
             <td class="px-4 py-3">{{ nv.ma }}</td>
             <td class="px-4 py-3">{{ nv.tenNhanVien }}</td>
@@ -130,7 +149,7 @@
             <td class="px-4 py-3">{{ nv.diaChiCuThe }}</td>
             <td class="px-4 py-3">{{ nv.cccd }}</td>
             <td class="px-4 py-3">
-              <button class="text-blue-600 hover:text-blue-800 font-semibold px-2">Sửa</button>
+              <button @click="editNhanVien(nv)" class="text-blue-600 hover:text-blue-800 font-semibold px-2">Sửa</button>
               <button @click="showDeleteConfirm(nv.id)" class="text-red-600 hover:text-red-800 font-semibold px-2">Xóa</button>
             </td>
           </tr>
@@ -197,15 +216,14 @@ const showToast = (toastType, msg) => {
     visible.value = false;
   }, 3000);
 };
-const fetchNhanVien = (async () => {
+const fetchNhanVien = async () => {
   try {
     const res = await axios.get("http://localhost:8080/nhan-vien/home");
-    console.log("Dữ liệu từ API:", res.data);
-    dataTable.value = res.data;
+    dataTable.value = res.data.filter(kh => !kh.deleted);
   } catch (error) {
-    console.error("Lỗi:", error);
+    console.error("Lỗi khi lấy danh sách khách hàng:", error);
   }
-});
+};
 onMounted(fetchNhanVien);
 //add
 const addNhanVien = async () => {
@@ -224,10 +242,6 @@ const addNhanVien = async () => {
   }
   if (!checkten.test(nhanvien.value.tenNhanVien)){
     showToast("error","Tên nhân viên chỉ được chứa chữ!");
-    return;
-  }
-  if (!nhanvien.value.ghiChu.trim()){
-    showToast("error","Vui lòng nhập ghi chú!");
     return;
   }
   if (!nhanvien.value.thanhPho.trim()){
@@ -255,7 +269,7 @@ const addNhanVien = async () => {
     return;
   }
   if (Ngaysinh > ngaySinhHt){
-    showToast("error","Ngay` sinh khong hop le!");
+    showToast("error","Ngay` sinh khong quá ngày hiện tại!");
     return;
   }
   if (dataTable.value.some(nv => nv.ma === nhanvien.value.ma)) {
@@ -277,8 +291,8 @@ const addNhanVien = async () => {
 
 const deleteNv = async (id) => {
   try {
-     await axios.delete(`http://localhost:8080/nhan-vien/delete/${selectedNVId.value}`)
-    showToast("success", "Xóa thành công!");
+     await axios.put(`http://localhost:8080/nhan-vien/delete/${selectedNVId.value}`)
+       showToast("success", "Xóa thành công!");
       fetchNhanVien();
   } catch (e) {
     showToast("loi");
@@ -299,6 +313,44 @@ const btnSearch = () => {
     nhanvien.cccd.toLowerCase().includes(searchNV.value.toLowerCase()) 
   );
 }
+//backSearch
+const backSearch = () => {
+  fetchNhanVien();
+  searchNV.value = "";
+  return;
+}
+
+//MouclickDulieu
+const isEditing = ref(false);
+const editNhanVien = (customer) => {
+  nhanvien.value = {
+    ...customer,
+    ngaySinh: customer.ngaySinh ? new Date(customer.ngaySinh).toISOString().split("T")[0] : ""
+  };
+  isEditing.value = true;
+};
+
+
+//UpdateNV
+const updateNhanVien = async () => {
+  try {
+    const res = await axios.put(`http://localhost:8080/nhan-vien/update/${nhanvien.value.id}`, nhanvien.value);
+    showToast("success", "Cập nhật nhân viên thành công!");
+
+    // Cập nhật lại danh sách
+    const index = dataTable.value.findIndex(nv => nv.id === nhanvien.value.id);
+    if (index !== -1) {
+      dataTable.value[index] = { ...res.data }; 
+    }
+
+    isEditing.value = false;
+  } catch (error) {
+    console.error("Lỗi khi cập nhật nhân viên:", error);
+    showToast("error", "Không thể cập nhật nhân viên!");
+  }
+};
+
+
 </script>
 <style scoped>
 .toast {

@@ -64,9 +64,19 @@
       </div>
     </div>
 
-    <div class="flex items-center space-x-2">
-      <input v-model="searchKH" placeholder="Search theo ma va ten..." type="text" class="w-full px-4 py-2 border rounded-md" />
-      <button @click="BtnSearch" type="reset" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition">Search</button>
+    <div class="flex items-center gap-2 flex-nowrap">
+      <input v-model="searchKH" placeholder="Search theo ma va ten..." type="text"
+             class="flex-1 px-4 py-2 border rounded-md" />
+
+      <button @click="BtnSearch" type="button"
+              class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition">
+        Tìm kiếm
+      </button>
+
+      <button @click="backSearch" type="reset"
+              class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition">
+        Đặt lại
+      </button>
     </div>
 
 
@@ -77,7 +87,7 @@
         <table class="w-full bg-white rounded-md">
           <thead>
           <tr class="bg-blue-500 text-black">
-            <th class="px-6 py-3 text-left">ID</th>
+            <th class="px-6 py-3 text-left">STT</th>
             <th class="px-6 py-3 text-left">ID_TK</th>
             <th class="px-6 py-3 text-left">Mã</th>
             <th class="px-6 py-3 text-left">Tên Khách Hàng</th>
@@ -87,9 +97,9 @@
           </tr>
           </thead>
           <tbody>
-          <tr v-for="customer in dataTable" :key="customer.id"
+          <tr v-for="(customer,index) in dataTable" :key="customer.id"
               class="border-t text-gray-700 hover:bg-gray-100 transition">
-            <td class="px-6 py-3">{{ customer.id }}</td>
+            <td class="px-6 py-3">{{ index+1 }}</td>
             <td class="px-6 py-3">{{ customer.idTaiKhoan?.id }}</td>
             <td class="px-6 py-3 font-semibold">{{ customer.ma }}</td>
             <td class="px-6 py-3">{{ customer.ten }}</td>
@@ -146,12 +156,11 @@ const showDeleteConfirm = (id) => {
 const fetchCustomers = async () => {
   try {
     const res = await axios.get("http://localhost:8080/khach-hang/home");
-    dataTable.value = res.data;
+    dataTable.value = res.data.filter(kh => !kh.deleted); 
   } catch (error) {
     console.error("Lỗi khi lấy danh sách khách hàng:", error);
   }
 };
-
 onMounted(fetchCustomers);
 
 
@@ -168,32 +177,36 @@ const showToast = (toastType, msg) => {
     visible.value = false;
   }, 3000);
 };
-
+ const dkcheck = () => {
+   const NamSinh = new Date(khachhang.value.ngaySinh);
+   const NamSinhHienTai = new Date();
+   const checkNumber = /\d/;
+   if (!khachhang.value.ma.trim()){
+     showToast("error","Vui lòng hãy nhập mãKH");
+     return;
+   } else if (!khachhang.value.ten.trim()){
+     showToast("error","Vui lòng hãy nhập tênKH");
+     return;
+   } else if ( checkNumber.test(khachhang.value.ten)){
+     showToast("error","Vui lòng không nhập số ở TênKH!");
+     return;
+   } else if (khachhang.value.gioiTinh == null) {
+     showToast("error", "Vui lòng hãy chọn giớiTính");
+     return;
+   } else if (!khachhang.value.ngaySinh.trim()){
+     showToast("error","Vui lòng hãy chọn ngàySinh");
+     return;
+   } else if (NamSinh > NamSinhHienTai){
+     showToast("error","Ngày Sinh ko hợp lệ!");
+     return;
+   } else if (dataTable.value.some(kh => kh.ma === khachhang.value.ma)) {
+     showToast("error", "Mã KH đã tồn tại!");
+     return;
+   }
+}
 //Add khachang
 const addCustomer = async () => {
-  const NamSinh = new Date(khachhang.value.ngaySinh);
-  const NamSinhHienTai = new Date();
-  const checkNumber = /\d/;
-  if (!khachhang.value.ma.trim()){
-    showToast("error","Vui lòng hãy nhập mãKH");
-    return;
-  } else if (!khachhang.value.ten.trim()){
-    showToast("error","Vui lòng hãy nhập tênKH");
-    return;
-  } else if ( checkNumber.test(khachhang.value.ten)){
-    showToast("error","Vui lòng không nhập số ở TênKH!");
-    return;
-  } else if (khachhang.value.gioiTinh == null) {
-    showToast("error", "Vui lòng hãy chọn giớiTính");
-    return;
-  } else if (!khachhang.value.ngaySinh.trim()){
-    showToast("error","Vui lòng hãy chọn ngàySinh");
-    return;
-  } else if (NamSinh > NamSinhHienTai){
-    showToast("error","Ngày Sinh ko hợp lệ!");
-    return;
-  } else if (dataTable.value.some(kh => kh.ma === khachhang.value.ma)) {
-    showToast("error", "Mã KH đã tồn tại!");
+  if (!dkcheck()){
     return;
   }
   try {
@@ -209,15 +222,16 @@ const addCustomer = async () => {
 //delete
 const confirmDelete = async () => {
   try {
-    await axios.delete(`http://localhost:8080/khach-hang/delete/${selectedCustomerId.value}`);
-    showToast("success", "Xóa thành công!");
+    await axios.put(`http://localhost:8080/khach-hang/delete/${selectedCustomerId.value}`);
+    showToast("success", "Xóa mềm thành công!");
     fetchCustomers();
   } catch (error) {
     console.error("Lỗi khi xóa khách hàng:", error);
-    showToast("error", "Không thể xóa khách hàng. Vui lòng thử lại!");
+    showToast("error", "Không thể xóa khách hàng!");
   }
   showConfirmModal.value = false;
 };
+
 
 
 const searchKH = ref("");
@@ -226,15 +240,19 @@ const searchKH = ref("");
 const BtnSearch =  () => {
   if (!searchKH.value.trim()){
     showToast("error","Vui long` nhap ten muon tim kiem!");
-    fetchCustomers();
     return;
   }
   dataTable.value = dataTable.value.filter(khachhang =>
-    khachhang.ten.toLowerCase().includes(searchKH.value.toLowerCase()) ||
-    khachhang.ma.toLowerCase().includes(searchKH.value.toLowerCase())
+    khachhang.ten?.toLowerCase().includes(searchKH.value.toLowerCase()) ||
+    khachhang.ma?.toLowerCase().includes(searchKH.value.toLowerCase())
   );
 }
-
+//backSearch
+const backSearch = () => {
+  fetchCustomers();
+  searchKH.value = "";
+  return;
+}
 const isEditing = ref(false);
 //hiendulieuoTable
 const editCustomer = (customer) => {

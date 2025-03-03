@@ -146,6 +146,7 @@ const ctspList = ref([]);
 const searchKeyword = ref("");
 const idDSPs = ref([]);
 
+
 const dotGiamGia = ref({
   id: null,
   ma: "",
@@ -158,17 +159,6 @@ const dotGiamGia = ref({
   trangThai: false,
   deleted: false
 });
-
-const trangThaiComputed = computed(() => {
-  if (!dotGiamGia.value.ngayBatDau) return false;
-
-  const ngayBatDau = new Date(dotGiamGia.value.ngayBatDau);
-  const ngayHienTai = new Date();
-
-  return ngayBatDau > ngayHienTai;
-});
-
-
 
 const edit = ref(false);
 
@@ -206,12 +196,72 @@ const fetchData = async () => {
     );
     dspList.value = res.data.dspList || [];
     ctspList.value = res.data.ctspList || [];
-    dotGiamGia.value.trangThai = trangThaiComputed.value; // Cập nhật trạng thái
     capNhatGiaSauKhiGiam();
   } catch (error) {
     console.error("Lỗi khi gọi API:", error);
   }
 };
+
+const checkDuplicate = async (field, value, excludeId = null) => {
+  try {
+    const { data } = await axios.get(`http://localhost:8080/dot_giam_gia/ViewAddDotGiamGia/exists/${field}`, {
+      params: { [field]: value, excludeId },
+    });
+    return data;
+  } catch (error) {
+    console.error("Error calling API:", error);  // In ra lỗi nếu có
+    alert("Sảy ra lỗi")
+    return false;
+  }
+};
+
+const validate = async function () {
+  if (dotGiamGia.value.ma == "") {
+    alert("Vui lòng nhập mã");
+    return false; 
+  }
+
+  if(edit.value==false){
+    const isDuplicate = await checkDuplicate('ma', dotGiamGia.value.ma);
+    if (isDuplicate) {
+      alert("Mã đã tồn tại");
+      return false;
+    }    
+  }
+
+  if (dotGiamGia.value.loaiGiamGiaApDung == "") {
+    alert("Vui lòng chọn loại giảm giá");
+    return false;  
+  }
+
+  if (dotGiamGia.value.giaTriGiamGia == 0 && dotGiamGia.value.loaiGiamGiaApDung != "Tiền mặt") {
+    alert("Vui lòng nhập giá trị giảm giá");
+    return false;  
+  }
+
+  if (dotGiamGia.value.soTienGiamToiDa == 0) {
+    alert("Vui lòng nhập số tiền giảm tối đa");
+    return false;  
+  }
+
+  if (dotGiamGia.value.ngayBatDau == "") {
+    alert("Vui lòng chọn ngày bắt đầu");
+    return false;  
+  }
+
+  if (dotGiamGia.value.ngayKetThuc == "" || dotGiamGia.value.ngayKetThuc < dotGiamGia.value.ngayBatDau) {
+    alert("Vui lòng chọn lại ngày kết thúc");
+    return false;  
+  }
+
+  if (idDSPs.value.length === 0) {
+    alert("Vui lòng chọn dòng sản phẩm trong đợt giảm giá");
+    return false;  
+  }
+
+  return true;  
+};
+
 
 
 const fetchDongSanPham = async () => {
@@ -246,7 +296,6 @@ const resetForm=()=>{
 }
 
 const addData = async () => {
-  dotGiamGia.value.trangThai = trangThaiComputed.value; // Cập nhật trạng thái trước khi gửi
 
   const requestData = {
     dotGiamGia: dotGiamGia.value,
@@ -254,35 +303,38 @@ const addData = async () => {
     ctspList: ctspList.value,
   };
 
-  try {
-    if(edit.value){
-      console.log("Dữ liệu gửi đi:", requestData);
-      const response = await axios.put(
-        `http://localhost:8080/dot_giam_gia/AddDotGiamGia/${dotGiamGia.value.id}`,
-        requestData,
-        { headers: { "Content-Type": "application/json" } }
-      );
-      resetForm();
-    } else {
-      console.log("Dữ liệu gửi đi:", requestData);
-      const response = await axios.post(
-        "http://localhost:8080/dot_giam_gia/AddDotGiamGia",
-        requestData,
-        { headers: { "Content-Type": "application/json" } }
-      );
-      resetForm();
-    }
-  } catch (error) {
-    console.error("Lỗi khi thêm đợt giảm giá:", error);
-    alert("Thêm thất bại!");
+  const isValid = await validate();
+  if (isValid) {
+    try {
+      validate();
+      if(edit.value){
+        console.log("Dữ liệu gửi đi:", requestData);
+        const response = await axios.put(
+          `http://localhost:8080/dot_giam_gia/AddDotGiamGia/${dotGiamGia.value.id}`,
+          requestData,
+          { headers: { "Content-Type": "application/json" } }
+        );
+        alert("Sửa thành công");
+        resetForm();
+      } else {
+        console.log("Dữ liệu gửi đi:", requestData);
+        const response = await axios.post(
+          "http://localhost:8080/dot_giam_gia/AddDotGiamGia",
+          requestData,
+          { headers: { "Content-Type": "application/json" } }
+        );
+        alert("Thêm thành công");
+        resetForm();
+      }
+    } catch (error) {
+      console.error("Lỗi khi thêm đợt giảm giá:", error);
+      alert("Thêm thất bại!");
+    }  
   }
 };
 
-
-
 const route = useRoute();
 
-// Hàm chuyển đổi ngày từ database về định dạng yyyy-MM-dd theo múi giờ địa phương
 const formatDateLocal = (dateString) => {
   const date = new Date(dateString);
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
@@ -314,9 +366,6 @@ watch(
 );
 
 
-watch(() => dotGiamGia.value.ngayBatDau, () => {
-  dotGiamGia.value.trangThai = trangThaiComputed.value;
-});
 watch(
   () => [dotGiamGia.value.loaiGiamGiaApDung, dotGiamGia.value.giaTriGiamGia],
   () => {
