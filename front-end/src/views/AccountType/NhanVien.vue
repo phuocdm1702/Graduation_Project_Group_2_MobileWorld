@@ -10,153 +10,108 @@
     <Breadcrumb breadcrumb="Quản lý Nhân Viên" />
 
     <div class="mt-4">
-      <h4 class="text-gray-600 text-4xl font-bold">Quản lý Nhân Viên</h4>
       <div class="mt-4">
         <div class="w-full overflow-hidden bg-white border rounded-md shadow-md">
-          <form @submit.prevent="addNhanVien">
-            <div class="flex items-center justify-between px-5 py-3 text-gray-700 border-b">
-              <h3 class="text-sm font-bold">Thêm Nhân Viên</h3>
-              <button>
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-            <div class="p-5 text-gray-700 bg-gray-200  grid grid-cols-3 gap-4 bg-white">
-<!--              <div>-->
-<!--                <label class="text-xs">ID Tài khoản</label>-->
-<!--                <input v-model="nhanvien.idTaiKhoan" type="text" class="w-full px-4 py-2 mt-2 border rounded-md" />-->
-<!--              </div>-->
+          <form @submit.prevent>
+            <div class="p-5  grid grid-cols-2 gap-6">
               <div>
-                <label class="text-xs">Mã</label>
-                <input v-model="nhanvien.ma" type="text" class="w-full px-4 py-2 mt-2 border rounded-md" />
+                <label class="text-sm font-semibold block mb-2">Nhập thông tin tìm kiếm</label>
+                <input @click="btnSearch" v-model="searchNV" placeholder="Tìm theo mã hoặc tên..." type="text"
+                       class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-400 outline-none"/>
               </div>
               <div>
-                <label class="text-xs">Tên Nhân viên</label>
-                <input v-model="nhanvien.tenNhanVien" type="text" class="w-full px-4 py-2 mt-2 border rounded-md" />
+                <label class="text-sm font-semibold block mb-2">Trạng thái</label>
+                <div class="flex items-center gap-6">
+                  <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="radio" name="status" id="tat-ca" class="w-4 h-4 text-blue-600">
+                    <span>Tất cả</span>
+                  </label>
+                  <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="radio" name="status" id="dang-lam" class="w-4 h-4 text-blue-600">
+                    <span>Đang làm</span>
+                  </label>
+                  <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="radio" name="status" id="da-nghi" class="w-4 h-4 text-blue-600">
+                    <span>Đã nghỉ</span>
+                  </label>
+                    <button @click="openModal()"
+                            class="bg-green-600  text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">
+                      Thêm nhân viên
+                    </button>
+                </div>
               </div>
-              <div>
-                <label class="text-xs">Ngày sinh</label>
-                <input v-model="nhanvien.ngaySinh" type="date" class="w-full px-4 py-2 mt-2 border rounded-md" />
-              </div>
-              <div>
-                <label class="text-xs">Ghi chú</label>
-                <input v-model="nhanvien.ghiChu"  type="text" class="w-full px-4 py-2 mt-2 border rounded-md" />
-              </div>
-              <div>
-                <label class="text-xs">Thành phố</label>
-                <input v-model="nhanvien.thanhPho" type="text" class="w-full px-4 py-2 mt-2 border rounded-md" />
-              </div>
-              <div>
-                <label class="text-xs">Quận</label>
-                <input v-model="nhanvien.quan" type="text" class="w-full px-4 py-2 mt-2 border rounded-md" />
-              </div>
-              <div>
-                <label class="text-xs">Phường</label>
-                <input v-model="nhanvien.phuong" type="text" class="w-full px-4 py-2 mt-2 border rounded-md" />
-              </div>
-              <div>
-                <label class="text-xs">Địa chỉ cụ thể</label>
-                <input v-model="nhanvien.diaChiCuThe" type="text" class="w-full px-4 py-2 mt-2 border rounded-md" />
-              </div>
-              <div>
-                <label class="text-xs">CCCD</label>
-                <input v-model="nhanvien.cccd" type="text" class="w-full px-4 py-2 mt-2 border rounded-md" />
-              </div>
-              <div>
-                <label class="text-xs">Ảnh nhân viên</label>
-                <input type="file" @change="handleFileUpload" class="w-full px-4 py-2 mt-2 border rounded-md" />
-              </div>
-              <div v-if="nhanvien.anhNhanVien">
-                <img :src="nhanvien.anhNhanVien" class="w-50 h-20 mt-2 rounded-md border border-gray-300 shadow-sm" />
-              </div>
-            </div>
-            <div class="px-5 py-3 flex justify-between">
-              <button type="reset" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition"
-                      @click="isEditing = false">Đặt lại thông tin</button>
-
-              <button v-if="!isEditing" type="submit" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">
-                Thêm nhân viên
-              </button>
-
-              <button v-if="isEditing" @click="updateNhanVien" type="button"
-                      class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition">
-                Sửa nhân viên
-              </button>
             </div>
           </form>
+  
+          <!-- Modal Thêm Nhân Viên -->
+          <div v-if="isModalOpen" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+            <div class="bg-white p-6 rounded-lg shadow-lg w-96">
+              <h2 class="text-xl font-bold mb-4">Thêm Nhân Viên</h2>
+
+              <label class="block mb-2">Tên Nhân Viên</label>
+              <input type="text" id="tenNhanVien" class="w-full px-3 py-2 border rounded-md mb-4" placeholder="Nhập tên nhân viên">
+
+              <label class="block mb-2">Mã Nhân Viên</label>
+              <input type="text" id="maNhanVien" class="w-full px-3 py-2 border rounded-md mb-4" placeholder="Nhập mã nhân viên">
+
+              <div class="flex justify-end space-x-4">
+                <button @click="closeModal()" class="px-4 py-2 bg-gray-300 rounded-md">Hủy</button>
+                <button @click="saveEmployee()" class="px-4 py-2 bg-blue-600 text-white rounded-md">Lưu</button>
+              </div>
+            </div>
+          </div>
+
+
+
+
+          <div class="mt-8">
+            <div class="mt-4 overflow-x-auto">
+              <table class="w-full bg-white rounded-lg shadow-lg overflow-hidden">
+                <thead>
+                <tr class="bg-gradient-to-r from-gray-300 to-gray-200 text-gray-800 uppercase text-sm tracking-wider">
+                  <th class="px-4 py-3 text-center">#</th>
+                    <th class="px-4 py-3 text-center">Tên</th>
+                  <th class="px-4 py-3 text-center">Email</th>
+                  <th class="px-4 py-3 text-center">SĐT</th>
+                  <th class="px-4 py-3 text-center">Ngày tham gia</th>
+                  <th class="px-4 py-3 text-center">Trạng thái</th>
+                  <th class="px-4 py-3 text-center">Thao Tác</th>
+                </tr>
+                </thead>
+                <tbody>
+
+                <tr
+                  v-for="(nv,index) in dataTable" :key="nv.id"
+                  class="border-t text-center hover:bg-gray-100 transition-all duration-200"
+                  :class="{'bg-gray-50': nv.id % 2 === 0}"
+                >
+                  <td class="px-4 py-3">{{ index+1 }}</td>
+                  <td class="px-4 py-3">{{ nv.tenNhanVien }}</td>
+                  <td class="px-4 py-3">
+                    <img :src="nv.anhNhanVien" class="anh-nhan-vien rounded-md shadow-sm border border-gray-300" />
+                  </td>
+                  <td class="px-4 py-3">{{ nv.ghiChu }}</td>
+                  <td class="px-4 py-3">{{ new Date(nv.ngaySinh).toLocaleDateString() }}</td>
+                  <td class="px-4 py-3">{{ nv.quan }}</td>
+                  <td class="px-4 py-3">{{ nv.phuong }}</td>
+                  <td class="px-4 py-3">{{ nv.diaChiCuThe }}</td>
+                  <td class="px-4 py-3">{{ nv.cccd }}</td>
+                  <td class="px-4 py-3">
+                    <button @click="editNhanVien(nv)" class="text-blue-600 hover:text-blue-800 font-semibold px-2">Sửa</button>
+                    <button @click="showDeleteConfirm(nv.id)" class="text-red-600 hover:text-red-800 font-semibold px-2">Xóa</button>
+                  </td>
+                </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
       </div>
     </div>
     <br>
+    
 
-    <div class="flex items-center gap-2 flex-nowrap">
-      <input v-model="searchNV" placeholder="Search theo ma va ten..." type="text"
-             class="flex-1 px-4 py-2 border rounded-md" />
-
-      <button @click="btnSearch" type="button"
-              class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition">
-        Tìm kiếm
-      </button>
-
-      <button @click="backSearch" type="reset"
-              class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition">
-        Đặt lại
-      </button>
-    </div>
-
-
-    <div class="mt-8">
-      <h4 class="text-gray-700 font-semibold text-lg">Danh sách Nhân Viên</h4>
-      <div class="mt-4 overflow-x-auto">
-        <table class="w-full bg-white rounded-lg shadow-lg overflow-hidden">
-          <thead>
-          <tr class="bg-gradient-to-r from-gray-300 to-gray-200 text-gray-800 uppercase text-sm tracking-wider">
-            <th class="px-4 py-3 text-center">STT</th>
-            <th class="px-4 py-3 text-center">ID Tài khoản</th>
-            <th class="px-4 py-3 text-center">Mã</th>
-            <th class="px-4 py-3 text-center">Tên Nhân viên</th>
-            <th class="px-4 py-3 text-center">Ngày sinh</th>
-            <th class="px-4 py-3 text-center">Ảnh nhân viên</th>
-            <th class="px-4 py-3 text-center">Ghi chú</th>
-            <th class="px-4 py-3 text-center">Thành phố</th>
-            <th class="px-4 py-3 text-center">Quận</th>
-            <th class="px-4 py-3 text-center">Phường</th>
-            <th class="px-4 py-3 text-center">Địa chỉ cụ thể</th>
-            <th class="px-4 py-3 text-center">CCCD</th>
-            <th class="px-4 py-3 text-center">Hành động</th>
-          </tr>
-          </thead>
-          <tbody>
-          
-          <tr
-            v-for="(nv,index) in dataTable" :key="nv.id"
-            class="border-t text-center hover:bg-gray-100 transition-all duration-200"
-            :class="{'bg-gray-50': nv.id % 2 === 0}"
-          >
-            <td class="px-4 py-3">{{ index+1 }}</td>
-            <td class="px-4 py-3">{{ nv.idTaiKhoan.id }}</td>
-            <td class="px-4 py-3">{{ nv.ma }}</td>
-            <td class="px-4 py-3">{{ nv.tenNhanVien }}</td>
-            <td class="px-4 py-3">{{ new Date(nv.ngaySinh).toLocaleDateString() }}</td>
-            <td class="px-4 py-3">
-              <img :src="nv.anhNhanVien" class="anh-nhan-vien rounded-md shadow-sm border border-gray-300" />
-            </td>
-            <td class="px-4 py-3">{{ nv.ghiChu }}</td>
-            <td class="px-4 py-3">{{ nv.thanhPho }}</td>
-            <td class="px-4 py-3">{{ nv.quan }}</td>
-            <td class="px-4 py-3">{{ nv.phuong }}</td>
-            <td class="px-4 py-3">{{ nv.diaChiCuThe }}</td>
-            <td class="px-4 py-3">{{ nv.cccd }}</td>
-            <td class="px-4 py-3">
-              <button @click="editNhanVien(nv)" class="text-blue-600 hover:text-blue-800 font-semibold px-2">Sửa</button>
-              <button @click="showDeleteConfirm(nv.id)" class="text-red-600 hover:text-red-800 font-semibold px-2">Xóa</button>
-            </td>
-          </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
+    
 
   </div>
 
@@ -176,6 +131,16 @@ const message = ref("");
 const type = ref("success");
 import { ref, onMounted } from "vue";
 import axios from "axios";
+  
+const isModalOpen = ref(false);
+
+const openModal = () => {
+  isModalOpen.value = true;
+};
+
+const closeModal = () => {
+  isModalOpen.value = false;
+};
 
 const dataTable = ref([]);
 const nhanvien = ref({

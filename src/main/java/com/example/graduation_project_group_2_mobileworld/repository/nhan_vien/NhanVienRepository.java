@@ -9,7 +9,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
-public interface NhanVienRepository extends JpaRepository<NhanVien,Integer> {
+public interface NhanVienRepository extends JpaRepository<NhanVien, Integer> {
     @Query("SELECT COUNT(n) > 0 FROM NhanVien n WHERE n.ma = :ma AND n.id <> :id")
     boolean existsByMaAndNotId(@Param("ma") String ma, @Param("id") Integer id);
 
