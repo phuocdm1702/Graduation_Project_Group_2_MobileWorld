@@ -1,12 +1,8 @@
 package com.example.graduation_project_group_2_mobileworld.repository.dot_giam_gia_repo;
-
-import com.example.graduation_project_group_2_mobileworld.dto.dot_giam_gia.dot_giam_gia_DTO;
 import com.example.graduation_project_group_2_mobileworld.dto.dot_giam_gia.viewCTSPDTO;
-import com.example.graduation_project_group_2_mobileworld.entity.ChiTietDotGiamGia;
-import com.example.graduation_project_group_2_mobileworld.entity.ChiTietSanPham;
+
 import com.example.graduation_project_group_2_mobileworld.entity.DongSanPham;
 import com.example.graduation_project_group_2_mobileworld.entity.DotGiamGia;
-import jakarta.persistence.EntityManager;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -14,11 +10,9 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.DeleteMapping;
 
 import java.math.BigDecimal;
 import java.sql.Date;
-import java.time.LocalDate;
 import java.util.List;
 
 public interface dot_giam_gia_repository extends JpaRepository<DotGiamGia, Integer> {
@@ -32,12 +26,28 @@ public interface dot_giam_gia_repository extends JpaRepository<DotGiamGia, Integ
     @Query("SELECT dsp FROM DongSanPham dsp WHERE (:timKiem IS NULL OR :timKiem = '' OR dsp.ma LIKE CONCAT('%', :timKiem, '%') OR dsp.dongSanPham LIKE CONCAT('%', :timKiem, '%')) AND dsp.deleted = false ")
     public List<DongSanPham> getAllDongSanPham(@Param("timKiem") String timKiem);
 
-    @Query("SELECT new com.example.graduation_project_group_2_mobileworld.dto.dot_giam_gia.viewCTSPDTO(dsp, ctsp, anh) " +
+//    @Query("SELECT new com.example.graduation_project_group_2_mobileworld.dto.dot_giam_gia.viewCTSPDTO(dsp, ctsp, anh, bnt) " +
+//            "FROM DongSanPham dsp " +
+//            "INNER JOIN ChiTietSanPham ctsp ON ctsp.idDongSanPham.id = dsp.id " +
+//            "INNER JOIN AnhSanPham anh ON ctsp.idAnhSanPham.id = anh.id " +
+//            "INNER JOIN BoNhoTrong bnt on ctsp.idBoNhoTrong.id=bnt.id " +
+//            "WHERE dsp.id IN :ids " +
+//            "AND ctsp.id = (SELECT MIN(ctsp2.id) FROM ChiTietSanPham ctsp2 WHERE ctsp2.giaBan = ctsp.giaBan AND ctsp2.idDongSanPham.id = dsp.id) " +
+//            "AND anh.id = (SELECT MIN(anh2.id) FROM AnhSanPham anh2 WHERE anh2.id = anh.id)")
+//    List<viewCTSPDTO> getAllCTSP(@Param("ids") List<Integer> ids);
+
+
+    @Query("SELECT new com.example.graduation_project_group_2_mobileworld.dto.dot_giam_gia.viewCTSPDTO(dsp, ctsp, anh, bnt) " +
             "FROM DongSanPham dsp " +
             "INNER JOIN ChiTietSanPham ctsp ON ctsp.idDongSanPham.id = dsp.id " +
             "INNER JOIN AnhSanPham anh ON ctsp.idAnhSanPham.id = anh.id " +
-            "WHERE dsp.id IN :ids")
-    List<viewCTSPDTO> getAllCTSP(@Param("ids") List<Integer> ids);
+            "INNER JOIN BoNhoTrong bnt on ctsp.idBoNhoTrong.id = bnt.id " +
+            "WHERE dsp.id IN :ids " +
+            "AND (:idBoNhoTrongs IS NULL OR bnt.id IN :idBoNhoTrongs) " + // Lọc theo bộ nhớ trong
+            "AND ctsp.id = (SELECT MIN(ctsp2.id) FROM ChiTietSanPham ctsp2 WHERE ctsp2.giaBan = ctsp.giaBan AND ctsp2.idDongSanPham.id = dsp.id) " +
+            "AND anh.id = (SELECT MIN(anh2.id) FROM AnhSanPham anh2 WHERE anh2.id = anh.id)")
+    List<viewCTSPDTO> getAllCTSP(@Param("ids") List<Integer> ids, @Param("idBoNhoTrongs") List<Integer> idBoNhoTrongs);
+
 
     @Modifying
     @Transactional
@@ -88,6 +98,25 @@ public interface dot_giam_gia_repository extends JpaRepository<DotGiamGia, Integ
 
     @Modifying
     @Transactional
-    @Query("UPDATE DotGiamGia e SET e.deleted = true WHERE e.ngayKetThuc <= :today AND e.deleted = false")
-    void updateDeletedIfEndDatePassed(@Param("today") Date today);
+    @Query("""
+                UPDATE DotGiamGia e 
+                SET e.deleted = true 
+                WHERE e.ngayKetThuc <= :today AND e.deleted = false
+            """)
+    int updateDeletedIfEndDatePassed(@Param("today") Date today);
+
+
+    @Modifying
+    @Transactional
+    @Query("""
+            UPDATE ChiTietDotGiamGia c 
+            SET c.deleted = true 
+            WHERE c.dotGiamGia.id IN (
+                SELECT e.id FROM DotGiamGia e WHERE e.deleted = true
+            )
+            """)
+    int updateDeletedChiTietDotGiamGia();
+
+
+
 }

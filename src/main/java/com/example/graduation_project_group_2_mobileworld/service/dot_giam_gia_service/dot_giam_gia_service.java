@@ -54,8 +54,8 @@ public class dot_giam_gia_service{
         return repository.getAllDongSanPham(timKiem);
     }
 
-    public List<viewCTSPDTO> getAllCTSP(List<Integer> ids) {
-        return repository.getAllCTSP(ids);
+    public List<viewCTSPDTO> getAllCTSP(List<Integer> ids,List<Integer> idBoNhoTrongs) {
+        return repository.getAllCTSP(ids,idBoNhoTrongs);
     }
 
     public Boolean existByMa(String ma){
@@ -347,6 +347,8 @@ public class dot_giam_gia_service{
         Date today = java.sql.Date.valueOf(LocalDate.now());
         repository.updateStatusIfStartDatePassed(today);
         repository.updateDeletedIfEndDatePassed(today);
+        repository.updateDeletedChiTietDotGiamGia();
+
     }
 
 }
