@@ -19,24 +19,23 @@ public class NhanVienController {
         this.nhanVienServices = nhanVienServices;
     }
 
-    //Lay tat ca du lieu
-//    @GetMapping("/home")
-//    public ResponseEntity<List<NhanVien>> getAllCustomers() {
-//        List<NhanVien> kh = nhanVienServices.getall();
-//        return ResponseEntity.ok(kh);
-//    }
+    @GetMapping("/home")
+    public ResponseEntity<List<NhanVien>> getAllCustomers() {
+        List<NhanVien> kh = nhanVienServices.getall();
+        return ResponseEntity.ok(kh);
+    }
 //    @PostMapping("/add")
 //    public NhanVien addNhanVien(@RequestBody NhanVien nhanVien){
 //        return nhanVienServices.add(nhanVien);
 //    }
-//    @PutMapping("/delete/{id}")
-//    public ResponseEntity<String> softDelete(@PathVariable Integer id) {
-//        boolean deleted = nhanVienServices.delete(id);
-//        if (deleted) {
-//            return ResponseEntity.ok("Xóa mềm thành công");
-//        }
-//        return ResponseEntity.badRequest().body("nv không tồn tại");
-//    }
+    @PutMapping("/delete/{id}")
+    public ResponseEntity<String> softDelete(@PathVariable Integer id) {
+        boolean deleted = nhanVienServices.delete(id);
+        if (deleted) {
+            return ResponseEntity.ok("Xóa mềm thành công");
+        }
+        return ResponseEntity.badRequest().body("nv không tồn tại");
+    }
 //    @PutMapping("/update/{id}")
 //    public ResponseEntity<NhanVien> updateNv(@PathVariable Integer id, @RequestBody NhanVien nhanVien) {
 //        try {

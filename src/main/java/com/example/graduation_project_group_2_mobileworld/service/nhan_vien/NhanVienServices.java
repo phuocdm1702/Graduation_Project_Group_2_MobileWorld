@@ -17,11 +17,10 @@ public class NhanVienServices {
         this.nhanVienRepository = nhanVienRepository;
     }
 
-
     public List<NhanVien> getall() {
-
         return nhanVienRepository.findAllActiveNv();
     }
+
 
 //    public NhanVien add(NhanVien nhanVien) {
 //        return nhanVienRepository.save(nhanVien);
@@ -41,16 +40,16 @@ public class NhanVienServices {
 //        return false;
 //    }
 //
-//    public boolean delete(Integer id) {
-//        Optional<NhanVien> optionalKH = nhanVienRepository.findById(id);
-//        if (optionalKH.isPresent()) {
-//            NhanVien kh = optionalKH.get();
-//            kh.setDeleted(true); // Đánh dấu khách hàng đã bị xóa mềm
-//            nhanVienRepository.save(kh);
-//            return true;
-//        }
-//        return false;
-//    }
+    public boolean delete(Integer id) {
+        Optional<NhanVien> optionalKH = nhanVienRepository.findById(id);
+        if (optionalKH.isPresent()) {
+            NhanVien kh = optionalKH.get();
+            kh.setDeleted(true); // Đánh dấu khách hàng đã bị xóa mềm
+            nhanVienRepository.save(kh);
+            return true;
+        }
+        return false;
+    }
 //
 //    public NhanVien updatenv(Integer id, NhanVien nhanVien) {
 //        Optional<NhanVien> existingKhachHang = nhanVienRepository.findById(id);

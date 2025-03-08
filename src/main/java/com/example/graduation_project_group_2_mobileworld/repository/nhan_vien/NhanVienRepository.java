@@ -13,6 +13,6 @@ public interface NhanVienRepository extends JpaRepository<NhanVien, Integer> {
     @Query("SELECT COUNT(n) > 0 FROM NhanVien n WHERE n.ma = :ma AND n.id <> :id")
     boolean existsByMaAndNotId(@Param("ma") String ma, @Param("id") Integer id);
 
-    @Query("SELECT n FROM NhanVien n WHERE n.deleted = false ")
+    @Query("SELECT n FROM NhanVien n")
     List<NhanVien> findAllActiveNv();
 }
