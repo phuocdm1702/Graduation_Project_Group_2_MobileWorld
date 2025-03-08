@@ -5,7 +5,7 @@ import java.util.List;
 public class RequestDTO {
     private String keyword;
     private List<Integer> idDSPs;
-
+    private List<Integer> idBoNhoTrongs;
 
     public String getKeyword() {
         return keyword;
@@ -21,5 +21,13 @@ public class RequestDTO {
 
     public void setIdDSPs(List<Integer> idDSPs) {
         this.idDSPs = idDSPs;
+    }
+
+    public List<Integer> getIdBoNhoTrongs() {
+        return idBoNhoTrongs;
+    }
+
+    public void setIdBoNhoTrongs(List<Integer> idBoNhoTrongs) {
+        this.idBoNhoTrongs = idBoNhoTrongs;
     }
 }

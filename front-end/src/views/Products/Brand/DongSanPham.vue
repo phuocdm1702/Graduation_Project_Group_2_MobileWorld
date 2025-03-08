@@ -1,9 +1,7 @@
 <template>
   <div class="container mx-auto p-4 relative">
-    <!-- Toast thông báo -->
     <ToastNotification ref="toast" />
-
-    <!-- Tiêu đề và nút mở modal -->
+    
     <div class="flex justify-between items-center mb-6">
       <h2 class="text-xl text-gray-600">Quản lý Dòng Sản Phẩm</h2>
       <button
@@ -13,8 +11,6 @@
         Thêm mới
       </button>
     </div>
-
-    <!-- Search Section -->
     <div class="flex gap-3 mb-6">
       <input
         v-model.trim="searchKeyword"
@@ -35,8 +31,7 @@
         Đặt lại
       </button>
     </div>
-
-    <!-- Bulk Delete Button -->
+    
     <div v-if="selectedProducts.length" class="mb-6 flex justify-end">
       <button
         @click="confirmDeleteSelected"
@@ -45,8 +40,7 @@
         Xóa {{ selectedProducts.length }} dòng sản phẩm đã chọn
       </button>
     </div>
-
-    <!-- Product Lines Table -->
+    
     <div class="overflow-x-auto shadow-md rounded-lg">
       <table class="w-full text-sm text-gray-500">
         <thead class="bg-blue-100 text-blue-700 uppercase">

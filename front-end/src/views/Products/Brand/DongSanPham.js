@@ -189,7 +189,7 @@ export default function useProductLineList() {
 
   const openAddModal = () => {
     productLine.value = { id: null, ma: '', dongSanPham: '' };
-    showAddModal.value = true;
+      showAddModal.value = true;
   };
 
   const openEditModal = (product) => {
