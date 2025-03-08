@@ -50,23 +50,80 @@
             </div>
           </form>
   
-          <!-- Modal Thêm Nhân Viên -->
+<!--        Modeladdnhanvien-->
           <div v-if="isModalOpen" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-            <div class="bg-white p-6 rounded-lg shadow-lg w-96">
-              <h2 class="text-xl font-bold mb-4">Thêm Nhân Viên</h2>
+            <div class="bg-white p-6 rounded-lg shadow-lg w-[700px]">
+              <h2 class="text-2xl font-bold mb-4">Thông tin nhân viên</h2>
 
-              <label class="block mb-2">Tên Nhân Viên</label>
-              <input type="text" id="tenNhanVien" class="w-full px-3 py-2 border rounded-md mb-4" placeholder="Nhập tên nhân viên">
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <label class="block mb-2">Tên Nhân Viên</label>
+                  <input type="text" id="tenNhanVien" class="w-full px-3 py-2 border rounded-md" placeholder="Nhập tên nhân viên">
+                </div>
 
-              <label class="block mb-2">Mã Nhân Viên</label>
-              <input type="text" id="maNhanVien" class="w-full px-3 py-2 border rounded-md mb-4" placeholder="Nhập mã nhân viên">
+                <div>
+                  <label class="block mb-2">UserName</label>
+                  <input type="text" id="maNhanVien" class="w-full px-3 py-2 border rounded-md" placeholder="Nhập UserNames">
+                </div>
 
-              <div class="flex justify-end space-x-4">
+                <div>
+                  <label class="block mb-2">SDT</label>
+                  <input type="text" id="maNhanVien" class="w-full px-3 py-2 border rounded-md" placeholder="Nhập SDT">
+                </div>
+
+                <div>
+                  <label class="block mb-2">Email</label>
+                  <input type="text" id="maNhanVien" class="w-full px-3 py-2 border rounded-md" placeholder="Nhập Email">
+                </div>
+
+                <div class="col-span-2">
+                  <label class="block mb-2">Địa chỉ cụ thể</label>
+                  <input type="text" id="maNhanVien" class="w-full px-3 py-2 border rounded-md" placeholder="Nhập địa chỉ cụ thể">
+                </div>
+                
+                <div class="flex gap-4 col-span-2">
+                  <div class="w-1/3">
+                    <label class="block mb-2">Tỉnh/Thành phố</label>
+                    <select v-model="selectedProvince" @change="handleProvinceChange" class="w-full px-3 py-2 border rounded-md">
+                      <option value="" disabled>Chọn tỉnh/thành phố</option>
+                      <option v-for="province in provinces" :key="province.code">{{ province.name }}</option>
+                    </select>
+                  </div>
+
+                  <div class="w-1/3">
+                    <label class="block mb-2">Quận/Huyện</label>
+                    <select v-model="selectedDistrict" @change="handleDistrictChange" class="w-full px-3 py-2 border rounded-md">
+                      <option value="" disabled>Chọn quận/huyện</option>
+                      <option v-for="district in districts" :key="district.code">{{ district.name }}</option>
+                    </select>
+                  </div>
+
+                  <div class="w-1/3">
+                    <label class="block mb-2">Xã/Phường</label>
+                    <select v-model="selectedWard" class="w-full px-3 py-2 border rounded-md">
+                      <option value="" disabled>Chọn xã/phường</option>
+                      <option v-for="ward in wards" :key="ward.code">{{ ward.name }}</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="col-span-2">
+                  <label class="block mb-2">Ảnh Nhân Viên</label>
+                  <input type="file" @change="previewImage" class="w-full px-3 py-2 border rounded-md">
+
+                  <!-- Hiển thị ảnh xem trước -->
+                  <div v-if="employeeImage" class="mt-4 flex justify-center">
+                    <img :src="employeeImage" alt="Ảnh nhân viên" class="w-32 h-32 object-cover rounded-full border">
+                  </div>
+                </div>
+              </div>
+
+              <div class="flex justify-end space-x-4 mt-4">
                 <button @click="closeModal()" class="px-4 py-2 bg-gray-300 rounded-md">Hủy</button>
                 <button @click="saveEmployee()" class="px-4 py-2 bg-blue-600 text-white rounded-md">Lưu</button>
               </div>
             </div>
           </div>
+
 
 
 
@@ -130,10 +187,57 @@ import ConfirmModal from "@/components/ConfirmModal.vue";
 const visible = ref(false);
 const message = ref("");
 const type = ref("success");
-import { ref, onMounted } from "vue";
+import { ref, onMounted, watch } from "vue";
 import axios from "axios";
-  
 
+
+//anhnhanvien
+const employeeImage = ref(null);
+function previewImage(event) {
+  const file = event.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      employeeImage.value = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+}
+
+
+//DiaChiThanhPho
+const provinces = ref([]);
+const districts = ref([]);
+const wards = ref([]);
+const selectedProvince = ref('');
+const selectedDistrict = ref('');
+const selectedWard = ref('');
+
+onMounted(async () => {
+  try {
+    const response = await axios.get('https://provinces.open-api.vn/api/?depth=3');
+    provinces.value = response.data;
+  } catch (error) {
+    console.error('Lỗi khi tải dữ liệu:', error);
+  }
+});
+
+const handleProvinceChange = () => {
+  const province = provinces.value.find(prov => prov.name === selectedProvince.value);
+  districts.value = province ? province.districts : [];
+  selectedDistrict.value = '';
+  selectedWard.value = '';
+};
+
+const handleDistrictChange = () => {
+  const district = districts.value.find(dist => dist.name === selectedDistrict.value);
+  wards.value = district ? district.wards : [];
+  selectedWard.value = '';
+};
+
+
+
+//
 const isModalOpen = ref(false);
 
 const openModal = () => {
