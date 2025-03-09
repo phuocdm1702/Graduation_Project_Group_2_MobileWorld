@@ -170,8 +170,18 @@ export const useDotGiamGia = () => {
       console.error("Lỗi khi lấy danh sách dòng sản phẩm:", error);
     }
   };
+  
+  //Các hàm cho form
 
-  const resetForm = () => {
+  const confirmAction = async () => {
+    const message = edit.value ? "Có muốn cập nhật dữ liệu không?" : "Có muốn thêm dữ liệu không?";
+    if (confirm(message)) {
+      await addData(); // Gọi addData() nếu xác nhận OK
+    }
+  };
+
+
+    const resetForm = () => {
     dotGiamGia.value = {
       id: null,
       ma: "",
@@ -275,6 +285,12 @@ export const useDotGiamGia = () => {
   watch(searchKeyword, fetchData);
   watch(idDSPs, fetchData);
 
+  watch(() => dotGiamGia.value.loaiGiamGiaApDung, (newVal) => {
+    if (newVal === 'Tiền mặt') {
+      dotGiamGia.value.giaTriGiamGia = null; // hoặc 0
+    }
+  });
+  
   return {
     dspList,
     ctspList,
@@ -289,5 +305,6 @@ export const useDotGiamGia = () => {
     filteredCTSPList,
     addData,
     resetForm,
+    confirmAction
   };
 };

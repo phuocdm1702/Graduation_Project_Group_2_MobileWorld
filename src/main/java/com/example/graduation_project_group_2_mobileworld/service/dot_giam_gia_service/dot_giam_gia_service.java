@@ -28,7 +28,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
-public class dot_giam_gia_service{
+public class dot_giam_gia_service {
 
     private dot_giam_gia_repository repository;
     private ChiTietDotGiamGiaRepository repo2;
@@ -42,24 +42,24 @@ public class dot_giam_gia_service{
     }
 
 
-    public Page<DotGiamGia> HienThi(Pageable pageable){
+    public Page<DotGiamGia> HienThi(Pageable pageable) {
         return repository.hienThi(pageable);
     }
 
-    public Page<DotGiamGia> hienThiFinish(Pageable pageable){
+    public Page<DotGiamGia> hienThiFinish(Pageable pageable) {
         return repository.hienThiFinish(pageable);
     }
 
-    public List<DongSanPham> getDSP(String timKiem){
+    public List<DongSanPham> getDSP(String timKiem) {
         return repository.getAllDongSanPham(timKiem);
     }
 
-    public List<viewCTSPDTO> getAllCTSP(List<Integer> ids,List<Integer> idBoNhoTrongs) {
-        return repository.getAllCTSP(ids,idBoNhoTrongs);
+    public List<viewCTSPDTO> getAllCTSP(List<Integer> ids, List<Integer> idBoNhoTrongs) {
+        return repository.getAllCTSP(ids, idBoNhoTrongs);
     }
 
-    public Boolean existByMa(String ma){
-        return  repository.existsByMaAndDeletedTrue(ma);
+    public Boolean existByMa(String ma) {
+        return repository.existsByMaAndDeletedTrue(ma);
     }
 
     @Transactional
@@ -172,7 +172,7 @@ public class dot_giam_gia_service{
     }
 
     @Modifying
-@Transactional
+    @Transactional
     public void deleteDotGiamGiaById(Integer id) {
         try {
             repository.updateDotGiamGiaDeleted(id);
@@ -194,11 +194,11 @@ public class dot_giam_gia_service{
         }
     }
 
-    public List<DongSanPham> getThatDongSanPham(Integer id){
+    public List<DongSanPham> getThatDongSanPham(Integer id) {
         return repository.getThatDongSanPham(id);
     }
 
-    public Optional<DotGiamGia> findOne(Integer id){
+    public Optional<DotGiamGia> findOne(Integer id) {
         return repository.findById(id);
     }
 
@@ -207,6 +207,8 @@ public class dot_giam_gia_service{
         try {
             DotGiamGia dotGiamGia = repository.findById(dotGiamGiaId)
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy đợt giảm giá với id: " + dotGiamGiaId));
+
+            BigDecimal maxDiscountAmountOld = dotGiamGia.getSoTienGiamToiDa();
 
             LocalDate today = LocalDate.now();
 
@@ -293,34 +295,29 @@ public class dot_giam_gia_service{
                     addedDSP.add(key); // Thêm key vào danh sách đã thêm
                     System.out.println("Thêm giảm giá cho sản phẩm mới: " + idDSP);
                 } else {
-                    // Nếu có bản ghi cũ, thực hiện so sánh giá
+                    // Nếu có bản ghi cũ, thực hiện kiểm tra giá trị giảm tối đa
+                    boolean isDiscountLimitChanged = false;
                     for (ChiTietDotGiamGia existingChiTiet : existingChiTietListForDSP) {
-                        if (giaSauKhiGiam.compareTo(existingChiTiet.getGiaSauKhiGiam()) < 0) {
-                            existingChiTiet.setDeleted(true);
-                            isLowerPrice = true;
+                        BigDecimal oldDiscountedPrice = existingChiTiet.getGiaSauKhiGiam(); // Giá sau giảm cũ
+                        BigDecimal maxDiscountAmountNew = dotGiamGiaDTO.getSoTienGiamToiDa(); // Số tiền giảm tối đa mới
+
+                        boolean isDiscountLimitUpdated = maxDiscountAmountNew.compareTo(maxDiscountAmountOld) != 0;
+                        BigDecimal expectedNewPrice = existingChiTiet.getGiaBanDau().subtract(maxDiscountAmountNew);
+
+                        // Cập nhật khi giá trị giảm tối đa thay đổi
+                        if (isDiscountLimitUpdated) {
+                            existingChiTiet.setGiaSauKhiGiam(expectedNewPrice);
+                            isDiscountLimitChanged = true;
                         }
                     }
 
-                    // Nếu có bản ghi cũ cần cập nhật, lưu tất cả lại 1 lần
-                    if (isLowerPrice) {
+                    // Nếu có bản ghi cũ cần cập nhật, lưu tất cả lại một lần
+                    if (isDiscountLimitChanged) {
                         repo2.saveAll(existingChiTietListForDSP);
                     } else {
-                        System.out.println("Giá không thấp hơn bản ghi cũ, bỏ qua: " + idDSP);
+                        System.out.println("Không có thay đổi về mức giảm giá tối đa, bỏ qua cập nhật cho: " + idDSP);
                         continue;
                     }
-
-                    // Tạo mới mã giảm giá
-                    String newMaChiTiet = String.format("CTDGG%05d", nextNumber++);
-                    ChiTietDotGiamGia chiTiet = new ChiTietDotGiamGia();
-                    chiTiet.setMa(newMaChiTiet);
-                    chiTiet.setDotGiamGia(dotGiamGia);
-                    chiTiet.setIdDongSanPham(dongSanPham);
-                    chiTiet.setGiaBanDau(giaBanDau);
-                    chiTiet.setGiaSauKhiGiam(giaSauKhiGiam);
-                    chiTiet.setDeleted(false);
-                    repo2.save(chiTiet);
-                    addedDSP.add(key); // Thêm key vào danh sách đã thêm
-                    System.out.println("Thêm giảm giá cho sản phẩm: " + idDSP);
                 }
             }
 
@@ -332,8 +329,8 @@ public class dot_giam_gia_service{
     }
 
 
-    public Page<DotGiamGia> timKiem(Pageable pageable, String maDGG, String tenDGG, String loaiGiamGiaApDung,BigDecimal giaTriGiamGia, BigDecimal soTienGiamToiDa, Date ngayBatDau,Date ngayKetThuc,Boolean trangThai, Boolean deleted){
-        return repository.timKiem(pageable, maDGG,tenDGG, loaiGiamGiaApDung, giaTriGiamGia,soTienGiamToiDa,ngayBatDau,ngayKetThuc,trangThai,deleted);
+    public Page<DotGiamGia> timKiem(Pageable pageable, String maDGG, String tenDGG, String loaiGiamGiaApDung, BigDecimal giaTriGiamGia, BigDecimal soTienGiamToiDa, Date ngayBatDau, Date ngayKetThuc, Boolean trangThai, Boolean deleted) {
+        return repository.timKiem(pageable, maDGG, tenDGG, loaiGiamGiaApDung, giaTriGiamGia, soTienGiamToiDa, ngayBatDau, ngayKetThuc, trangThai, deleted);
     }
 
     @PostConstruct //Chạy sau khi khởi động
