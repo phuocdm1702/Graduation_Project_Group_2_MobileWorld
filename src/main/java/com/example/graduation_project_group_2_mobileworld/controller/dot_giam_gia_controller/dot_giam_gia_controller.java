@@ -75,6 +75,7 @@ public class dot_giam_gia_controller {
     public ResponseEntity<CombinedResponse> hienThiAdd(@RequestBody RequestDTO request) {
         String keyword = request.getKeyword();
         List<Integer> idDSPs = request.getIdDSPs();
+        List<Integer> idBoNhoTrongs = request.getIdBoNhoTrongs(); // Thêm danh sách bộ nhớ trong
 
         List<DongSanPham> dspList;
         List<viewCTSPDTO> ctspList = new ArrayList<>();
@@ -82,16 +83,17 @@ public class dot_giam_gia_controller {
         if (keyword == null || keyword.trim().isEmpty()) {
             dspList = sr.getDSP(null);
         } else {
-            dspList = sr.getDSP(keyword); // Tìm kiếm theo từ khóa
+            dspList = sr.getDSP(keyword);
         }
 
         if (idDSPs != null && !idDSPs.isEmpty()) {
-            ctspList = sr.getAllCTSP(idDSPs);
+            ctspList = sr.getAllCTSP(idDSPs, idBoNhoTrongs); // Truyền danh sách bộ nhớ trong vào
         }
 
         CombinedResponse response = new CombinedResponse(dspList, ctspList);
         return ResponseEntity.ok(response);
     }
+
 
 
     @PostMapping("/AddDotGiamGia")

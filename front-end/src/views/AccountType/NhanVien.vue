@@ -1,3 +1,4 @@
+
 <template>
   <div v-if="visible" :class="`toast ${type}`">
     <span v-if="type === 'success'" class="checkmark">✔</span>
@@ -10,153 +11,165 @@
     <Breadcrumb breadcrumb="Quản lý Nhân Viên" />
 
     <div class="mt-4">
-      <h4 class="text-gray-600 text-4xl font-bold">Quản lý Nhân Viên</h4>
       <div class="mt-4">
         <div class="w-full overflow-hidden bg-white border rounded-md shadow-md">
-          <form @submit.prevent="addNhanVien">
-            <div class="flex items-center justify-between px-5 py-3 text-gray-700 border-b">
-              <h3 class="text-sm font-bold">Thêm Nhân Viên</h3>
-              <button>
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-            <div class="p-5 text-gray-700 bg-gray-200  grid grid-cols-3 gap-4 bg-white">
-<!--              <div>-->
-<!--                <label class="text-xs">ID Tài khoản</label>-->
-<!--                <input v-model="nhanvien.idTaiKhoan" type="text" class="w-full px-4 py-2 mt-2 border rounded-md" />-->
-<!--              </div>-->
+          <form @submit.prevent>
+            <div class="p-5  grid grid-cols-2 gap-6">
+<!--              search-->
               <div>
-                <label class="text-xs">Mã</label>
-                <input v-model="nhanvien.ma" type="text" class="w-full px-4 py-2 mt-2 border rounded-md" />
+                <label class="text-sm font-semibold block mb-2">Nhập thông tin tìm kiếm</label>
+                <input v-model="searchNV"
+                       @input="btnSearch"
+                       placeholder="Tìm theo mã hoặc tên..."
+                       type="text"
+                       class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-400 outline-none"/>
               </div>
+<!--              trangthai-->
               <div>
-                <label class="text-xs">Tên Nhân viên</label>
-                <input v-model="nhanvien.tenNhanVien" type="text" class="w-full px-4 py-2 mt-2 border rounded-md" />
+                <label class="text-sm font-semibold block mb-2">Trạng thái</label>
+                <div class="flex items-center gap-6">
+                  <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="radio" name="status" id="tat-ca" v-model="filterStatus" value="tat-ca" @change="fetchNhanVien">
+                    <span>Tất cả</span>
+                  </label>
+                  <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="radio" name="status" id="dang-lam" v-model="filterStatus" value="dang-lam" @change="fetchNhanVien">
+                    <span>Đang làm</span>
+                  </label>
+                  <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="radio" name="status" id="da-nghi" v-model="filterStatus" value="da-nghi" @change="fetchNhanVien">
+                    <span>Đã nghỉ</span>
+                  </label>
+                  <button type="button" @click="openModal()"
+                          class="bg-green-600  text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">
+                    Thêm nhân viên
+                  </button>
+                </div>
               </div>
-              <div>
-                <label class="text-xs">Ngày sinh</label>
-                <input v-model="nhanvien.ngaySinh" type="date" class="w-full px-4 py-2 mt-2 border rounded-md" />
-              </div>
-              <div>
-                <label class="text-xs">Ghi chú</label>
-                <input v-model="nhanvien.ghiChu"  type="text" class="w-full px-4 py-2 mt-2 border rounded-md" />
-              </div>
-              <div>
-                <label class="text-xs">Thành phố</label>
-                <input v-model="nhanvien.thanhPho" type="text" class="w-full px-4 py-2 mt-2 border rounded-md" />
-              </div>
-              <div>
-                <label class="text-xs">Quận</label>
-                <input v-model="nhanvien.quan" type="text" class="w-full px-4 py-2 mt-2 border rounded-md" />
-              </div>
-              <div>
-                <label class="text-xs">Phường</label>
-                <input v-model="nhanvien.phuong" type="text" class="w-full px-4 py-2 mt-2 border rounded-md" />
-              </div>
-              <div>
-                <label class="text-xs">Địa chỉ cụ thể</label>
-                <input v-model="nhanvien.diaChiCuThe" type="text" class="w-full px-4 py-2 mt-2 border rounded-md" />
-              </div>
-              <div>
-                <label class="text-xs">CCCD</label>
-                <input v-model="nhanvien.cccd" type="text" class="w-full px-4 py-2 mt-2 border rounded-md" />
-              </div>
-              <div>
-                <label class="text-xs">Ảnh nhân viên</label>
-                <input type="file" @change="handleFileUpload" class="w-full px-4 py-2 mt-2 border rounded-md" />
-              </div>
-              <div v-if="nhanvien.anhNhanVien">
-                <img :src="nhanvien.anhNhanVien" class="w-50 h-20 mt-2 rounded-md border border-gray-300 shadow-sm" />
-              </div>
-            </div>
-            <div class="px-5 py-3 flex justify-between">
-              <button type="reset" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition"
-                      @click="isEditing = false">Đặt lại thông tin</button>
 
-              <button v-if="!isEditing" type="submit" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">
-                Thêm nhân viên
-              </button>
-
-              <button v-if="isEditing" @click="updateNhanVien" type="button"
-                      class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition">
-                Sửa nhân viên
-              </button>
             </div>
           </form>
+  
+<!--        Modeladdnhanvien-->
+          <div v-if="isModalOpen" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+            <div class="bg-white p-6 rounded-lg shadow-lg w-[700px]">
+              <h2 class="text-2xl font-bold mb-4">Thông tin nhân viên</h2>
+
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <label class="block mb-2">Tên Nhân Viên</label>
+                  <input type="text" id="tenNhanVien" class="w-full px-3 py-2 border rounded-md" placeholder="Nhập tên nhân viên">
+                </div>
+
+                <div>
+                  <label class="block mb-2">UserName</label>
+                  <input type="text" id="maNhanVien" class="w-full px-3 py-2 border rounded-md" placeholder="Nhập UserNames">
+                </div>
+
+                <div>
+                  <label class="block mb-2">SDT</label>
+                  <input type="text" id="maNhanVien" class="w-full px-3 py-2 border rounded-md" placeholder="Nhập SDT">
+                </div>
+
+                <div>
+                  <label class="block mb-2">Email</label>
+                  <input type="text" id="maNhanVien" class="w-full px-3 py-2 border rounded-md" placeholder="Nhập Email">
+                </div>
+
+                <div class="col-span-2">
+                  <label class="block mb-2">Địa chỉ cụ thể</label>
+                  <input type="text" id="maNhanVien" class="w-full px-3 py-2 border rounded-md" placeholder="Nhập địa chỉ cụ thể">
+                </div>
+                
+                <div class="flex gap-4 col-span-2">
+                  <div class="w-1/3">
+                    <label class="block mb-2">Tỉnh/Thành phố</label>
+                    <select v-model="selectedProvince" @change="handleProvinceChange" class="w-full px-3 py-2 border rounded-md">
+                      <option value="" disabled>Chọn tỉnh/thành phố</option>
+                      <option v-for="province in provinces" :key="province.code">{{ province.name }}</option>
+                    </select>
+                  </div>
+
+                  <div class="w-1/3">
+                    <label class="block mb-2">Quận/Huyện</label>
+                    <select v-model="selectedDistrict" @change="handleDistrictChange" class="w-full px-3 py-2 border rounded-md">
+                      <option value="" disabled>Chọn quận/huyện</option>
+                      <option v-for="district in districts" :key="district.code">{{ district.name }}</option>
+                    </select>
+                  </div>
+
+                  <div class="w-1/3">
+                    <label class="block mb-2">Xã/Phường</label>
+                    <select v-model="selectedWard" class="w-full px-3 py-2 border rounded-md">
+                      <option value="" disabled>Chọn xã/phường</option>
+                      <option v-for="ward in wards" :key="ward.code">{{ ward.name }}</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="col-span-2">
+                  <label class="block mb-2">Ảnh Nhân Viên</label>
+                  <input type="file" @change="previewImage" class="w-full px-3 py-2 border rounded-md">
+
+                  <!-- Hiển thị ảnh xem trước -->
+                  <div v-if="employeeImage" class="mt-4 flex justify-center">
+                    <img :src="employeeImage" alt="Ảnh nhân viên" class="w-32 h-32 object-cover rounded-full border">
+                  </div>
+                </div>
+              </div>
+
+              <div class="flex justify-end space-x-4 mt-4">
+                <button @click="closeModal()" class="px-4 py-2 bg-gray-300 rounded-md">Hủy</button>
+                <button @click="saveEmployee()" class="px-4 py-2 bg-blue-600 text-white rounded-md">Lưu</button>
+              </div>
+            </div>
+          </div>
+
+
+
+
+
+          <div class="mt-8">
+            <div class="mt-4 overflow-x-auto">
+              <table class="w-full bg-white rounded-lg shadow-lg overflow-hidden border border-gray-200">
+                <thead>
+                <tr class="bg-gray-200 text-gray-800 uppercase text-sm tracking-wider">
+                  <th class="px-6 py-4 text-center w-10">#</th>
+                  <th class="px-6 py-4 text-left">Tên</th>
+                  <th class="px-6 py-4 text-left">Email</th>
+                  <th class="px-6 py-4 text-center w-40">SĐT</th>
+                  <th class="px-6 py-4 text-center w-40">Ngày tham gia</th>
+                  <th class="px-6 py-4 text-center w-32">Trạng thái</th>
+                  <th class="px-6 py-4 text-center w-32">Thao Tác</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr v-for="(nv, index) in dataTable" :key="nv.id"
+                    class="border-t hover:bg-gray-100 transition-all duration-200"
+                    :class="{'bg-gray-50': index % 2 !== 0}">
+                  <td class="px-6 py-4 text-center">{{ index + 1 }}</td>
+                  <td class="px-6 py-4 text-left">{{ nv.tenNhanVien }}</td>
+                  <td class="px-6 py-4 text-left">{{ nv.idTaiKhoan.email }}</td>
+                  <td class="px-6 py-4 text-center">{{ nv.idTaiKhoan.soDienThoai }}</td>
+                  <td class="px-6 py-4 text-center">{{ new Date(nv.ngaySinh).toLocaleDateString('vi-VN') }}</td>
+                  <td class="px-6 py-4 text-center font-semibold"
+                      :class="{'text-red-500': nv.deleted, 'text-green-600': !nv.deleted}">
+                    {{ nv.deleted ? 'Đã nghỉ' : 'Đang làm' }}
+                  </td>
+                  <td class="px-6 py-4 text-center">
+                    <button @click="showDeleteConfirm(nv.id)" class="text-red-600 hover:text-red-800 font-semibold px-2">Xóa</button>
+                  </td>
+                </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
       </div>
     </div>
     <br>
+    
 
-    <div class="flex items-center gap-2 flex-nowrap">
-      <input v-model="searchNV" placeholder="Search theo ma va ten..." type="text"
-             class="flex-1 px-4 py-2 border rounded-md" />
-
-      <button @click="btnSearch" type="button"
-              class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition">
-        Tìm kiếm
-      </button>
-
-      <button @click="backSearch" type="reset"
-              class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition">
-        Đặt lại
-      </button>
-    </div>
-
-
-    <div class="mt-8">
-      <h4 class="text-gray-700 font-semibold text-lg">Danh sách Nhân Viên</h4>
-      <div class="mt-4 overflow-x-auto">
-        <table class="w-full bg-white rounded-lg shadow-lg overflow-hidden">
-          <thead>
-          <tr class="bg-gradient-to-r from-gray-300 to-gray-200 text-gray-800 uppercase text-sm tracking-wider">
-            <th class="px-4 py-3 text-center">STT</th>
-            <th class="px-4 py-3 text-center">ID Tài khoản</th>
-            <th class="px-4 py-3 text-center">Mã</th>
-            <th class="px-4 py-3 text-center">Tên Nhân viên</th>
-            <th class="px-4 py-3 text-center">Ngày sinh</th>
-            <th class="px-4 py-3 text-center">Ảnh nhân viên</th>
-            <th class="px-4 py-3 text-center">Ghi chú</th>
-            <th class="px-4 py-3 text-center">Thành phố</th>
-            <th class="px-4 py-3 text-center">Quận</th>
-            <th class="px-4 py-3 text-center">Phường</th>
-            <th class="px-4 py-3 text-center">Địa chỉ cụ thể</th>
-            <th class="px-4 py-3 text-center">CCCD</th>
-            <th class="px-4 py-3 text-center">Hành động</th>
-          </tr>
-          </thead>
-          <tbody>
-          
-          <tr
-            v-for="(nv,index) in dataTable" :key="nv.id"
-            class="border-t text-center hover:bg-gray-100 transition-all duration-200"
-            :class="{'bg-gray-50': nv.id % 2 === 0}"
-          >
-            <td class="px-4 py-3">{{ index+1 }}</td>
-            <td class="px-4 py-3">{{ nv.idTaiKhoan.id }}</td>
-            <td class="px-4 py-3">{{ nv.ma }}</td>
-            <td class="px-4 py-3">{{ nv.tenNhanVien }}</td>
-            <td class="px-4 py-3">{{ new Date(nv.ngaySinh).toLocaleDateString() }}</td>
-            <td class="px-4 py-3">
-              <img :src="nv.anhNhanVien" class="anh-nhan-vien rounded-md shadow-sm border border-gray-300" />
-            </td>
-            <td class="px-4 py-3">{{ nv.ghiChu }}</td>
-            <td class="px-4 py-3">{{ nv.thanhPho }}</td>
-            <td class="px-4 py-3">{{ nv.quan }}</td>
-            <td class="px-4 py-3">{{ nv.phuong }}</td>
-            <td class="px-4 py-3">{{ nv.diaChiCuThe }}</td>
-            <td class="px-4 py-3">{{ nv.cccd }}</td>
-            <td class="px-4 py-3">
-              <button @click="editNhanVien(nv)" class="text-blue-600 hover:text-blue-800 font-semibold px-2">Sửa</button>
-              <button @click="showDeleteConfirm(nv.id)" class="text-red-600 hover:text-red-800 font-semibold px-2">Xóa</button>
-            </td>
-          </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
+    
 
   </div>
 
@@ -174,8 +187,66 @@ import ConfirmModal from "@/components/ConfirmModal.vue";
 const visible = ref(false);
 const message = ref("");
 const type = ref("success");
-import { ref, onMounted } from "vue";
+import { ref, onMounted, watch } from "vue";
 import axios from "axios";
+
+
+//anhnhanvien
+const employeeImage = ref(null);
+function previewImage(event) {
+  const file = event.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      employeeImage.value = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+}
+
+
+//DiaChiThanhPho
+const provinces = ref([]);
+const districts = ref([]);
+const wards = ref([]);
+const selectedProvince = ref('');
+const selectedDistrict = ref('');
+const selectedWard = ref('');
+
+onMounted(async () => {
+  try {
+    const response = await axios.get('https://provinces.open-api.vn/api/?depth=3');
+    provinces.value = response.data;
+  } catch (error) {
+    console.error('Lỗi khi tải dữ liệu:', error);
+  }
+});
+
+const handleProvinceChange = () => {
+  const province = provinces.value.find(prov => prov.name === selectedProvince.value);
+  districts.value = province ? province.districts : [];
+  selectedDistrict.value = '';
+  selectedWard.value = '';
+};
+
+const handleDistrictChange = () => {
+  const district = districts.value.find(dist => dist.name === selectedDistrict.value);
+  wards.value = district ? district.wards : [];
+  selectedWard.value = '';
+};
+
+
+
+//
+const isModalOpen = ref(false);
+
+const openModal = () => {
+  isModalOpen.value = true;
+};
+
+const closeModal = () => {
+  isModalOpen.value = false;
+};
 
 const dataTable = ref([]);
 const nhanvien = ref({
@@ -216,14 +287,26 @@ const showToast = (toastType, msg) => {
     visible.value = false;
   }, 3000);
 };
+//getall
+const filterStatus = ref('tat-ca'); // Mặc định là "Tất cả"
+
 const fetchNhanVien = async () => {
   try {
     const res = await axios.get("http://localhost:8080/nhan-vien/home");
-    dataTable.value = res.data.filter(kh => !kh.deleted);
+
+    if (filterStatus.value === 'dang-lam') {
+      dataTable.value = res.data.filter(nv => !nv.deleted); // Đang làm
+    } else if (filterStatus.value === 'da-nghi') {
+      dataTable.value = res.data.filter(nv => nv.deleted); // Đã nghỉ
+    } else {
+      dataTable.value = res.data; // Tất cả
+    }
   } catch (error) {
-    console.error("Lỗi khi lấy danh sách khách hàng:", error);
+    console.error("Lỗi khi lấy danh sách nhân viên:", error);
   }
 };
+
+
 onMounted(fetchNhanVien);
 //add
 const addNhanVien = async () => {
@@ -285,7 +368,7 @@ const addNhanVien = async () => {
   } catch (error) {
     console.error("Lỗi khi thêm khách hàng:", error);
     showToast("error", "Không thể thêm nhân viên. Vui lòng thử lại!");
-  }
+  } 
 };
 //delete
 
@@ -303,21 +386,14 @@ const deleteNv = async (id) => {
 const searchNV = ref("");
 const btnSearch = () => {
   if (!searchNV.value.trim()){
-    showToast("error","Vui long nhap search!");
     fetchNhanVien();
     return;
   } 
   dataTable.value = dataTable.value.filter(nhanvien =>
-    nhanvien.ma.toLowerCase().includes(searchNV.value.toLowerCase()) || 
+    nhanvien.idTaiKhoan.email.toLowerCase().includes(searchNV.value.toLowerCase()) || 
     nhanvien.tenNhanVien.toLowerCase().includes(searchNV.value.toLowerCase()) || 
-    nhanvien.cccd.toLowerCase().includes(searchNV.value.toLowerCase()) 
+    nhanvien.idTaiKhoan.soDienThoai.toLowerCase().includes(searchNV.value.toLowerCase()) 
   );
-}
-//backSearch
-const backSearch = () => {
-  fetchNhanVien();
-  searchNV.value = "";
-  return;
 }
 
 //MouclickDulieu
@@ -352,6 +428,8 @@ const updateNhanVien = async () => {
 
 
 </script>
+
+
 <style scoped>
 .toast {
   position: fixed;
