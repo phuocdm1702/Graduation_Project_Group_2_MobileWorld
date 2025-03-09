@@ -12,9 +12,9 @@ import PhieuBaoHanh from "../views/BaoHanh/PhieuBaoHanh.vue";
 import Login from "../views/LoginView/AppLogin.vue";
 
 // Đơn hàng
-import LichSuHD from "../views/Bill/AppLichSuHoaDon.vue";
-import HoaDon from "../views/Bill/AppHoaDon.vue";
-import HoaDonChiTiet from "../views/Bill/AppHoaDonChiTiet.vue";
+import LichSuHD from "../views/Bill/LichSuHoaDon.vue";
+import HoaDon from "../views/Bill/HoaDon.vue";
+import HoaDonChiTiet from "../views/Bill/HoaDonChiTiet.vue";
 
 // Tài khoản
 import NhanVien from "../views/AccountType/NhanVien.vue";

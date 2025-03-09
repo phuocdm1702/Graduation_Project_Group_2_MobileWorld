@@ -1,5 +1,22 @@
 <template>
   <div class="mt-8 max-w-screen-xl mx-auto">
+    <h4 class="text-gray-600">Hóa Đơn Chi Tiết</h4>
+
+    <!-- Bộ lọc -->
+    <div class="flex space-x-4 my-4">
+      <select v-model="selectedStatus" class="border p-2 rounded-md">
+        <option value="">Tất cả trạng thái</option>
+        <option value="Hoàn thành">Hoàn thành</option>
+        <option value="Đang xử lý">Đang xử lý</option>
+        <option value="Đã thanh toán">Đã thanh toán</option>
+        <option value="Chờ xác nhận">Chờ xác nhận</option>
+      </select>
+
+      <select v-model="selectedBillId" class="border p-2 rounded-md">
+        <option value="">Tất cả hóa đơn</option>
+        <option v-for="bill in uniqueBillIds" :key="bill" :value="bill">{{ bill }}</option>
+      </select>
+    </div>
     <!-- Bảng dữ liệu -->
     <div class="overflow-x-auto mt-6 bg-white shadow-lg rounded-lg p-4">
       <table class="w-full min-w-max table-auto border-collapse">
@@ -37,20 +54,10 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
-import axios from "axios";
-
-const dataTableHDCT = ref([]);
-
-onMounted(async () => {
-  try {
-    const res = await axios.get("http://localhost:8080/hoa-don-chi-tiet/home");
-    console.log("Dữ liệu từ API:", res.data);
-    dataTableHDCT.value = res.data;
-  } catch (error) {
-    console.error("Lỗi:", error);
-  }
-});
+import useHoaDonChiTietLineList from "@/views/Bill/HoaDonChiTiet";
+const{
+  dataTableHDCT
+}= useHoaDonChiTietLineList();
 </script>
 
 <style scoped>
