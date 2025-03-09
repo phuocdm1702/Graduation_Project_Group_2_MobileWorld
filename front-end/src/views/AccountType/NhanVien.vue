@@ -14,115 +14,144 @@
       <div class="mt-4">
         <div class="w-full overflow-hidden bg-white border rounded-md shadow-md">
           <form @submit.prevent>
-            <div class="p-5  grid grid-cols-2 gap-6">
-<!--              search-->
+            <div class="p-5 grid grid-cols-3 gap-6 items-center">
+              <!-- Search -->
               <div>
                 <label class="text-sm font-semibold block mb-2">Nhập thông tin tìm kiếm</label>
-                <input v-model="searchNV"
-                       @input="btnSearch"
-                       placeholder="Tìm theo mã hoặc tên..."
-                       type="text"
-                       class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-400 outline-none"/>
+                <input
+                  v-model="searchNV"
+                  @input="btnSearch"
+                  placeholder="Tìm theo mã hoặc tên..."
+                  type="text"
+                  class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-400 outline-none"
+                />
               </div>
-<!--              trangthai-->
+
+              <!-- Trạng thái -->
               <div>
                 <label class="text-sm font-semibold block mb-2">Trạng thái</label>
-                <div class="flex items-center gap-6">
+                <div class="flex items-center gap-4">
                   <label class="flex items-center gap-2 cursor-pointer">
-                    <input type="radio" name="status" id="tat-ca" v-model="filterStatus" value="tat-ca" @change="fetchNhanVien">
+                    <input
+                      type="radio"
+                      name="status"
+                      id="tat-ca"
+                      v-model="filterStatus"
+                      value="tat-ca"
+                      @change="fetchNhanVien"
+                    />
                     <span>Tất cả</span>
                   </label>
+
                   <label class="flex items-center gap-2 cursor-pointer">
-                    <input type="radio" name="status" id="dang-lam" v-model="filterStatus" value="dang-lam" @change="fetchNhanVien">
+                    <input
+                      type="radio"
+                      name="status"
+                      id="dang-lam"
+                      v-model="filterStatus"
+                      value="dang-lam"
+                      @change="fetchNhanVien"
+                    />
                     <span>Đang làm</span>
                   </label>
+
                   <label class="flex items-center gap-2 cursor-pointer">
-                    <input type="radio" name="status" id="da-nghi" v-model="filterStatus" value="da-nghi" @change="fetchNhanVien">
+                    <input
+                      type="radio"
+                      name="status"
+                      id="da-nghi"
+                      v-model="filterStatus"
+                      value="da-nghi"
+                      @change="fetchNhanVien"
+                    />
                     <span>Đã nghỉ</span>
                   </label>
-                  <button type="button" @click="openModal()"
-                          class="bg-green-600  text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">
-                    Thêm nhân viên
-                  </button>
+                  <div class="flex justify-end items-end">
+                    <router-link to="/them-nhan-vien">
+                      <button class="px-4 py-2 bg-green-500 text-white rounded-md">
+                        Thêm Nhân Viên
+                      </button>
+                    </router-link>
+                  </div>
                 </div>
               </div>
-
             </div>
           </form>
-  
-<!--        Modeladdnhanvien-->
-          <div v-if="isModalOpen" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-            <div class="bg-white p-6 rounded-lg shadow-lg w-[700px]">
-              <h2 class="text-2xl font-bold mb-4">Thông tin nhân viên</h2>
 
-              <div class="grid grid-cols-2 gap-4">
-                <div>
-                  <label class="block mb-2">Tên Nhân Viên</label>
-                  <input type="text" id="tenNhanVien" class="w-full px-3 py-2 border rounded-md" placeholder="Nhập tên nhân viên">
-                </div>
 
-                <div>
-                  <label class="block mb-2">UserName</label>
-                  <input type="text" id="maNhanVien" class="w-full px-3 py-2 border rounded-md" placeholder="Nhập UserNames">
-                </div>
+          <!--        Modeladdnhanvien-->
+<!--          <div v-if="isModalOpen" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">-->
+<!--            <div class="bg-white p-6 rounded-lg shadow-lg w-[700px]">-->
+<!--              <h2 class="text-2xl font-bold mb-4">Thông tin nhân viên</h2>-->
 
-                <div>
-                  <label class="block mb-2">SDT</label>
-                  <input type="text" id="maNhanVien" class="w-full px-3 py-2 border rounded-md" placeholder="Nhập SDT">
-                </div>
+<!--              <div class="grid grid-cols-2 gap-4">-->
+<!--                <div>-->
+<!--                  <label class="block mb-2">Tên Nhân Viên</label>-->
+<!--                  <input type="text" id="tenNhanVien" class="w-full px-3 py-2 border rounded-md" placeholder="Nhập tên nhân viên">-->
+<!--                </div>-->
 
-                <div>
-                  <label class="block mb-2">Email</label>
-                  <input type="text" id="maNhanVien" class="w-full px-3 py-2 border rounded-md" placeholder="Nhập Email">
-                </div>
+<!--                <div>-->
+<!--                  <label class="block mb-2">UserName</label>-->
+<!--                  <input type="text" id="maNhanVien" class="w-full px-3 py-2 border rounded-md" placeholder="Nhập UserNames">-->
+<!--                </div>-->
 
-                <div class="col-span-2">
-                  <label class="block mb-2">Địa chỉ cụ thể</label>
-                  <input type="text" id="maNhanVien" class="w-full px-3 py-2 border rounded-md" placeholder="Nhập địa chỉ cụ thể">
-                </div>
-                
-                <div class="flex gap-4 col-span-2">
-                  <div class="w-1/3">
-                    <label class="block mb-2">Tỉnh/Thành phố</label>
-                    <select v-model="selectedProvince" @change="handleProvinceChange" class="w-full px-3 py-2 border rounded-md">
-                      <option value="" disabled>Chọn tỉnh/thành phố</option>
-                      <option v-for="province in provinces" :key="province.code">{{ province.name }}</option>
-                    </select>
-                  </div>
+<!--                <div>-->
+<!--                  <label class="block mb-2">SDT</label>-->
+<!--                  <input type="text" id="maNhanVien" class="w-full px-3 py-2 border rounded-md" placeholder="Nhập SDT">-->
+<!--                </div>-->
 
-                  <div class="w-1/3">
-                    <label class="block mb-2">Quận/Huyện</label>
-                    <select v-model="selectedDistrict" @change="handleDistrictChange" class="w-full px-3 py-2 border rounded-md">
-                      <option value="" disabled>Chọn quận/huyện</option>
-                      <option v-for="district in districts" :key="district.code">{{ district.name }}</option>
-                    </select>
-                  </div>
+<!--                <div>-->
+<!--                  <label class="block mb-2">Email</label>-->
+<!--                  <input type="text" id="maNhanVien" class="w-full px-3 py-2 border rounded-md" placeholder="Nhập Email">-->
+<!--                </div>-->
 
-                  <div class="w-1/3">
-                    <label class="block mb-2">Xã/Phường</label>
-                    <select v-model="selectedWard" class="w-full px-3 py-2 border rounded-md">
-                      <option value="" disabled>Chọn xã/phường</option>
-                      <option v-for="ward in wards" :key="ward.code">{{ ward.name }}</option>
-                    </select>
-                  </div>
-                </div>
-                <div class="col-span-2">
-                  <label class="block mb-2">Ảnh Nhân Viên</label>
-                  <input type="file" @change="previewImage" class="w-full px-3 py-2 border rounded-md">
+<!--                <div class="col-span-2">-->
+<!--                  <label class="block mb-2">Địa chỉ cụ thể</label>-->
+<!--                  <input type="text" id="maNhanVien" class="w-full px-3 py-2 border rounded-md" placeholder="Nhập địa chỉ cụ thể">-->
+<!--                </div>-->
+<!--                -->
+<!--                <div class="flex gap-4 col-span-2">-->
+<!--                  <div class="w-1/3">-->
+<!--                    <label class="block mb-2">Tỉnh/Thành phố</label>-->
+<!--                    <select v-model="selectedProvince" @change="handleProvinceChange" class="w-full px-3 py-2 border rounded-md">-->
+<!--                      <option value="" disabled>Chọn tỉnh/thành phố</option>-->
+<!--                      <option v-for="province in provinces" :key="province.code">{{ province.name }}</option>-->
+<!--                    </select>-->
+<!--                  </div>-->
 
-                  <!-- Hiển thị ảnh xem trước -->
-                  <div v-if="employeeImage" class="mt-4 flex justify-center">
-                    <img :src="employeeImage" alt="Ảnh nhân viên" class="w-32 h-32 object-cover rounded-full border">
-                  </div>
-                </div>
-              </div>
+<!--                  <div class="w-1/3">-->
+<!--                    <label class="block mb-2">Quận/Huyện</label>-->
+<!--                    <select v-model="selectedDistrict" @change="handleDistrictChange" class="w-full px-3 py-2 border rounded-md">-->
+<!--                      <option value="" disabled>Chọn quận/huyện</option>-->
+<!--                      <option v-for="district in districts" :key="district.code">{{ district.name }}</option>-->
+<!--                    </select>-->
+<!--                  </div>-->
 
-              <div class="flex justify-end space-x-4 mt-4">
-                <button @click="closeModal()" class="px-4 py-2 bg-gray-300 rounded-md">Hủy</button>
-                <button @click="saveEmployee()" class="px-4 py-2 bg-blue-600 text-white rounded-md">Lưu</button>
-              </div>
-            </div>
-          </div>
+<!--                  <div class="w-1/3">-->
+<!--                    <label class="block mb-2">Xã/Phường</label>-->
+<!--                    <select v-model="selectedWard" class="w-full px-3 py-2 border rounded-md">-->
+<!--                      <option value="" disabled>Chọn xã/phường</option>-->
+<!--                      <option v-for="ward in wards" :key="ward.code">{{ ward.name }}</option>-->
+<!--                    </select>-->
+<!--                  </div>-->
+<!--                </div>-->
+<!--                <div class="col-span-2">-->
+<!--                  <label class="block mb-2">Ảnh Nhân Viên</label>-->
+<!--                  <input type="file" @change="previewImage" class="w-full px-3 py-2 border rounded-md">-->
+
+<!--                  &lt;!&ndash; Hiển thị ảnh xem trước &ndash;&gt;-->
+<!--                  <div v-if="employeeImage" class="mt-4 flex justify-center">-->
+<!--                    <img :src="employeeImage" alt="Ảnh nhân viên" class="w-32 h-32 object-cover rounded-full border">-->
+<!--                  </div>-->
+<!--                </div>-->
+<!--              </div>-->
+
+<!--              <div class="flex justify-end space-x-4 mt-4">-->
+<!--                <button @click="closeModal()" class="px-4 py-2 bg-gray-300 rounded-md">Hủy</button>-->
+<!--                <button @click="saveEmployee()" class="px-4 py-2 bg-blue-600 text-white rounded-md">Lưu</button>-->
+<!--              </div>-->
+<!--            </div>-->
+<!--          </div>-->
 
 
 
@@ -150,7 +179,7 @@
                   <td class="px-6 py-4 text-left">{{ nv.tenNhanVien }}</td>
                   <td class="px-6 py-4 text-left">{{ nv.idTaiKhoan.email }}</td>
                   <td class="px-6 py-4 text-center">{{ nv.idTaiKhoan.soDienThoai }}</td>
-                  <td class="px-6 py-4 text-center">{{ new Date(nv.ngaySinh).toLocaleDateString('vi-VN') }}</td>
+                  <td class="px-6 py-4 text-center">{{ new Date(nv.createdAt).toLocaleDateString('vi-VN') }}</td>
                   <td class="px-6 py-4 text-center font-semibold"
                       :class="{'text-red-500': nv.deleted, 'text-green-600': !nv.deleted}">
                     {{ nv.deleted ? 'Đã nghỉ' : 'Đang làm' }}
@@ -183,7 +212,7 @@
 
 <script setup>
 import ConfirmModal from "@/components/ConfirmModal.vue";
-
+import EmployeeForm from "@/views/AccountType/EmployeeForm.vue";
 const visible = ref(false);
 const message = ref("");
 const type = ref("success");
@@ -206,38 +235,7 @@ function previewImage(event) {
 
 
 //DiaChiThanhPho
-const provinces = ref([]);
-const districts = ref([]);
-const wards = ref([]);
-const selectedProvince = ref('');
-const selectedDistrict = ref('');
-const selectedWard = ref('');
 
-onMounted(async () => {
-  try {
-    const response = await axios.get('https://provinces.open-api.vn/api/?depth=3');
-    provinces.value = response.data;
-  } catch (error) {
-    console.error('Lỗi khi tải dữ liệu:', error);
-  }
-});
-
-const handleProvinceChange = () => {
-  const province = provinces.value.find(prov => prov.name === selectedProvince.value);
-  districts.value = province ? province.districts : [];
-  selectedDistrict.value = '';
-  selectedWard.value = '';
-};
-
-const handleDistrictChange = () => {
-  const district = districts.value.find(dist => dist.name === selectedDistrict.value);
-  wards.value = district ? district.wards : [];
-  selectedWard.value = '';
-};
-
-
-
-//
 const isModalOpen = ref(false);
 
 const openModal = () => {

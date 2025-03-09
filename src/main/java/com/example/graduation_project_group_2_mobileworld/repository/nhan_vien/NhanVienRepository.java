@@ -15,4 +15,8 @@ public interface NhanVienRepository extends JpaRepository<NhanVien, Integer> {
 
     @Query("SELECT n FROM NhanVien n")
     List<NhanVien> findAllActiveNv();
+
+    @Query("SELECT MAX(CAST(SUBSTRING(n.ma, 3, LENGTH(n.ma)) AS int)) FROM NhanVien n")
+    Integer findMaxMa();
+
 }

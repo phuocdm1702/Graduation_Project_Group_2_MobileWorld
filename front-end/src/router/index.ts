@@ -18,6 +18,7 @@ import HoaDonChiTiet from "../views/Bill/HoaDonChiTiet.vue";
 
 // Tài khoản
 import NhanVien from "../views/AccountType/NhanVien.vue";
+import EmployeeForm from "@/views/AccountType/EmployeeForm.vue";
 import KhachHang from "../views/AccountType/KhachHang.vue";
 
 import NotFound from "../views/NotFound.vue";
@@ -28,6 +29,8 @@ import ProductDetails from "../views/Products/SanPham/ChiTietSanPham.vue";
 // Thương hiệu
 import Manufacturer from "../views/Products/Brand/NhaSanXuat.vue";
 import ProductLine from "../views/Products/Brand/DongSanPham.vue";
+
+//NhanVien
 
 // Màn hình
 import Display from "../views/Products/Screen/ManHinh.vue";
@@ -122,7 +125,13 @@ const routes: Array<RouteRecordRaw> = [
     path: "/ViewAddDotGiamGia",
     name: "ViewAddDotGiamGia",
     component: () => import("@/views/Voucher/ViewAddDotGiamGia.vue"),
-  }
+  },
+  
+  { path: '/', component: NhanVien },
+  { path: '/them-nhan-vien', component: EmployeeForm },
+
+  { path: '/', component: EmployeeForm },
+  { path: '/back', component: NhanVien }
 
 ];
 

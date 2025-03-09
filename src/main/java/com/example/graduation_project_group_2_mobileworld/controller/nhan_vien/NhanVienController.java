@@ -1,8 +1,10 @@
 package com.example.graduation_project_group_2_mobileworld.controller.nhan_vien;
 
+import com.example.graduation_project_group_2_mobileworld.dto.nhan_vien.NhanVienDTO;
 import com.example.graduation_project_group_2_mobileworld.entity.KhachHang;
 import com.example.graduation_project_group_2_mobileworld.entity.NhanVien;
 import com.example.graduation_project_group_2_mobileworld.service.nhan_vien.NhanVienServices;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,10 +26,17 @@ public class NhanVienController {
         List<NhanVien> kh = nhanVienServices.getall();
         return ResponseEntity.ok(kh);
     }
-//    @PostMapping("/add")
-//    public NhanVien addNhanVien(@RequestBody NhanVien nhanVien){
-//        return nhanVienServices.add(nhanVien);
-//    }
+
+    @PostMapping("/add")
+    public ResponseEntity<?> addNhanVien(@RequestBody NhanVienDTO nhanVienDTO) {
+        try {
+            NhanVien nhanVien = nhanVienServices.addNhanVien(nhanVienDTO);
+            return new ResponseEntity<>(nhanVien, HttpStatus.CREATED);
+        } catch (Exception e) {
+            return new ResponseEntity<>("Lỗi khi thêm nhân viên: " + e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
+
     @PutMapping("/delete/{id}")
     public ResponseEntity<String> softDelete(@PathVariable Integer id) {
         boolean deleted = nhanVienServices.delete(id);

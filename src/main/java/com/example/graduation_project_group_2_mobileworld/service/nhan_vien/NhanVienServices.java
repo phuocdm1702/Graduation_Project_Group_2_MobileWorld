@@ -1,8 +1,12 @@
 package com.example.graduation_project_group_2_mobileworld.service.nhan_vien;
 
+import com.example.graduation_project_group_2_mobileworld.dto.nhan_vien.NhanVienDTO;
 import com.example.graduation_project_group_2_mobileworld.entity.KhachHang;
 import com.example.graduation_project_group_2_mobileworld.entity.NhanVien;
+import com.example.graduation_project_group_2_mobileworld.entity.QuyenHan;
+import com.example.graduation_project_group_2_mobileworld.entity.TaiKhoan;
 import com.example.graduation_project_group_2_mobileworld.repository.nhan_vien.NhanVienRepository;
+import com.example.graduation_project_group_2_mobileworld.repository.tai_khoan.TaiKhoanRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -12,34 +16,42 @@ import java.util.Optional;
 @Service
 public class NhanVienServices {
     private final NhanVienRepository nhanVienRepository;
-
-    public NhanVienServices(NhanVienRepository nhanVienRepository) {
+    private final TaiKhoanRepository taiKhoanRepository;
+    public NhanVienServices(NhanVienRepository nhanVienRepository, TaiKhoanRepository taiKhoanRepository) {
         this.nhanVienRepository = nhanVienRepository;
+        this.taiKhoanRepository = taiKhoanRepository;
     }
 
+    //MatutangNV
+    public String generateMaNhanVien() {
+        Integer maxMa = nhanVienRepository.findMaxMa(); // Tìm giá trị lớn nhất dạng số nguyên
+        if (maxMa == null) {
+            return "NV000001"; // Nếu chưa có mã nào thì bắt đầu từ NV000001
+        }
+        return String.format("NV%06d", maxMa + 1);
+    }
+    //MatutangTK
+    public String MaTaiKhoan() {
+        String maxMaTK = taiKhoanRepository.findMaxMaTK();
+        if (maxMaTK != null) {
+            int nextNumber = Integer.parseInt(maxMaTK.substring(2)) + 1;
+            return String.format("TK%05d", nextNumber);
+        } else {
+            return "TK00001";
+        }
+    }
+
+
+
+
+
+
+    //hienthi
     public List<NhanVien> getall() {
         return nhanVienRepository.findAllActiveNv();
     }
 
-
-//    public NhanVien add(NhanVien nhanVien) {
-//        return nhanVienRepository.save(nhanVien);
-//    }
-
-
-
-
-//    public boolean softDeleteNhanVien(Integer id) {
-//        Optional<NhanVien> optionalNV = nhanVienRepository.findById(id);
-//        if (optionalNV.isPresent()) {
-//            NhanVien nv = optionalNV.get();
-//            nv.setDeleted(true);
-//            nhanVienRepository.save(nv);
-//            return true;
-//        }
-//        return false;
-//    }
-//
+    //xoa
     public boolean delete(Integer id) {
         Optional<NhanVien> optionalKH = nhanVienRepository.findById(id);
         if (optionalKH.isPresent()) {
@@ -50,28 +62,32 @@ public class NhanVienServices {
         }
         return false;
     }
-//
-//    public NhanVien updatenv(Integer id, NhanVien nhanVien) {
-//        Optional<NhanVien> existingKhachHang = nhanVienRepository.findById(id);
-//        if (existingKhachHang.isPresent()) {
-//            NhanVien kh = existingKhachHang.get();
-//            // Kiểm tra trùng mã với các khách hàng khác (trừ chính nó)
-//            if (nhanVienRepository.existsByMaAndNotId(nhanVien.getMa(), id)) {
-//                throw new RuntimeException("Mã khách hàng đã tồn tại: " + nhanVien.getMa());
-//            }
-//            kh.setMa(nhanVien.getMa());
-//            kh.setTenNhanVien(nhanVien.getTenNhanVien());
-//            kh.setNgaySinh(nhanVien.getNgaySinh());
-//            kh.setAnhNhanVien(nhanVien.getAnhNhanVien());
-//            kh.setGhiChu(nhanVien.getGhiChu());
-//            kh.setThanhPho(nhanVien.getThanhPho());
-//            kh.setQuan(nhanVien.getQuan());
-//            kh.setPhuong(nhanVien.getPhuong());
-//            kh.setDiaChiCuThe(nhanVien.getDiaChiCuThe());
-//            kh.setCccd(nhanVien.getCccd());
-//            return nhanVienRepository.save(kh);
-//        } else {
-//            throw new RuntimeException("Không tìm thấy khách hàng với ID: " + id);
-//        }
-//    }
+    //themnhanvien
+    public NhanVien addNhanVien(NhanVienDTO dto) {
+        QuyenHan quyenHan = new QuyenHan();;
+        quyenHan.setId(3);
+        TaiKhoan taiKhoan = new TaiKhoan();
+        taiKhoan.setMa(MaTaiKhoan());
+        taiKhoan.setEmail(dto.getEmail());
+        taiKhoan.setSoDienThoai(dto.getSoDienThoai());
+        taiKhoan.setTenDangNhap(dto.getTenDangNhap());
+        taiKhoan.setIdQuyenHan(quyenHan);
+        taiKhoan = taiKhoanRepository.save(taiKhoan);
+
+        NhanVien nhanVien = new NhanVien();
+        nhanVien.setMa(generateMaNhanVien());
+        nhanVien.setIdTaiKhoan(taiKhoan);
+        nhanVien.setTenNhanVien(dto.getTenNhanVien());
+        nhanVien.setNgaySinh(dto.getNgaySinh());
+        nhanVien.setThanhPho(dto.getThanhPho());
+        nhanVien.setQuan(dto.getQuan());
+        nhanVien.setPhuong(dto.getPhuong());
+        nhanVien.setDiaChiCuThe(dto.getDiaChiCuThe());
+        nhanVien.setCccd(dto.getCccd());
+        nhanVien.setAnhNhanVien(dto.getAnhNhanVien());
+        nhanVien.setDeleted(false);
+
+        return nhanVienRepository.save(nhanVien);
+    }
+
 }
