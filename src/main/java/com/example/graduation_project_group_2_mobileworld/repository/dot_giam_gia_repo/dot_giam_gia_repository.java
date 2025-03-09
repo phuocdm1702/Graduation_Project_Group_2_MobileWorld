@@ -26,16 +26,6 @@ public interface dot_giam_gia_repository extends JpaRepository<DotGiamGia, Integ
     @Query("SELECT dsp FROM DongSanPham dsp WHERE (:timKiem IS NULL OR :timKiem = '' OR dsp.ma LIKE CONCAT('%', :timKiem, '%') OR dsp.dongSanPham LIKE CONCAT('%', :timKiem, '%')) AND dsp.deleted = false ")
     public List<DongSanPham> getAllDongSanPham(@Param("timKiem") String timKiem);
 
-//    @Query("SELECT new com.example.graduation_project_group_2_mobileworld.dto.dot_giam_gia.viewCTSPDTO(dsp, ctsp, anh, bnt) " +
-//            "FROM DongSanPham dsp " +
-//            "INNER JOIN ChiTietSanPham ctsp ON ctsp.idDongSanPham.id = dsp.id " +
-//            "INNER JOIN AnhSanPham anh ON ctsp.idAnhSanPham.id = anh.id " +
-//            "INNER JOIN BoNhoTrong bnt on ctsp.idBoNhoTrong.id=bnt.id " +
-//            "WHERE dsp.id IN :ids " +
-//            "AND ctsp.id = (SELECT MIN(ctsp2.id) FROM ChiTietSanPham ctsp2 WHERE ctsp2.giaBan = ctsp.giaBan AND ctsp2.idDongSanPham.id = dsp.id) " +
-//            "AND anh.id = (SELECT MIN(anh2.id) FROM AnhSanPham anh2 WHERE anh2.id = anh.id)")
-//    List<viewCTSPDTO> getAllCTSP(@Param("ids") List<Integer> ids);
-
 
     @Query("SELECT new com.example.graduation_project_group_2_mobileworld.dto.dot_giam_gia.viewCTSPDTO(dsp, ctsp, anh, bnt) " +
             "FROM DongSanPham dsp " +
