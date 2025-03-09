@@ -64,9 +64,8 @@ export default function useHoaDonLineList() {
     try {
       const res = await axios.get("http://localhost:8080/hoa-don/home", {
         params: {
-          page: currentPage.value - 1, // Backend dùng page từ 0
+          page: currentPage.value - 1,
           size: pageSize.value,
-          // Thêm các tham số lọc nếu backend hỗ trợ
           search: searchQuery.value || undefined,
           minAmount: minAmount.value || undefined,
           maxAmount: maxAmount.value || undefined,
@@ -76,11 +75,15 @@ export default function useHoaDonLineList() {
         },
       });
       console.log("Dữ liệu từ API:", res.data);
-      dataTable.value = res.data.content; // Dữ liệu trang hiện tại
-      totalPages.value = res.data.totalPages; // Tổng số trang
-      totalElements.value = res.data.totalElements; // Tổng số bản ghi
+      dataTable.value = res.data.content;
+      totalPages.value = res.data.totalPages;
+      totalElements.value = res.data.totalElements;
     } catch (error) {
-      console.error("Lỗi:", error);
+      console.error("Lỗi khi gọi API:", error);
+      // Xử lý lỗi (ví dụ: đặt giá trị mặc định)
+      dataTable.value = [];
+      totalPages.value = 0;
+      totalElements.value = 0;
     }
   };
 

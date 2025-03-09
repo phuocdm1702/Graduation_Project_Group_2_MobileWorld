@@ -23,34 +23,12 @@
     </div>
 
     <!-- Bảng dữ liệu động -->
-    <div class="overflow-x-auto mt-6 bg-white shadow-lg rounded-lg p-4">
-      <table class="w-full min-w-max table-auto border-collapse">
-        <thead>
-        <tr class="bg-gray-100 text-gray-700 text-sm font-semibold">
-          <th v-for="column in columns" :key="column.key" class="th-cell">
-            {{ column.label }}
-          </th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr v-for="(hoaDon, index) in dataTable" :key="hoaDon.id" class="text-gray-700 border-b hover:bg-gray-50">
-          <td v-for="column in columns" :key="column.key" class="td-cell">
-            <span v-if="column.formatter" v-html="column.formatter(getNestedValue(hoaDon, column.key), hoaDon, index)"></span>
-            <span v-else>{{ getNestedValue(hoaDon, column.key) || 'N/A' }}</span>
-          </td>
-          <td>
-            <a href="/hoa-don-chi-tiet">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-box-arrow-in-down-left" viewBox="0 0 16 16">
-                <path fill-rule="evenodd" d="M9.636 2.5a.5.5 0 0 0-.5-.5H2.5A1.5 1.5 0 0 0 1 3.5v10A1.5 1.5 0 0 0 2.5 15h10a1.5 1.5 0 0 0 1.5-1.5V6.864a.5.5 0 0 0-1 0V13.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5"/>
-                <path fill-rule="evenodd" d="M5 10.5a.5.5 0 0 0 .5.5h5a.5.5 0 0 0 0-1H6.707l8.147-8.146a.5.5 0 0 0-.708-.708L6 9.293V5.5a.5.5 0 0 0-1 0z"/>
-              </svg>
-            </a>
-          </td>
-        </tr>
-        </tbody>
-      </table>
-    </div>
-
+    <!-- Sử dụng DynamicTable -->
+    <DynamicTable
+      :data="dataTable"
+      :columns="columns"
+      :get-nested-value="getNestedValue"
+    />
     <!-- Phân trang -->
     <div class="mt-4 flex justify-between items-center">
       <button @click="prevPage" :disabled="currentPage === 1" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400">
@@ -62,10 +40,17 @@
       </button>
     </div>
   </div>
+  
+  <HoaDonChiTiet/>
+  
+  <LichSuHoaDon/>
 </template>
 
 <script setup>
 import useHoaDonLineList from "@/views/Bill/HoaDon";
+import HoaDonChiTiet from "@/views/Bill/HoaDonChiTiet.vue";
+import LichSuHoaDon from "@/views/Bill/LichSuHoaDon.vue";
+import DynamicTable from "@/components/DynamicTable.vue";
 
 const {
   dataTable,
@@ -89,11 +74,5 @@ const {
 <style scoped>
 .input-field {
   @apply w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm;
-}
-.th-cell {
-  @apply px-4 py-3 text-left border-b;
-}
-.td-cell {
-  @apply px-4 py-2 text-sm;
 }
 </style>
