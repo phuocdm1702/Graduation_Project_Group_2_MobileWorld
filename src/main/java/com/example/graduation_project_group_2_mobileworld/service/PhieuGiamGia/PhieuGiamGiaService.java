@@ -5,8 +5,10 @@ import com.example.graduation_project_group_2_mobileworld.entity.PhieuGiamGiaCaN
 import com.example.graduation_project_group_2_mobileworld.repository.giam_gia.PhieuGiamGiaCaNhanRepository;
 import com.example.graduation_project_group_2_mobileworld.repository.giam_gia.PhieuGiamGiaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,6 +24,36 @@ public class PhieuGiamGiaService {
     }
 
     public List<PhieuGiamGia> getPGG() {
+        List<PhieuGiamGia> listPgg = phieuGiamGiaRepository.findAll();
+        Date now = new Date();
+
+        for (PhieuGiamGia pgg : listPgg) {
+            if(pgg.getNgayKetThuc() != null && pgg.getNgayKetThuc().before(now)) {
+                pgg.setTrangThai(false);
+                phieuGiamGiaRepository.save(pgg);
+            }
+        }
+        return listPgg;
+    }
+
+    @Scheduled(fixedRate = 200000)
+    public void updateHanPGG() {
+        List<PhieuGiamGia> listPgg = phieuGiamGiaRepository.findAll();
+        Date now = new Date();
+
+        for (PhieuGiamGia pgg : listPgg) {
+            if(pgg.getNgayKetThuc() != null && pgg.getNgayKetThuc().before(now)) {
+                pgg.setTrangThai(false);
+                phieuGiamGiaRepository.save(pgg);
+            }
+        }
+
+    }
+
+    public List<PhieuGiamGia> searchData(String keyword) {
+        if(keyword != null) {
+            return phieuGiamGiaRepository.search(keyword);
+        }
         return phieuGiamGiaRepository.findAll();
     }
 

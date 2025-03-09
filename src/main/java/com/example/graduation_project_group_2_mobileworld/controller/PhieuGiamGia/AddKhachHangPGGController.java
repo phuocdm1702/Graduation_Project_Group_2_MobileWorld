@@ -29,11 +29,11 @@ public class AddKhachHangPGGController {
     private PhieuGiamGiaCaNhanService phieuGiamGiaCaNhanService;
 
 
-//    @GetMapping("/data-kh")
-//    public List<KhachHang> fetchDataKH() {
-//        List<KhachHang> listKH = khachHangService.getAll();
-//        return listKH;
-//    }
+    @GetMapping("/data-kh")
+    public List<KhachHang> fetchDataKH() {
+        List<KhachHang> listKH = khachHangService.getAllCustomers();
+        return listKH;
+    }
 
     @PostMapping("/addPhieuGiamGia")
     public ResponseEntity<String> addPGG(@RequestBody PhieuGiamGiaDTO dtoPGG) {
@@ -60,7 +60,7 @@ public class AddKhachHangPGGController {
                     PhieuGiamGiaCaNhan pggcn = new PhieuGiamGiaCaNhan();
                     pggcn.setIdPhieuGiamGia(pgg);
                     pggcn.setIdKhachHang(kh);
-                    pggcn.setMa(dtoPGG.getMa());
+                    pggcn.setMa(dtoPGG.getMa() + "-" + khachHangID);
                     pggcn.setNgayNhan(new Date());
                     pggcn.setNgayHetHan(pgg.getNgayKetThuc());
                     pggcn.setTrangThai(true);

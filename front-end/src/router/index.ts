@@ -5,7 +5,7 @@ import Dashboard from "../views/ThongKe/AppDashboard.vue";
 // Giảm giá
 import Voucher from "../views/Voucher/AppVoucher.vue";
 import DotVoucher from "../views/Voucher/DotVoucher.vue"
-import FormAddPgg from "../views/Voucher/FormAddPgg.vue";
+import FormAddPgg from "../views/Voucher/components/FormAddPgg.vue";
 import PhieuBaoHanh from "../views/BaoHanh/PhieuBaoHanh.vue";
 
 // View Login
@@ -18,8 +18,9 @@ import HoaDonChiTiet from "../views/Bill/HoaDonChiTiet.vue";
 
 // Tài khoản
 import NhanVien from "../views/AccountType/NhanVien.vue";
+import EmployeeForm from "@/views/AccountType/EmployeeForm.vue";
 import KhachHang from "../views/AccountType/KhachHang.vue";
-
+import CustmerForm from "@/views/AccountType/CustmerForm.vue";
 import NotFound from "../views/NotFound.vue";
 
 // Sản phẩm
@@ -28,6 +29,8 @@ import ProductDetails from "../views/Products/SanPham/ChiTietSanPham.vue";
 // Thương hiệu
 import Manufacturer from "../views/Products/Brand/NhaSanXuat.vue";
 import ProductLine from "../views/Products/Brand/DongSanPham.vue";
+
+//NhanVien
 
 // Màn hình
 import Display from "../views/Products/Screen/ManHinh.vue";
@@ -122,7 +125,16 @@ const routes: Array<RouteRecordRaw> = [
     path: "/ViewAddDotGiamGia",
     name: "ViewAddDotGiamGia",
     component: () => import("@/views/Voucher/ViewAddDotGiamGia.vue"),
-  }
+  },
+  
+  { path: '/', component: NhanVien },
+  { path: '/them-nhan-vien', component: EmployeeForm },
+
+  { path: '/', component: EmployeeForm },
+  { path: '/back', component: NhanVien },
+
+  { path: '/', component: KhachHang },
+  { path: '/them-khach-hang', component: CustmerForm }
 
 ];
 

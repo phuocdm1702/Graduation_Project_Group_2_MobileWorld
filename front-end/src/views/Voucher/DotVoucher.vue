@@ -4,7 +4,7 @@
   </head>
 
   <div>
-    <!-- Breadcrumb -->
+    <ToastNotification ref="toast" />
     <Breadcrumb breadcrumb="Đợt Giảm Giá"/>
     <h4 class="text-gray-600">Quản lý Đợt Giảm Giá</h4>
     <div class="bg-white p-6 rounded-lg shadow-lg grid grid-cols-4 gap-4">
@@ -49,7 +49,7 @@
       <!-- Đã kết thúc -->
       <div class="flex items-center space-x-2">
         <input type="checkbox" v-model="deleted" @change="currentPage = 0; fetchData()"
-               class="w-5 h-5 rounded focus:ring-2 focus:ring-blue-400" />
+               class="w-5 h-5 rounded focus:ring-2 focus:ring-blue-400"/>
         <label class="text-gray-700">Đã kết thúc</label>
       </div>
 
@@ -57,28 +57,27 @@
       <div class="relative">
         <input type="date" v-model="startDate"
                class="border px-3 py-2 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-400"
-               @change="currentPage = 0; fetchData()" />
+               @change="currentPage = 0; fetchData()"/>
       </div>
 
       <!-- Ngày kết thúc -->
       <div class="relative">
         <input type="date" v-model="endDate"
                class="border px-3 py-2 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-400"
-               @change="currentPage = 0; fetchData()" />
+               @change="currentPage = 0; fetchData()"/>
       </div>
 
       <!-- Giá trị giảm giá -->
       <div class="relative">
         <input type="number" v-model="saleValue" placeholder="Giá trị giảm"
                class="border px-3 py-2 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-400"
-               @input="currentPage = 0; fetchData()" />
+               @input="currentPage = 0; fetchData()"/>
       </div>
 
-      <!-- Số tiền giảm tối đa -->
       <div class="relative">
         <input type="number" v-model="minOrder" placeholder="Số tiền giảm tối đa"
                class="border px-3 py-2 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-400"
-               @input="currentPage = 0; fetchData()" />
+               @input="currentPage = 0; fetchData()"/>
       </div>
     </div>
 
@@ -135,14 +134,24 @@
               {{ new Date(discount.ngayKetThuc).toLocaleDateString("vi-VN") }}
             </td>
             <td class="px-4 py-2">
-              {{
-                discount.deleted
-                  ? "Đã kết thúc"
-                  : discount.trangThai
-                    ? "Sắp tới"
-                    : "Đang diễn ra"
-              }}
+              <span
+                  class="px-3 py-1 inline-block text-white font-semibold rounded-full"
+                  :class="{
+                          'bg-red-500': discount.deleted,
+                          'bg-blue-500': !discount.deleted && discount.trangThai,
+                          'bg-green-500': !discount.deleted && !discount.trangThai
+                        }"
+                >
+                  {{
+                    discount.deleted
+                      ? "Đã kết thúc"
+                      : discount.trangThai
+                        ? "Sắp tới"
+                        : "Đang diễn ra"
+                  }}
+              </span>
             </td>
+
             <td class="px-4 py-2 flex justify-center gap-2">
               <button
                 @click="confirmDelete(discount.id)"
@@ -161,7 +170,7 @@
         </table>
       </div>
     </div>
-    <!--    <div v-if="isModalOpen" class="overlay"></div>-->
+    
   </div>
   <div class="pagination flex justify-center items-center space-x-2 py-4">
     <button
@@ -170,7 +179,7 @@
       v-for="page in totalPages"
       :key="page"
       :disabled="currentPage === page - 1">
-      <span class="font-semibold">{{ page }}</span> <!-- Hiển thị số trang bắt đầu từ 1 -->
+      <span class="font-semibold">{{ page }}</span> <!-- Bắt đầu từ trăng 1 -->
     </button>
   </div>
 
@@ -178,7 +187,9 @@
 </template>
 
 <script setup>
-import { useDiscountManagement } from './DotVoucher.js';
+import {useDiscountManagement} from './DotVoucher.js';
+import "@vuepic/vue-datepicker/dist/main.css";
+import ToastNotification from '@/components/ToastNotification.vue';
 
 const {
   router,
