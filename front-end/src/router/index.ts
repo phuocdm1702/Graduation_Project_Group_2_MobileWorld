@@ -20,7 +20,7 @@ import HoaDonChiTiet from "../views/Bill/HoaDonChiTiet.vue";
 import NhanVien from "../views/AccountType/NhanVien.vue";
 import EmployeeForm from "@/views/AccountType/EmployeeForm.vue";
 import KhachHang from "../views/AccountType/KhachHang.vue";
-
+import CustmerForm from "@/views/AccountType/CustmerForm.vue";
 import NotFound from "../views/NotFound.vue";
 
 // Sản phẩm
@@ -131,7 +131,10 @@ const routes: Array<RouteRecordRaw> = [
   { path: '/them-nhan-vien', component: EmployeeForm },
 
   { path: '/', component: EmployeeForm },
-  { path: '/back', component: NhanVien }
+  { path: '/back', component: NhanVien },
+
+  { path: '/', component: KhachHang },
+  { path: '/them-khach-hang', component: CustmerForm }
 
 ];
 
