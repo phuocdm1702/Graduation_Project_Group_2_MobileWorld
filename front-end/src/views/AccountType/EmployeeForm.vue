@@ -153,8 +153,9 @@ async function addNhanVien() {
 
     // Thông tin tài khoản mới
     email: employee.value.email,
-    sdt: employee.value.sdt,
-    userName: employee.value.userName
+    soDienThoai: employee.value.sdt,
+    tenDangNhap: employee.value.userName,
+    gioiTinh: employee.value.gioiTinh
   };
 
   try {
