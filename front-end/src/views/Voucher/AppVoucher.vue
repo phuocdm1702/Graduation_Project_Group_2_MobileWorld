@@ -17,7 +17,7 @@
 
         <div class="relative w-1/6">
           <select v-model="filterType" class="border px-10 py-2 rounded-md w-full">
-            <option value="">Tất cả loại phiếu</option>
+            <option value="Tất cả loại phiếu" selected>Tất cả loại phiếu</option>
             <option value="Phần trăm">Phần trăm</option>
             <option value="Tiền mặt">Tiền mặt</option>
           </select>
@@ -25,7 +25,7 @@
 
         <div class="relative w-1/6">
           <select v-model="filterStatus" class="border px-10 py-2 rounded-md w-full">
-            <option value="">Tất cả trạng thái</option>
+            <option value="Tất cả trạng thái" selected>Tất cả trạng thái</option>
             <option value="Hoạt động">Còn hạn</option>
             <option value="Hết hạn">Hết hạn</option>
           </select>
@@ -86,7 +86,7 @@
             <td class="px-4 py-2">{{ voucher.ma }}</td>
             <td class="px-4 py-2">{{ voucher?.tenPhieuGiamGia || "Không có dữ liệu" }}</td>
             <td class="px-4 py-2">{{ voucher.loaiPhieuGiamGia }}</td>
-            <td class="px-4 py-2">{{ voucher.phanTramGiamGia }}%</td>
+            <td class="px-4 py-2">{{ voucher.phanTramGiamGia * 100 }}%</td>
             <td class="px-4 py-2">{{ voucher.soTienGiamToiDa }}</td>
             <td class="px-4 py-2">{{ voucher.soLuongDung }}</td>
             <td class="px-4 py-2">{{ voucher.hoaDonToiThieu }}</td>
@@ -109,39 +109,80 @@
         <div class="bg-white p-6 rounded-lg shadow-lg w-1/2">
           <h3 class="text-lg font-semibold mb-4">Chỉnh sửa Phiếu Giảm Giá</h3>
 
-          <div class="mb-3">
-            <label class="block text-gray-700">Tên phiếu:</label>
-            <input v-model="editingVoucher.tenPhieuGiamGia" type="text" class="border px-3 py-2 rounded-md w-full" />
-          </div>
+          <!-- Chia layout thành 2 cột -->
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-gray-700">Mã phiếu:</label>
+              <input v-model="editingVoucher.ma" type="text" class="border px-3 py-2 rounded-md w-full" />
+              <p v-if="errors.ma" class="text-red-500 text-sm">{{ errors.ma }}</p>
+            </div>
 
-          <div class="mb-3">
-            <label class="block text-gray-700">Loại phiếu:</label>
-            <select v-model="editingVoucher.loaiPhieuGiamGia" class="border px-3 py-2 rounded-md w-full">
-              <option value="Phần trăm">Phần trăm</option>
-              <option value="Tiền mặt">Tiền mặt</option>
-            </select>
-          </div>
+            <div>
+              <label class="block text-gray-700">Tên phiếu:</label>
+              <input v-model="editingVoucher.tenPhieuGiamGia" type="text" class="border px-3 py-2 rounded-md w-full" />
+              <p v-if="errors.tenPhieuGiamGia" class="text-red-500 text-sm">{{ errors.tenPhieuGiamGia }}</p>
+            </div>
 
-          <div class="mb-3">
-            <label class="block text-gray-700">Số tiền giảm tối đa:</label>
-            <input v-model="editingVoucher.soTienGiamToiDa" type="number" class="border px-3 py-2 rounded-md w-full" />
-          </div>
+            <div>
+              <label class="block text-gray-700">Loại phiếu:</label>
+              <select v-model="editingVoucher.loaiPhieuGiamGia" class="border px-3 py-2 rounded-md w-full">
+                <option value="Phần trăm">Phần trăm</option>
+                <option value="Tiền mặt">Tiền mặt</option>
+              </select>
+              <p v-if="errors.loaiPhieuGiamGia" class="text-red-500 text-sm">{{ errors.loaiPhieuGiamGia }}</p>
+            </div>
 
-          <div class="mb-3">
-            <label class="block text-gray-700">Hóa đơn tối thiểu:</label>
-            <input v-model="editingVoucher.hoaDonToiThieu" type="number" class="border px-3 py-2 rounded-md w-full" />
-          </div>
+            <div>
+              <label class="block text-gray-700">Phần trăm giảm giá:</label>
+              <input v-model="editingVoucher.phanTramGiamGia" type="number" class="border px-3 py-2 rounded-md w-full" />
+              <p v-if="errors.phanTramGiamGia" class="text-red-500 text-sm">{{ errors.phanTramGiamGia }}</p>
+            </div>
 
-          <div class="mb-3">
-            <label class="block text-gray-700">Ngày bắt đầu:</label>
-            <input v-model="editingVoucher.ngayBatDau" type="date" class="border px-3 py-2 rounded-md w-full" />
-          </div>
+            <div>
+              <label class="block text-gray-700">Số tiền giảm tối đa:</label>
+              <input v-model="editingVoucher.soTienGiamToiDa" type="number" class="border px-3 py-2 rounded-md w-full" />
+              <p v-if="errors.soTienGiamToiDa" class="text-red-500 text-sm">{{ errors.soTienGiamToiDa }}</p>
+            </div>
 
-          <div class="mb-3">
-            <label class="block text-gray-700">Ngày kết thúc:</label>
-            <input v-model="editingVoucher.ngayKetThuc" type="date" class="border px-3 py-2 rounded-md w-full" />
-          </div>
+            <div>
+              <label class="block text-gray-700">Số lượng:</label>
+              <input v-model="editingVoucher.soLuongDung" type="number" class="border px-3 py-2 rounded-md w-full" />
+              <p v-if="errors.soLuongDung" class="text-red-500 text-sm">{{ errors.soLuongDung }}</p>
+            </div>
 
+            <div>
+              <label class="block text-gray-700">Hóa đơn tối thiểu:</label>
+              <input v-model="editingVoucher.hoaDonToiThieu" type="number" class="border px-3 py-2 rounded-md w-full" />
+              <p v-if="errors.hoaDonToiThieu" class="text-red-500 text-sm">{{ errors.hoaDonToiThieu }}</p>
+            </div>
+
+            <div>
+              <label class="block text-gray-700">Ngày bắt đầu:</label>
+              <input v-model="editingVoucher.ngayBatDau" type="date" class="border px-3 py-2 rounded-md w-full" />
+              <p v-if="errors.ngayBatDau" class="text-red-500 text-sm">{{ errors.ngayBatDau }}</p>
+            </div>
+
+            <div>
+              <label class="block text-gray-700">Ngày kết thúc:</label>
+              <input v-model="editingVoucher.ngayKetThuc" type="date" class="border px-3 py-2 rounded-md w-full" />
+              <p v-if="errors.ngayKetThuc" class="text-red-500 text-sm">{{ errors.ngayKetThuc }}</p>
+            </div>
+            
+            <div>
+              <label class="block text-gray-700">Trạng thái:</label>
+              <div class="flex items-center gap-2">
+                <input type="checkbox" id="trangThai" v-model="editingVoucher.trangThai" true-value="Còn hạn" false-value="Hết hạn" checked/>
+                <label for="trangThai">Còn hạn</label>
+              </div>
+            </div>
+            
+          </div>
+          
+          <div class="mt-3">
+            <label class="block text-gray-700">Mô tả:</label>
+            <textarea v-model="editingVoucher.moTa" class="border px-3 py-2 rounded-md w-full"></textarea>
+          </div>
+          
           <div class="flex justify-end gap-3 mt-4">
             <button @click="isEditing = false" class="px-4 py-2 bg-gray-400 text-white rounded-md">Hủy</button>
             <button @click="updatePGG" class="px-4 py-2 bg-blue-600 text-white rounded-md">Cập nhật</button>
@@ -149,16 +190,20 @@
         </div>
       </div>
 
+
     </div>
     
   </div>
 </template>
 
 <script setup>
-import { onMounted,watch } from "vue";
+import { onMounted,watch, ref } from "vue";
 import AppVoucher from "@/views/Voucher/JS/AppVoucher"
+import axios from "axios";
 
-const { vouchers, searchQuery, searchPGG, deletePGG, editPGG, isEditing, updatePGG, fetchDataPGG } = AppVoucher();
+const baseURL = "http://localhost:8080/phieu-giam-gia";
+
+const { vouchers, searchQuery, filterType, filterStatus, searchPGG, deletePGG, fetchDataPGG } = AppVoucher();
 vouchers.value = [];
 watch(searchQuery, (newQuery) => {
   if(newQuery.trim().length > 0) {
@@ -167,6 +212,55 @@ watch(searchQuery, (newQuery) => {
 });
 
 onMounted(fetchDataPGG);
+
+const isEditing = ref(false);
+const editingVoucher = ref({});
+const errors = ref({});
+
+const validateForm = () => {
+  errors.value = {}; // Reset lỗi
+
+  const { ma, tenPhieuGiamGia, loaiPhieuGiamGia, phanTramGiamGia, soTienGiamToiDa, soLuongDung, hoaDonToiThieu, ngayBatDau, ngayKetThuc } = editingVoucher.value;
+  
+  if (!ma) errors.value.ma = "Mã phiếu không được để trống";
+  if (!tenPhieuGiamGia) errors.value.tenPhieuGiamGia = "Tên phiếu không được để trống";
+  if (!loaiPhieuGiamGia) errors.value.loaiPhieuGiamGia = "Vui lòng chọn loại phiếu";
+  
+  if (phanTramGiamGia < 0 || phanTramGiamGia > 100) errors.value.phanTramGiamGia = "Phần trăm giảm giá phải từ 0 đến 100";
+  if (soTienGiamToiDa < 0) errors.value.soTienGiamToiDa = "Số tiền giảm không hợp lệ";
+  if (soLuongDung < 1) errors.value.soLuongDung = "Số lượng phải lớn hơn 0";
+  if (hoaDonToiThieu < 0) errors.value.hoaDonToiThieu = "Hóa đơn tối thiểu không hợp lệ";
+  
+  if (!ngayBatDau) errors.value.ngayBatDau = "Vui lòng chọn ngày bắt đầu";
+  if (!ngayKetThuc) errors.value.ngayKetThuc = "Vui lòng chọn ngày kết thúc";
+  if (ngayBatDau && ngayKetThuc && ngayBatDau > ngayKetThuc) {
+    errors.value.ngayKetThuc = "Ngày kết thúc phải sau ngày bắt đầu";
+  }
+
+  return Object.keys(errors.value).length === 0; 
+};
+
+
+
+const editPGG = (voucher) => {
+  editingVoucher.value = { ...voucher };
+  editingVoucher.value.ngayBatDau = new Date(editingVoucher.value.ngayBatDau).toISOString().split("T")[0];
+  editingVoucher.value.ngayKetThuc = new Date(editingVoucher.value.ngayKetThuc).toISOString().split("T")[0];
+  isEditing.value = true;
+};
+
+const updatePGG = async () => {
+  if(!validateForm()) {
+    return;
+  }
+  try {
+    await axios.put(`${baseURL}/update/${editingVoucher.value.id}`, editingVoucher.value);
+    isEditing.value = false;
+    await fetchDataPGG();
+  } catch (error) {
+    console.log("Cập nhật thất bại!", error);
+  }
+};
 
 </script>
 

@@ -24,7 +24,8 @@ public class PhieuGiamGiaController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<List<PhieuGiamGia>> searchData(@RequestParam("keyword") String keyword){
+    public ResponseEntity<List<PhieuGiamGia>> searchData(@RequestParam("keyword") String keyword
+    ){
         List<PhieuGiamGia> listSearch = phieuGiamGiaService.searchData(keyword);
         return ResponseEntity.ok(listSearch);
     }

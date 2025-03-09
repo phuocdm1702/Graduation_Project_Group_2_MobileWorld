@@ -4,19 +4,8 @@ import axios from "axios";
 export default function usePhieuGiamGia() {
   const vouchers = ref([]);
   const searchQuery = ref("");
-  const isEditing = ref(false);
-  const editingVoucher = ref({ma: null, 
-    tenPhieuGiamGia: null, 
-    loaiPhieuGiam: null,
-    phanTramGiamGia: 0,
-    soLuongDung: 0,
-    hoaDonToiThieu: 0,
-    ngayBatDau: null,
-    ngayKetThuc: null,
-    trangThai: null,
-    riengTu: false,
-    moTa: null,
-  });
+  const filterType = ref("");
+  const filterStatus = ref("");
 
   const baseURL = "http://localhost:8080/phieu-giam-gia";
 
@@ -35,11 +24,15 @@ export default function usePhieuGiamGia() {
   const searchPGG = async () => {
     try {
       let response;
-      if (!searchQuery.value.trim()) {
+      if (!searchQuery.value || !searchQuery.value.trim()) {
         response = await axios.get(`${baseURL}/data`);
       } else {
         response = await axios.get(`${baseURL}/search`, {
-          params: { keyword: searchQuery.value }
+          params: {
+            keyword: searchQuery.value,
+            loaiPhieuGiamGia: filterType.value === "Phần trăm" ? 1 : filterType.value === "Tiền mặt" ? 2 : null,
+            trangThai: filterStatus.value === "Còn hạn" ? 1 : filterStatus.value === "Hết hạn" ? 0 : null
+          }
         });
       }
       vouchers.value = response.data;
@@ -47,6 +40,7 @@ export default function usePhieuGiamGia() {
       console.error("Lỗi search!", error);
     }
   };
+
 
   const deletePGG = async (id) => {
     try {
@@ -56,48 +50,14 @@ export default function usePhieuGiamGia() {
       console.log("Lỗi khi xóa:", error);
     }
   };
-
-  const editPGG = (voucher) => {
-    if (!voucher) {
-      console.error("Voucher không hợp lệ:", voucher);
-      return;
-    }
-    editingVoucher.value = { ...voucher };
-    isEditing.value = true;
-  };
-
-
-  const updatePGG = async () => {
-    const {ma,
-      tenPhieuGiamGia,
-      loaiPhieuGiam,
-      phanTramGiamGia,
-      soLuongDung,
-      hoaDonToiThieu,
-      ngayBatDau,
-      ngayKetThuc,
-      trangThai,
-      riengTu,
-      moTa,
-    } = editingVoucher.value
-    try {
-      await axios.put(`${baseURL}/update/${editingVoucher.value.id}`, editingVoucher.value);
-      isEditing.value = false;
-      await fetchDataPGG();
-    } catch (error) {
-      console.log("Cập nhật thất bại!");
-    }
-  };
-
+  
   return {
     vouchers,
     searchQuery,
+    filterType,
+    filterStatus,
     searchPGG,
     deletePGG,
-    editPGG,
-    isEditing,
-    editingVoucher,
-    updatePGG,
     fetchDataPGG
   };
 }

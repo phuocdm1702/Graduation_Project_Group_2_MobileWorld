@@ -60,7 +60,7 @@ public class AddKhachHangPGGController {
                     PhieuGiamGiaCaNhan pggcn = new PhieuGiamGiaCaNhan();
                     pggcn.setIdPhieuGiamGia(pgg);
                     pggcn.setIdKhachHang(kh);
-                    pggcn.setMa(dtoPGG.getMa());
+                    pggcn.setMa(dtoPGG.getMa() + "-" + khachHangID);
                     pggcn.setNgayNhan(new Date());
                     pggcn.setNgayHetHan(pgg.getNgayKetThuc());
                     pggcn.setTrangThai(true);

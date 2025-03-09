@@ -1,9 +1,4 @@
 <template>
-  <div v-if="visible" :class="`toast ${type}`">
-    <span v-if="type === 'success'" class="checkmark">✔</span>
-    <span v-if="type === 'error'" class="crossmark">✖</span>
-    {{ message }}
-  </div>
   <div class="flex h-screen p-6 bg-gray-100">
     <!-- Form container -->
     <div class="w-3/4 p-6 bg-white border rounded-md shadow-md">
@@ -19,10 +14,12 @@
           <div>
             <label class="text-sm font-medium">Mã</label>
             <input type="text" class="form-input" v-model="ma" />
+            <p class="error" v-if="errors.ma">{{ errors.ma }}</p>
           </div>
           <div>
             <label class="text-sm font-medium">Tên Phiếu Giảm Giá</label>
             <input type="text" class="form-input" v-model="tenPhieuGiamGia" />
+            <p class="error" v-if="errors.tenPhieuGiamGia">{{ errors.tenPhieuGiamGia }}</p>
           </div>
           <div>
             <label class="text-sm font-medium">Loại Phiếu</label>
@@ -35,35 +32,42 @@
                 <input type="radio" name="voucherType" value="Tiền mặt" v-model="loaiPhieuGiamGia" class="mr-2" />
                 Tiền mặt
               </label>
+              <p class="error" v-if="errors.loaiPhieuGiamGia">{{ errors.loaiPhieuGiamGia }}</p>
             </div>
           </div>
           <div>
             <label class="text-sm font-medium">Phần trăm giảm giá</label>
             <input type="number" class="form-input" v-model="phanTramGiamGia" />
+            <p class="error" v-if="errors.phanTramGiamGia">{{ errors.phanTramGiamGia }}</p>
           </div>
           <div>
             <label class="text-sm font-medium">Số tiền giảm tối đa</label>
             <input type="number" class="form-input" v-model="soTienGiamToiDa" />
+            <p class="error" v-if="errors.soTienGiamToiDa">{{ errors.soTienGiamToiDa }}</p>
           </div>
           <div>
             <label class="text-sm font-medium">Hóa đơn tối thiểu</label>
             <input type="number" class="form-input" v-model="hoaDonToiThieu" />
+            <p class="error" v-if="errors.hoaDonToiThieu">{{ errors.hoaDonToiThieu }}</p>
           </div>
           <div>
             <label class="text-sm font-medium">Số lượng sử dụng</label>
             <input type="number" class="form-input" v-model="soLuongDung" />
+            <p class="error" v-if="errors.soLuongDung">{{ errors.soLuongDung }}</p>
           </div>
           <div>
             <label class="text-sm font-medium">Ngày bắt đầu</label>
             <input type="date" class="form-input" v-model="ngayBatDau" />
+            <p class="error" v-if="errors.ngayBatDau">{{ errors.ngayBatDau }}</p>
           </div>
           <div>
             <label class="text-sm font-medium">Ngày kết thúc</label>
             <input type="date" class="form-input" v-model="ngayKetThuc" />
+            <p class="error" v-if="errors.ngayKetThuc">{{ errors.ngayKetThuc }}</p>
           </div>
           <div class="flex items-center">
             <label class="text-sm font-medium">Trạng thái</label>
-            <input type="checkbox" v-model="trangThai" class="ml-2" />
+            <input type="checkbox" v-model="trangThai" class="ml-2" checked/>
           </div>
           <div class="flex items-center">
             <label class="text-sm font-medium">Riêng tư</label>
@@ -127,19 +131,6 @@ import {ref, onMounted} from "vue";
 import {useRouter} from "vue-router";
 import axios from "axios";
 
-const visible = ref(false);
-const message = ref("");
-const type = ref("success");
-
-const showToast = (toastType, msg) => {
-  message.value = msg;
-  type.value = toastType;
-  visible.value = true;
-  setTimeout(() => {
-    visible.value = false;
-  }, 3000);
-};
-
 const customers = ref([]);
 const selectedCustomers = ref([]);
 const router = useRouter();
@@ -165,9 +156,37 @@ const fetchDataKH = async () => {
   } catch (error) {
     console.log("Error: ", error);
   }
+  
 }
 
+const errors = ref({});
+
+const validateForm = () => {
+  errors.value = {}; // Reset lỗi
+
+  if (!ma.value) errors.value.ma = "Mã phiếu không được để trống";
+  if (!tenPhieuGiamGia.value) errors.value.tenPhieuGiamGia = "Tên phiếu không được để trống";
+  if (!loaiPhieuGiamGia.value) errors.value.loaiPhieuGiamGia = "Vui lòng chọn loại phiếu";
+
+  if (phanTramGiamGia.value < 0 || phanTramGiamGia.value > 100) errors.value.phanTramGiamGia = "Phần trăm giảm giá phải từ 0 đến 100";
+  if (soTienGiamToiDa.value < 0) errors.value.soTienGiamToiDa = "Số tiền giảm không hợp lệ";
+  if (soLuongDung.value < 1) errors.value.soLuongDung = "Số lượng phải lớn hơn 0";
+  if (hoaDonToiThieu.value < 0) errors.value.hoaDonToiThieu = "Hóa đơn tối thiểu không hợp lệ";
+
+  if (!ngayBatDau.value) errors.value.ngayBatDau = "Vui lòng chọn ngày bắt đầu";
+  if (!ngayKetThuc.value) errors.value.ngayKetThuc = "Vui lòng chọn ngày kết thúc";
+  if (ngayBatDau.value && ngayKetThuc.value && ngayBatDau.value > ngayKetThuc.value) {
+    errors.value.ngayKetThuc = "Ngày kết thúc phải sau ngày bắt đầu";
+  }
+
+  return Object.keys(errors.value).length === 0;
+};
+
 const submitForm = async () => {
+  if(!validateForm()) {
+    return;
+  }
+  
   const newPgg = {
     ma: ma.value,
     tenPhieuGiamGia: tenPhieuGiamGia.value,
