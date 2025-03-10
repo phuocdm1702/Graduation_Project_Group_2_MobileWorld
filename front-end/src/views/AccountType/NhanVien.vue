@@ -157,51 +157,47 @@
 
 
 
-          <div class="mt-8">
-            <div class="mt-4 overflow-x-auto">
-              <table class="w-full bg-white rounded-lg shadow-lg overflow-hidden border border-gray-200">
-                <thead>
-                <tr class="bg-gray-200 text-gray-800 uppercase text-sm tracking-wider">
-                  <th class="px-6 py-4 text-center w-10">#</th>
-                  <th class="px-6 py-4 text-left">Tên</th>
-                  <th class="px-6 py-4 text-left">Email</th>
-                  <th class="px-6 py-4 text-center w-40">SĐT</th>
-                  <th class="px-6 py-4 text-center w-40">Ngày tham gia</th>
-                  <th class="px-6 py-4 text-center w-32">Trạng thái</th>
-                  <th class="px-6 py-4 text-center w-32">Thao Tác</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr v-for="(nv, index) in dataTable" :key="nv.id"
-                    class="border-t hover:bg-gray-100 transition-all duration-200"
-                    :class="{'bg-gray-50': index % 2 !== 0}">
-                  <td class="px-6 py-4 text-center">{{ index + 1 }}</td>
-                  <td class="px-6 py-4 text-left">{{ nv.tenNhanVien }}</td>
-                  <td class="px-6 py-4 text-left">{{ nv.idTaiKhoan.email }}</td>
-                  <td class="px-6 py-4 text-center">{{ nv.idTaiKhoan.soDienThoai }}</td>
-                  <td class="px-6 py-4 text-center">{{ new Date(nv.createdAt).toLocaleDateString('vi-VN') }}</td>
-                  <td class="px-6 py-4 text-center font-semibold"
-                      :class="{'text-red-500': nv.deleted, 'text-green-600': !nv.deleted}">
-                    {{ nv.deleted ? 'Đã nghỉ' : 'Đang làm' }}
-                  </td>
-                  <td class="px-6 py-4 text-center">
-                    <button @click="showDeleteConfirm(nv.id)" class="text-red-600 hover:text-red-800 font-semibold px-2">Xóa</button>
-                  </td>
-                </tr>
-                </tbody>
-              </table>
-            </div>
+          <div class="overflow-x-auto shadow-md rounded-lg mt-8">
+            <table class="w-full text-sm text-gray-500">
+              <thead class="bg-blue-100 text-blue-700 uppercase">
+              <tr>
+                <th class="px-6 py-3 text-center w-10">#</th>
+                <th class="px-6 py-3 text-center">Tên</th>
+                <th class="px-6 py-3 text-center">Email</th>
+                <th class="px-6 py-3 text-center w-40">SĐT</th>
+                <th class="px-6 py-3 text-center w-40">Ngày tham gia</th>
+                <th class="px-6 py-3 text-center w-32">Trạng thái</th>
+                <th class="px-6 py-3 text-center w-32">Thao Tác</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr v-for="(nv, index) in dataTable" :key="nv.id"
+                  class="bg-white border-b hover:bg-gray-50 transition"
+                  :class="{'bg-gray-50': index % 2 !== 0}">
+                <td class="px-6 py-4 text-center">{{ index + 1 }}</td>
+                <td class="px-6 py-4 text-center">{{ nv.tenNhanVien }}</td>
+                <td class="px-6 py-4 text-center">{{ nv.idTaiKhoan.email }}</td>
+                <td class="px-6 py-4 text-center">{{ nv.idTaiKhoan.soDienThoai }}</td>
+                <td class="px-6 py-4 text-center">{{ new Date(nv.createdAt).toLocaleDateString('vi-VN') }}</td>
+                <td class="px-6 py-4 text-center font-semibold"
+                    :class="{'text-red-500': nv.deleted, 'text-green-600': !nv.deleted}">
+                  {{ nv.deleted ? 'Đã nghỉ' : 'Đang làm' }}
+                </td>
+                <td class="px-6 py-4 text-center">
+                  <button @click="showDeleteConfirm(nv.id)"
+                          class="text-red-600 hover:text-red-800 transition">Xóa</button>
+                </td>
+              </tr>
+              </tbody>
+            </table>
           </div>
+
+        </div>
         </div>
       </div>
     </div>
     <br>
-    
-
-    
-
-  </div>
-
+  
   <ConfirmModal
     :show="showConfirmModal"
     :message="'Bạn có chắc chắn muốn xóa khách hàng này không?'"

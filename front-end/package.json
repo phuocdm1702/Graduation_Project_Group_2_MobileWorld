@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@faker-js/faker": "^9.5.1",
+    "@vuepic/vue-datepicker": "^11.0.1",
     "autoprefixer": "^10",
     "axios": "^1.8.1",
     "core-js": "^3.8.3",

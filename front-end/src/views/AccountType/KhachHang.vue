@@ -73,42 +73,47 @@
                     </router-link>
                   </div>
                 </div>
-
               </div>
-
             </div>
           </form>
           <div class="mt-8">
             <div class="mt-4 overflow-hidden border rounded-lg shadow-lg">
-              <table class="w-full bg-white rounded-md">
-                <thead>
-                <tr class="bg-blue-500 text-black">
-                  <th class="px-6 py-3 text-left">#</th>
-                  <th class="px-6 py-3 text-left">Tên</th>
-                  <th class="px-6 py-3 text-left">Email</th>
-                  <th class="px-6 py-3 text-left">SDT</th>
-                  <th class="px-6 py-3 text-left">Ngày tham gia</th>
-                  <th class="px-6 py-3 text-center">Trạng thái</th>
-                  <th class="px-6 py-3 text-center">Thao tác</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr v-for="(customer,index) in dataTable" :key="customer.id"
-                    class="border-t text-gray-700 hover:bg-gray-100 transition">
-                  <td class="px-6 py-3">{{ index+1 }}</td>
-                  <td class="px-6 py-3">{{ customer.ten }}</td>
-                  <td class="px-6 py-3 font-semibold">{{ customer.idTaiKhoan.email }}</td>
-                  <td class="px-6 py-3">{{ customer.idTaiKhoan.soDienThoai }}</td>
-                  <td class="px-6 py-3">{{ new Date(customer.createdAt).toLocaleDateString() }}</td>
-                  <td class="px-6 py-4 text-center font-semibold"
-                      :class="{'text-red-500': customer.deleted, 'text-green-600': !customer.deleted}">
-                    {{ customer.deleted ? 'Hủy kích hoạt' : 'Kích hoạt' }}
-                  </td>                  <td class="px-6 py-3 text-center">
-                  <button @click="editCustomer(customer)" class="text-blue-600 hover:text-blue-800 font-semibold px-2">Sửa</button>
-                </td>
-                </tr>
-                </tbody>
-              </table>
+              <div class="overflow-x-auto shadow-md rounded-lg">
+                <table class="w-full text-sm text-gray-500">
+                  <thead class="bg-blue-100 text-blue-700 uppercase">
+                  <tr>
+                    <th class="px-6 py-3 text-center">#</th>
+                    <th class="px-6 py-3 text-center">Tên</th>
+                    <th class="px-6 py-3 text-center">Email</th>
+                    <th class="px-6 py-3 text-center">SDT</th>
+                    <th class="px-6 py-3 text-center">Ngày tham gia</th>
+                    <th class="px-6 py-3 text-center">Trạng thái</th>
+                    <th class="px-6 py-3 text-center">Thao tác</th>
+                  </tr>
+                  </thead>
+                  <tbody>
+                  <tr v-for="(customer, index) in dataTable" :key="customer.id"
+                      class="bg-white border-b hover:bg-gray-50 transition">
+                    <td class="px-6 py-4 text-center">{{ index + 1 }}</td>
+                    <td class="px-6 py-4 text-center">{{ customer.ten }}</td>
+                    <td class="px-6 py-4 text-center font-semibold">{{ customer.idTaiKhoan.email }}</td>
+                    <td class="px-6 py-4 text-center">{{ customer.idTaiKhoan.soDienThoai }}</td>
+                    <td class="px-6 py-4 text-center">{{ new Date(customer.createdAt).toLocaleDateString() }}</td>
+                    <td class="px-6 py-4 text-center font-semibold"
+                        :class="{'text-red-500': customer.deleted, 'text-green-600': !customer.deleted}">
+                      {{ customer.deleted ? 'Hủy kích hoạt' : 'Kích hoạt' }}
+                    </td>
+                    <td class="px-6 py-4 text-center">
+                      <button @click="editCustomer(customer)"
+                              class="text-blue-600 hover:text-blue-800 transition">
+                        Sửa
+                      </button>
+                    </td>
+                  </tr>
+                  </tbody>
+                </table>
+              </div>
+
             </div>
           </div>
         </div>
