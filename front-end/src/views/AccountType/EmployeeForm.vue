@@ -5,7 +5,7 @@
     <div class="grid grid-cols-2 gap-4">
       <div class="flex flex-col items-center gap-2">
         <div
-          class="w-32 h-32 rounded-full border-4 border-green-500 flex items-center justify-center cursor-pointer"
+          class="w-32 h-32 rounded-full border-4 border-gray-400 flex items-center justify-center cursor-pointer"
           @click="triggerFileInput"
         >
           <img
@@ -183,7 +183,7 @@ const employee = ref({
 //anh
 function deleteImage() {
   employeeImage.value = null;
-  fileInput.value.value = ''; // Reset giá trị input file
+  fileInput.value.value = ''; 
 }
 const employeeImage = ref(null);
 const fileInput = ref(null);

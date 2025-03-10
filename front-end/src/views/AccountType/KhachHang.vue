@@ -9,7 +9,7 @@
     <Breadcrumb breadcrumb="Quản lý Khách Hàng" />
 
     <div class="mb-3">
-      <h4 class="text-gray-600 text-4xl font-bold">Quản lý Khách Hàng</h4>
+      <h4 class="text-gray-600 text-4xl font-bold">Thông tin Khách Hàng</h4>
 
       <div class="mt-4">
         <div class="w-full overflow-hidden bg-white border rounded-md shadow-md">
@@ -18,8 +18,8 @@
               <div>
                 <label class="text-sm font-semibold block mb-2">Nhập thông tin tìm kiếm</label>
                 <input
-                  v-model="searchNV"
-                  @input="btnSearch"
+                  v-model="searchKH"
+                  @input="BtnSearch"
                   placeholder="Tìm theo mã hoặc tên..."
                   type="text"
                   class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-400 outline-none"
@@ -103,10 +103,10 @@
                         :class="{'text-red-500': customer.deleted, 'text-green-600': !customer.deleted}">
                       {{ customer.deleted ? 'Hủy kích hoạt' : 'Kích hoạt' }}
                     </td>
-                    <td class="px-6 py-4 text-center">
+                    <td class="flex items-center justify-center">
                       <button @click="editCustomer(customer)"
-                              class="text-blue-600 hover:text-blue-800 transition">
-                        Sửa
+                              class="text-blue-600 hover:text-blue-800 transition w-8 h-8 flex items-center justify-center">
+                        <i class="fas fa-pen-to-square"></i>
                       </button>
                     </td>
                   </tr>
@@ -136,6 +136,11 @@
 import { ref, onMounted } from "vue";
 import axios from "axios";
 import ConfirmModal from "@/components/ConfirmModal.vue";
+import '@fortawesome/fontawesome-free/css/all.css';
+
+
+import { defineComponent } from 'vue';
+import App from '@/App.vue';
 
 //du lieu add
 const dataTable = ref([]);
@@ -242,12 +247,13 @@ const searchKH = ref("");
 //SearchKH
 const BtnSearch =  () => {
   if (!searchKH.value.trim()){
-    showToast("error","Vui long` nhap ten muon tim kiem!");
+    fetchCustomers();
     return;
   }
   dataTable.value = dataTable.value.filter(khachhang =>
-    khachhang.ten?.toLowerCase().includes(searchKH.value.toLowerCase()) ||
-    khachhang.ma?.toLowerCase().includes(searchKH.value.toLowerCase())
+    khachhang.ten.toLowerCase().includes(searchKH.value.toLowerCase()) ||
+    khachhang.idTaiKhoan.soDienThoai.toLowerCase().includes(searchKH.value.toLowerCase()) ||
+    khachhang.idTaiKhoan.email.toLowerCase().includes(searchKH.value.toLowerCase())
   );
 }
 //backSearch
@@ -304,3 +310,5 @@ const  reseatKH = () => {
 .error { background: red; }
 .info { background: blue; }
 </style>
+
+
