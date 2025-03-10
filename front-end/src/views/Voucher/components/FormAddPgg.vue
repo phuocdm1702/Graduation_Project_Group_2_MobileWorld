@@ -98,7 +98,6 @@
     </div>
     
     <div
-      v-if="riengTu"
       class="w-2/4 ml-4 p-4 bg-white border rounded-md shadow-md"
     >
       <h4 class="text-lg font-semibold mb-2">Chọn Khách Hàng</h4>

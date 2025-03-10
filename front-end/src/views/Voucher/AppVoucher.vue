@@ -63,47 +63,13 @@
         </router-link>
       </div>
 
-      <div class="mt-4 mx-2">
-        <table class="w-full bg-white rounded-md shadow-md text-base">
-          <thead>
-          <tr class="bg-gray-200 text-gray-700">
-            <th class="px-2 py-2">Mã</th>
-            <th class="px-2 py-2">Tên Phiếu</th>
-            <th class="px-2 py-2">Loại Phiếu</th>
-            <th class="px-2 py-2">Phần trăm giảm giá</th>
-            <th class="px-2 py-2">Số tiền giảm tối đa</th>
-            <th class="px-2 py-2">Số lượng</th>
-            <th class="px-2 py-2">Hóa đơn tối thiểu</th>
-            <th class="px-2 py-2">Ngày bắt đầu</th>
-            <th class="px-2 py-2">Ngày kết thúc</th>
-            <th class="px-2 py-2">Trạng thái</th>
-            <th class="px-2 py-2">Riêng tư</th>
-            <th class="px-2 py-2">Mô tả</th>
-            <th class="px-2 py-2">Hành động</th>
-          </tr>
-          </thead>
-          <tbody>
-          <tr class="border-t text-center" v-for="voucher in vouchers" :key="voucher.id">
-            <td class="px-2 py-2">{{ voucher.ma }}</td>
-            <td class="px-2 py-2">{{ voucher.tenPhieuGiamGia }}</td>
-            <td class="px-2 py-2">{{ voucher.loaiPhieuGiamGia }}</td>
-            <td class="px-2 py-2">{{ voucher.phanTramGiamGia * 100 }}%</td>
-            <td class="px-2 py-2">{{ voucher.soTienGiamToiDa }}</td>
-            <td class="px-2 py-2">{{ voucher.soLuongDung }}</td>
-            <td class="px-2 py-2">{{ voucher.hoaDonToiThieu }}</td>
-            <td class="px-2 py-2">{{ new Date(voucher.ngayBatDau).toLocaleDateString('vi-VN') }}</td>
-            <td class="px-2 py-2">{{ new Date(voucher.ngayKetThuc).toLocaleDateString('vi-VN') }}</td>
-            <td class="px-2 py-2">{{ voucher.trangThai == "1" ? "Còn hạn" : "Hết hạn" }}</td>
-            <td class="px-2 py-2">{{ voucher.riengTu == "1" ? "Có" : "Không" }}</td>
-            <td class="px-2 py-2">{{ voucher.moTa }}</td>
-            <td class="px-2 py-2">
-              <button @click="editPGG(voucher)" class="text-blue-600 hover:underline mr-2 text-base">Sửa</button>
-              <button @click="deletePGG(voucher.id)" class="text-red-600 hover:underline text-base">Xóa</button>
-            </td>
-          </tr>
-          </tbody>
-        </table>
-      </div>
+      <DynamicTable 
+        :data="vouchers" 
+        :columns="columns" 
+        :getNestedValue="getNestedValue" 
+      />
+      
+     
 
       <!-- Modal chỉnh sửa -->
       <div v-if="isEditing" class="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50">
@@ -162,12 +128,33 @@
 <script setup>
 import { onMounted,watch, ref } from "vue";
 import AppVoucher from "@/views/Voucher/JS/AppVoucher"
+import DynamicTable from "@/components/DynamicTable.vue";
+import ToggleSwitch from "@/components/ToggleSwitch.vue";
 import axios from "axios";
 
 const baseURL = "http://localhost:8080/phieu-giam-gia";
 
 const { vouchers, searchQuery, filteredVouchers, searchPGG, deletePGG, fetchDataPGG } = AppVoucher();
-vouchers.value = [];
+const columns = ref([
+  { key: "ma", label: "Mã" },
+  { key: "tenPhieuGiamGia", label: "Tên Phiếu" },
+  { key: "loaiPhieuGiamGia", label: "Loại Phiếu" },
+  { key: "phanTramGiamGia", label: "Phần trăm giảm giá", formatter: (value) => `${value * 100}%` },
+  { key: "soTienGiamToiDa", label: "Số tiền giảm tối đa" },
+  { key: "soLuongDung", label: "Số lượng" },
+  { key: "hoaDonToiThieu", label: "Hóa đơn tối thiểu" },
+  { key: "ngayBatDau", label: "Ngày bắt đầu", formatter: (value) => new Date(value).toLocaleDateString("vi-VN") },
+  { key: "ngayKetThuc", label: "Ngày kết thúc", formatter: (value) => new Date(value).toLocaleDateString("vi-VN") },
+  { key: "moTa", label: "Mô tả" },
+  { key: "trangThai", label: "Trạng thái", cellSlot: "trangThaiSlot"},
+  
+]);
+
+
+
+const getNestedValue = (obj, key) => {
+  return key.split(".").reduce((o, k) => (o && o[k] !== undefined ? o[k] : null), obj);
+};
 watch(searchQuery, (newQuery) =>  {
   if(newQuery.trim().length > 0) {
     searchPGG();
