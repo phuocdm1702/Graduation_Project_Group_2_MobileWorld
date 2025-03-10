@@ -104,73 +104,14 @@
     <div class="mt-8">
       <h4 class="text-gray-600">Danh sách Đợt Giảm Giá</h4>
       <div class="mt-4">
-        <table class="w-full bg-white rounded-md shadow-md">
-          <thead>
-          <tr class="bg-gray-200 text-gray-700">
-            <th class="px-4 py-2">STT</th>
-            <th class="px-4 py-2">Mã</th>
-            <th class="px-4 py-2">Tên đợt giảm giá</th>
-            <th class="px-4 py-2">Loại giảm giá</th>
-            <th class="px-4 py-2">Giá trị</th>
-            <th class="px-4 py-2">Số tiền giảm tối đa</th>
-            <th class="px-4 py-2">Ngày bắt đầu</th>
-            <th class="px-4 py-2">Ngày kết thúc</th>
-            <th class="px-4 py-2">Trạng thái</th>
-            <th class="px-4 py-2">Hành động</th>
-          </tr>
-          </thead>
-          <tbody>
-          <tr class="border-t text-center" v-for="(discount,index) in dataTable" :key="discount.id">
-            <td class="px-4 py-2">{{ currentPage * pageSize + index + 1 }}</td>
-            <td class="px-4 py-2">{{ discount.ma }}</td>
-            <td class="px-4 py-2">{{ discount.tenDotGiamGia }}</td>
-            <td class="px-4 py-2">{{ discount.loaiGiamGiaApDung }}</td>
-            <td class="px-4 py-2">{{ discount.giaTriGiamGia + "%" }}</td>
-            <td class="px-4 py-2">{{ discount.soTienGiamToiDa.toLocaleString("vi-VN") + " VND" }}</td>
-            <td class="px-4 py-2">
-              {{ new Date(discount.ngayBatDau).toLocaleDateString("vi-VN") }}
-            </td>
-            <td class="px-4 py-2">
-              {{ new Date(discount.ngayKetThuc).toLocaleDateString("vi-VN") }}
-            </td>
-            <td class="px-4 py-2">
-              <span
-                  class="px-3 py-1 inline-block text-white font-semibold rounded-full"
-                  :class="{
-                          'bg-red-500': discount.deleted,
-                          'bg-blue-500': !discount.deleted && discount.trangThai,
-                          'bg-green-500': !discount.deleted && !discount.trangThai
-                        }"
-                >
-                  {{
-                    discount.deleted
-                      ? "Đã kết thúc"
-                      : discount.trangThai
-                        ? "Sắp tới"
-                        : "Đang diễn ra"
-                  }}
-              </span>
-            </td>
-
-            <td class="px-4 py-2 flex justify-center gap-2">
-              <button
-                @click="confirmDelete(discount.id)"
-                class="bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600 transition">
-                <i class="fa-solid fa-trash"></i>
-              </button>
-
-              <button
-                @click="viewUpdate(discount)"
-                class="bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600 transition">
-                <i class="fa-solid fa-edit"></i>
-              </button>
-            </td>
-          </tr>
-          </tbody>
-        </table>
+        <DynamicTable
+          :data="dataTable"
+          :columns="columns"
+          :getNestedValue="getNestedValue"
+        />
       </div>
     </div>
-    
+
   </div>
   <div class="pagination flex justify-center items-center space-x-2 py-4">
     <button
@@ -189,7 +130,8 @@
 <script setup>
 import {useDiscountManagement} from './DotVoucher.js';
 import "@vuepic/vue-datepicker/dist/main.css";
-import ToastNotification from '@/components/ToastNotification.vue';
+// import ToastNotification from '@/components/ToastNotification.vue';
+import DynamicTable from "@/components/DynamicTable.vue";
 
 const {
   router,
@@ -214,6 +156,8 @@ const {
   confirmDelete,
   deleteDotGiamGia,
   viewUpdate,
+  columns,
+  getNestedValue
 } = useDiscountManagement();
 </script>
 

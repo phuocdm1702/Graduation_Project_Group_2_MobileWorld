@@ -4,8 +4,6 @@
     <Breadcrumb breadcrumb="Đợt Giảm Giá"/>
     <h4 class="text-gray-600">Quản lý Đợt Giảm Giá</h4>
     <div class="bg-white p-4 rounded-md shadow-md flex flex-wrap gap-3">
-
-
       <h4 class="text-gray-600 text-lg font-semibold">Quản lý Đợt Giảm Giá</h4>
 
       <!-- Container for form and product list -->
@@ -45,8 +43,8 @@
               <input type="date" v-model="dotGiamGia.ngayKetThuc" class="w-full border rounded p-2">
             </div>
             <div class="mt-2">
-              <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded" >
-              {{ edit ? 'Cập nhật' : 'Thêm' }}
+              <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded">
+                {{ edit ? 'Cập nhật' : 'Thêm' }}
               </button>
             </div>
             <div class="mt-2">
@@ -55,56 +53,28 @@
               </router-link>
             </div>
           </form>
-
         </div>
 
         <!-- Bảng Dòng Sản Phẩm -->
         <div class="w-2/5 overflow-hidden bg-white border rounded-md shadow-md p-4">
           <h5 class="text-gray-700 font-semibold">Dòng Sản Phẩm</h5>
-
           <input
             v-model="searchKeyword"
             placeholder="Tìm kiếm theo tên, mã"
             class="w-full p-2 border border-gray-300 rounded-md mt-2"
           />
-
           <div class="max-h-[700px] overflow-y-auto">
-            <table class="w-full mt-3 border-collapse border border-gray-300">
-              <thead class="bg-gray-200">
-              <tr>
-                <th class="border border-gray-300 px-2 py-1"></th>
-                <th class="border border-gray-300 px-2 py-1">STT</th>
-                <th class="border border-gray-300 px-2 py-1">Mã</th>
-                <th class="border border-gray-300 px-2 py-1">Dòng sản phẩm</th>
-              </tr>
-              </thead>
-              <tbody>
-              <tr
-                v-for="(product, index) in dspList"
-                :key="product.id"
-                class="border border-gray-300"
-              >
-                <td class="px-2 py-1 border border-gray-300">
-                  <input
-                    type="checkbox"
-                    :value="product.id"
-                    v-model="idDSPs"
-                    @change="fetchCTSPData"
-                  />
-                </td>
-                <td class="px-2 py-1 border border-gray-300">{{ index + 1 }}</td>
-                <td class="px-2 py-1 border border-gray-300">{{ product.ma }}</td>
-                <td class="px-2 py-1 border border-gray-300">{{ product.dongSanPham }}</td>
-              </tr>
-              </tbody>
-            </table>
+            <DynamicTable
+              :data="dspList"
+              :columns="columns"
+              :getNestedValue="getNestedValue"
+            />
           </div>
         </div>
       </div>
 
       <div class="w-full overflow-hidden bg-white border rounded-md shadow-md p-4 mt-4">
         <h5 class="text-gray-700 font-semibold">Chi Tiết Sản Phẩm</h5>
-
         <label for="dongSanPham">Dòng sản phẩm:</label>
         <select v-model="selectedDongSanPham" @change="updateBoNhoTrong">
           <option></option>
@@ -112,7 +82,6 @@
             {{ dong }}
           </option>
         </select>
-    
         <label for="boNhoTrong">Bộ nhớ trong:</label>
         <select v-model="selectedBoNhoTrong">
           <option></option>
@@ -120,45 +89,22 @@
             {{ boNho }}
           </option>
         </select>
-
-
         <div class="max-h-[700px] overflow-y-auto">
-          <table class="w-full mt-3 border-collapse border border-gray-300">
-            <thead class="bg-gray-200">
-            <tr>
-              <th class="border border-gray-300 px-2 py-1">STT</th>
-              <th class="border border-gray-300 px-2 py-1">Ảnh</th>
-              <th class="border border-gray-300 px-2 py-1">Tên sản phẩm</th>
-              <th class="border border-gray-300 px-2 py-1">Dung lượng bộ nhớ trong</th>
-              <th class="border border-gray-300 px-2 py-1">Đơn giá</th>
-              <th class="border border-gray-300 px-2 py-1">Số tiền giảm tối đa</th>
-              <th class="border border-gray-300 px-2 py-1">Đơn giá sau giảm giá</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr v-for="(detail, index) in filteredCTSPList" :key="index" class="border border-gray-300">
-              <td class="px-2 py-1 border border-gray-300">{{ index + 1 }}</td>
-              <td class="px-2 py-1 border border-gray-300">
-                <img :src="detail.anh.duongDan" alt="Ảnh" class="w-10 h-10 object-cover">
-              </td>
-              <td class="px-2 py-1 border border-gray-300">{{ detail.dsp.dongSanPham }}</td>
-              <td class="px-2 py-1 border border-gray-300">{{ detail.bnt.dungLuongBoNhoTrong }}</td>
-              <td class="px-2 py-1 border border-gray-300">{{ detail.ctsp.giaBan }}</td>
-              <td class="px-2 py-1 border border-gray-300"> {{ dotGiamGia.soTienGiamToiDa }}</td>
-              <td class="px-2 py-1 border border-gray-300">{{ detail.giaSauKhiGiam }}</td>
-            </tr>
-            </tbody>
-          </table>
+          <DynamicTable
+            :data="filteredCTSPList"
+            :columns="columns2"
+            :getNestedValue="getNestedValue2"
+          />
         </div>
       </div>
     </div>
   </div>
 </template>
 
-
 <script setup>
 import { useDotGiamGia } from './ViewAddDotGiamGia.js';
-import {computed} from "vue";
+import { computed } from "vue";
+import DynamicTable from "@/components/DynamicTable.vue";
 
 const {
   dspList,
@@ -174,12 +120,17 @@ const {
   filteredCTSPList,
   addData,
   resetForm,
-  confirmAction
+  confirmAction,
+  columns,
+  getNestedValue,
+  columns2,
+  getNestedValue2,
+  fetchCTSPData
 } = useDotGiamGia();
 
-// const isTienMat=computed(function (){
-//   return dotGiamGia.value.loaiGiamGiaApDung==="Tiền mặt";
-// });
+const isTienMat = computed(() => {
+  return dotGiamGia.value.loaiGiamGiaApDung === "Tiền mặt";
+});
 </script>
 
 <style src="@/assets/VoucherCss/dotVoucher.css"></style>
