@@ -11,6 +11,7 @@
     <Breadcrumb breadcrumb="Quản lý Nhân Viên" />
 
     <div class="mt-4">
+      <h4 class="text-gray-600 text-4xl font-bold">Thông tin Nhân Viên</h4>
       <div class="mt-4">
         <div class="w-full overflow-hidden bg-white border rounded-md shadow-md">
           <form @submit.prevent>
@@ -68,7 +69,7 @@
                   </label>
                   <div class="flex justify-end items-end">
                     <router-link to="/them-nhan-vien">
-                      <button class="px-4 py-2 bg-green-500 text-white rounded-md">
+                      <button class="px-4 py-2 bg-blue-500 text-white rounded-md">
                         Thêm Nhân Viên
                       </button>
                     </router-link>
@@ -159,7 +160,7 @@
 
           <div class="overflow-x-auto shadow-md rounded-lg mt-8">
             <table class="w-full text-sm text-gray-500">
-              <thead class="bg-blue-100 text-blue-700 uppercase">
+              <thead class="bg-gray-100 text-black uppercase">
               <tr>
                 <th class="px-6 py-3 text-center w-10">#</th>
                 <th class="px-6 py-3 text-center">Tên</th>
@@ -176,7 +177,7 @@
                   :class="{'bg-gray-50': index % 2 !== 0}">
                 <td class="px-6 py-4 text-center">{{ index + 1 }}</td>
                 <td class="px-6 py-4 text-center">{{ nv.tenNhanVien }}</td>
-                <td class="px-6 py-4 text-center">{{ nv.idTaiKhoan.email }}</td>
+                <td class="px-6 py-4 text-center font-semibold">{{ nv.idTaiKhoan.email }}</td>
                 <td class="px-6 py-4 text-center">{{ nv.idTaiKhoan.soDienThoai }}</td>
                 <td class="px-6 py-4 text-center">{{ new Date(nv.createdAt).toLocaleDateString('vi-VN') }}</td>
                 <td class="px-6 py-4 text-center font-semibold"
@@ -185,7 +186,9 @@
                 </td>
                 <td class="px-6 py-4 text-center">
                   <button @click="showDeleteConfirm(nv.id)"
-                          class="text-red-600 hover:text-red-800 transition">Xóa</button>
+                          class="text-blue-600 hover:text-blue-800 transition">
+                    <i class="fas fa-pen-to-square"></i>
+                  </button>
                 </td>
               </tr>
               </tbody>
@@ -232,45 +235,14 @@ function previewImage(event) {
 
 //DiaChiThanhPho
 
-const isModalOpen = ref(false);
-
-const openModal = () => {
-  isModalOpen.value = true;
-};
-
-const closeModal = () => {
-  isModalOpen.value = false;
-};
 
 const dataTable = ref([]);
-const nhanvien = ref({
-  idTaiKhoan: { id: 19 },
-  ma: "",
-  tenNhanVien: "",
-  ngaySinh: "",
-  anhNhanVien:"",
-  ghiChu:"",
-  thanhPho:"",
-  quan:"",
-  phuong:"",
-  diaChiCuThe:"",
-  cccd: "",
-  deleted: 1,
-});
 //Confirm
 const showConfirmModal = ref(false);
 const selectedNVId = ref(null);
 const showDeleteConfirm = (id) => {
   selectedNVId.value = id;
   showConfirmModal.value = true;
-};
-
-const handleFileUpload = (event) => {
-  const file = event.target.files[0];
-  if (file) {
-    nhanvien.value.anhNhanVien = URL.createObjectURL(file);
-    nhanvien.value.fileAnh = file; // Lưu file để gửi lên server
-  }
 };
 
 const showToast = (toastType, msg) => {
@@ -282,7 +254,7 @@ const showToast = (toastType, msg) => {
   }, 3000);
 };
 //getall
-const filterStatus = ref('tat-ca'); // Mặc định là "Tất cả"
+const filterStatus = ref('tat-ca'); 
 
 const fetchNhanVien = async () => {
   try {
@@ -302,69 +274,6 @@ const fetchNhanVien = async () => {
 
 
 onMounted(fetchNhanVien);
-//add
-const addNhanVien = async () => {
-  const checkcccd = /^\d{12}$/; 
-  const checkten = /^[^\d]+$/; 
-  const Ngaysinh = new Date(nhanvien.value.ngaySinh);
-  const ngaySinhHt = new Date();
-
-  if (!nhanvien.value.ma.trim()){
-    showToast("error","Vui lòng nhập mãNV!");
-    return;
-  }
-  if (!nhanvien.value.tenNhanVien.trim()){
-    showToast("error","Vui lòng nhập tên nhân viên!");
-    return;
-  }
-  if (!checkten.test(nhanvien.value.tenNhanVien)){
-    showToast("error","Tên nhân viên chỉ được chứa chữ!");
-    return;
-  }
-  if (!nhanvien.value.thanhPho.trim()){
-    showToast("error","Vui lòng nhập thành phố!");
-    return;
-  }
-  if (!nhanvien.value.quan.trim()){
-    showToast("error","Vui lòng nhập quận!");
-    return;
-  }
-  if (!nhanvien.value.phuong.trim()){
-    showToast("error","Vui lòng nhập phường!");
-    return;
-  }
-  if (!nhanvien.value.diaChiCuThe.trim()){
-    showToast("error","Vui lòng nhập địa chỉ cụ thể!");
-    return;
-  }
-  if (!nhanvien.value.cccd.trim()){
-    showToast("error","Vui lòng nhập CCCD!");
-    return;
-  }
-  if (!checkcccd.test(nhanvien.value.cccd)){
-    showToast("error","CCCD phải có đúng 12 chữ số!");
-    return;
-  }
-  if (Ngaysinh > ngaySinhHt){
-    showToast("error","Ngay` sinh khong quá ngày hiện tại!");
-    return;
-  }
-  if (dataTable.value.some(nv => nv.ma === nhanvien.value.ma)) {
-    showToast("error", "Mã nhân viên đã tồn tại!");
-    return;
-  }
-
-  try {
-    const res = await axios.post("http://localhost:8080/nhan-vien/add", nhanvien.value);
-    showToast("success", "Thêm nhân viên thành công!");
-    dataTable.value.unshift(res.data);
-    
-  } catch (error) {
-    console.error("Lỗi khi thêm khách hàng:", error);
-    showToast("error", "Không thể thêm nhân viên. Vui lòng thử lại!");
-  } 
-};
-//delete
 
 const deleteNv = async (id) => {
   try {
@@ -390,35 +299,7 @@ const btnSearch = () => {
   );
 }
 
-//MouclickDulieu
-const isEditing = ref(false);
-const editNhanVien = (customer) => {
-  nhanvien.value = {
-    ...customer,
-    ngaySinh: customer.ngaySinh ? new Date(customer.ngaySinh).toISOString().split("T")[0] : ""
-  };
-  isEditing.value = true;
-};
 
-
-//UpdateNV
-const updateNhanVien = async () => {
-  try {
-    const res = await axios.put(`http://localhost:8080/nhan-vien/update/${nhanvien.value.id}`, nhanvien.value);
-    showToast("success", "Cập nhật nhân viên thành công!");
-
-    // Cập nhật lại danh sách
-    const index = dataTable.value.findIndex(nv => nv.id === nhanvien.value.id);
-    if (index !== -1) {
-      dataTable.value[index] = { ...res.data }; 
-    }
-
-    isEditing.value = false;
-  } catch (error) {
-    console.error("Lỗi khi cập nhật nhân viên:", error);
-    showToast("error", "Không thể cập nhật nhân viên!");
-  }
-};
 
 
 </script>
