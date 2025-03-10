@@ -130,7 +130,7 @@
       <router-link to="/back">
         <button @click="$emit('cancel')" class="px-4 py-2 bg-gray-300 rounded-md">Hủy</button>
       </router-link>
-      <button type="submit" @click="addNhanVien()" class="px-4 py-2 bg-green-600 text-white rounded-md">Lưu</button>
+      <button type="submit" @click="addNhanVien()" class="px-4 py-2 bg-blue-500 text-white rounded-md">Lưu</button>
     </div>
   </div>
 

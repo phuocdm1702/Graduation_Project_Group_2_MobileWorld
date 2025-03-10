@@ -67,7 +67,7 @@
                   </label>
                   <div class="flex justify-end items-end">
                     <router-link to="/them-khach-hang">
-                      <button class="px-2 py-3 bg-green-500 text-white rounded-md">
+                      <button class="px-2 py-2 bg-blue-500 text-white rounded-md">
                         Thêm Khách hàng
                       </button>
                     </router-link>
@@ -80,7 +80,7 @@
             <div class="mt-4 overflow-hidden border rounded-lg shadow-lg">
               <div class="overflow-x-auto shadow-md rounded-lg">
                 <table class="w-full text-sm text-gray-500">
-                  <thead class="bg-blue-100 text-blue-700 uppercase">
+                  <thead class="bg-gray-100 text-black uppercase">
                   <tr>
                     <th class="px-6 py-3 text-center">#</th>
                     <th class="px-6 py-3 text-center">Tên</th>

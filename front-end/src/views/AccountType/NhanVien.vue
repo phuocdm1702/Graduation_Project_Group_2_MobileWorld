@@ -69,7 +69,7 @@
                   </label>
                   <div class="flex justify-end items-end">
                     <router-link to="/them-nhan-vien">
-                      <button class="px-4 py-2 bg-green-500 text-white rounded-md">
+                      <button class="px-4 py-2 bg-blue-500 text-white rounded-md">
                         Thêm Nhân Viên
                       </button>
                     </router-link>
