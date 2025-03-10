@@ -24,10 +24,18 @@ public class PhieuGiamGiaController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<List<PhieuGiamGia>> searchData(@RequestParam("keyword") String keyword
-    ){
+    public ResponseEntity<List<PhieuGiamGia>> searchData(@RequestParam("keyword") String keyword){
         List<PhieuGiamGia> listSearch = phieuGiamGiaService.searchData(keyword);
         return ResponseEntity.ok(listSearch);
+    }
+
+    @GetMapping("/filter")
+    public ResponseEntity<List<PhieuGiamGia>> filterTable(
+            @RequestParam("loaiPhieu") String loaiPhieu,
+            @RequestParam("trangThai") Boolean trangThai
+    ) {
+        List<PhieuGiamGia> listPGG = phieuGiamGiaService.filterTrangThaiLoaiPhieu(loaiPhieu, trangThai);
+        return ResponseEntity.ok(listPGG);
     }
 
     @DeleteMapping("/delete/{id}")

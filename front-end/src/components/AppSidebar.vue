@@ -10,33 +10,16 @@
 
     <div
       :class="isOpen ? 'translate-x-0 ease-out' : '-translate-x-full ease-in'"
-      class="fixed inset-y-0 left-0 z-30 w-64 overflow-y-auto transition duration-300 transform bg-gray-900 lg:translate-x-0 lg:static lg:inset-0"
+      class="fixed inset-y-0 left-0 z-30 w-64 overflow-y-auto transition duration-300 transform bg-white lg:translate-x-0 lg:static lg:inset-0"
     >
       <div class="flex items-center justify-center mt-8">
         <div class="flex items-center">
-          <svg
-            class="w-8 h-8 ml-2 text-blue-500"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"
-            ></path>
-          </svg>
-
-          <span class="mx-2 text-2xl font-semibold text-white"
-            >Mobie World</span
-          >
+          <img src="@/assets/logo-helloword.png" class="w-36 h-auto">
         </div>
       </div>
 
       <nav class="mt-10">
-        <p class="pl-4 text-xs font-semibold mb-4 text-gray-400">GENERAL</p>
+        <p class="pl-4 text-xs font-semibold mb-4 text-gray-700">GENERAL</p>
         <router-link
           class="flex items-center px-6 py-2 mt-4 duration-200 border-l-4"
           :class="[$route.name === 'Dashboard' ? activeClass : inactiveClass]"
@@ -57,9 +40,9 @@
             ></path>
           </svg>
 
-          <span class="mx-4">Thống kê</span>
+          <span class="mx-4 text-black">Thống kê</span>
         </router-link>
-        <p class="pl-4 my-2 text-xs font-semibold mb-4 text-gray-400">
+        <p class="pl-4 my-2 text-xs font-semibold mb-4 text-gray-700">
           Examples
         </p>
 
@@ -68,7 +51,7 @@
             <button
               @click="toggleDropdown"
               class="flex items-center w-full px-6 py-2 mt-4 duration-200 border-l-4"
-              :class="[isOpen ? activeClass : inactiveClass]"
+              :class="[$route.name === 'Orders' ? activeClass : inactiveClass]"
             >
               <svg
                 class="w-7 h-7"
@@ -85,7 +68,7 @@
                 />
               </svg>
 
-              <span class="mx-4">Bán hàng</span>
+              <span class="mx-4 text-black">Bán hàng</span>
               <svg
                 class="w-4 h-4 ml-auto transform transition-transform"
                 :class="{ 'rotate-180': isOpen }"
@@ -109,7 +92,7 @@
                 to="/orders"
               >
                 <svg
-                  class="w-6 h-6 text-white"
+                  class="w-6 h-6 text-black"
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
                   viewBox="0 0 24 24"
@@ -122,7 +105,7 @@
                     d="M16 11V9a4 4 0 1 0-8 0v2M5 11h14m-1 0a3 3 0 1 1-6 0M9 11a3 3 0 1 1-6 0m2 8h10a2 2 0 0 0 2-2v-5H5v5a2 2 0 0 0 2 2Z"
                   />
                 </svg>
-                <span class="mx-4">Tại quầy</span>
+                <span class="mx-4 text-black">Tại quầy</span>
               </router-link>
 
               <router-link
@@ -135,7 +118,7 @@
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   fill="currentColor"
-                  class="w-6 h-6 bi bi-box-seam text-white"
+                  class="w-6 h-6 text-black"
                   viewBox="0 0 24 24"
                 >
                   <path
@@ -143,7 +126,7 @@
                   />
                 </svg>
 
-                <span class="mx-4">Đặt Online</span>
+                <span class="mx-4 text-black">Đặt Online</span>
               </router-link>
             </div>
           </div>
@@ -157,18 +140,18 @@
           <svg
             xmlns="http://www.w3.org/2000/svg"
             fill="currentColor"
-            class="w-5 h-5 bi bi-receipt text-white"
+            class="w-5 h-5 text-black"
             viewBox="0 0 16 16"
           >
             <path
-              d="M1.92.506a.5.5 0 0 1 .434.14L3 1.293l.646-.647a.5.5 0 0 1 .708 0L5 1.293l.646-.647a.5.5 0 0 1 .708 0L7 1.293l.646-.647a.5.5 0 0 1 .708 0L9 1.293l.646-.647a.5.5 0 0 1 .708 0l.646.647.646-.647a.5.5 0 0 1 .708 0l.646.647.646-.647a.5.5 0 0 1 .801.13l.5 1A.5.5 0 0 1 15 2v12a.5.5 0 0 1-.053.224l-.5 1a.5.5 0 0 1-.8.13L13 14.707l-.646.647a.5.5 0 0 1-.708 0L11 14.707l-.646.647a.5.5 0 0 1-.708 0L9 14.707l-.646.647a.5.5 0 0 1-.708 0L7 14.707l-.646.647a.5.5 0 0 1-.708 0L5 14.707l-.646.647a.5.5 0 0 1-.708 0L3 14.707l-.646.647a.5.5 0 0 1-.801-.13l-.5-1A.5.5 0 0 1 1 14V2a.5.5 0 0 1 .053-.224l.5-1a.5.5 0 0 1 .367-.27m.217 1.338L2 2.118v11.764l.137.274.51-.51a.5.5 0 0 1 .707 0l.646.647.646-.646a.5.5 0 0 1 .708 0l.646.646.646-.646a.5.5 0 0 1 .708 0l.646.646.646-.646a.5.5 0 0 1 .708 0l.646.646.646-.646a.5.5 0 0 1 .708 0l.646.646.646-.646a.5.5 0 0 1 .708 0l.509.509.137-.274V2.118l-.137-.274-.51.51a.5.5 0 0 1-.707 0L12 1.707l-.646.647a.5.5 0 0 1-.708 0L10 1.707l-.646.647a.5.5 0 0 1-.708 0L8 1.707l-.646.647a.5.5 0 0 1-.708 0L6 1.707l-.646.647a.5.5 0 0 1-.708 0L4 1.707l-.646.647a.5.5 0 0 1-.708 0z"
+              d="M1.92.506a.5.5 0 0 1 .434.14L3 1.293l.646-.647a.5.5 0 0 1 .708 0L5 1.293l.646-.647a.5.5 0 0 1 .708 0L7 1.293l.646-.647a.5.5 0 0 1 .708 0L9 1.293l.646-.647a.5.5 0 0 1 .708 0l.646.647.646-.647a.5.5 0 0 1 .708 0l.646.647.646-.647a.5.5 0 0 1 .801.13l.5 1A.5.5 0 0 1 15 2v12a.5.5 0 0 1-.053.224l-.5 1a.5.5 0 0 1-.8.13L13 14.707l-.646.647a.5.5 0 0 1-.708 0L11 14.707l-.646.647a.5.5 0 0 1-.708 0L9 14.707l-.646.647a.5.5 0 0 1-.708 0L7 14.707l-.646.647a.5.5 0 0 1-.708 0L5 14.707l-.646.647a.5.5 0 0 1-.801-.13l-.5-1A.5.5 0 0 1 1 14V2a.5.5 0 0 1 .053-.224l.5-1a.5.5 0 0 1 .367-.27m.217 1.338L2 2.118v11.764l.137.274.51-.51a.5.5 0 0 1 .707 0l.646.647.646-.646a.5.5 0 0 1 .708 0l.646.646.646-.646a.5.5 0 0 1 .708 0l.646.646.646-.646a.5.5 0 0 1 .708 0l.646.646.646-.646a.5.5 0 0 1 .708 0l.509.509.137-.274V2.118l-.137-.274-.51.51a.5.5 0 0 1-.707 0L12 1.707l-.646.647a.5.5 0 0 1-.708 0L10 1.707l-.646.647a.5.5 0 0 1-.708 0L8 1.707l-.646.647a.5.5 0 0 1-.708 0L6 1.707l-.646.647a.5.5 0 0 1-.708 0L4 1.707l-.646.647a.5.5 0 0 1-.708 0z"
             />
             <path
               d="M3 4.5a.5.5 0 0 1 .5-.5h6a.5.5 0 1 1 0 1h-6a.5.5 0 0 1-.5-.5m0 2a.5.5 0 0 1 .5-.5h6a.5.5 0 1 1 0 1h-6a.5.5 0 0 1-.5-.5m0 2a.5.5 0 0 1 .5-.5h6a.5.5 0 1 1 0 1h-6a.5.5 0 0 1-.5-.5m0 2a.5.5 0 0 1 .5-.5h6a.5.5 0 0 1 0 1h-6a.5.5 0 0 1-.5-.5m8-6a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 0 1h-1a.5.5 0 0 1-.5-.5m0 2a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 0 1h-1a.5.5 0 0 1-.5-.5m0 2a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 0 1h-1a.5.5 0 0 1-.5-.5m0 2a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 0 1h-1a.5.5 0 0 1-.5-.5"
             />
           </svg>
 
-          <span class="mx-4">Quản lý hóa đơn</span>
+          <span class="mx-4 text-black">Quản lý hóa đơn</span>
         </router-link>
 
         <router-link
@@ -179,7 +162,7 @@
           <svg
             xmlns="http://www.w3.org/2000/svg"
             fill="currentColor"
-            class="w-6 h-6 bi bi-arrow-return-right"
+            class="w-6 h-6 text-black"
             viewBox="0 0 16 16"
           >
             <path
@@ -188,7 +171,7 @@
             />
           </svg>
 
-          <span class="mx-4">Trả hàng</span>
+          <span class="mx-4 text-black">Trả hàng</span>
         </router-link>
 
         <!-- Thêm vào vị trí bạn muốn trong template, ví dụ sau mục "Trả hàng" -->
@@ -202,7 +185,7 @@
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="currentColor"
-                class="w-6 h-6 bi bi-shield-check"
+                class="w-6 h-6 text-black"
                 viewBox="0 0 16 16"
               >
                 <path
@@ -212,7 +195,7 @@
                   d="M10.854 5.146a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708 0l-1.5-1.5a.5.5 0 1 1 .708-.708L7.5 7.793l2.646-2.647a.5.5 0 0 1 .708 0z"
                 />
               </svg>
-              <span class="mx-4">Bảo hành</span>
+              <span class="mx-4 text-black">Bảo hành</span>
               <svg
                 class="w-4 h-4 ml-auto transform transition-transform"
                 :class="{ 'rotate-180': isOpen5 }"
@@ -236,14 +219,14 @@
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   fill="currentColor"
-                  class="w-5 h-5 bi bi-ticket-perforated"
+                  class="w-5 h-5 text-black"
                   viewBox="0 0 16 16"
                 >
                   <path
                     d="M4 4.5a.5.5 0 0 1 .5-.5H6a.5.5 0 0 1 0 1v.5a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5zm7.5-.5a.5.5 0 0 0 0 1v.5a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5V5a.5.5 0 0 0-.5-.5zM0 4.5A1.5 1.5 0 0 1 1.5 3h13A1.5 1.5 0 0 1 16 4.5V6a.5.5 0 0 1-.5.5 1.5 1.5 0 0 0 0 3 .5.5 0 0 1 .5.5v1.5a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 0 11.5V10a.5.5 0 0 1 .5-.5 1.5 1.5 0 1 0 0-3A.5.5 0 0 1 0 6zm1.5-.5a.5.5 0 0 0-.5.5v1.5a.5.5 0 0 0 .5.5h13a.5.5 0 0 0 .5-.5V4.5a.5.5 0 0 0-.5-.5z"
                   />
                 </svg>
-                <span class="mx-4">Phiếu bảo hành</span>
+                <span class="mx-4 text-black">Phiếu bảo hành</span>
               </router-link>
               <router-link
                 class="flex items-center gap-x-3 block px-6 py-2 mt-2 duration-200 border-l-4"
@@ -253,19 +236,19 @@
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   fill="currentColor"
-                  class="w-5 h-5 bi bi-clock-history"
+                  class="w-5 h-5 text-black"
                   viewBox="0 0 16 16"
                 >
                   <path
                     d="M8.515 1.019A7 7 0 0 0 8 1V0a8 8 0 0 1 .589.022zm-1.03.022A8 8 0 0 1 8 1v1a7 7 0 0 0-.515-.019zm6.004 1.517A7 7 0 0 0 15 8a7 7 0 0 0-.485-2.461zM1.485 2.558A7 7 0 0 0 1 8a7 7 0 0 0 .485 2.461zm11.03 9.923A7 7 0 0 0 15 8a7 7 0 0 0-1.485-4.461zM1 8a7 7 0 0 0 1.485 4.461L1 8zm7-6a6 6 0 1 1 0 12A6 6 0 0 1 8 2zm0 9V8H5V7h4v4h-1z"
                   />
                 </svg>
-                <span class="mx-4">Lịch sử bảo hành</span>
+                <span class="mx-4 text-black">Lịch sử bảo hành</span>
               </router-link>
             </div>
           </div>
         </div>
-        
+
         <div>
           <div class="relative">
             <button
@@ -276,7 +259,7 @@
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="currentColor"
-                class="w-6 h-6 bi bi-phone"
+                class="w-6 h-6 text-black"
                 viewBox="0 0 16 16"
               >
                 <path
@@ -284,7 +267,7 @@
                 />
                 <path d="M8 14a1 1 0 1 0 0-2 1 1 0 0 0 0 2" />
               </svg>
-              <span class="mx-4">Sản Phẩm</span>
+              <span class="mx-4 text-black">Sản Phẩm</span>
               <svg
                 class="w-4 h-4 ml-auto transform transition-transform"
                 :class="{ 'rotate-180': isOpen2 }"
@@ -309,7 +292,7 @@
                 ]"
                 :to="item.path"
               >
-                {{ item.name }}
+                <span class="text-black">{{ item.name }}</span>
               </router-link>
             </div>
           </div>
@@ -325,14 +308,14 @@
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="currentColor"
-                class="w-6 h-6 bi bi-person-lines-fill"
+                class="w-6 h-6 text-black"
                 viewBox="0 0 16 16"
               >
                 <path
                   d="M6 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6m-5 6s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1zM11 3.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 0 1h-4a.5.5 0 0 1-.5-.5m.5 2.5a.5.5 0 0 0 0 1h4a.5.5 0 0 0 0-1zm2 3a.5.5 0 0 0 0 1h2a.5.5 0 0 0 0-1zm0 3a.5.5 0 0 0 0 1h2a.5.5 0 0 0 0-1z"
                 />
               </svg>
-              <span class="mx-4">Quản lý tài khoản</span>
+              <span class="mx-4 text-black">Quản lý tài khoản</span>
               <svg
                 class="w-4 h-4 ml-auto transform transition-transform"
                 :class="{ 'rotate-180': isOpen3 }"
@@ -358,14 +341,14 @@
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   fill="currentColor"
-                  class="w-6 h-6 bi bi-person-gear"
+                  class="w-6 h-6 text-black"
                   viewBox="0 0 16 16"
                 >
                   <path
                     d="M11 5a3 3 0 1 1-6 0 3 3 0 0 1 6 0M8 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4m.256 7a4.5 4.5 0 0 1-.229-1.004H3c.001-.246.154-.986.832-1.664C4.484 10.68 5.711 10 8 10q.39 0 .74.025c.226-.341.496-.65.804-.918Q8.844 9.002 8 9c-5 0-6 3-6 4s1 1 1 1zm3.63-4.54c.18-.613 1.048-.613 1.229 0l.043.148a.64.64 0 0 0 .921.382l.136-.074c.561-.306 1.175.308.87.869l-.075.136a.64.64 0 0 0 .382.92l.149.045c.612.18.612 1.048 0 1.229l-.15.043a.64.64 0 0 0-.38.921l.074.136c.305.561-.309 1.175-.87.87l-.136-.075a.64.64 0 0 0-.92.382l-.045.149c-.18.612-1.048.612-1.229 0l-.043-.15a.64.64 0 0 0-.921-.38l-.136.074c-.561.305-1.175-.309-.87-.87l.075-.136a.64.64 0 0 0-.382-.92l-.148-.045c-.613-.18-.613-1.048 0-1.229l.148-.043a.64.64 0 0 0 .382-.921l-.074-.136c-.306-.561.308-1.175.869-.87l.136.075a.64.64 0 0 0 .92-.382zM14 12.5a1.5 1.5 0 1 0-3 0 1.5 1.5 0 0 0 3 0"
                   />
                 </svg>
-                <span class="mx-4">Nhân viên</span>
+                <span class="mx-4 text-black">Nhân viên</span>
               </router-link>
               <router-link
                 class="flex items-center gap-x-3 block px-6 py-2 mt-2 duration-200 border-l-4"
@@ -377,14 +360,14 @@
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   fill="currentColor"
-                  class="w-6 h-6 bi bi-people"
+                  class="w-6 h-6 text-black"
                   viewBox="0 0 16 16"
                 >
                   <path
                     d="M15 14s1 0 1-1-1-4-5-4-5 3-5 4 1 1 1 1zm-7.978-1L7 12.996c.001-.264.167-1.03.76-1.72C8.312 10.629 9.282 10 11 10c1.717 0 2.687.63 3.24 1.276.593.69.758 1.457.76 1.72l-.008.002-.014.002zM11 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4m3-2a3 3 0 1 1-6 0 3 3 0 0 1 6 0M6.936 9.28a6 6 0 0 0-1.23-.247A7 7 0 0 0 5 9c-4 0-5 3-5 4q0 1 1 1h4.216A2.24 2.24 0 0 1 5 13c0-1.01.377-2.042 1.09-2.904.243-.294.526-.569.846-.816M4.92 10A5.5 5.5 0 0 0 4 13H1c0-.26.164-1.03.76-1.724.545-.636 1.492-1.256 3.16-1.275ZM1.5 5.5a3 3 0 1 1 6 0 3 3 0 0 1-6 0m3-2a2 2 0 1 0 0 4 2 2 0 0 0 0-4"
                   />
                 </svg>
-                <span class="mx-4">Khách hàng</span>
+                <span class="mx-4 text-black">Khách hàng</span>
               </router-link>
             </div>
           </div>
@@ -400,14 +383,14 @@
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="currentColor"
-                class="w-5 h-5 bi bi-ticket-fill"
+                class="w-5 h-5 text-black"
                 viewBox="0 0 16 16"
               >
                 <path
                   d="M1.5 3A1.5 1.5 0 0 0 0 4.5V6a.5.5 0 0 0 .5.5 1.5 1.5 0 1 1 0 3 .5.5 0 0 0-.5.5v1.5A1.5 1.5 0 0 0 1.5 13h13a1.5 1.5 0 0 0 1.5-1.5V10a.5.5 0 0 0-.5-.5 1.5 1.5 0 0 1 0-3A.5.5 0 0 0 16 6V4.5A1.5 1.5 0 0 0 14.5 3z"
                 />
               </svg>
-              <span class="mx-4">Phiếu Giảm giá</span>
+              <span class="mx-4 text-black">Phiếu Giảm giá</span>
               <svg
                 class="w-4 h-4 ml-auto transform transition-transform"
                 :class="{ 'rotate-180': isOpen4 }"
@@ -430,14 +413,14 @@
                 ]"
                 to="/phieu-giam-gia"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" 
-                     fill="currentColor" 
-                     class="w-5 h-5 bi bi-ticket-perforated" 
+                <svg xmlns="http://www.w3.org/2000/svg"
+                     fill="currentColor"
+                     class="w-5 h-5 text-black"
                      viewBox="0 0 16 16">
                   <path d="M4 4.85v.9h1v-.9zm7 0v.9h1v-.9zm-7 1.8v.9h1v-.9zm7 0v.9h1v-.9zm-7 1.8v.9h1v-.9zm7 0v.9h1v-.9zm-7 1.8v.9h1v-.9zm7 0v.9h1v-.9z"/>
                   <path d="M1.5 3A1.5 1.5 0 0 0 0 4.5V6a.5.5 0 0 0 .5.5 1.5 1.5 0 1 1 0 3 .5.5 0 0 0-.5.5v1.5A1.5 1.5 0 0 0 1.5 13h13a1.5 1.5 0 0 0 1.5-1.5V10a.5.5 0 0 0-.5-.5 1.5 1.5 0 0 1 0-3A.5.5 0 0 0 16 6V4.5A1.5 1.5 0 0 0 14.5 3zM1 4.5a.5.5 0 0 1 .5-.5h13a.5.5 0 0 1 .5.5v1.05a2.5 2.5 0 0 0 0 4.9v1.05a.5.5 0 0 1-.5.5h-13a.5.5 0 0 1-.5-.5v-1.05a2.5 2.5 0 0 0 0-4.9z"/>
                 </svg>
-                <span class="mx-4">Phiếu giảm giá</span>
+                <span class="mx-4 text-black">Phiếu giảm giá</span>
               </router-link>
               <router-link
                 class="flex items-center gap-x-3 block px-6 py-2 mt-2 duration-200 border-l-4"
@@ -446,20 +429,20 @@
                 ]"
                 to="/dot-giam-gia"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" 
-                     fill="currentColor" 
-                     class="w-5 h-5 bi bi-calendar-event" 
+                <svg xmlns="http://www.w3.org/2000/svg"
+                     fill="currentColor"
+                     class="w-5 h-5 text-black"
                      viewBox="0 0 16 16">
                   <path d="M11 6.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5z"/>
                   <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5M1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4z"/>
                 </svg>
-                <span class="mx-4">Đợt Giảm giá</span>
+                <span class="mx-4 text-black">Đợt Giảm giá</span>
               </router-link>
             </div>
           </div>
         </div>
 
-        
+
       </nav>
     </div>
   </div>
@@ -476,12 +459,8 @@ const { isOpen3 } = useSidebar();
 const { isOpen4 } = useSidebar();
 const { isOpen5 } = useSidebar();
 
-const activeClass = ref(
-  "bg-gray-600 bg-opacity-25 text-gray-100 border-gray-100"
-);
-const inactiveClass = ref(
-  "border-gray-900 text-gray-500 hover:bg-gray-600 hover:bg-opacity-25 hover:text-gray-100"
-);
+const activeClass = ref("bg-gray-600 bg-opacity-25 text-gray-100 border-gray-300");
+const inactiveClass = ref("border-gray-300 text-gray-500 hover:bg-gray-600 hover:bg-opacity-25 hover:text-gray-100");
 
 function toggleDropdown() {
   isOpen.value = !isOpen.value;
