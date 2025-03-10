@@ -160,7 +160,7 @@
 
           <div class="overflow-x-auto shadow-md rounded-lg mt-8">
             <table class="w-full text-sm text-gray-500">
-              <thead class="bg-blue-100 text-blue-700 uppercase">
+              <thead class="bg-gray-100 text-black uppercase">
               <tr>
                 <th class="px-6 py-3 text-center w-10">#</th>
                 <th class="px-6 py-3 text-center">Tên</th>
