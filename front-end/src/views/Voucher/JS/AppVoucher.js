@@ -1,4 +1,4 @@
-import { ref, watch } from "vue";
+import { ref, computed } from "vue";
 import axios from "axios";
 
 export default function usePhieuGiamGia() {
@@ -24,14 +24,12 @@ export default function usePhieuGiamGia() {
   const searchPGG = async () => {
     try {
       let response;
-      if (!searchQuery.value || !searchQuery.value.trim()) {
-        response = await axios.get(`${baseURL}/data`);
+      if(!searchQuery.value || searchQuery.value.trim() === "") {
+        response = await axios.get(`${baseURL}/data`)
       } else {
         response = await axios.get(`${baseURL}/search`, {
           params: {
-            keyword: searchQuery.value,
-            loaiPhieuGiamGia: filterType.value === "Phần trăm" ? 1 : filterType.value === "Tiền mặt" ? 2 : null,
-            trangThai: filterStatus.value === "Còn hạn" ? 1 : filterStatus.value === "Hết hạn" ? 0 : null
+            keyword: searchQuery.value.trim(),
           }
         });
       }
@@ -41,6 +39,21 @@ export default function usePhieuGiamGia() {
     }
   };
 
+  const filteredVouchers = computed(() => {
+    console.log("Danh sách voucher:", vouchers.value);
+    return vouchers.value.filter((voucher) => {
+      // Lọc theo loại phiếu
+      const matchType = filterType.value === "Tất cả loại phiếu" || voucher.loaiPhieuGiamGia === filterType.value;
+
+      // Lọc theo trạng thái
+      const matchStatus =
+        filterStatus.value === "Tất cả trạng thái" ||
+        (filterStatus.value === "Còn hạn" && voucher.trangThai == "1") ||
+        (filterStatus.value === "Hết hạn" && voucher.trangThai == "0");
+
+      return matchType && matchStatus;
+    });
+  });
 
   const deletePGG = async (id) => {
     try {
@@ -57,6 +70,7 @@ export default function usePhieuGiamGia() {
     filterType,
     filterStatus,
     searchPGG,
+    filteredVouchers,
     deletePGG,
     fetchDataPGG
   };

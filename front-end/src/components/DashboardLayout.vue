@@ -10,7 +10,7 @@
           <slot />
         </div>
       </main>
-      <Footer />
+      
     </div>
   </div>
 </template>
@@ -18,5 +18,5 @@
 <script setup lang="ts">
 import Sidebar from './AppSidebar.vue'
 import Header from './AppHeader.vue'
-import Footer from './AppFooter.vue'
+
 </script>

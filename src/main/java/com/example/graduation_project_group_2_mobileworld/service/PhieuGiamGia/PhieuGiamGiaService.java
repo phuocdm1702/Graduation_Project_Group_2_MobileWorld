@@ -51,11 +51,31 @@ public class PhieuGiamGiaService {
     }
 
     public List<PhieuGiamGia> searchData(String keyword) {
-        if(keyword != null) {
-            return phieuGiamGiaRepository.search(keyword);
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return phieuGiamGiaRepository.findAll(); // Trả về tất cả nếu không có điều kiện lọc
         }
-        return phieuGiamGiaRepository.findAll();
+        return phieuGiamGiaRepository.search(keyword);
     }
+
+    public List<PhieuGiamGia> filterTrangThaiLoaiPhieu(String loaiPhieu, Boolean trangThai) {
+        if ((loaiPhieu == null || "Tất cả loại phiếu".equals(loaiPhieu)) &&
+                (trangThai == null)) {
+            return phieuGiamGiaRepository.findAll();
+        }
+
+        // Nếu "Tất cả loại phiếu", đặt về null để không lọc theo loại phiếu
+        if ("Tất cả loại phiếu".equals(loaiPhieu)) {
+            loaiPhieu = null;
+        }
+
+        // Nếu trangThai không phải true/false, đặt về null
+        if (trangThai != null && !trangThai.equals(true) && !trangThai.equals(false)) {
+            trangThai = null;
+        }
+
+        return phieuGiamGiaRepository.filterByLoaiPhieuAndTrangThai(loaiPhieu, trangThai);
+    }
+
 
     public PhieuGiamGia addPGG(PhieuGiamGia phieuGiamGia) {
         return phieuGiamGiaRepository.save(phieuGiamGia);
