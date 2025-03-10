@@ -4,7 +4,7 @@ import axios from "axios";
 export default function useHoaDonLineList() {
   const dataTable = ref([]);
   const currentPage = ref(1); // Trang hiện tại (bắt đầu từ 1)
-  const pageSize = ref(1); // Kích thước trang
+  const pageSize = ref(10); // Kích thước trang
   const totalPages = ref(0); // Tổng số trang
   const totalElements = ref(0); // Tổng số bản ghi
 
@@ -55,11 +55,6 @@ export default function useHoaDonLineList() {
     {
       label: "TG tạo",
       key: "ngayTao",
-      formatter: (value) => (value ? new Date(value).toLocaleDateString() : "N/A"),
-    },
-    {
-      label: "TG sửa",
-      key: "updated_at",
       formatter: (value) => (value ? new Date(value).toLocaleDateString() : "N/A"),
     },
     {

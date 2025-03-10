@@ -9,7 +9,7 @@
     <Breadcrumb breadcrumb="Quản lý Khách Hàng" />
 
     <div class="mb-3">
-      <h4 class="text-gray-600 text-4xl font-bold">Quản lý Khách Hàng</h4>
+      <h4 class="text-gray-600 text-4xl font-bold">Thông tin Khách Hàng</h4>
 
       <div class="mt-4">
         <div class="w-full overflow-hidden bg-white border rounded-md shadow-md">
@@ -18,8 +18,8 @@
               <div>
                 <label class="text-sm font-semibold block mb-2">Nhập thông tin tìm kiếm</label>
                 <input
-                  v-model="searchNV"
-                  @input="btnSearch"
+                  v-model="searchKH"
+                  @input="BtnSearch"
                   placeholder="Tìm theo mã hoặc tên..."
                   type="text"
                   class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-400 outline-none"
@@ -67,48 +67,53 @@
                   </label>
                   <div class="flex justify-end items-end">
                     <router-link to="/them-khach-hang">
-                      <button class="px-2 py-3 bg-green-500 text-white rounded-md">
+                      <button class="px-2 py-2 bg-blue-500 text-white rounded-md">
                         Thêm Khách hàng
                       </button>
                     </router-link>
                   </div>
                 </div>
-
               </div>
-
             </div>
           </form>
           <div class="mt-8">
             <div class="mt-4 overflow-hidden border rounded-lg shadow-lg">
-              <table class="w-full bg-white rounded-md">
-                <thead>
-                <tr class="bg-blue-500 text-black">
-                  <th class="px-6 py-3 text-left">#</th>
-                  <th class="px-6 py-3 text-left">Tên</th>
-                  <th class="px-6 py-3 text-left">Email</th>
-                  <th class="px-6 py-3 text-left">SDT</th>
-                  <th class="px-6 py-3 text-left">Ngày tham gia</th>
-                  <th class="px-6 py-3 text-center">Trạng thái</th>
-                  <th class="px-6 py-3 text-center">Thao tác</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr v-for="(customer,index) in dataTable" :key="customer.id"
-                    class="border-t text-gray-700 hover:bg-gray-100 transition">
-                  <td class="px-6 py-3">{{ index+1 }}</td>
-                  <td class="px-6 py-3">{{ customer.ten }}</td>
-                  <td class="px-6 py-3 font-semibold">{{ customer.idTaiKhoan.email }}</td>
-                  <td class="px-6 py-3">{{ customer.idTaiKhoan.soDienThoai }}</td>
-                  <td class="px-6 py-3">{{ new Date(customer.createdAt).toLocaleDateString() }}</td>
-                  <td class="px-6 py-4 text-center font-semibold"
-                      :class="{'text-red-500': customer.deleted, 'text-green-600': !customer.deleted}">
-                    {{ customer.deleted ? 'Hủy kích hoạt' : 'Kích hoạt' }}
-                  </td>                  <td class="px-6 py-3 text-center">
-                  <button @click="editCustomer(customer)" class="text-blue-600 hover:text-blue-800 font-semibold px-2">Sửa</button>
-                </td>
-                </tr>
-                </tbody>
-              </table>
+              <div class="overflow-x-auto shadow-md rounded-lg">
+                <table class="w-full text-sm text-gray-500">
+                  <thead class="bg-gray-100 text-black uppercase">
+                  <tr>
+                    <th class="px-6 py-3 text-center">#</th>
+                    <th class="px-6 py-3 text-center">Tên</th>
+                    <th class="px-6 py-3 text-center">Email</th>
+                    <th class="px-6 py-3 text-center">SDT</th>
+                    <th class="px-6 py-3 text-center">Ngày tham gia</th>
+                    <th class="px-6 py-3 text-center">Trạng thái</th>
+                    <th class="px-6 py-3 text-center">Thao tác</th>
+                  </tr>
+                  </thead>
+                  <tbody>
+                  <tr v-for="(customer, index) in dataTable" :key="customer.id"
+                      class="bg-white border-b hover:bg-gray-50 transition">
+                    <td class="px-6 py-4 text-center">{{ index + 1 }}</td>
+                    <td class="px-6 py-4 text-center">{{ customer.ten }}</td>
+                    <td class="px-6 py-4 text-center font-semibold">{{ customer.idTaiKhoan.email }}</td>
+                    <td class="px-6 py-4 text-center">{{ customer.idTaiKhoan.soDienThoai }}</td>
+                    <td class="px-6 py-4 text-center">{{ new Date(customer.createdAt).toLocaleDateString() }}</td>
+                    <td class="px-6 py-4 text-center font-semibold"
+                        :class="{'text-red-500': customer.deleted, 'text-green-600': !customer.deleted}">
+                      {{ customer.deleted ? 'Hủy kích hoạt' : 'Kích hoạt' }}
+                    </td>
+                    <td class="flex items-center justify-center">
+                      <button @click="editCustomer(customer)"
+                              class="text-blue-600 hover:text-blue-800 transition w-8 h-8 flex items-center justify-center">
+                        <i class="fas fa-pen-to-square"></i>
+                      </button>
+                    </td>
+                  </tr>
+                  </tbody>
+                </table>
+              </div>
+
             </div>
           </div>
         </div>
@@ -131,6 +136,11 @@
 import { ref, onMounted } from "vue";
 import axios from "axios";
 import ConfirmModal from "@/components/ConfirmModal.vue";
+import '@fortawesome/fontawesome-free/css/all.css';
+
+
+import { defineComponent } from 'vue';
+import App from '@/App.vue';
 
 //du lieu add
 const dataTable = ref([]);
@@ -237,12 +247,13 @@ const searchKH = ref("");
 //SearchKH
 const BtnSearch =  () => {
   if (!searchKH.value.trim()){
-    showToast("error","Vui long` nhap ten muon tim kiem!");
+    fetchCustomers();
     return;
   }
   dataTable.value = dataTable.value.filter(khachhang =>
-    khachhang.ten?.toLowerCase().includes(searchKH.value.toLowerCase()) ||
-    khachhang.ma?.toLowerCase().includes(searchKH.value.toLowerCase())
+    khachhang.ten.toLowerCase().includes(searchKH.value.toLowerCase()) ||
+    khachhang.idTaiKhoan.soDienThoai.toLowerCase().includes(searchKH.value.toLowerCase()) ||
+    khachhang.idTaiKhoan.email.toLowerCase().includes(searchKH.value.toLowerCase())
   );
 }
 //backSearch
@@ -299,3 +310,5 @@ const  reseatKH = () => {
 .error { background: red; }
 .info { background: blue; }
 </style>
+
+
