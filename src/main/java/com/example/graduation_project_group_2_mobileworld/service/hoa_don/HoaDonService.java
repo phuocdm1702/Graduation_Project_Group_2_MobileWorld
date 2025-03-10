@@ -5,6 +5,7 @@ import com.example.graduation_project_group_2_mobileworld.entity.HoaDon;
 import com.example.graduation_project_group_2_mobileworld.repository.hoa_don.HoaDonRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -26,13 +27,18 @@ public class HoaDonService {
                 ;
     }
 
-    public Page<HoaDonDTO> getAllData(Pageable pageable) {
-        Page<HoaDon> hoaDonPage = hoaDonRepository.findAll(pageable);
-        List<HoaDonDTO> hoaDonDTOs = hoaDonPage.getContent()
-                .stream()
-                .map(this::toDTO)
-                .toList();
-        return new PageImpl<>(hoaDonDTOs, pageable, hoaDonPage.getTotalElements());
+//    public Page<HoaDonDTO> getAllData(Pageable pageable) {
+//        Page<HoaDon> hoaDonPage = hoaDonRepository.findAll(pageable);
+//        List<HoaDonDTO> hoaDonDTOs = hoaDonPage.getContent()
+//                .stream()
+//                .map(this::toDTO)
+//                .toList();
+//        return new PageImpl<>(hoaDonDTOs, pageable, hoaDonPage.getTotalElements());
+//    }
+
+    public Page<HoaDonDTO> getHoaDonWithPagination(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return hoaDonRepository.findAllWithPagination(pageable).map(this::toDTO);
     }
 
     private HoaDonDTO toDTO(HoaDon hoaDon){

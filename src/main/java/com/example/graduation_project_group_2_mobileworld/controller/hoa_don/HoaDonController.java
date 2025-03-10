@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+
 @CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/hoa-don")
@@ -26,19 +27,22 @@ public class HoaDonController {
     public HoaDonController(HoaDonService hoaDonService) {
         this.hoaDonService = hoaDonService;
     }
-//
-//    @GetMapping("/home")
-//    public ResponseEntity<List<HoaDonDTO>> getAllHoaDon() {
-//        return ResponseEntity.ok(hoaDonService.getAllData());
-//    }
 
+    //
     @GetMapping("/home")
     public ResponseEntity<Page<HoaDonDTO>> getAllHoaDon(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("ngayTao").descending());
-        Page<HoaDonDTO> hoaDonPage = hoaDonService.getAllData(pageable);
-        return ResponseEntity.ok(hoaDonPage);
+            @RequestParam(defaultValue = "1") int size) {
+        return ResponseEntity.ok(hoaDonService.getHoaDonWithPagination(page, size));
     }
+
+//    @GetMapping("/home")
+//    public ResponseEntity<Page<HoaDonDTO>> getAllHoaDon(
+//            @RequestParam(defaultValue = "0") int page,
+//            @RequestParam(defaultValue = "10") int size) {
+//        Pageable pageable = PageRequest.of(page, size, Sort.by("ngayTao").descending());
+//        Page<HoaDonDTO> hoaDonPage = hoaDonService.getAllData(pageable);
+//        return ResponseEntity.ok(hoaDonPage);
+//    }
 }
 

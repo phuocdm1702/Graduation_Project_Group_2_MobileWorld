@@ -3,7 +3,8 @@
     <h4 class="text-xl font-semibold text-gray-700">📋 Danh sách Hóa Đơn</h4>
 
     <!-- Form lọc -->
-    <div class="bg-white shadow-lg rounded-lg p-5 mt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+    <div
+      class="bg-white shadow-lg rounded-lg p-5 mt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
       <input v-model="searchQuery" type="text" placeholder="🔍 Tìm kiếm hóa đơn..." class="input-field"/>
       <input v-model="minAmount" type="number" placeholder="💰 Giá tối thiểu" class="input-field"/>
       <input v-model="maxAmount" type="number" placeholder="💰 Giá tối đa" class="input-field"/>
@@ -17,32 +18,60 @@
       <input v-model="startDate" type="date" class="input-field"/>
       <input v-model="endDate" type="date" class="input-field"/>
 
-      <button @click="applyFilters" class="col-span-full sm:col-span-2 md:col-span-3 lg:col-span-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition">
+      <button @click="applyFilters"
+              class="col-span-full sm:col-span-2 md:col-span-3 lg:col-span-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition">
         🔍 Lọc
       </button>
     </div>
-
-    <!-- Bảng dữ liệu động -->
+    
     <!-- Sử dụng DynamicTable -->
     <DynamicTable
       :data="dataTable"
       :columns="columns"
       :get-nested-value="getNestedValue"
     />
+
     <!-- Phân trang -->
-    <div class="mt-4 flex justify-between items-center">
-      <button @click="prevPage" :disabled="currentPage === 1" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400">
-        Trang trước
+    <div class="mt-4 flex justify-between items-center gap-2">
+      <!-- Nút Trang đầu -->
+      <button @click="goToFirstPage" :disabled="currentPage === 1"
+              class="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 4.5L10.5 12l9 7.5M4.5 4.5v15"/>
+        </svg>
       </button>
+
+      <!-- Nút Trang trước -->
+      <button @click="prevPage" :disabled="currentPage === 1"
+              class="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5"/>
+        </svg>
+      </button>
+
       <span>Trang {{ currentPage }} / {{ totalPages }}</span>
-      <button @click="nextPage" :disabled="currentPage === totalPages" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400">
-        Trang sau
+
+      <!-- Nút Trang sau -->
+      <button @click="nextPage" :disabled="currentPage === totalPages"
+              class="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/>
+        </svg>
+      </button>
+
+      <!-- Nút Trang cuối -->
+      <button @click="goToLastPage" :disabled="currentPage === totalPages"
+              class="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 4.5l9 7.5-9 7.5M19.5 4.5v15"/>
+        </svg>
       </button>
     </div>
+
   </div>
-  
+
   <HoaDonChiTiet/>
-  
+
   <LichSuHoaDon/>
 </template>
 
@@ -68,6 +97,8 @@ const {
   applyFilters,
   columns,
   getNestedValue,
+  goToFirstPage,
+  goToLastPage,
 } = useHoaDonLineList();
 </script>
 
