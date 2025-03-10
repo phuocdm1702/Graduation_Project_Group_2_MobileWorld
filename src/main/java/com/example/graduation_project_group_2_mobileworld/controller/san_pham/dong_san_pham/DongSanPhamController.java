@@ -4,6 +4,8 @@ import com.example.graduation_project_group_2_mobileworld.dto.san_pham.dong_san_
 import com.example.graduation_project_group_2_mobileworld.service.san_pham.dong_san_pham.DongSanPhamService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -88,10 +90,23 @@ public class DongSanPhamController {
 
     @GetMapping("/search")
     public ResponseEntity<Page<DongSanPhamDTO>> search(
-            @RequestParam String keyword,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String dongSanPham,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size) {
-        return ResponseEntity.ok(service.searchDongSanPham(keyword, page, size));
+        Pageable pageable = PageRequest.of(page, size);
+        if (dongSanPham != null && !dongSanPham.isEmpty()) {
+            return ResponseEntity.ok(service.filterByDongSanPham(dongSanPham, pageable));
+        }
+        if (keyword != null && !keyword.isEmpty()) {
+            return ResponseEntity.ok(service.searchDongSanPham(keyword, pageable));
+        }
+        return ResponseEntity.ok(service.getAllDongSanPham(page, size));
+    }
+
+    @GetMapping("/all-names")
+    public ResponseEntity<List<String>> getAllProductLineNames() {
+        return ResponseEntity.ok(service.getAllProductLineNames());
     }
 
     @GetMapping("/exists/ma")

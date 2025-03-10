@@ -40,7 +40,7 @@ export default function useNhaSanXuat() {
       manufacturers.value = data.content;
       totalItems.value = data.totalElements;
     } catch (error) {
-      toast.value?.showToast('error', 'Không thể tải dữ liệu!');
+      toast.value?.kshowToast('error', 'Không thể tải dữ liệu!');
       console.error('Fetch error:', error);
     }
   };
@@ -70,7 +70,7 @@ export default function useNhaSanXuat() {
       manufacturers.value = data.content;
       totalItems.value = data.totalElements;
     } catch (error) {
-      toast.value?.showToast('error', 'Lỗi tìm kiếm!');
+      toast.value?.kshowToast('error', 'Lỗi tìm kiếm!');
       console.error('Search error:', error);
     }
   };
@@ -89,7 +89,7 @@ export default function useNhaSanXuat() {
       });
       return data;
     } catch (error) {
-      toast.value?.showToast('error', `Lỗi kiểm tra ${field}!`);
+      toast.value?.kshowToast('error', `Lỗi kiểm tra ${field}!`);
       return false;
     }
   };
@@ -97,12 +97,12 @@ export default function useNhaSanXuat() {
   const saveManufacturer = async () => {
     const { ma, nhaSanXuat } = manufacturer.value;
     if (!ma || !nhaSanXuat) {
-      toast.value?.showToast('error', 'Vui lòng nhập đầy đủ thông tin!');
+      toast.value?.kshowToast('error', 'Vui lòng nhập đầy đủ thông tin!');
       return;
     }
     try {
       const response = await axios.post('http://localhost:8080/api/nha-san-xuat', manufacturer.value);
-      toast.value?.showToast('success', 'Thêm mới thành công!');
+      toast.value?.kshowToast('success', 'Thêm mới thành công!');
       manufacturers.value.unshift(response.data);
       totalItems.value += 1;
       if (manufacturers.value.length > pageSize.value) {
@@ -110,15 +110,17 @@ export default function useNhaSanXuat() {
       }
       closeModal();
     } catch (error) {
-      toast.value?.showToast('error', 'Lỗi khi lưu dữ liệu: ' + (error.response?.data || error.message));
+      toast.value?.kshowToast('error', 'Lỗi khi lưu dữ liệu: ' + (error.response?.data || error.message));
       console.error('Save error:', error);
     }
   };
 
   const updateManufacturer = async () => {
     const { id, ma, nhaSanXuat } = manufacturer.value;
-    if (!ma || !nhaSanXuat) {
-      toast.value?.showToast('error', 'Vui lòng nhập đầy đủ thông tin!');
+    if (!id || !ma || !nhaSanXuat) {
+      if (toast.value) {
+        toast.value?.kshowToast('error', 'Dữ liệu không hợp lệ! Vui lòng kiểm tra lại.');
+      }
       return;
     }
     const originalManufacturer = manufacturers.value.find((m) => m.id === id);
@@ -126,23 +128,36 @@ export default function useNhaSanXuat() {
     const originalNhaSanXuat = originalManufacturer?.nhaSanXuat;
 
     if (ma !== originalMa && (await checkDuplicate('ma', ma, id))) {
-      toast.value?.showToast('error', 'Mã nhà sản xuất đã tồn tại!');
+      if (toast.value) {
+        toast.value?.kshowToast('error', 'Mã nhà sản xuất đã tồn tại!');
+      }
       return;
     }
     if (nhaSanXuat !== originalNhaSanXuat && (await checkDuplicate('nhaSanXuat', nhaSanXuat, id))) {
-      toast.value?.showToast('error', 'Tên nhà sản xuất đã tồn tại!');
+      if (toast.value) {
+        toast.value?.kshowToast('error', 'Tên nhà sản xuất đã tồn tại!');
+      }
       return;
     }
     try {
+      console.log('Sending update request with data:', manufacturer.value);
       const response = await axios.put(`http://localhost:8080/api/nha-san-xuat/${id}`, manufacturer.value);
-      toast.value?.showToast('success', 'Cập nhật thành công!');
+      console.log('Response from server:', response.data);
+      if (!response.data || typeof response.data !== 'object') {
+        throw new Error('Dữ liệu trả về từ server không hợp lệ');
+      }
+      if (toast.value) {
+        toast.value?.kshowToast('success', 'Cập nhật thành công!');
+      }
       const index = manufacturers.value.findIndex((m) => m.id === id);
       if (index !== -1) {
         manufacturers.value[index] = response.data;
       }
       closeModal();
     } catch (error) {
-      toast.value?.showToast('error', 'Lỗi khi cập nhật dữ liệu: ' + (error.response?.data || error.message));
+      if (toast.value) {
+        toast.value?.kshowToast('error', 'Lỗi khi cập nhật dữ liệu: ' + (error.response?.data || error.message));
+      }
       console.error('Update error:', error);
     }
   };
@@ -150,7 +165,7 @@ export default function useNhaSanXuat() {
   const deleteManufacturer = async (id) => {
     try {
       await axios.delete(`http://localhost:8080/api/nha-san-xuat/${id}`);
-      toast.value?.showToast('success', 'Xóa thành công!');
+      toast.value?.kshowToast('success', 'Xóa thành công!');
       totalItems.value -= 1;
       if (totalItems.value > 0 && currentPage.value >= totalPages.value) {
         currentPage.value = totalPages.value - 1;
@@ -163,7 +178,7 @@ export default function useNhaSanXuat() {
         await fetchData();
       }
     } catch (error) {
-      toast.value?.showToast('error', 'Lỗi khi xóa!');
+      toast.value?.kshowToast('error', 'Lỗi khi xóa!');
       console.error('Delete error:', error);
     }
   };
@@ -173,7 +188,7 @@ export default function useNhaSanXuat() {
       await axios.delete('http://localhost:8080/api/nha-san-xuat/bulk', {
         data: { ids: selectedManufacturers.value },
       });
-      toast.value?.showToast('success', 'Xóa thành công!');
+      toast.value?.kshowToast('success', 'Xóa thành công!');
       totalItems.value -= selectedManufacturers.value.length;
       if (totalItems.value > 0 && currentPage.value >= totalPages.value) {
         currentPage.value = totalPages.value - 1;
@@ -188,7 +203,7 @@ export default function useNhaSanXuat() {
         await fetchData();
       }
     } catch (error) {
-      toast.value?.showToast('error', 'Lỗi khi xóa nhiều nhà sản xuất!');
+      toast.value?.kshowToast('error', 'Lỗi khi xóa nhiều nhà sản xuất!');
       console.error('Bulk delete error:', error);
     }
   };

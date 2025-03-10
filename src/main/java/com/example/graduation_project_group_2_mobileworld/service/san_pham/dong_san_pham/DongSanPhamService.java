@@ -5,12 +5,14 @@ import com.example.graduation_project_group_2_mobileworld.entity.DongSanPham;
 import com.example.graduation_project_group_2_mobileworld.repository.san_pham.dong_san_pham.DongSanPhamRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class DongSanPhamService {
@@ -89,9 +91,31 @@ public class DongSanPhamService {
         }
     }
 
-    public Page<DongSanPhamDTO> searchDongSanPham(String keyword, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
-        return repository.searchByKeyword(keyword, pageable).map(this::toDTO);
+    public Page<DongSanPhamDTO> searchDongSanPham(String keyword, Pageable pageable) {
+        // Tìm kiếm trên toàn bộ dữ liệu trước, sau đó phân trang
+        List<DongSanPham> allResults = repository.findByDeletedFalse()
+                .stream()
+                .filter(d -> matchesKeyword(d, keyword))
+                .collect(Collectors.toList());
+        return toPage(allResults, pageable);
+    }
+
+    public Page<DongSanPhamDTO> filterByDongSanPham(String dongSanPham, Pageable pageable) {
+        // Lọc trên toàn bộ dữ liệu trước, sau đó phân trang
+        List<DongSanPham> allResults = repository.findByDeletedFalse()
+                .stream()
+                .filter(d -> d.getDongSanPham().equalsIgnoreCase(dongSanPham))
+                .collect(Collectors.toList());
+        return toPage(allResults, pageable);
+    }
+
+    public List<String> getAllProductLineNames() {
+        return repository.findByDeletedFalse()
+                .stream()
+                .map(DongSanPham::getDongSanPham)
+                .distinct()
+                .sorted()
+                .collect(Collectors.toList());
     }
 
     public boolean existsByMa(String ma) {
@@ -100,6 +124,22 @@ public class DongSanPhamService {
 
     public boolean existsByDongSanPham(String dongSanPham) {
         return repository.existsByDongSanPham(dongSanPham);
+    }
+
+    private boolean matchesKeyword(DongSanPham dsp, String keyword) {
+        String keywordLower = keyword.toLowerCase().replaceAll("\\s+", "");
+        String maLower = dsp.getMa().toLowerCase().replaceAll("\\s+", "");
+        String dongSanPhamLower = dsp.getDongSanPham().toLowerCase();
+        return maLower.contains(keywordLower) || dongSanPhamLower.contains(keywordLower);
+    }
+
+    private Page<DongSanPhamDTO> toPage(List<DongSanPham> results, Pageable pageable) {
+        int start = (int) pageable.getOffset();
+        int end = Math.min(start + pageable.getPageSize(), results.size());
+        List<DongSanPhamDTO> subList = start < end ? results.subList(start, end).stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList()) : List.of();
+        return new PageImpl<>(subList, pageable, results.size());
     }
 
     private DongSanPhamDTO toDTO(DongSanPham entity) {
