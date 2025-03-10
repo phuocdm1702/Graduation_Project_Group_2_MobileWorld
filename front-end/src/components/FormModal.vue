@@ -43,19 +43,19 @@ const props = defineProps({
   isEdit: Boolean,
   entityName: {
     type: String,
-    required: true, // Tên thuộc tính (ví dụ: "Dòng Sản Phẩm", "Nhà Sản Xuất")
+    required: true,
   },
   entityData: {
     type: Object,
-    default: () => ({ id: null }), // Mặc định chỉ có id, các trường khác sẽ được định nghĩa qua slot
+    default: () => ({ id: null }),
   },
   iconClass: {
     type: String,
-    default: 'fa-plus-circle', // Icon mặc định cho thêm mới
+    default: 'fa-plus-circle',
   },
   iconColor: {
     type: String,
-    default: 'text-green-500', // Màu mặc định cho thêm mới
+    default: 'text-green-500',
   },
 });
 
@@ -63,7 +63,6 @@ const emit = defineEmits(['submit', 'close']);
 
 const localEntityData = ref({ ...props.entityData });
 
-// Đồng bộ dữ liệu từ prop entityData khi thay đổi
 watch(
   () => props.entityData,
   (newValue) => {
@@ -76,7 +75,6 @@ watch(
 const submitForm = () => {
   console.log('Submitting entity data:', localEntityData.value);
 
-  // Kiểm tra dữ liệu dựa trên entityName
   let requiredFields = [];
   switch (props.entityName) {
     case 'Dòng Sản Phẩm':
@@ -88,19 +86,24 @@ const submitForm = () => {
     case 'Imel':
       requiredFields = ['ma', 'imel'];
       break;
-    // Có thể mở rộng cho các thực thể khác
     default:
       requiredFields = Object.keys(localEntityData.value).filter(key => key !== 'id');
   }
 
-  // Kiểm tra các trường bắt buộc
   const missingFields = requiredFields.filter(field => !localEntityData.value[field]);
   if (missingFields.length > 0) {
     console.error('Dữ liệu không đầy đủ:', missingFields, localEntityData.value);
-    return; // Ngăn emit nếu dữ liệu thiếu
+    return;
   }
 
-  emit('submit', localEntityData.value);
+  const sanitizedData = {};
+  Object.keys(localEntityData.value).forEach(key => {
+    if (localEntityData.value[key] !== undefined && localEntityData.value[key] !== null) {
+      sanitizedData[key] = localEntityData.value[key];
+    }
+  });
+
+  emit('submit', sanitizedData);
 };
 
 const close = () => {
@@ -110,9 +113,9 @@ const close = () => {
 
 <style scoped>
 :root {
-  --ring-color: #10b981; /* Màu xanh lá cho Thêm mới */
+  --ring-color: #10b981;
 }
 div[z-50] {
-  --ring-color: #3b82f6; /* Màu xanh dương cho Cập nhật */
+  --ring-color: #3b82f6;
 }
 </style>

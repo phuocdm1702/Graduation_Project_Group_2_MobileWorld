@@ -15,25 +15,34 @@
     </div>
 
     <!-- Search Section -->
-    <div class="flex gap-3 mb-6">
-      <input
-        v-model.trim="searchKeyword"
-        type="text"
-        placeholder="Tìm kiếm theo mã hoặc tên..."
-        class="flex-1 border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-      />
-      <button
-        @click="searchManufacturer"
-        class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition"
-      >
-        Tìm kiếm
-      </button>
-      <button
-        @click="resetSearch"
-        class="bg-gray-400 text-white px-4 py-2 rounded-lg hover:bg-gray-500 transition"
-      >
-        Đặt lại
-      </button>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Tìm kiếm</label>
+        <input
+          v-model.trim="searchKeyword"
+          type="text"
+          placeholder="Tìm kiếm theo mã hoặc tên..."
+          class="w-full border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Tên nhà sản xuất</label>
+        <select
+          v-model="searchNhaSanXuat"
+          class="w-full border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          <option value="">Tất cả</option>
+          <option v-for="name in uniqueNhaSanXuatList" :key="name" :value="name">{{ name }}</option>
+        </select>
+      </div>
+      <div class="flex gap-3 items-end">
+        <button
+          @click="resetFilters"
+          class="bg-gray-400 text-white px-4 py-2 rounded-lg hover:bg-gray-500 transition"
+        >
+          Đặt lại
+        </button>
+      </div>
     </div>
 
     <!-- Bulk Delete Button -->
@@ -46,60 +55,12 @@
       </button>
     </div>
 
-    <!-- Manufacturer Table -->
-    <div class="overflow-x-auto shadow-md rounded-lg">
-      <table class="w-full text-sm text-gray-500">
-        <thead class="bg-blue-100 text-blue-700 uppercase">
-        <tr>
-          <th class="px-6 py-3 text-center">ID</th>
-          <th class="px-6 py-3 text-center">Mã</th>
-          <th class="px-6 py-3 text-center">Tên Nhà Sản Xuất</th>
-          <th class="px-6 py-3 text-center">Hành động</th>
-          <th class="px-6 py-3 text-center">
-            <input
-              type="checkbox"
-              v-model="selectAll"
-              @change="toggleSelectAll"
-              class="w-4 h-4 rounded"
-            />
-          </th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr
-          v-for="manufacturer in manufacturers"
-          :key="manufacturer.id"
-          class="bg-white border-b hover:bg-gray-50 transition"
-        >
-          <td class="px-6 py-4 text-center">{{ manufacturer.id }}</td>
-          <td class="px-6 py-4 text-center">{{ manufacturer.ma }}</td>
-          <td class="px-6 py-4 text-center">{{ manufacturer.nhaSanXuat }}</td>
-          <td class="px-6 py-4 text-center space-x-4">
-            <button
-              @click="openEditModal(manufacturer)"
-              class="text-blue-600 hover:text-blue-800 transition"
-            >
-              <i class="fa-solid fa-edit"></i>
-            </button>
-            <button
-              @click="confirmDelete(manufacturer.id)"
-              class="text-red-600 hover:text-red-800 transition"
-            >
-              <i class="fa-solid fa-trash"></i>
-            </button>
-          </td>
-          <td class="px-6 py-4 text-center">
-            <input
-              type="checkbox"
-              v-model="selectedManufacturers"
-              :value="manufacturer.id"
-              class="w-4 h-4 rounded"
-            />
-          </td>
-        </tr>
-        </tbody>
-      </table>
-    </div>
+    <!-- DynamicTable -->
+    <DynamicTable
+      :data="filteredManufacturers"
+      :columns="columns"
+      :getNestedValue="getNestedValue"
+    />
 
     <!-- Pagination -->
     <Pagination
@@ -157,11 +118,13 @@
 </template>
 
 <script setup>
+import { ref, computed, watch } from 'vue';
 import useNhaSanXuat from './NhaSanXuat.js';
 import ToastNotification from '@/components/ToastNotification.vue';
 import Pagination from '@/components/Pagination.vue';
 import ProductLineFormModal from '@/components/FormModal.vue';
 import ConfirmModal from '@/components/ConfirmModal.vue';
+import DynamicTable from '@/components/DynamicTable.vue';
 
 // Lấy tất cả từ useNhaSanXuat
 const {
@@ -200,6 +163,111 @@ const {
   closeConfirmModal,
   toggleSelectAll,
 } = useNhaSanXuat();
+
+// Hàm lấy giá trị lồng nhau
+const getNestedValue = (obj, path) => {
+  return path.split('.').reduce((acc, part) => acc && acc[part], obj);
+};
+
+// Bộ lọc bằng combobox
+const searchNhaSanXuat = ref('');
+
+// Danh sách tên nhà sản xuất duy nhất
+const uniqueNhaSanXuatList = computed(() => {
+  return [...new Set(manufacturers.value.map((item) => item.nhaSanXuat))].sort();
+});
+
+// Dữ liệu đã lọc
+const filteredManufacturers = computed(() => {
+  let filtered = manufacturers.value;
+  if (searchKeyword.value) {
+    filtered = filtered.filter((item) =>
+      item.ma.toLowerCase().includes(searchKeyword.value.toLowerCase()) ||
+      item.nhaSanXuat.toLowerCase().includes(searchKeyword.value.toLowerCase())
+    );
+  }
+  if (searchNhaSanXuat.value) {
+    filtered = filtered.filter((item) => item.nhaSanXuat === searchNhaSanXuat.value);
+  }
+  return filtered;
+});
+
+// Đặt lại bộ lọc
+const resetFilters = () => {
+  searchKeyword.value = '';
+  searchNhaSanXuat.value = '';
+  resetSearch();
+};
+
+// Theo dõi thay đổi để lọc tự động
+watch([searchKeyword, searchNhaSanXuat], () => {
+  if (searchKeyword.value || searchNhaSanXuat.value) {
+    isSearching.value = true;
+    searchManufacturer();
+  } else {
+    isSearching.value = false;
+    fetchData();
+  }
+});
+
+// Định nghĩa các cột cho DynamicTable
+const columns = [
+  {
+    key: 'select',
+    label: '',
+    formatter: (value, item) => {
+      return `
+        <input type="checkbox" value="${item.id}" class="w-4 h-4 rounded" ${selectedManufacturers.value.includes(item.id) ? 'checked' : ''} onchange="document.dispatchEvent(new CustomEvent('toggleSelect', { detail: ${item.id} }))">
+      `;
+    },
+  },
+  {
+    key: 'stt',
+    label: 'STT',
+    formatter: (value, item, index) => index + 1,
+  },
+  { key: 'ma', label: 'Mã' },
+  { key: 'nhaSanXuat', label: 'Tên Nhà Sản Xuất' },
+  {
+    key: 'actions',
+    label: 'Hành động',
+    formatter: (value, item) => {
+      const safeItem = JSON.stringify(item);
+      return `
+        <div class="space-x-4">
+          <button class="text-blue-600 hover:text-blue-800 transition" data-item='${safeItem}' onclick="document.dispatchEvent(new CustomEvent('openEditModal', { detail: JSON.parse(this.dataset.item) }))">
+            <i class="fa-solid fa-edit"></i>
+          </button>
+          <button class="text-red-600 hover:text-red-800 transition" data-id="${item.id}" onclick="document.dispatchEvent(new CustomEvent('confirmDelete', { detail: this.dataset.id }))">
+            <i class="fa-solid fa-trash"></i>
+          </button>
+        </div>
+      `;
+    },
+  },
+];
+
+// Xử lý các sự kiện từ DynamicTable
+const handleCustomEvents = () => {
+  document.addEventListener('openEditModal', (event) => {
+    openEditModal(event.detail);
+  });
+
+  document.addEventListener('confirmDelete', (event) => {
+    confirmDelete(event.detail);
+  });
+
+  document.addEventListener('toggleSelect', (event) => {
+    const id = event.detail;
+    if (selectedManufacturers.value.includes(id)) {
+      selectedManufacturers.value = selectedManufacturers.value.filter((selectedId) => selectedId !== id);
+    } else {
+      selectedManufacturers.value.push(id);
+    }
+  });
+};
+
+handleCustomEvents();
 </script>
 
 <style scoped>

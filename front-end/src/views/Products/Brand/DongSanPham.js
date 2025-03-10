@@ -1,4 +1,4 @@
-import { ref, onMounted, computed, watch } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import axios from 'axios';
 
 export default function useProductLineList() {
@@ -6,6 +6,7 @@ export default function useProductLineList() {
   const productLines = ref([]);
   const productLine = ref({ id: null, ma: '', dongSanPham: '' });
   const searchKeyword = ref('');
+  const searchDongSanPham = ref('');
   const currentPage = ref(0);
   const pageSize = ref(5);
   const totalItems = ref(0);
@@ -20,14 +21,6 @@ export default function useProductLineList() {
 
   const totalPages = computed(() => Math.ceil(totalItems.value / pageSize.value));
 
-  watch(searchKeyword, (newValue) => {
-    isSearching.value = !!newValue.trim();
-    if (newValue !== searchKeyword.value) {
-      currentPage.value = 0;
-      searchProductLine();
-    }
-  });
-
   const fetchData = async () => {
     try {
       const { data } = await axios.get('http://localhost:8080/api/dong-san-pham', {
@@ -36,14 +29,16 @@ export default function useProductLineList() {
       productLines.value = data.content;
       totalItems.value = data.totalElements;
     } catch (error) {
-      toast.value?.showToast('error', 'Không thể tải dữ liệu!');
+      if (toast.value) {
+        toast.value?.kshowToast('error', 'Không thể tải dữ liệu!');
+      }
       console.error('Fetch error:', error);
     }
   };
 
   const goToPage = async (page) => {
     currentPage.value = page;
-    if (isSearching.value && searchKeyword.value.trim()) {
+    if (isSearching.value) {
       await searchProductLine();
     } else {
       await fetchData();
@@ -52,7 +47,8 @@ export default function useProductLineList() {
 
   const searchProductLine = async () => {
     const keyword = searchKeyword.value.replace(/\s+/g, '').trim();
-    if (!keyword) {
+    const dongSanPhamFilter = searchDongSanPham.value || '';
+    if (!keyword && !dongSanPhamFilter) {
       isSearching.value = false;
       currentPage.value = 0;
       await fetchData();
@@ -61,18 +57,26 @@ export default function useProductLineList() {
     isSearching.value = true;
     try {
       const { data } = await axios.get('http://localhost:8080/api/dong-san-pham/search', {
-        params: { keyword, page: currentPage.value, size: pageSize.value },
+        params: {
+          keyword: keyword || undefined,
+          dongSanPham: dongSanPhamFilter || undefined,
+          page: currentPage.value,
+          size: pageSize.value,
+        },
       });
       productLines.value = data.content;
       totalItems.value = data.totalElements;
     } catch (error) {
-      toast.value?.showToast('error', 'Lỗi tìm kiếm!');
+      if (toast.value) {
+        toast.value?.kshowToast('error', 'Lỗi tìm kiếm!');
+      }
       console.error('Search error:', error);
     }
   };
 
   const resetSearch = () => {
     searchKeyword.value = '';
+    searchDongSanPham.value = '';
     isSearching.value = false;
     currentPage.value = 0;
     fetchData();
@@ -85,7 +89,9 @@ export default function useProductLineList() {
       });
       return data;
     } catch (error) {
-      toast.value?.showToast('error', `Lỗi kiểm tra ${field}!`);
+      if (toast.value) {
+        toast.value?.kshowToast('error', `Lỗi kiểm tra ${field}!`);
+      }
       return false;
     }
   };
@@ -93,12 +99,16 @@ export default function useProductLineList() {
   const saveProductLine = async () => {
     const { ma, dongSanPham } = productLine.value;
     if (!ma || !dongSanPham) {
-      toast.value?.showToast('error', 'Vui lòng nhập đầy đủ thông tin!');
+      if (toast.value) {
+        toast.value?.kshowToast('error', 'Vui lòng nhập đầy đủ thông tin!');
+      }
       return;
     }
     try {
       const response = await axios.post('http://localhost:8080/api/dong-san-pham', productLine.value);
-      toast.value?.showToast('success', 'Thêm mới thành công!');
+      if (toast.value) {
+        toast.value?.kshowToast('success', 'Thêm mới thành công!');
+      }
       productLines.value.unshift(response.data);
       totalItems.value += 1;
       if (productLines.value.length > pageSize.value) {
@@ -106,15 +116,19 @@ export default function useProductLineList() {
       }
       closeModal();
     } catch (error) {
-      toast.value?.showToast('error', 'Lỗi khi lưu dữ liệu: ' + (error.response?.data || error.message));
+      if (toast.value) {
+        toast.value?.kshowToast('error', 'Lỗi khi lưu dữ liệu: ' + (error.response?.data?.error || error.message));
+      }
       console.error('Save error:', error);
     }
   };
 
   const updateProductLine = async () => {
     const { id, ma, dongSanPham } = productLine.value;
-    if (!ma || !dongSanPham) {
-      toast.value?.showToast('error', 'Vui lòng nhập đầy đủ thông tin!');
+    if (!id || !ma || !dongSanPham) {
+      if (toast.value) {
+        toast.value?.kshowToast('error', 'Dữ liệu không hợp lệ! Vui lòng kiểm tra lại.');
+      }
       return;
     }
     const originalProduct = productLines.value.find((p) => p.id === id);
@@ -122,23 +136,31 @@ export default function useProductLineList() {
     const originalDongSanPham = originalProduct?.dongSanPham;
 
     if (ma !== originalMa && (await checkDuplicate('ma', ma, id))) {
-      toast.value?.showToast('error', 'Mã dòng sản phẩm đã tồn tại!');
+      if (toast.value) {
+        toast.value?.kshowToast('error', 'Mã dòng sản phẩm đã tồn tại!');
+      }
       return;
     }
     if (dongSanPham !== originalDongSanPham && (await checkDuplicate('dongSanPham', dongSanPham, id))) {
-      toast.value?.showToast('error', 'Tên dòng sản phẩm đã tồn tại!');
+      if (toast.value) {
+        toast.value?.kshowToast('error', 'Tên dòng sản phẩm đã tồn tại!');
+      }
       return;
     }
     try {
       const response = await axios.put(`http://localhost:8080/api/dong-san-pham/${id}`, productLine.value);
-      toast.value?.showToast('success', 'Cập nhật thành công!');
+      if (toast.value) {
+        toast.value?.kshowToast('success', 'Cập nhật thành công!');
+      }
       const index = productLines.value.findIndex((p) => p.id === id);
       if (index !== -1) {
         productLines.value[index] = response.data;
       }
       closeModal();
     } catch (error) {
-      toast.value?.showToast('error', 'Lỗi khi cập nhật dữ liệu: ' + (error.response?.data || error.message));
+      if (toast.value) {
+        toast.value?.kshowToast('error', 'Lỗi khi cập nhật dữ liệu: ' + (error.response?.data?.error || error.message));
+      }
       console.error('Update error:', error);
     }
   };
@@ -146,20 +168,25 @@ export default function useProductLineList() {
   const deleteProductLine = async (id) => {
     try {
       await axios.delete(`http://localhost:8080/api/dong-san-pham/${id}`);
-      toast.value?.showToast('success', 'Xóa thành công!');
+      if (toast.value) {
+        toast.value?.kshowToast('success', 'Xóa thành công!');
+      }
       totalItems.value -= 1;
       if (totalItems.value > 0 && currentPage.value >= totalPages.value) {
         currentPage.value = totalPages.value - 1;
       } else if (totalItems.value <= 0) {
         currentPage.value = 0;
       }
-      if (isSearching.value && searchKeyword.value.trim()) {
+      if (isSearching.value) {
         await searchProductLine();
       } else {
         await fetchData();
       }
     } catch (error) {
-      toast.value?.showToast('error', 'Lỗi khi xóa!');
+      if (toast.value) {
+        toast.value?.kshowToast('error', 'Lỗi khi xóa!');
+      }
+      console.error('Delete error:', error);
     }
   };
 
@@ -168,7 +195,9 @@ export default function useProductLineList() {
       await axios.delete('http://localhost:8080/api/dong-san-pham/bulk', {
         data: { ids: selectedProducts.value },
       });
-      toast.value?.showToast('success', 'Xóa thành công!');
+      if (toast.value) {
+        toast.value?.kshowToast('success', 'Xóa thành công!');
+      }
       totalItems.value -= selectedProducts.value.length;
       if (totalItems.value > 0 && currentPage.value >= totalPages.value) {
         currentPage.value = totalPages.value - 1;
@@ -177,19 +206,22 @@ export default function useProductLineList() {
       }
       selectedProducts.value = [];
       selectAll.value = false;
-      if (isSearching.value && searchKeyword.value.trim()) {
+      if (isSearching.value) {
         await searchProductLine();
       } else {
         await fetchData();
       }
     } catch (error) {
-      toast.value?.showToast('error', 'Lỗi khi xóa nhiều sản phẩm!');
+      if (toast.value) {
+        toast.value?.kshowToast('error', 'Lỗi khi xóa nhiều dòng sản phẩm!');
+      }
+      console.error('Bulk delete error:', error);
     }
   };
 
   const openAddModal = () => {
     productLine.value = { id: null, ma: '', dongSanPham: '' };
-      showAddModal.value = true;
+    showAddModal.value = true;
   };
 
   const openEditModal = (product) => {
@@ -248,6 +280,7 @@ export default function useProductLineList() {
     productLines,
     productLine,
     searchKeyword,
+    searchDongSanPham,
     currentPage,
     pageSize,
     totalItems,
