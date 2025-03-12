@@ -22,14 +22,14 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-@RestController
 @CrossOrigin(origins = "http://localhost:3000")
-@RequestMapping("/dot_giam_gia")
+@RestController
+@RequestMapping("/api/dot_giam_gia")
 public class dot_giam_gia_controller {
     @Autowired
     private dot_giam_gia_service sr;
 
-    @GetMapping("/home")
+        @GetMapping()
     public Page<DotGiamGia> hienThi(@RequestParam(defaultValue = "0") int page,
                                     @RequestParam(defaultValue = "5") int size,
                                     Model model) {

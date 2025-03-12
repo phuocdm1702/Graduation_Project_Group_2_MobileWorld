@@ -59,7 +59,8 @@ public interface dot_giam_gia_repository extends JpaRepository<DotGiamGia, Integ
     boolean existsByMaAndDeletedTrue(@Param("ma") String ma);
 
     @Query("SELECT d FROM DotGiamGia d WHERE "
-            + "((:maDGG IS NOT NULL AND d.ma LIKE CONCAT('%', :maDGG, '%')) "
+            + "((:maDGG IS NULL AND :tenDGG IS NULL) " // Nếu cả hai null thì bỏ qua điều kiện này
+            + " OR (:maDGG IS NOT NULL AND d.ma LIKE CONCAT('%', :maDGG, '%')) "
             + " OR (:tenDGG IS NOT NULL AND d.tenDotGiamGia LIKE CONCAT('%', :tenDGG, '%'))) AND "
             + "(:loaiGiamGiaApDung IS NULL OR d.loaiGiamGiaApDung = :loaiGiamGiaApDung) AND "
             + "(:giaTriGiamGia IS NULL OR d.giaTriGiamGia = :giaTriGiamGia) AND "

@@ -49,18 +49,18 @@ export function useDiscountManagement() {
       const params = {
         page: currentPage.value,
         size: pageSize.value,
-        maDGG: searchQuery.value,
-        tenDGG: searchQuery.value,
+        maDGG: searchQuery.value || null,
+        tenDGG: searchQuery.value || null,
         loaiGiamGiaApDung: filterType.value || null,
-        trangThai: filterStatus.value === "" ? null : filterStatus.value === "1",
-        giaTriGiamGia: saleValue.value || null,
-        soTienGiamToiDa: minOrder.value || null,
-        ngayBatDau: startDate.value || null,
-        ngayKetThuc: endDate.value || null,
-        deleted: deleted.value || null
+        trangThai: filterStatus.value === "" ? null : filterStatus.value === "true",
+        giaTriGiamGia: saleValue.value ? Number(saleValue.value) : null,
+        soTienGiamToiDa: minOrder.value ? Number(minOrder.value) : null,
+        ngayBatDau: startDate.value ? startDate.value.split('T')[0] : null,
+        ngayKetThuc: endDate.value ? endDate.value.split('T')[0] : null,
+        deleted: deleted.value === "" ? null : deleted.value === "true"
       };
-
-      const res = await axios.get("http://localhost:8080/dot_giam_gia/search", { params });
+      const res = await axios.get("http://localhost:8080/api/dot_giam_gia/search", { params });
+      console.log("API Response:", res.data); // Debug
       dataTable.value = res.data.content;
       totalPages.value = res.data.totalPages;
     } catch (error) {
@@ -68,7 +68,6 @@ export function useDiscountManagement() {
       toast.value?.showToast("error", "Không thể tải dữ liệu!");
     }
   };
-
   const confirmDelete = (discountId) => {
     if (window.confirm("Bạn có chắc chắn muốn xóa đợt giảm giá này?")) {
       deleteDotGiamGia(discountId);
@@ -77,8 +76,8 @@ export function useDiscountManagement() {
 
   const deleteDotGiamGia = async (id) => {
     try {
-      await axios.delete(`http://localhost:8080/dot_giam_gia/${id}`);
-      // toast.value?.showToast('success', 'Xóa thành công!');
+      await axios.delete(`http://localhost:8080/api/dot_giam_gia/${id}`);
+      toast.value?.showToast('success', 'Xóa thành công!');
       await fetchData();
     } catch (error) {
       console.error("Lỗi khi xóa đợt giảm giá:", error);
@@ -86,34 +85,41 @@ export function useDiscountManagement() {
     }
   };
 
-  const viewUpdate = (discount) => {
-    // Kiểm tra xem discount là object hay chỉ là ID
-    let discountData = discount;
-    if (typeof discount === "number" || typeof discount === "string") {
-      // Nếu chỉ nhận được ID, lấy dữ liệu đầy đủ từ dataTable
-      discountData = dataTable.value.find(item => item.id === discount);
-    }
+  const viewUpdate = async (discount) => {
+    try {
+      let discountData = discount;
+      if (typeof discount === "number" || typeof discount === "string") {
+        discountData = dataTable.value.find(item => item.id === discount);
+      }
 
-    if (!discountData) {
-      console.error("Không tìm thấy dữ liệu cho discount:", discount);
-      toast.value?.showToast("error", "Không tìm thấy dữ liệu để cập nhật!");
-      return;
-    }
+      if (!discountData) {
+        throw new Error("Không tìm thấy dữ liệu");
+      }
 
-    router.push({
-      path: "/ViewAddDotGiamGia",
-      query: {
-        id: discountData.id,
-        ma: discountData.ma || "",
-        tenDotGiamGia: discountData.tenDotGiamGia || "",
-        loaiGiamGiaApDung: discountData.loaiGiamGiaApDung || "",
-        giaTriGiamGia: discountData.giaTriGiamGia || "",
-        soTienGiamToiDa: discountData.soTienGiamToiDa || "",
-        ngayBatDau: discountData.ngayBatDau || "",
-        ngayKetThuc: discountData.ngayKetThuc || "",
-        trangThai: discountData.trangThai !== undefined ? discountData.trangThai : "",
-      },
-    });
+      // Gọi API để lấy danh sách dòng sản phẩm liên quan
+      const response = await axios.get(`http://localhost:8080/api/dot_giam_gia/viewUpdate`, {
+        params: { id: discountData.id }
+      });
+
+      router.push({
+        path: "/ViewAddDotGiamGia",
+        query: {
+          id: discountData.id,
+          ma: discountData.ma || "",
+          tenDotGiamGia: discountData.tenDotGiamGia || "",
+          loaiGiamGiaApDung: discountData.loaiGiamGiaApDung || "",
+          giaTriGiamGia: discountData.giaTriGiamGia || "",
+          soTienGiamToiDa: discountData.soTienGiamToiDa || "",
+          ngayBatDau: discountData.ngayBatDau || "",
+          ngayKetThuc: discountData.ngayKetThuc || "",
+          trangThai: discountData.trangThai !== undefined ? discountData.trangThai : "",
+          dongSanPham: JSON.stringify(response.data) // Truyền danh sách dòng sản phẩm
+        },
+      });
+    } catch (error) {
+      console.error("Lỗi khi xem cập nhật:", error);
+      toast.value?.showToast("error", "Không thể tải dữ liệu cập nhật!");
+    }
   };
 
   // Định nghĩa biến toàn cục
@@ -125,7 +131,11 @@ export function useDiscountManagement() {
     { key: "ma", label: "Mã" },
     { key: "tenDotGiamGia", label: "Tên đợt giảm giá" },
     { key: "loaiGiamGiaApDung", label: "Loại giảm giá" },
-    { key: "giaTriGiamGia", label: "Giá trị", formatter: value => value + "%" },
+    {
+      key: "giaTriGiamGia",
+      label: "Giá trị",
+      formatter: value => value + "%"
+    },
     {
       key: "soTienGiamToiDa",
       label: "Số tiền giảm tối đa",
@@ -175,6 +185,11 @@ export function useDiscountManagement() {
   const getNestedValue = (obj, key) => (key === "index" ? null : obj[key]);
 
   onMounted(() => {
+    fetchData();
+  });
+
+  watch([searchQuery, filterType, filterStatus, startDate, endDate, minOrder, saleValue, deleted], () => {
+    currentPage.value = 0;
     fetchData();
   });
 
