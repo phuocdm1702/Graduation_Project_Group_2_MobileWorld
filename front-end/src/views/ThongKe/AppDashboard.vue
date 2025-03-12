@@ -1,5 +1,5 @@
 <template>
-  <div class="p-6">
+  <div>
     <!-- Thống kê -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
       <div v-for="(stat, index) in statistics" :key="index" class="p-6 rounded-xl text-white" :class="stat.bgColor">

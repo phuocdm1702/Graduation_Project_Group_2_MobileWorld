@@ -1,4 +1,3 @@
-
 <template>
   <div v-if="visible" :class="`toast ${type}`">
     <span v-if="type === 'success'" class="checkmark">✔</span>
@@ -6,18 +5,22 @@
     {{ message }}
   </div>
   <div>
-    
     <!-- Breadcrumb -->
     <Breadcrumb breadcrumb="Quản lý Nhân Viên" />
 
-    <div class="mt-4">
-      <h4 class="text-gray-600 text-4xl font-bold">Thông tin Nhân Viên</h4>
-      <div class="mt-4">
-        <div class="w-full overflow-hidden bg-white border rounded-md shadow-md">
-          <form @submit.prevent>
-            <div class="p-5 grid grid-cols-3 gap-6 items-center">
+    <div class="mt-2 max-w-screen-xl mx-auto">
+      <h2 class="bg-white shadow-lg rounded-lg p-5 mb-2 mt-2 text-2xl font-semibold text-gray-700">
+        Quản Lý Nhân Viên
+      </h2>
+
+      <!-- Phần form (search và trạng thái) -->
+      <div class="mt-2 w-full bg-white border rounded-md shadow-md">
+        <form @submit.prevent>
+          <div class="p-5 flex flex-col gap-6">
+            <!-- Div chứa Search và Trạng thái -->
+            <div class="flex items-center gap-6">
               <!-- Search -->
-              <div>
+              <div class="flex-1">
                 <label class="text-sm font-semibold block mb-2">Nhập thông tin tìm kiếm</label>
                 <input
                   v-model="searchNV"
@@ -28,282 +31,112 @@
                 />
               </div>
 
-              <!-- Trạng thái -->
-              <div>
+              <!-- Trạng thái (Combobox) -->
+              <div class="w-60">
                 <label class="text-sm font-semibold block mb-2">Trạng thái</label>
-                <div class="flex items-center gap-4">
-                  <label class="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="radio"
-                      name="status"
-                      id="tat-ca"
-                      v-model="filterStatus"
-                      value="tat-ca"
-                      @change="fetchNhanVien"
-                    />
-                    <span>Tất cả</span>
-                  </label>
-
-                  <label class="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="radio"
-                      name="status"
-                      id="dang-lam"
-                      v-model="filterStatus"
-                      value="dang-lam"
-                      @change="fetchNhanVien"
-                    />
-                    <span>Đang làm</span>
-                  </label>
-
-                  <label class="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="radio"
-                      name="status"
-                      id="da-nghi"
-                      v-model="filterStatus"
-                      value="da-nghi"
-                      @change="fetchNhanVien"
-                    />
-                    <span>Đã nghỉ</span>
-                  </label>
-                  <div class="flex justify-end items-end">
-                    <router-link to="/them-nhan-vien">
-                      <button class="px-4 py-2 bg-blue-500 text-white rounded-md">
-                        Thêm Nhân Viên
-                      </button>
-                    </router-link>
-                  </div>
-                </div>
+                <select
+                  v-model="filterStatus"
+                  @change="fetchNhanVien"
+                  class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-400 outline-none"
+                >
+                  <option value="tat-ca">Tất cả</option>
+                  <option value="dang-lam">Đang làm</option>
+                  <option value="da-nghi">Đã nghỉ</option>
+                </select>
               </div>
             </div>
-          </form>
 
-
-          <!--        Modeladdnhanvien-->
-<!--          <div v-if="isModalOpen" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">-->
-<!--            <div class="bg-white p-6 rounded-lg shadow-lg w-[700px]">-->
-<!--              <h2 class="text-2xl font-bold mb-4">Thông tin nhân viên</h2>-->
-
-<!--              <div class="grid grid-cols-2 gap-4">-->
-<!--                <div>-->
-<!--                  <label class="block mb-2">Tên Nhân Viên</label>-->
-<!--                  <input type="text" id="tenNhanVien" class="w-full px-3 py-2 border rounded-md" placeholder="Nhập tên nhân viên">-->
-<!--                </div>-->
-
-<!--                <div>-->
-<!--                  <label class="block mb-2">UserName</label>-->
-<!--                  <input type="text" id="maNhanVien" class="w-full px-3 py-2 border rounded-md" placeholder="Nhập UserNames">-->
-<!--                </div>-->
-
-<!--                <div>-->
-<!--                  <label class="block mb-2">SDT</label>-->
-<!--                  <input type="text" id="maNhanVien" class="w-full px-3 py-2 border rounded-md" placeholder="Nhập SDT">-->
-<!--                </div>-->
-
-<!--                <div>-->
-<!--                  <label class="block mb-2">Email</label>-->
-<!--                  <input type="text" id="maNhanVien" class="w-full px-3 py-2 border rounded-md" placeholder="Nhập Email">-->
-<!--                </div>-->
-
-<!--                <div class="col-span-2">-->
-<!--                  <label class="block mb-2">Địa chỉ cụ thể</label>-->
-<!--                  <input type="text" id="maNhanVien" class="w-full px-3 py-2 border rounded-md" placeholder="Nhập địa chỉ cụ thể">-->
-<!--                </div>-->
-<!--                -->
-<!--                <div class="flex gap-4 col-span-2">-->
-<!--                  <div class="w-1/3">-->
-<!--                    <label class="block mb-2">Tỉnh/Thành phố</label>-->
-<!--                    <select v-model="selectedProvince" @change="handleProvinceChange" class="w-full px-3 py-2 border rounded-md">-->
-<!--                      <option value="" disabled>Chọn tỉnh/thành phố</option>-->
-<!--                      <option v-for="province in provinces" :key="province.code">{{ province.name }}</option>-->
-<!--                    </select>-->
-<!--                  </div>-->
-
-<!--                  <div class="w-1/3">-->
-<!--                    <label class="block mb-2">Quận/Huyện</label>-->
-<!--                    <select v-model="selectedDistrict" @change="handleDistrictChange" class="w-full px-3 py-2 border rounded-md">-->
-<!--                      <option value="" disabled>Chọn quận/huyện</option>-->
-<!--                      <option v-for="district in districts" :key="district.code">{{ district.name }}</option>-->
-<!--                    </select>-->
-<!--                  </div>-->
-
-<!--                  <div class="w-1/3">-->
-<!--                    <label class="block mb-2">Xã/Phường</label>-->
-<!--                    <select v-model="selectedWard" class="w-full px-3 py-2 border rounded-md">-->
-<!--                      <option value="" disabled>Chọn xã/phường</option>-->
-<!--                      <option v-for="ward in wards" :key="ward.code">{{ ward.name }}</option>-->
-<!--                    </select>-->
-<!--                  </div>-->
-<!--                </div>-->
-<!--                <div class="col-span-2">-->
-<!--                  <label class="block mb-2">Ảnh Nhân Viên</label>-->
-<!--                  <input type="file" @change="previewImage" class="w-full px-3 py-2 border rounded-md">-->
-
-<!--                  &lt;!&ndash; Hiển thị ảnh xem trước &ndash;&gt;-->
-<!--                  <div v-if="employeeImage" class="mt-4 flex justify-center">-->
-<!--                    <img :src="employeeImage" alt="Ảnh nhân viên" class="w-32 h-32 object-cover rounded-full border">-->
-<!--                  </div>-->
-<!--                </div>-->
-<!--              </div>-->
-
-<!--              <div class="flex justify-end space-x-4 mt-4">-->
-<!--                <button @click="closeModal()" class="px-4 py-2 bg-gray-300 rounded-md">Hủy</button>-->
-<!--                <button @click="saveEmployee()" class="px-4 py-2 bg-blue-600 text-white rounded-md">Lưu</button>-->
-<!--              </div>-->
-<!--            </div>-->
-<!--          </div>-->
-
-
-
-
-
-          <div class="overflow-x-auto shadow-md rounded-lg mt-8">
-            <table class="w-full text-sm text-gray-500">
-              <thead class="bg-gray-100 text-black uppercase">
-              <tr>
-                <th class="px-6 py-3 text-center w-10">#</th>
-                <th class="px-6 py-3 text-center">Tên</th>
-                <th class="px-6 py-3 text-center">Email</th>
-                <th class="px-6 py-3 text-center w-40">SĐT</th>
-                <th class="px-6 py-3 text-center w-40">Ngày tham gia</th>
-                <th class="px-6 py-3 text-center w-32">Trạng thái</th>
-                <th class="px-6 py-3 text-center w-32">Thao Tác</th>
-              </tr>
-              </thead>
-              <tbody>
-              <tr v-for="(nv, index) in dataTable" :key="nv.id"
-                  class="bg-white border-b hover:bg-gray-50 transition"
-                  :class="{'bg-gray-50': index % 2 !== 0}">
-                <td class="px-6 py-4 text-center">{{ index + 1 }}</td>
-                <td class="px-6 py-4 text-center">{{ nv.tenNhanVien }}</td>
-                <td class="px-6 py-4 text-center font-semibold">{{ nv.idTaiKhoan.email }}</td>
-                <td class="px-6 py-4 text-center">{{ nv.idTaiKhoan.soDienThoai }}</td>
-                <td class="px-6 py-4 text-center">{{ new Date(nv.createdAt).toLocaleDateString('vi-VN') }}</td>
-                <td class="px-6 py-4 text-center font-semibold"
-                    :class="{'text-red-500': nv.deleted, 'text-green-600': !nv.deleted}">
-                  {{ nv.deleted ? 'Đã nghỉ' : 'Đang làm' }}
-                </td>
-                <td class="px-6 py-4 text-center">
-                  <button @click="showDeleteConfirm(nv.id)"
-                          class="text-blue-600 hover:text-blue-800 transition">
-                    <i class="fas fa-pen-to-square"></i>
-                  </button>
-                </td>
-              </tr>
-              </tbody>
-            </table>
+            <!-- Div chứa các button Thêm Nhân Viên và Nhập bằng Excel -->
+            <div class="flex justify-end gap-4">
+              <router-link to="/them-nhan-vien">
+                <button class="flex items-center gap-2 px-4 py-2 bg-[#f97316] text-white font-semibold rounded-lg shadow-md hover:bg-orange-600 transition">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-1">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
+                  </svg>
+                  Thêm Nhân Viên
+                </button>
+              </router-link>
+              <button
+                @click="importExcel"
+                class="px-4 py-2 bg-green-500 text-white rounded-md flex items-center"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  class="w-5 h-5 mr-1"
+                >
+                  <path
+                    d="M19.5 3h-4.5V1.5H9V3H4.5C3.675 3 3 3.675 3 4.5v15c0 .825.675 1.5 1.5 1.5h15c.825 0 1.5-.675 1.5-1.5v-15c0-.825-.675-1.5-1.5-1.5zM9 19.5H7.5v-1.5H9v1.5zm0-3H7.5v-1.5H9v1.5zm0-3H7.5v-1.5H9v1.5zm0-3H7.5V9H9v1.5zm4.5 9H12v-1.5h1.5v1.5zm0-3H12v-1.5h1.5v1.5zm0-3H12v-1.5h1.5v1.5zm0-3H12V9h1.5v1.5zm3 9H15v-1.5h1.5v1.5zm0-3H15v-1.5h1.5v1.5zm0-3H15v-1.5h1.5v1.5zm0-3H15V9h1.5v1.5zM18 7.5H6V6h12v1.5z"
+                  />
+                </svg>
+                Nhập bằng Excel
+              </button>
+            </div>
           </div>
+        </form>
+      </div>
 
-        </div>
-        </div>
+      <!-- Phần bảng (DynamicTable) -->
+      <div class="mt-2">
+        <DynamicTable
+          :data="dataTable"
+          :columns="tableColumns"
+          :getNestedValue="getNestedValue"
+        />
       </div>
     </div>
-    <br>
-  
-  <ConfirmModal
-    :show="showConfirmModal"
-    :message="'Bạn có chắc chắn muốn xóa khách hàng này không?'"
-    @confirm="deleteNv"
-    @cancel="showConfirmModal = false"
-  />
+    <br />
+
+    <ConfirmModal
+      :show="showConfirmModal"
+      :message="'Bạn có chắc chắn muốn xóa khách hàng này không?'"
+      @confirm="deleteNv"
+      @cancel="showConfirmModal = false"
+    />
+  </div>
+
+  <footer class="bg-white shadow-lg rounded-lg p-4 flex justify-center items-center">
+    <Pagination
+      :current-page="currentPage"
+      :total-pages="totalPages"
+      @page-changed="goToPage"
+    />
+  </footer>
 </template>
 
 <script setup>
 import ConfirmModal from "@/components/ConfirmModal.vue";
 import EmployeeForm from "@/views/AccountType/EmployeeForm.vue";
-const visible = ref(false);
-const message = ref("");
-const type = ref("success");
-import { ref, onMounted, watch } from "vue";
-import axios from "axios";
+import DynamicTable from "@/components/DynamicTable.vue"; // Import DynamicTable
+import useEmployeeManagement from "./useEmployeeManagement";
+import Pagination from '@/components/Pagination.vue';
 
-
-//anhnhanvien
-const employeeImage = ref(null);
-function previewImage(event) {
-  const file = event.target.files[0];
-  if (file) {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      employeeImage.value = e.target.result;
-    };
-    reader.readAsDataURL(file);
-  }
-}
-
-
-//DiaChiThanhPho
-
-
-const dataTable = ref([]);
-//Confirm
-const showConfirmModal = ref(false);
-const selectedNVId = ref(null);
-const showDeleteConfirm = (id) => {
-  selectedNVId.value = id;
-  showConfirmModal.value = true;
-};
-
-const showToast = (toastType, msg) => {
-  message.value = msg;
-  type.value = toastType;
-  visible.value = true;
-  setTimeout(() => {
-    visible.value = false;
-  }, 3000);
-};
-//getall
-const filterStatus = ref('tat-ca'); 
-
-const fetchNhanVien = async () => {
-  try {
-    const res = await axios.get("http://localhost:8080/nhan-vien/home");
-
-    if (filterStatus.value === 'dang-lam') {
-      dataTable.value = res.data.filter(nv => !nv.deleted); // Đang làm
-    } else if (filterStatus.value === 'da-nghi') {
-      dataTable.value = res.data.filter(nv => nv.deleted); // Đã nghỉ
-    } else {
-      dataTable.value = res.data; // Tất cả
-    }
-  } catch (error) {
-    console.error("Lỗi khi lấy danh sách nhân viên:", error);
-  }
-};
-
-
-onMounted(fetchNhanVien);
-
-const deleteNv = async (id) => {
-  try {
-     await axios.put(`http://localhost:8080/nhan-vien/delete/${selectedNVId.value}`)
-       showToast("success", "Xóa thành công!");
-      fetchNhanVien();
-  } catch (e) {
-    showToast("loi");
-  }
-  showConfirmModal.value = false;
-}
-//Search 
-const searchNV = ref("");
-const btnSearch = () => {
-  if (!searchNV.value.trim()){
-    fetchNhanVien();
-    return;
-  } 
-  dataTable.value = dataTable.value.filter(nhanvien =>
-    nhanvien.idTaiKhoan.email.toLowerCase().includes(searchNV.value.toLowerCase()) || 
-    nhanvien.tenNhanVien.toLowerCase().includes(searchNV.value.toLowerCase()) || 
-    nhanvien.idTaiKhoan.soDienThoai.toLowerCase().includes(searchNV.value.toLowerCase()) 
-  );
-}
-
-
-
-
+// Sử dụng logic từ file JS
+const {
+  visible,
+  message,
+  type,
+  currentPage,
+  goToPage,
+  totalPages,
+  employeeImage,
+  previewImage,
+  dataTable,
+  showConfirmModal,
+  selectedNVId,
+  showDeleteConfirm,
+  showToast,
+  filterStatus,
+  fetchNhanVien,
+  deleteNv,
+  searchNV,
+  btnSearch,
+  tableColumns, // Thêm tableColumns từ file JS
+  getNestedValue, // Thêm getNestedValue từ file JS
+  importExcel, // Thêm hàm xử lý import Excel
+} = useEmployeeManagement();
 </script>
-
 
 <style scoped>
 .toast {
@@ -314,9 +147,15 @@ const btnSearch = () => {
   border-radius: 5px;
   color: white;
 }
-.success { background: green; }
-.error { background: red; }
-.info { background: blue; }
+.success {
+  background: green;
+}
+.error {
+  background: red;
+}
+.info {
+  background: blue;
+}
 .anh-nhan-vien {
   width: 60px;
   height: 60px;

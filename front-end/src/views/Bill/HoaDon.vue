@@ -1,100 +1,123 @@
 <template>
-  <div class="mt-8 max-w-screen-xl mx-auto">
-    <h4 class="text-xl font-semibold text-gray-700">📋 Danh sách Hóa Đơn</h4>
+  <div class="mt-2 max-w-screen-xl mx-auto">
+    <h2 class="bg-white shadow-lg rounded-lg p-5 mb-2 mt-2 text-2xl font-semibold text-gray-700">
+      Quản Lý Hóa Đơn
+    </h2>
 
     <!-- Form lọc -->
     <div
-      class="bg-white shadow-lg rounded-lg p-5 mt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-      <input v-model="searchQuery" type="text" placeholder="🔍 Tìm kiếm hóa đơn..." class="input-field"/>
-      <input v-model="minAmount" type="number" placeholder="💰 Giá tối thiểu" class="input-field"/>
-      <input v-model="maxAmount" type="number" placeholder="💰 Giá tối đa" class="input-field"/>
+      class="bg-white shadow-lg rounded-lg p-5 mb-4 mt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
 
-      <select v-model="selectedOrderType" class="input-field">
-        <option value="">📦 Tất cả loại đơn</option>
-        <option value="Online">Online</option>
-        <option value="Tại cửa hàng">Tại cửa hàng</option>
-      </select>
+      <!-- Ô tìm kiếm -->
+      <div>
+        <label for="searchQuery" class="block text-sm font-medium text-gray-700 mb-1">Tìm kiếm hóa đơn</label>
+        <input v-model="searchQuery" id="searchQuery" type="text" placeholder="Tìm kiếm hóa đơn..."
+               class="input-field"/>
+      </div>
 
-      <input v-model="startDate" type="date" class="input-field"/>
-      <input v-model="endDate" type="date" class="input-field"/>
+      <!-- Dropdown chọn loại đơn -->
+      <div>
+        <label for="orderType" class="block text-sm font-medium text-gray-700 mb-1">Loại đơn</label>
+        <select v-model="selectedOrderType" id="orderType" class="input-field">
+          <option value="">Tất cả loại đơn</option>
+          <option value="Online">Online</option>
+          <option value="Tại cửa hàng">Tại cửa hàng</option>
+        </select>
+      </div>
 
-      <button @click="applyFilters"
-              class="col-span-full sm:col-span-2 md:col-span-3 lg:col-span-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition">
-        🔍 Lọc
-      </button>
+      <!-- Thanh trượt chọn khoảng tiền -->
+      <div>
+        <label for="labels-range-input" class="block text-sm font-medium text-gray-700 mb-1">
+          Khoảng giá
+        </label>
+        <input id="labels-range-input" type="range" v-model="priceRange" min="100" max="1500"
+               class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer 
+         accent-[#f97316]">
+        <div class="flex justify-between text-sm text-gray-500 dark:text-gray-400 mt-1">
+          <span>Min ($100)</span>
+          <span>Max ($1500)</span>
+        </div>
+      </div>
+
+      <!-- Chọn ngày bắt đầu -->
+      <div>
+        <label for="startDate" class="block text-sm font-medium text-gray-700 mb-1">Ngày bắt đầu</label>
+        <input v-model="startDate" id="startDate" type="date" class="input-field"/>
+      </div>
+
+      <!-- Chọn ngày kết thúc -->
+      <div>
+        <label for="endDate" class="block text-sm font-medium text-gray-700 mb-1">Ngày kết thúc</label>
+        <input v-model="endDate" id="endDate" type="date" class="input-field"/>
+      </div>
+
+      <div class="flex justify-end w-full col-span-full gap-2">
+        <!-- Button Quét QR -->
+        <button
+          class="flex items-center gap-2 px-4 py-2 bg-[#f97316] text-white font-semibold rounded-lg shadow-md hover:bg-orange-600 transition">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 3h4v4H3z"></path>
+            <path d="M17 3h4v4h-4z"></path>
+            <path d="M3 17h4v4H3z"></path>
+            <path d="M17 17h4v4h-4z"></path>
+            <path d="M7 7h4v4H7z"></path>
+            <path d="M7 17h4"></path>
+            <path d="M7 13h8v8"></path>
+            <path d="M17 7h-4v4"></path>
+          </svg>
+          Quét QR
+        </button>
+
+        <!-- Button Tạo Hóa Đơn -->
+        <button
+          class="flex items-center gap-2 px-4 py-2 bg-[#f97316] text-white font-semibold rounded-lg shadow-md hover:bg-orange-600 transition">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+               stroke="currentColor" class="w-5 h-5 mr-1">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
+          </svg>
+          Tạo Hóa Đơn
+        </button>
+      </div>
     </div>
-    
-    <!-- Sử dụng DynamicTable -->
-    <DynamicTable
-      :data="dataTable"
-      :columns="columns"
-      :get-nested-value="getNestedValue"
+
+
+    <!-- Bảng danh sách hóa đơn -->
+    <statusBar/>
+    <DynamicTable class="dynamic-table"
+                  :data="dataTable"
+                  :columns="columns"
+                  :get-nested-value="getNestedValue"
     />
 
-    <!-- Phân trang -->
-    <div class="mt-4 flex justify-between items-center gap-2">
-      <!-- Nút Trang đầu -->
-      <button @click="goToFirstPage" :disabled="currentPage === 1"
-              class="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 4.5L10.5 12l9 7.5M4.5 4.5v15"/>
-        </svg>
-      </button>
-
-      <!-- Nút Trang trước -->
-      <button @click="prevPage" :disabled="currentPage === 1"
-              class="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5"/>
-        </svg>
-      </button>
-
-      <span>Trang {{ currentPage }} / {{ totalPages }}</span>
-
-      <!-- Nút Trang sau -->
-      <button @click="nextPage" :disabled="currentPage === totalPages"
-              class="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/>
-        </svg>
-      </button>
-
-      <!-- Nút Trang cuối -->
-      <button @click="goToLastPage" :disabled="currentPage === totalPages"
-              class="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 4.5l9 7.5-9 7.5M19.5 4.5v15"/>
-        </svg>
-      </button>
-    </div>
-
+    <footer class="bg-white shadow-lg rounded-lg p-4 flex justify-center items-center mt-2">
+      <Pagination
+        :current-page="currentPage"
+        :total-pages="totalPages"
+        @page-changed="goToPage"
+      />
+    </footer>
   </div>
 </template>
 
 <script setup>
 import useHoaDonLineList from "@/views/Bill/HoaDon";
-import HoaDonChiTiet from "@/views/Bill/HoaDonChiTiet.vue";
-import LichSuHoaDon from "@/views/Bill/LichSuHoaDon.vue";
 import DynamicTable from "@/components/DynamicTable.vue";
+import statusBar from "@/components/statusBar.vue";
+import Pagination from '@/components/Pagination.vue';
 
 const {
   dataTable,
   currentPage,
-  pageSize,
+  goToPage,
   totalPages,
-  prevPage,
-  nextPage,
   searchQuery,
-  minAmount,
-  maxAmount,
+  priceRange,
   selectedOrderType,
   startDate,
   endDate,
-  applyFilters,
   columns,
-  getNestedValue,
-  goToFirstPage,
-  goToLastPage,
+  getNestedValue
 } = useHoaDonLineList();
 </script>
 
@@ -102,4 +125,10 @@ const {
 .input-field {
   @apply w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm;
 }
+
+.dynamic-table {
+  border-top-left-radius: 0px;
+  border-top-right-radius: 0px;
+}
+
 </style>

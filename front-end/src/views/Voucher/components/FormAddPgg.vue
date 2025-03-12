@@ -1,12 +1,11 @@
 <template>
-  <div class="flex h-screen p-6 bg-gray-100">
+  <div class="flex h-screen p-2 bg-gray-100">
     <!-- Form container -->
     <div class="w-3/4 p-6 bg-white border rounded-md shadow-md">
       <form>
         <!-- Header -->
         <div class="flex items-center justify-between pb-4 border-b">
           <h3 class="text-lg font-semibold">Thêm Phiếu Giảm Giá</h3>
-          <button @click="closeModal">&times;</button>
         </div>
 
         <!-- Form nội dung -->
@@ -82,15 +81,17 @@
         <!-- Button actions -->
         <div class="flex justify-between mt-4">
           <button
-            @click="closeModal"
-            class="px-4 py-2 text-sm bg-gray-300 rounded-md hover:bg-gray-400"
+            class="flex items-center gap-2 px-4 py-2 bg-gray-300 rounded-md hover:bg-gray-400 font-semibold "
           >
             Hủy
           </button>
           <button
             @click="submitForm"
-            class="px-4 py-2 text-sm text-white bg-indigo-600 rounded-md hover:bg-indigo-500"
-          >
+            class="flex items-center gap-2 px-4 py-2 bg-[#f97316] text-white font-semibold rounded-lg shadow-md hover:bg-orange-600 transition">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                 stroke="currentColor" class="w-5 h-5 mr-1">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
+            </svg>
             Thêm
           </button>
         </div>

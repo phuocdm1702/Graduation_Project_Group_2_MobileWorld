@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-screen-xl mx-auto h-screen">
+  <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-screen-xl mx-auto h-auto">
     <h2 class="text-2xl font-bold mb-4">Thông tin khách hàng</h2>
 
     <div class="grid grid-cols-2 gap-4">
@@ -17,7 +17,6 @@
           <span v-else class="text-gray-400">Chọn ảnh</span>
         </div>
 
-        <!-- Nút xóa ảnh -->
         <button
           v-if="employeeImage"
           @click="deleteImage"
@@ -27,23 +26,21 @@
           ✖
         </button>
 
-        <!-- Input ẩn để chọn file -->
         <input
           type="file"
           ref="fileInput"
           @change="previewImage"
           class="hidden"
-          accept="image/*"
         >
       </div>
 
       <div class="w-full mt-4">
-        <label class="block mb-2">Tên khách hàng</label>
+        <label class="block mb-2">Tên Khách Hàng</label>
         <input
           type="text"
           v-model="employee.tenNhanVien"
           class="w-full px-3 py-2 border rounded-md"
-          placeholder="Nhập tên nhân viên"
+          placeholder="Nhập tên khách hàng"
         >
       </div>
 
@@ -59,7 +56,29 @@
 
       <div>
         <label class="block mb-2">CCCD</label>
-        <input type="text" v-model="employee.cccd" class="w-full px-3 py-2 border rounded-md" placeholder="Nhập CCCD">
+        <div class="flex items-center gap-2">
+          <input
+            type="text"
+            v-model="employee.cccd"
+            class="flex-1 px-3 py-2 border rounded-md"
+            placeholder="Nhập CCCD"
+          >
+          <button
+            class="bg-orange-500 text-white px-3 py-2 rounded-md hover:bg-orange-600 flex items-center justify-center"
+            title="Quét mã QR"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 3h4v4H3z"></path>
+              <path d="M17 3h4v4h-4z"></path>
+              <path d="M3 17h4v4H3z"></path>
+              <path d="M17 17h4v4h-4z"></path>
+              <path d="M7 7h4v4H7z"></path>
+              <path d="M7 17h4"></path>
+              <path d="M7 13h8v8"></path>
+              <path d="M17 7h-4v4"></path>
+            </svg>
+          </button>
+        </div>
       </div>
 
       <div>
@@ -79,18 +98,11 @@
         </div>
 
         <div>
-          <label class="block mb-2">Giới tính</label>
-          <div class="flex items-center gap-4">
-            <label class="flex items-center gap-2">
-              <input type="radio" v-model="employee.gioiTinh" value="True" class="form-radio">
-              Nam
-            </label>
-
-            <label class="flex items-center gap-2">
-              <input type="radio" v-model="employee.gioiTinh" value="False" class="form-radio">
-              Nữ
-            </label>
-          </div>
+          <label class="block mb-2">Giới Tính</label>
+          <select class="w-full px-3 py-2 border rounded-md">
+            <option value="nam">Nam</option>
+            <option value="nu">Nữ</option>
+          </select>
         </div>
       </div>
 
@@ -130,7 +142,7 @@
       <router-link to="/back">
         <button @click="$emit('cancel')" class="px-4 py-2 bg-gray-300 rounded-md">Hủy</button>
       </router-link>
-      <button type="submit" @click="addNhanVien()" class="px-4 py-2 bg-blue-500 text-white rounded-md">Lưu</button>
+      <button type="submit" @click="addNhanVien()" class="px-4 py-2 bg-orange-500 text-white rounded-md">Lưu</button>
     </div>
   </div>
 
