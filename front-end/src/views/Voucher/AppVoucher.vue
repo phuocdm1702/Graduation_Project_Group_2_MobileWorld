@@ -3,7 +3,7 @@
     <!-- Breadcrumb -->
     <Breadcrumb breadcrumb="Phiếu Giảm Giá" />
 
-    <div class="mt-2 max-w-screen-xl mx-auto">
+    <div class="mt-2 mx-auto">
       <h2 class="bg-white shadow-lg rounded-lg p-5 mb-2 mt-2 text-2xl font-semibold text-gray-700">
         Quản Lý Phiếu Giảm Giá
       </h2>
