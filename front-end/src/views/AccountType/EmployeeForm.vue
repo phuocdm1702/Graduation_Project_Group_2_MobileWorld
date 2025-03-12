@@ -1,6 +1,19 @@
 <template>
-  <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-screen-xl mx-auto h-auto">
+  <div class="bg-white p-6 rounded-lg shadow-lg ">
     <h2 class="text-2xl font-bold mb-4">Thông tin nhân viên</h2>
+
+    <!-- Khu vực quét QR -->
+    <div v-if="isScanning" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div class="bg-white p-4 rounded-lg">
+        <div id="qr-reader" class="w-64 h-64"></div>
+        <button
+          @click="stopScanning"
+          class="mt-4 bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600"
+        >
+          Dừng quét
+        </button>
+      </div>
+    </div>
 
     <div class="grid grid-cols-2 gap-4">
       <div class="flex flex-col items-center gap-2">
@@ -16,7 +29,6 @@
           >
           <span v-else class="text-gray-400">Chọn ảnh</span>
         </div>
-
         <button
           v-if="employeeImage"
           @click="deleteImage"
@@ -25,7 +37,6 @@
         >
           ✖
         </button>
-
         <input
           type="file"
           ref="fileInput"
@@ -46,7 +57,7 @@
 
       <div>
         <label class="block mb-2">UserName</label>
-        <input type="text" v-model="employee.userName" class="w-full px-3 py-2 border rounded-md" placeholder="Nhập UserNames">
+        <input type="text" v-model="employee.userName" class="w-full px-3 py-2 border rounded-md" placeholder="Nhập UserName">
       </div>
 
       <div>
@@ -64,6 +75,7 @@
             placeholder="Nhập CCCD"
           >
           <button
+            @click="startScanning"
             class="bg-orange-500 text-white px-3 py-2 rounded-md hover:bg-orange-600 flex items-center justify-center"
             title="Quét mã QR"
           >
@@ -99,16 +111,13 @@
 
         <div>
           <label class="block mb-2">Giới Tính</label>
-          <select class="w-full px-3 py-2 border rounded-md">
-            <option value="nam">Nam</option>
-            <option value="nu">Nữ</option>
+          <select v-model="employee.gioiTinh" class="w-full px-3 py-2 border rounded-md">
+            <option value="">---Chọn Giới Tính---</option>
+            <option value="False">Nam</option>
+            <option value="True">Nữ</option>
           </select>
         </div>
       </div>
-
-
-
-
 
       <div class="flex gap-4 col-span-2">
         <div class="w-1/3">
@@ -135,71 +144,205 @@
           </select>
         </div>
       </div>
-      
     </div>
 
-    <div class="flex justify-end space-x-4 mt-4">
+    <div class="flex justify-end space-x-4 mt-6">
       <router-link to="/back">
-        <button @click="$emit('cancel')" class="px-4 py-2 bg-gray-300 rounded-md">Hủy</button>
+        <button @click="$emit('cancel')" class="px-4 py-2 bg-gray-300 rounded-md hover:bg-gray-400 transition-colors">
+          Hủy
+        </button>
       </router-link>
-      <button type="submit" @click="addNhanVien()" class="px-4 py-2 bg-orange-500 text-white rounded-md">Lưu</button>
+
+      <button
+        type="submit"
+        @click="addNhanVien()"
+        class="px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 transition-colors flex items-center"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
+        </svg>
+        <a class="font-bold">Thêm nhân viên</a>
+      </button>
     </div>
   </div>
-
 </template>
 
 <script setup>
-import {onMounted, ref} from 'vue';
-import axios from "axios";
+import { onMounted, ref, nextTick } from 'vue';
+import axios from 'axios';
+import { Html5Qrcode } from 'html5-qrcode';
+import { useRouter } from 'vue-router';
 
-
-// /add
-async function addNhanVien() {
-  const employeeData = {
-    ma: employee.value.ma,
-    tenNhanVien: employee.value.tenNhanVien,
-    ngaySinh: employee.value.ngaySinh,
-    anhNhanVien: employeeImage.value,
-    thanhPho: selectedProvince.value,
-    quan: selectedDistrict.value,
-    phuong: selectedWard.value,
-    diaChiCuThe: employee.value.diaChicuthe,
-    cccd: employee.value.cccd,
-
-    // Thông tin tài khoản mới
-    email: employee.value.email,
-    soDienThoai: employee.value.sdt,
-    tenDangNhap: employee.value.userName,
-    gioiTinh: employee.value.gioiTinh
-  };
-
-  try {
-    await axios.post('http://localhost:8080/nhan-vien/add', employeeData);
-    alert('Thêm nhân viên thành công!');
-  } catch (error) {
-    console.error('Lỗi khi thêm nhân viên:', error.response ? error.response.data : error);
-    alert('Thêm nhân viên thất bại.');
-  }
-}
+const router = useRouter();
+const qrReader = ref(null);
+const isScanning = ref(false);
 
 const employee = ref({
   tenNhanVien: '',
-  cccd:'',
-  userName: '',
+  cccd: '',
   sdt: '',
   email: '',
   diaChicuthe: '',
   ngaySinh: '',
   gioiTinh: '',
-  
-  
+  userName: '',
 });
 
-//anh
-function deleteImage() {
-  employeeImage.value = null;
-  fileInput.value.value = ''; 
+const provinces = ref([]);
+const districts = ref([]);
+const wards = ref([]);
+const selectedProvince = ref('');
+const selectedDistrict = ref('');
+const selectedWard = ref('');
+
+const startScanning = async () => {
+  isScanning.value = true;
+  await nextTick();
+  qrReader.value = new Html5Qrcode('qr-reader');
+
+  qrReader.value
+    .start(
+      { facingMode: 'environment' },
+      {
+        fps: 15,
+        qrbox: 250,
+      },
+      (decodedText) => {
+        handleQRData(decodedText);
+        stopScanning();
+      },
+      (error) => {
+        console.error('Lỗi quét QR chi tiết:', error);
+      }
+    )
+    .catch((err) => {
+      console.error('Lỗi khởi động quét QR:', err);
+    });
+};
+
+const stopScanning = () => {
+  if (qrReader.value) {
+    qrReader.value
+      .stop()
+      .then(() => {
+        qrReader.value = null;
+        isScanning.value = false;
+      })
+      .catch((err) => {
+        console.error('Lỗi dừng quét:', err);
+      });
+  }
+};
+
+const handleQRData = (data) => {
+  console.log('Dữ liệu QR thô:', data);
+  const fields = data.split('|');
+  console.log('Các trường phân tích:', fields);
+
+  if (fields.length >= 6) {
+    employee.value = {
+      ...employee.value,
+      cccd: fields[0].trim(),
+      tenNhanVien: fields[2].trim() || 'Không xác định',
+      ngaySinh: isValidDateFormat(fields[3].trim()) ? formatDate(fields[3].trim()) : '',
+      gioiTinh: fields[4].trim() === 'Nam' ? 'False' : 'True',
+      diaChicuthe: fields[5].trim(),
+    };
+    console.log('Tên nhân viên sau gán:', employee.value.tenNhanVien);
+    parseAddress(fields[5].trim());
+  } else {
+    employee.value = {
+      ...employee.value,
+      cccd: data.trim(),
+    };
+    console.log('Chỉ gán CCCD:', employee.value.cccd);
+  }
+
+  setTimeout(() => {
+    console.log('Tên nhân viên sau 1 giây:', employee.value.tenNhanVien);
+  }, 1000);
+};
+
+const isValidDateFormat = (dateStr) => {
+  if (dateStr.length !== 8 || !/^\d{8}$/.test(dateStr)) {
+    return false;
+  }
+  const day = parseInt(dateStr.slice(0, 2));
+  const month = parseInt(dateStr.slice(2, 4));
+  const year = parseInt(dateStr.slice(4, 8));
+  const date = new Date(year, month - 1, day);
+  return date.getDate() === day && date.getMonth() + 1 === month && date.getFullYear() === year;
+};
+
+const formatDate = (dateStr) => {
+  if (dateStr.length === 8) {
+    const day = dateStr.slice(0, 2);
+    const month = dateStr.slice(2, 4);
+    const year = dateStr.slice(4, 8);
+    return `${year}-${month}-${day}`;
+  }
+  return '';
+};
+
+const parseAddress = (address) => {
+  const parts = address.split(', ').reverse();
+  if (parts.length >= 3) {
+    selectedProvince.value = parts[0].trim();
+    handleProvinceChange();
+    selectedDistrict.value = parts[1].trim();
+    handleDistrictChange();
+    selectedWard.value = parts[2].trim();
+  }
+};
+
+async function uploadImage(file) {
+  const formData = new FormData();
+  formData.append('file', file);
+  try {
+    const response = await axios.post('http://localhost:8080/api/upload', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Lỗi khi tải lên ảnh:', error);
+    return null;
+  }
 }
+
+async function addNhanVien() {
+  let imagePath = null;
+  if (employeeImage.value) {
+    imagePath = await uploadImage(employeeImage.value);
+    if (!imagePath) {
+      alert('Tải lên ảnh thất bại. Vui lòng thử lại.');
+      return;
+    }
+  }
+
+  const employeeData = {
+    ma: employee.value.ma,
+    tenNhanVien: employee.value.tenNhanVien,
+    ngaySinh: employee.value.ngaySinh,
+    anhNhanVien: imagePath,
+    thanhPho: selectedProvince.value,
+    quan: selectedDistrict.value,
+    phuong: selectedWard.value,
+    diaChiCuThe: employee.value.diaChicuthe,
+    cccd: employee.value.cccd,
+    email: employee.value.email,
+    soDienThoai: employee.value.sdt,
+    tenDangNhap: employee.value.userName,
+    gioiTinh: employee.value.gioiTinh,
+  };
+  try {
+    await axios.post('http://localhost:8080/nhan-vien/add', employeeData);
+    alert('Thêm nhân viên thành công!');
+    router.push({ path: '/nhan-vien' });
+  } catch (error) {
+    console.error('Lỗi khi thêm nhân viên:', error.response ? error.response.data : error);
+  }
+}
+
 const employeeImage = ref(null);
 const fileInput = ref(null);
 
@@ -217,18 +360,11 @@ function previewImage(event) {
     reader.readAsDataURL(file);
   }
 }
-//
-function saveEmployee() {
-  console.log('Thông tin nhân viên:', employee.value);
-}
 
-//diaChi
-const provinces = ref([]);
-const districts = ref([]);
-const wards = ref([]);
-const selectedProvince = ref('');
-const selectedDistrict = ref('');
-const selectedWard = ref('');
+function deleteImage() {
+  employeeImage.value = null;
+  fileInput.value.value = '';
+}
 
 onMounted(async () => {
   try {
@@ -240,19 +376,15 @@ onMounted(async () => {
 });
 
 const handleProvinceChange = () => {
-  const province = provinces.value.find(prov => prov.name === selectedProvince.value);
+  const province = provinces.value.find((prov) => prov.name === selectedProvince.value);
   districts.value = province ? province.districts : [];
   selectedDistrict.value = '';
   selectedWard.value = '';
 };
 
 const handleDistrictChange = () => {
-  const district = districts.value.find(dist => dist.name === selectedDistrict.value);
+  const district = districts.value.find((dist) => dist.name === selectedDistrict.value);
   wards.value = district ? district.wards : [];
   selectedWard.value = '';
 };
-
-
-
-//
 </script>

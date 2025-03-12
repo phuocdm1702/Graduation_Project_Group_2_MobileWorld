@@ -16,11 +16,20 @@ public class NhanVienDTO {
     private String phuong;
     private String diaChiCuThe;
     private String cccd;
-
     private String email;
     private String soDienThoai;
+
+    public Boolean getGioiTinh() {
+        return gioiTinh;
+    }
+
+    public void setGioiTinh(Boolean gioiTinh) {
+        this.gioiTinh = gioiTinh;
+    }
+
     private String matKhau;
     private String tenDangNhap;
+    private Boolean gioiTinh;
 
     public String getTenDangNhap() {
         return tenDangNhap;
