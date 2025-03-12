@@ -59,7 +59,7 @@ export function useDiscountManagement() {
         ngayKetThuc: endDate.value ? endDate.value.split('T')[0] : null,
         deleted: deleted.value === "" ? null : deleted.value === "true"
       };
-      const res = await axios.get("http://localhost:8080/api/dot_giam_gia/search", { params });
+      const res = await axios.get("http://localhost:8080/dot_giam_gia/search", { params });
       console.log("API Response:", res.data); // Debug
       dataTable.value = res.data.content;
       totalPages.value = res.data.totalPages;

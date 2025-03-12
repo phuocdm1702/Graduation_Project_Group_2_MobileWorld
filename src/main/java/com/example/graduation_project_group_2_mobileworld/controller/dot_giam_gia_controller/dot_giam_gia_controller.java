@@ -24,12 +24,11 @@ import java.util.List;
 
 @CrossOrigin(origins = "http://localhost:3000")
 @RestController
-@RequestMapping("/api/dot_giam_gia")
+@RequestMapping("/dot_giam_gia")
 public class dot_giam_gia_controller {
     @Autowired
     private dot_giam_gia_service sr;
-
-        @GetMapping()
+    @GetMapping()
     public Page<DotGiamGia> hienThi(@RequestParam(defaultValue = "0") int page,
                                     @RequestParam(defaultValue = "5") int size,
                                     Model model) {
