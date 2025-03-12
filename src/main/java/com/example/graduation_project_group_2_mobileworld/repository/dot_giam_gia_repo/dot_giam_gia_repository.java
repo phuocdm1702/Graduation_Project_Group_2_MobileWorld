@@ -52,7 +52,7 @@ public interface dot_giam_gia_repository extends JpaRepository<DotGiamGia, Integ
     @Query("SELECT dsp FROM DongSanPham dsp " +
             "JOIN ChiTietDotGiamGia ctdgg ON ctdgg.idDongSanPham = dsp " +
             "JOIN ctdgg.dotGiamGia dgg " +
-            "WHERE dgg.id = :id")
+            "WHERE dgg.id = :id AND ctdgg.deleted=false ")
     List<DongSanPham> getThatDongSanPham(@Param("id") Integer id);
 
     @Query("SELECT COUNT(dgg) > 0 FROM DotGiamGia dgg WHERE dgg.ma = :ma")

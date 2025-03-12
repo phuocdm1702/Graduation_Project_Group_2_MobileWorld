@@ -2,6 +2,15 @@ import axios from "axios";
 import { onMounted, ref, watch, computed } from "vue";
 import { useRoute } from "vue-router";
 
+// Định nghĩa hàm toàn cục để gọi từ formatter
+window.handleCheckboxChange = function(id) {
+  const { fetchCTSPData } = useDotGiamGiaInstance;
+  if (fetchCTSPData) fetchCTSPData(id);
+};
+
+// Lưu instance của useDotGiamGia để truy cập từ hàm toàn cục
+let useDotGiamGiaInstance = null;
+
 export const useDotGiamGia = () => {
   const dspList = ref([]);
   const ctspList = ref([]);
@@ -66,6 +75,80 @@ export const useDotGiamGia = () => {
     }
   };
 
+  const fetchCTSPData = (id) => {
+    if (idDSPs.value.includes(id)) {
+      idDSPs.value = idDSPs.value.filter(dspId => dspId !== id);
+    } else {
+      idDSPs.value.push(id);
+    }
+    fetchData(); // Cập nhật dữ liệu khi tick/un-tick
+  };
+
+  const columns = ref([
+    {
+      key: "select",
+      label: "",
+      formatter: (value, item) => {
+        return `
+          <input
+            type="checkbox"
+            value="${item.id}"
+            ${idDSPs.value.includes(item.id) ? 'checked' : ''}
+            onchange="handleCheckboxChange(${item.id})"
+          />
+        `;
+      },
+    },
+    { key: "index", label: "STT", formatter: (value, item, index) => index + 1 },
+    { key: "ma", label: "Mã" },
+    { key: "dongSanPham", label: "Dòng sản phẩm" },
+  ]);
+
+  const getNestedValue = (obj, key) => (key === "index" ? null : obj[key]);
+
+  const columns2 = ref([
+    {
+      key: "index",
+      label: "STT",
+      formatter: (_, __, index) => index + 1,
+    },
+    {
+      key: "anh.duongDan",
+      label: "Ảnh",
+      formatter: (value) => value ? `<img src="${value}" alt="Ảnh" class="w-10 h-10 object-cover">` : "N/A",
+    },
+    {
+      key: "dsp.dongSanPham",
+      label: "Tên sản phẩm",
+      formatter: (value) => value ?? "Chưa có dữ liệu",
+    },
+    {
+      key: "bnt.dungLuongBoNhoTrong",
+      label: "Dung lượng bộ nhớ trong",
+      formatter: (value) => value ?? "Chưa có dữ liệu",
+    },
+    {
+      key: "ctsp.giaBan",
+      label: "Đơn giá",
+      formatter: (value) => value !== undefined ? value.toLocaleString() : "N/A",
+    },
+    {
+      key: "soTienGiamToiDa",
+      label: "Số tiền giảm tối đa",
+      formatter: () => dotGiamGia.value.soTienGiamToiDa ?? "N/A",
+    },
+    {
+      key: "giaSauKhiGiam",
+      label: "Đơn giá sau giảm giá",
+      formatter: (value) => value !== undefined ? value.toLocaleString() : "N/A",
+    },
+  ]);
+
+  const getNestedValue2 = (obj, key) => {
+    if (key === "index") return null;
+    return key.split('.').reduce((o, k) => (o && o[k] !== undefined ? o[k] : 'N/A'), obj);
+  };
+
   const uniqueDongSanPhams = computed(() => {
     const unique = new Set(ctspList.value.map(ctsp => ctsp.dsp.dongSanPham));
     return Array.from(unique);
@@ -76,17 +159,16 @@ export const useDotGiamGia = () => {
     return [...new Set(allBoNhoTrong)];
   });
 
+  // Sửa filteredCTSPList để hiển thị dựa trên idDSPs
   const filteredCTSPList = computed(() => {
+    if (idDSPs.value.length === 0) return []; // Nếu không chọn dòng sản phẩm nào, trả về rỗng
     return ctspList.value.filter(ctsp => {
-      const matchDongSanPham = selectedDongSanPham.value
-        ? ctsp.dsp.dongSanPham === selectedDongSanPham.value
-        : true;
-
+      const dspId = ctsp.dsp.id; // Giả sử ctsp.dsp có id
+      const matchDSP = idDSPs.value.includes(dspId);
       const matchBoNhoTrong = selectedBoNhoTrong.value
         ? ctsp.bnt.dungLuongBoNhoTrong === selectedBoNhoTrong.value
         : true;
-
-      return matchDongSanPham && matchBoNhoTrong;
+      return matchDSP && matchBoNhoTrong;
     });
   });
 
@@ -105,12 +187,10 @@ export const useDotGiamGia = () => {
 
   const validate = async function () {
     const today = new Date().toISOString().split("T")[0];
-
     if (dotGiamGia.value.ma == "") {
       alert("Vui lòng nhập mã");
       return false;
     }
-
     if (edit.value == false) {
       const isDuplicate = await checkDuplicate('ma', dotGiamGia.value.ma);
       if (isDuplicate) {
@@ -118,70 +198,58 @@ export const useDotGiamGia = () => {
         return false;
       }
     }
-
     if (dotGiamGia.value.loaiGiamGiaApDung == "") {
       alert("Vui lòng chọn loại giảm giá");
       return false;
     }
-
     if (dotGiamGia.value.giaTriGiamGia == 0 && dotGiamGia.value.loaiGiamGiaApDung != "Tiền mặt") {
       alert("Vui lòng nhập giá trị giảm giá");
       return false;
     }
-
     if (dotGiamGia.value.soTienGiamToiDa == 0) {
       alert("Vui lòng nhập số tiền giảm tối đa");
       return false;
     }
-
     if (dotGiamGia.value.ngayBatDau == "") {
       alert("Vui lòng chọn ngày bắt đầu");
       return false;
     }
-
     if (dotGiamGia.value.ngayBatDau < today) {
       alert("Ngày bắt đầu không được nhỏ hơn ngày hiện tại");
       return false;
     }
-
     if (dotGiamGia.value.ngayKetThuc == "" || dotGiamGia.value.ngayKetThuc < dotGiamGia.value.ngayBatDau) {
       alert("Vui lòng chọn lại ngày kết thúc");
       return false;
     }
-
     if (dotGiamGia.value.ngayKetThuc < dotGiamGia.value.ngayBatDau) {
       alert("Ngày kết thúc không được nhỏ hơn ngày bắt đầu");
       return false;
     }
-
     if (idDSPs.value.length === 0) {
       alert("Vui lòng chọn dòng sản phẩm trong đợt giảm giá");
       return false;
     }
-
     return true;
   };
 
   const fetchDongSanPham = async () => {
     try {
       const response = await axios.get(`http://localhost:8080/dot_giam_gia/viewUpdate?id=${dotGiamGia.value.id}`);
-      idDSPs.value = response.data.map(dsp => dsp.id); // Gán danh sách ID đã chọn
+      idDSPs.value = response.data.map(dsp => dsp.id);
     } catch (error) {
       console.error("Lỗi khi lấy danh sách dòng sản phẩm:", error);
     }
   };
-  
-  //Các hàm cho form
 
   const confirmAction = async () => {
     const message = edit.value ? "Có muốn cập nhật dữ liệu không?" : "Có muốn thêm dữ liệu không?";
     if (confirm(message)) {
-      await addData(); // Gọi addData() nếu xác nhận OK
+      await addData();
     }
   };
 
-
-    const resetForm = () => {
+  const resetForm = () => {
     dotGiamGia.value = {
       id: null,
       ma: "",
@@ -204,11 +272,9 @@ export const useDotGiamGia = () => {
       idDSPs: idDSPs.value,
       ctspList: ctspList.value,
     };
-
     const isValid = await validate();
     if (isValid) {
       try {
-        validate();
         if (edit.value) {
           console.log("Dữ liệu gửi đi:", requestData);
           const response = await axios.put(
@@ -254,14 +320,11 @@ export const useDotGiamGia = () => {
           loaiGiamGiaApDung: newQuery.loaiGiamGiaApDung || "",
           giaTriGiamGia: newQuery.giaTriGiamGia || "",
           soTienGiamToiDa: newQuery.soTienGiamToiDa || "",
-          ngayBatDau: newQuery.ngayBatDau
-            ? formatDateLocal(newQuery.ngayBatDau)
-            : "",
-          ngayKetThuc: newQuery.ngayKetThuc
-            ? formatDateLocal(newQuery.ngayKetThuc)
-            : "",
+          ngayBatDau: newQuery.ngayBatDau ? formatDateLocal(newQuery.ngayBatDau) : "",
+          ngayKetThuc: newQuery.ngayKetThuc ? formatDateLocal(newQuery.ngayKetThuc) : "",
           trangThai: newQuery.trangThai || "",
         };
+        console.log("Updated dotGiamGia:", dotGiamGia.value);
         fetchDongSanPham();
       }
     },
@@ -277,7 +340,7 @@ export const useDotGiamGia = () => {
 
   watch(selectedDongSanPham, async () => {
     await fetchData();
-    selectedBoNhoTrong.value = null; // Reset bộ nhớ trong khi chọn dòng mới
+    selectedBoNhoTrong.value = null;
   });
 
   onMounted(fetchData);
@@ -287,11 +350,12 @@ export const useDotGiamGia = () => {
 
   watch(() => dotGiamGia.value.loaiGiamGiaApDung, (newVal) => {
     if (newVal === 'Tiền mặt') {
-      dotGiamGia.value.giaTriGiamGia = null; // hoặc 0
+      dotGiamGia.value.giaTriGiamGia = null;
     }
   });
-  
-  return {
+
+  // Lưu instance để dùng trong hàm toàn cục
+  useDotGiamGiaInstance = {
     dspList,
     ctspList,
     searchKeyword,
@@ -305,6 +369,13 @@ export const useDotGiamGia = () => {
     filteredCTSPList,
     addData,
     resetForm,
-    confirmAction
+    confirmAction,
+    columns,
+    getNestedValue,
+    columns2,
+    getNestedValue2,
+    fetchCTSPData
   };
+
+  return useDotGiamGiaInstance;
 };
