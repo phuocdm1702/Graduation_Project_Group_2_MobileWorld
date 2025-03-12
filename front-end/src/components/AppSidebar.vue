@@ -14,7 +14,7 @@
     >
       <div class="flex items-center justify-center mt-8">
         <div class="flex items-center">
-          <img src="@/assets/logo-helloword.png" class="w-36 h-auto">
+          <img src="@/assets/logo-helloword.jpg" class="w-36 h-auto">
         </div>
       </div>
 

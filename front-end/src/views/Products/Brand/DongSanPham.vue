@@ -200,6 +200,15 @@ const columns = [
   { key: 'ma', label: 'Mã' },
   { key: 'dongSanPham', label: 'Tên Dòng Sản Phẩm' },
   {
+    key: 'trangThai',
+    label: 'Trạng Thái',
+    formatter: (value, item) => {
+      return item.deleted ?
+        '<span class="text-red-600">Hết hàng</span>' :
+        '<span class="text-green-600">Còn hàng</span>';
+    },
+  },
+  {
     key: 'actions',
     label: 'Hành động',
     formatter: (value, item) => {

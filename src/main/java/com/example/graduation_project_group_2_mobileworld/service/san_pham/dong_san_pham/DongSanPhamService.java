@@ -30,24 +30,20 @@ public class DongSanPhamService {
 
     @Transactional
     public DongSanPhamDTO createDongSanPham(DongSanPhamDTO dto) {
-        // Kiểm tra xem có bản ghi đã xóa mềm với ma hoặc dongSanPham không
         Optional<DongSanPham> existingDongSanPhamByMa = repository.findByMaAndDeletedTrue(dto.getMa());
         Optional<DongSanPham> existingDongSanPhamByName = repository.findByDongSanPhamAndDeletedTrue(dto.getDongSanPham());
 
         if (existingDongSanPhamByMa.isPresent()) {
-            // Khôi phục bản ghi đã xóa mềm với ma
             DongSanPham entity = existingDongSanPhamByMa.get();
             entity.setDeleted(false);
-            entity.setDongSanPham(dto.getDongSanPham()); // Cập nhật giá trị mới
+            entity.setDongSanPham(dto.getDongSanPham());
             return toDTO(repository.save(entity));
         } else if (existingDongSanPhamByName.isPresent()) {
-            // Khôi phục bản ghi đã xóa mềm với dongSanPham
             DongSanPham entity = existingDongSanPhamByName.get();
             entity.setDeleted(false);
-            entity.setMa(dto.getMa()); // Cập nhật giá trị mới
+            entity.setMa(dto.getMa());
             return toDTO(repository.save(entity));
         } else {
-            // Nếu không có bản ghi nào bị xóa mềm, tạo mới
             DongSanPham entity = new DongSanPham();
             entity.setMa(dto.getMa());
             entity.setDongSanPham(dto.getDongSanPham());
@@ -92,7 +88,6 @@ public class DongSanPhamService {
     }
 
     public Page<DongSanPhamDTO> searchDongSanPham(String keyword, Pageable pageable) {
-        // Tìm kiếm trên toàn bộ dữ liệu trước, sau đó phân trang
         List<DongSanPham> allResults = repository.findByDeletedFalse()
                 .stream()
                 .filter(d -> matchesKeyword(d, keyword))
@@ -101,7 +96,6 @@ public class DongSanPhamService {
     }
 
     public Page<DongSanPhamDTO> filterByDongSanPham(String dongSanPham, Pageable pageable) {
-        // Lọc trên toàn bộ dữ liệu trước, sau đó phân trang
         List<DongSanPham> allResults = repository.findByDeletedFalse()
                 .stream()
                 .filter(d -> d.getDongSanPham().equalsIgnoreCase(dongSanPham))
@@ -143,6 +137,6 @@ public class DongSanPhamService {
     }
 
     private DongSanPhamDTO toDTO(DongSanPham entity) {
-        return new DongSanPhamDTO(entity.getId(), entity.getMa(), entity.getDongSanPham());
+        return new DongSanPhamDTO(entity.getId(), entity.getMa(), entity.getDongSanPham(), entity.getDeleted());
     }
 }

@@ -69,10 +69,6 @@
     </div>
 
   </div>
-
-  <HoaDonChiTiet/>
-
-  <LichSuHoaDon/>
 </template>
 
 <script setup>

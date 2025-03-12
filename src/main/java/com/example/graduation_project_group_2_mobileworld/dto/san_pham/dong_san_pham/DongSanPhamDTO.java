@@ -17,10 +17,12 @@ public class DongSanPhamDTO {
     @NotBlank(message = "Tên dòng sản phẩm không được để trống")
     @Size(max = 255, message = "Tên dòng sản phẩm không được vượt quá 255 ký tự")
     private String dongSanPham;
+    private boolean deleted;
 
-    public DongSanPhamDTO(Integer id, String ma, String dongSanPham) {
+    public DongSanPhamDTO(Integer id, String ma, String dongSanPham, boolean deleted) {
         this.id = id;
         this.ma = ma;
         this.dongSanPham = dongSanPham;
+        this.deleted = deleted;
     }
 }
