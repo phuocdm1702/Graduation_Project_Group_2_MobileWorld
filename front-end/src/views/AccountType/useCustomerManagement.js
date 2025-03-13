@@ -116,11 +116,14 @@ export default function useCustomerManagement() {
       key: "actions",
       label: "Thao Tác",
       formatter: (value, item) => `
-        <button class="text-blue-600 hover:text-blue-800 transition" 
-                onclick="document.dispatchEvent(new CustomEvent('showDeleteConfirm', { detail: '${item.id}' }))">
-          <i class="fa-solid fa-edit text-orange-500"></i>
+    <td class="px-6 py-4 text-center">
+      <a href="/update-khach-hang?id=${item.id}">
+        <button class="text-blue-600 hover:text-blue-800 transition">
+          <i class="fas fa-pen-to-square"></i>
         </button>
-      `,
+      </a>
+    </td>
+  `,
     },
   ];
 

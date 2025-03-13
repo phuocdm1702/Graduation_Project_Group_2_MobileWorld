@@ -14,12 +14,21 @@ public class KhachHangDTO {
     private String quan;
     private String phuong;
     private String diaChiCuThe;
+
+    public Date getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Date createdAt) {
+        this.createdAt = createdAt;
+    }
+
     private String cccd;
     private String email;
     private String soDienThoai;
     private String userName;
     private Boolean gioiTinh;
-
+    private Date createdAt;
     public Boolean getGioiTinh() {
         return gioiTinh;
     }

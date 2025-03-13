@@ -6,7 +6,7 @@ export function useDiscountManagement() {
   const router = useRouter();
   const toast = ref(null);
   const currentPage = ref(0);
-  const pageSize = ref(5);
+  const pageSize = ref(10);
   const totalPages = ref(0);
 
   // Tìm kiếm
@@ -40,7 +40,7 @@ export function useDiscountManagement() {
   });
 
   const changePage = (page) => {
-    currentPage.value = page - 1;
+    currentPage.value = page;
     fetchData();
   };
 
@@ -52,22 +52,44 @@ export function useDiscountManagement() {
         maDGG: searchQuery.value || null,
         tenDGG: searchQuery.value || null,
         loaiGiamGiaApDung: filterType.value || null,
-        trangThai: filterStatus.value === "" ? null : filterStatus.value === "true",
+        trangThai: filterStatus.value === "" ? null : filterStatus.value === "1",
         giaTriGiamGia: saleValue.value ? Number(saleValue.value) : null,
         soTienGiamToiDa: minOrder.value ? Number(minOrder.value) : null,
-        ngayBatDau: startDate.value ? startDate.value.split('T')[0] : null,
-        ngayKetThuc: endDate.value ? endDate.value.split('T')[0] : null,
-        deleted: deleted.value === "" ? null : deleted.value === "true"
+        ngayBatDau: startDate.value || null,
+        ngayKetThuc: endDate.value || null,
+        deleted: deleted.value === true ? true : deleted.value === false ? false : null
       };
+      console.log("Params sent:", params); // Debug
       const res = await axios.get("http://localhost:8080/dot_giam_gia/search", { params });
       console.log("API Response:", res.data); // Debug
-      dataTable.value = res.data.content;
-      totalPages.value = res.data.totalPages;
+
+      const processedData = res.data.content && res.data.content.length > 0
+        ? res.data.content.map(item => {
+          let colorClass = item.deleted
+            ? "bg-red-500"
+            : item.trangThai
+              ? "bg-blue-500"
+              : "bg-green-500";
+          let text = item.deleted
+            ? "Đã kết thúc"
+            : item.trangThai
+              ? "Sắp tới"
+              : "Đang diễn ra";
+          return {
+            ...item,
+            trangThaiFormatted: `<span class="px-3 py-1 inline-block text-white font-semibold rounded-full ${colorClass}">${text}</span>`
+          };
+        })
+        : [];
+
+      dataTable.value = processedData;
+      totalPages.value = res.data.totalPages || 0;
     } catch (error) {
-      console.error("Lỗi:", error);
+      console.error("Lỗi:", error.response?.data || error.message);
       toast.value?.showToast("error", "Không thể tải dữ liệu!");
     }
   };
+  
   const confirmDelete = (discountId) => {
     if (window.confirm("Bạn có chắc chắn muốn xóa đợt giảm giá này?")) {
       deleteDotGiamGia(discountId);
@@ -76,7 +98,7 @@ export function useDiscountManagement() {
 
   const deleteDotGiamGia = async (id) => {
     try {
-      await axios.delete(`http://localhost:8080/api/dot_giam_gia/${id}`);
+      await axios.delete(`http://localhost:8080/dot_giam_gia/${id}`);
       toast.value?.showToast('success', 'Xóa thành công!');
       await fetchData();
     } catch (error) {
@@ -97,7 +119,7 @@ export function useDiscountManagement() {
       }
 
       // Gọi API để lấy danh sách dòng sản phẩm liên quan
-      const response = await axios.get(`http://localhost:8080/api/dot_giam_gia/viewUpdate`, {
+      const response = await axios.get(`http://localhost:8080/dot_giam_gia/viewUpdate`, {
         params: { id: discountData.id }
       });
 
@@ -113,7 +135,7 @@ export function useDiscountManagement() {
           ngayBatDau: discountData.ngayBatDau || "",
           ngayKetThuc: discountData.ngayKetThuc || "",
           trangThai: discountData.trangThai !== undefined ? discountData.trangThai : "",
-          dongSanPham: JSON.stringify(response.data) // Truyền danh sách dòng sản phẩm
+          dongSanPham: JSON.stringify(response.data)
         },
       });
     } catch (error) {
@@ -127,7 +149,9 @@ export function useDiscountManagement() {
   window.viewUpdate = viewUpdate;
 
   const columns = ref([
-    { key: "index", label: "STT", formatter: (value, item, index) => index + 1 },
+    { key: "index", label: "STT",  formatter: (value, item, index) => {
+        return (currentPage.value * pageSize.value) + (index + 1);
+      } },
     { key: "ma", label: "Mã" },
     { key: "tenDotGiamGia", label: "Tên đợt giảm giá" },
     { key: "loaiGiamGiaApDung", label: "Loại giảm giá" },
@@ -152,36 +176,24 @@ export function useDiscountManagement() {
       formatter: value => new Date(value).toLocaleDateString("vi-VN"),
     },
     {
-      key: "trangThai",
+      key: "trangThaiFormatted",
       label: "Trạng thái",
-      formatter: (value, item) => {
-        let colorClass = item.deleted
-          ? "bg-red-500"
-          : item.trangThai
-            ? "bg-blue-500"
-            : "bg-green-500";
-        let text = item.deleted
-          ? "Đã kết thúc"
-          : item.trangThai
-            ? "Sắp tới"
-            : "Đang diễn ra";
-        return `<span class="px-3 py-1 inline-block text-white font-semibold rounded-full ${colorClass}">${text}</span>`;
-      },
+      formatter: (value) => value  // Trả về chuỗi HTML đã được xử lý
     },
     {
       key: "actions",
       label: "Hành động",
       formatter: (value, item) => `
-        <button onclick="window.confirmDelete(${item.id})" class="bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600 transition">
-          <i class="fa-solid fa-trash"></i>
-        </button>
-        <button onclick="window.viewUpdate(${item.id})" class="bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600 transition">
-          <i class="fa-solid fa-edit"></i>
-        </button>
-      `,
+      <button onclick="window.confirmDelete(${item.id})" class="bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600 transition">
+        <i class="fa-solid fa-trash"></i>
+      </button>
+      <button onclick="window.viewUpdate(${item.id})" class="bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600 transition">
+        <i class="fa-solid fa-edit"></i>
+      </button>
+    `,
     },
   ]);
-
+  
   const getNestedValue = (obj, key) => (key === "index" ? null : obj[key]);
 
   onMounted(() => {
