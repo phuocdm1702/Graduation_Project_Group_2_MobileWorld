@@ -14,7 +14,7 @@
       </h2>
 
       <!-- Phần form (search và trạng thái) -->
-      <div class="mt-2 w-full bg-white border rounded-md shadow-md">
+      <div class="mt-2 bg-white border rounded-md shadow-md">
         <form @submit.prevent>
           <div class="p-5 flex flex-col gap-6">
             <!-- Div chứa Search và Trạng thái -->

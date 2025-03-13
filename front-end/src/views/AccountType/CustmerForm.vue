@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-screen-xl mx-auto h-auto">
+  <div class="bg-white p-4 rounded-lg">
     <h2 class="text-2xl font-bold mb-4">Thông tin khách hàng</h2>
 
     <div class="grid grid-cols-2 gap-4">
@@ -38,7 +38,7 @@
         <label class="block mb-2">Tên Khách Hàng</label>
         <input
           type="text"
-          v-model="employee.tenNhanVien"
+         
           class="w-full px-3 py-2 border rounded-md"
           placeholder="Nhập tên khách hàng"
         >
@@ -46,12 +46,12 @@
 
       <div>
         <label class="block mb-2">UserName</label>
-        <input type="text" v-model="employee.userName" class="w-full px-3 py-2 border rounded-md" placeholder="Nhập UserNames">
+        <input type="text"  class="w-full px-3 py-2 border rounded-md" placeholder="Nhập UserNames">
       </div>
 
       <div>
         <label class="block mb-2">SDT</label>
-        <input type="text" v-model="employee.sdt" class="w-full px-3 py-2 border rounded-md" placeholder="Nhập SDT">
+        <input type="text"  class="w-full px-3 py-2 border rounded-md" placeholder="Nhập SDT">
       </div>
 
       <div>
@@ -59,7 +59,7 @@
         <div class="flex items-center gap-2">
           <input
             type="text"
-            v-model="employee.cccd"
+            
             class="flex-1 px-3 py-2 border rounded-md"
             placeholder="Nhập CCCD"
           >
@@ -83,18 +83,18 @@
 
       <div>
         <label class="block mb-2">Email</label>
-        <input type="text" v-model="employee.email" class="w-full px-3 py-2 border rounded-md" placeholder="Nhập Email">
+        <input type="text"  class="w-full px-3 py-2 border rounded-md" placeholder="Nhập Email">
       </div>
 
       <div class="col-span-2 grid grid-cols-3 gap-4">
         <div>
           <label class="block mb-2">Địa chỉ cụ thể</label>
-          <input type="text" v-model="employee.diaChicuthe" class="w-full px-3 py-2 border rounded-md" placeholder="Nhập địa chỉ cụ thể">
+          <input type="text"  class="w-full px-3 py-2 border rounded-md" placeholder="Nhập địa chỉ cụ thể">
         </div>
 
         <div>
           <label class="block mb-2">Ngày sinh</label>
-          <input type="date" v-model="employee.ngaySinh" class="w-full px-3 py-2 border rounded-md">
+          <input type="date"  class="w-full px-3 py-2 border rounded-md">
         </div>
 
         <div>
@@ -182,8 +182,8 @@ async function addNhanVien() {
   }
 }
 
-const employee = ref({
-  tenNhanVien: '',
+const khachhang = ref({
+  ten: '',
   cccd:'',
   userName: '',
   sdt: '',
