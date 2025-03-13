@@ -1,6 +1,7 @@
 package com.example.graduation_project_group_2_mobileworld.repository.dot_giam_gia_repo;
 import com.example.graduation_project_group_2_mobileworld.dto.dot_giam_gia.viewCTSPDTO;
 
+import com.example.graduation_project_group_2_mobileworld.entity.ChiTietDotGiamGia;
 import com.example.graduation_project_group_2_mobileworld.entity.DongSanPham;
 import com.example.graduation_project_group_2_mobileworld.entity.DotGiamGia;
 import org.springframework.data.domain.Page;
@@ -24,7 +25,7 @@ public interface dot_giam_gia_repository extends JpaRepository<DotGiamGia, Integ
     public Page<DotGiamGia> hienThiFinish(Pageable pageable);
 
     @Query("SELECT dsp FROM DongSanPham dsp WHERE (:timKiem IS NULL OR :timKiem = '' OR dsp.ma LIKE CONCAT('%', :timKiem, '%') OR dsp.dongSanPham LIKE CONCAT('%', :timKiem, '%')) AND dsp.deleted = false ")
-    public List<DongSanPham> getAllDongSanPham(@Param("timKiem") String timKiem);
+    public Page<DongSanPham> getAllDongSanPham(@Param("timKiem") String timKiem, Pageable pageable);
 
 
     @Query("SELECT new com.example.graduation_project_group_2_mobileworld.dto.dot_giam_gia.viewCTSPDTO(dsp, ctsp, anh, bnt) " +
@@ -36,7 +37,7 @@ public interface dot_giam_gia_repository extends JpaRepository<DotGiamGia, Integ
             "AND (:idBoNhoTrongs IS NULL OR bnt.id IN :idBoNhoTrongs) " + // Lọc theo bộ nhớ trong
             "AND ctsp.id = (SELECT MIN(ctsp2.id) FROM ChiTietSanPham ctsp2 WHERE ctsp2.giaBan = ctsp.giaBan AND ctsp2.idDongSanPham.id = dsp.id) " +
             "AND anh.id = (SELECT MIN(anh2.id) FROM AnhSanPham anh2 WHERE anh2.id = anh.id)")
-    List<viewCTSPDTO> getAllCTSP(@Param("ids") List<Integer> ids, @Param("idBoNhoTrongs") List<Integer> idBoNhoTrongs);
+    Page<viewCTSPDTO> getAllCTSP(@Param("ids") List<Integer> ids, @Param("idBoNhoTrongs") List<Integer> idBoNhoTrongs, Pageable pageable);
 
 
     @Modifying

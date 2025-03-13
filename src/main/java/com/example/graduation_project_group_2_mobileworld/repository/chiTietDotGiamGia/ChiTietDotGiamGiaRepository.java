@@ -24,5 +24,15 @@ public interface ChiTietDotGiamGiaRepository extends JpaRepository<ChiTietDotGia
     @Query("SELECT c FROM ChiTietDotGiamGia c WHERE c.idDongSanPham = :dongSanPham AND c.giaBanDau = :giaBanDau AND c.deleted = false")
     List<ChiTietDotGiamGia> findByIdDongSanPhamAndGiaBanDau(@Param("dongSanPham") DongSanPham dongSanPham, @Param("giaBanDau") BigDecimal giaBanDau);
 
+    @Query("SELECT c FROM ChiTietDotGiamGia c " +
+            "WHERE c.dotGiamGia = :dotGiamGia " +
+            "AND c.idDongSanPham = :idDongSanPham " +
+            "AND c.giaBanDau = :giaBanDau " +
+            "AND c.deleted = :deleted")
+    List<ChiTietDotGiamGia> findByDotGiamGiaAndIdDongSanPhamAndGiaBanDauAndDeleted(
+            @Param("dotGiamGia") DotGiamGia dotGiamGia,
+            @Param("idDongSanPham") DongSanPham idDongSanPham,
+            @Param("giaBanDau") BigDecimal giaBanDau,
+            @Param("deleted") boolean deleted);
 
 }
