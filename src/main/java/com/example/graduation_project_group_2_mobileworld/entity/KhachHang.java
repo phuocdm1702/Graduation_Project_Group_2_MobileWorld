@@ -45,7 +45,7 @@ public class KhachHang {
     private Date ngaySinh;
 
     @Column(name = "deleted")
-    private Boolean deleted;
+    private boolean deleted;
 
     @Column(name = "created_at")
     private Instant createdAt;
@@ -94,6 +94,10 @@ public class KhachHang {
         this.ma = ma;
     }
 
+    public boolean isDeleted() {
+        return deleted;
+    }
+
     public @Size(max = 255) String getTen() {
         return ten;
     }
@@ -118,11 +122,11 @@ public class KhachHang {
         this.ngaySinh = ngaySinh;
     }
 
-    public Boolean getDeleted() {
+    public boolean getDeleted() {
         return deleted;
     }
 
-    public void setDeleted(Boolean deleted) {
+    public void setDeleted(boolean deleted) {
         this.deleted = deleted;
     }
 
