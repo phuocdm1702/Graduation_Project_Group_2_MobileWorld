@@ -81,7 +81,7 @@ public class NhanVien {
     private Integer createdBy;
 
     @Column(name = "updated_at")
-    private Instant updatedAt;
+    private Date updatedAt;
 
     @Column(name = "updated_by")
     private Integer updatedBy;

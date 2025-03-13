@@ -33,6 +33,11 @@ public class KhachHang {
     @Column(name = "ten")
     private String ten;
 
+    @Size(max = 255)
+    @Nationalized
+    @Column(name = "cccd")
+    private String cccd;
+
     @Column(name = "gioi_tinh", columnDefinition = "tinyint")
     private Short gioiTinh;
 
@@ -44,6 +49,14 @@ public class KhachHang {
 
     @Column(name = "created_at")
     private Instant createdAt;
+
+    public @Size(max = 255) String getCccd() {
+        return cccd;
+    }
+
+    public void setCccd(@Size(max = 255) String cccd) {
+        this.cccd = cccd;
+    }
 
     @Column(name = "created_by")
     private Integer createdBy;

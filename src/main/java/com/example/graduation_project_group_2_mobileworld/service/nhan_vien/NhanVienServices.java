@@ -10,6 +10,7 @@ import com.example.graduation_project_group_2_mobileworld.repository.tai_khoan.T
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -72,6 +73,8 @@ public class NhanVienServices {
         taiKhoan.setSoDienThoai(dto.getSoDienThoai());
         taiKhoan.setTenDangNhap(dto.getTenDangNhap());
         taiKhoan.setIdQuyenHan(quyenHan);
+        taiKhoan.setDeleted(dto.getGioiTinh());
+        taiKhoan.setTenDangNhap(dto.getTenDangNhap());
         taiKhoan = taiKhoanRepository.save(taiKhoan);
 
         NhanVien nhanVien = new NhanVien();
@@ -89,5 +92,37 @@ public class NhanVienServices {
 
         return nhanVienRepository.save(nhanVien);
     }
+    public Optional<NhanVien> findById(Integer id) {
+        return nhanVienRepository.findById(id);
+    }
+
+    public NhanVien updateNhanVien(Integer id, NhanVienDTO nhanVienDTO) {
+        return nhanVienRepository.findById(id)
+                .map(existingNhanVien -> {
+                    existingNhanVien.setTenNhanVien(nhanVienDTO.getTenNhanVien());
+                    existingNhanVien.setNgaySinh(nhanVienDTO.getNgaySinh());
+                    existingNhanVien.setThanhPho(nhanVienDTO.getThanhPho());
+                    existingNhanVien.setQuan(nhanVienDTO.getQuan());
+                    existingNhanVien.setPhuong(nhanVienDTO.getPhuong());
+                    existingNhanVien.setDiaChiCuThe(nhanVienDTO.getDiaChiCuThe());
+
+                    // Lấy thông tin tài khoản qua idTaiKhoan
+                    if (existingNhanVien.getIdTaiKhoan() != null) {
+                        TaiKhoan taiKhoan = taiKhoanRepository.findById(existingNhanVien.getIdTaiKhoan().getId())
+                                .orElseThrow(() -> new RuntimeException("Tài khoản không tồn tại!"));
+
+                        taiKhoan.setEmail(nhanVienDTO.getEmail());
+                        taiKhoan.setSoDienThoai(nhanVienDTO.getSoDienThoai());
+                        taiKhoan.setDeleted(nhanVienDTO.getGioiTinh());
+                        taiKhoanRepository.save(taiKhoan);
+                    }
+
+                    existingNhanVien.setUpdatedAt(new Date());
+                    existingNhanVien.setUpdatedBy(1); // Hoặc lấy từ session
+
+                    return nhanVienRepository.save(existingNhanVien);
+                }).orElseThrow(() -> new RuntimeException("Nhân viên không tồn tại!"));
+    }
+
 
 }

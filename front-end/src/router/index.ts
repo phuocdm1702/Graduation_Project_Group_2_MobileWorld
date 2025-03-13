@@ -22,6 +22,7 @@
   import KhachHang from "../views/AccountType/KhachHang.vue";
   import CustmerForm from "@/views/AccountType/CustmerForm.vue";
   import NotFound from "../views/NotFound.vue";
+  import UpdateNhanVien from "@/views/AccountType/UpdateNhanVien.vue";
   
   // Sản phẩm
   import ProductDetails from "../views/Products/SanPham/ChiTietSanPham.vue";
@@ -134,7 +135,13 @@
     { path: '/back', component: NhanVien },
   
     { path: '/', component: KhachHang },
-    { path: '/them-khach-hang', component: CustmerForm }
+    { path: '/them-khach-hang', component: CustmerForm },
+
+    { path: '/', component: NhanVien },
+    { path: '/update-nhan-vien', component: UpdateNhanVien },
+
+    { path: '/', component: EmployeeForm },
+    { path: '/back', component: NhanVien },
   
   ];
   

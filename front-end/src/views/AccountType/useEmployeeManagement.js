@@ -1,6 +1,6 @@
-import { ref, onMounted } from "vue";
+import { ref, onMounted,h } from "vue";
 import axios from "axios";
-
+import { RouterLink } from "vue-router";
 export default function useEmployeeManagement() {
   // Toast notification
   const visible = ref(false);
@@ -64,16 +64,16 @@ export default function useEmployeeManagement() {
   onMounted(fetchNhanVien);
 
   // Delete employee
-  const deleteNv = async () => {
-    try {
-      await axios.put(`http://localhost:8080/nhan-vien/delete/${selectedNVId.value}`);
-      showToast("success", "Xóa thành công!");
-      fetchNhanVien();
-    } catch (e) {
-      showToast("error", "Xóa thất bại!");
-    }
-    showConfirmModal.value = false;
-  };
+  // const deleteNv = async () => {
+  //   try {
+  //     await axios.put(`http://localhost:8080/nhan-vien/delete/${selectedNVId.value}`);
+  //     showToast("success", "Xóa thành công!");
+  //     fetchNhanVien();
+  //   } catch (e) {
+  //     showToast("error", "Xóa thất bại!");
+  //   }
+  //   showConfirmModal.value = false;
+  // };
 
   // Search
   const searchNV = ref("");
@@ -93,6 +93,7 @@ export default function useEmployeeManagement() {
   // Định nghĩa các cột cho DynamicTable
   const tableColumns = [
     { key: "index", label: "#", formatter: (value, item, index) => index + 1 },
+    { key: "ma", label: "Mã" },
     { key: "tenNhanVien", label: "Tên" },
     { key: "idTaiKhoan.email", label: "Email" },
     { key: "idTaiKhoan.soDienThoai", label: "SĐT" },
@@ -102,20 +103,42 @@ export default function useEmployeeManagement() {
       formatter: (value) => new Date(value).toLocaleDateString("vi-VN"),
     },
     {
-      key: "trangThai",
+      key: "deleted",
       label: "Trạng thái",
-      formatter: (value, item) => (item.deleted ? "Đã nghỉ" : "Đang làm"),
-    },
+      formatter: (value) =>
+        value
+          ? `<div style="
+          display: inline-block;
+          background-color: #f3f4f6;
+          color: #ef4444;
+          padding: 4px 12px;
+          border-radius: 16px;
+          font-weight: 500;
+          ">Đã nghỉ</div>`
+          : `<div style="
+          display: inline-block;
+          background-color: #f3f4f6;
+          color: #10b981;
+          padding: 4px 12px;
+          border-radius: 16px;
+          font-weight: 500;
+          ">Đang làm</div>`
+    }
+    ,
     {
       key: "actions",
       label: "Thao Tác",
       formatter: (value, item) => `
-        <button class="text-blue-600 hover:text-blue-800 transition" 
-                onclick="document.dispatchEvent(new CustomEvent('showDeleteConfirm', { detail: '${item.id}' }))">
-          <i class="fa-solid fa-edit text-orange-500"></i>
+    <td class="px-6 py-4 text-center">
+      <a href="/update-nhan-vien?id=${item.id}">
+        <button class="text-blue-600 hover:text-blue-800 transition">
+          <i class="fas fa-pen-to-square"></i>
         </button>
-      `,
-    },
+      </a>
+    </td>
+  `,
+    }
+
   ];
 
   // Hàm getNestedValue để truy cập thuộc tính lồng nhau
@@ -142,7 +165,6 @@ export default function useEmployeeManagement() {
     showToast,
     filterStatus,
     fetchNhanVien,
-    deleteNv,
     searchNV,
     btnSearch,
     tableColumns, // Trả về tableColumns để sử dụng trong DynamicTable
