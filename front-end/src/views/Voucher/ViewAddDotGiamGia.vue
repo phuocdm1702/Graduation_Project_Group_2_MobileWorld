@@ -102,6 +102,13 @@
               :getNestedValue="getNestedValue"
             />
           </div>
+          <footer class="bg-white shadow-lg rounded-lg p-4 flex justify-center items-center mt-2">
+            <Pagination
+              :current-page="currentPageDSP"
+              :total-pages="totalPagesDSP"
+              @page-changed="changePageDSP"
+            />
+          </footer>
         </div>
       </div>
 
@@ -142,6 +149,13 @@
             :getNestedValue="getNestedValue2"
           />
         </div>
+        <footer class="bg-white shadow-lg rounded-lg p-4 flex justify-center items-center mt-2">
+          <Pagination
+            :current-page="currentPageCTSP"
+            :total-pages="totalPagesCTSP"
+            @page-changed="changePageCTSP"
+          />
+        </footer>
       </div>
     </div>
   </div>
@@ -151,12 +165,17 @@
 import { useDotGiamGia } from './ViewAddDotGiamGia.js';
 import { computed } from "vue";
 import DynamicTable from "@/components/DynamicTable.vue";
+import Pagination from '@/components/Pagination.vue';
 
 const {
+  currentPageDSP,
+  changePageDSP,
+  totalPagesDSP,
+  currentPageCTSP,
+  changePageCTSP,
+  totalPagesCTSP,
   dspList,
-  ctspList,
   searchKeyword,
-  idDSPs,
   selectedDongSanPham,
   selectedBoNhoTrong,
   dotGiamGia,
@@ -164,14 +183,13 @@ const {
   uniqueDongSanPhams,
   filteredBoNhoTrong,
   filteredCTSPList,
-  addData,
-  resetForm,
   confirmAction,
   columns,
   getNestedValue,
   columns2,
   getNestedValue2,
-  fetchCTSPData
+  displayedPagesDSP,
+  displayedPagesCTSP
 } = useDotGiamGia();
 
 const isTienMat = computed(() => {

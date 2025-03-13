@@ -141,7 +141,7 @@
       <!-- Phân trang -->
       <footer class="bg-white shadow-lg rounded-lg p-4 flex justify-center items-center mt-2">
         <Pagination
-          :current-page="currentPage + 1"
+          :current-page="currentPage"
           :total-pages="totalPages"
           @page-changed="changePage"
         />
@@ -158,7 +158,7 @@ import Pagination from '@/components/Pagination.vue';
 
 const {
   currentPage,
-  pageSize,
+  // pageSize,
   totalPages,
   searchQuery,
   filterType,
