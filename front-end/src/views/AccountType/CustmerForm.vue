@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-screen-xl mx-auto h-auto">
+  <div class="bg-white p-4 rounded-lg">
     <h2 class="text-2xl font-bold mb-4">Thông tin khách hàng</h2>
 
     <div class="grid grid-cols-2 gap-4">
@@ -35,10 +35,10 @@
       </div>
 
       <div class="w-full mt-4">
-        <label class="block mb-2">Tên Khách Hàng</label>
+        <label  class="block mb-2">Tên Khách Hàng</label>
         <input
           type="text"
-          v-model="employee.tenNhanVien"
+         v-model="custmer.ten"
           class="w-full px-3 py-2 border rounded-md"
           placeholder="Nhập tên khách hàng"
         >
@@ -46,20 +46,20 @@
 
       <div>
         <label class="block mb-2">UserName</label>
-        <input type="text" v-model="employee.userName" class="w-full px-3 py-2 border rounded-md" placeholder="Nhập UserNames">
+        <input  v-model="custmer.userName" type="text"  class="w-full px-3 py-2 border rounded-md" placeholder="Nhập UserNames">
       </div>
 
       <div>
         <label class="block mb-2">SDT</label>
-        <input type="text" v-model="employee.sdt" class="w-full px-3 py-2 border rounded-md" placeholder="Nhập SDT">
+        <input v-model="custmer.sdt" type="text"  class="w-full px-3 py-2 border rounded-md" placeholder="Nhập SDT">
       </div>
 
       <div>
         <label class="block mb-2">CCCD</label>
-        <div class="flex items-center gap-2">
-          <input
+        <div  class="flex items-center gap-2">
+          <input v-model="custmer.cccd"
             type="text"
-            v-model="employee.cccd"
+            
             class="flex-1 px-3 py-2 border rounded-md"
             placeholder="Nhập CCCD"
           >
@@ -83,25 +83,25 @@
 
       <div>
         <label class="block mb-2">Email</label>
-        <input type="text" v-model="employee.email" class="w-full px-3 py-2 border rounded-md" placeholder="Nhập Email">
+        <input v-model="custmer.email" type="text"  class="w-full px-3 py-2 border rounded-md" placeholder="Nhập Email">
       </div>
 
       <div class="col-span-2 grid grid-cols-3 gap-4">
         <div>
           <label class="block mb-2">Địa chỉ cụ thể</label>
-          <input type="text" v-model="employee.diaChicuthe" class="w-full px-3 py-2 border rounded-md" placeholder="Nhập địa chỉ cụ thể">
+          <input v-model="custmer.diaChicuthe" type="text"  class="w-full px-3 py-2 border rounded-md" placeholder="Nhập địa chỉ cụ thể">
         </div>
 
         <div>
           <label class="block mb-2">Ngày sinh</label>
-          <input type="date" v-model="employee.ngaySinh" class="w-full px-3 py-2 border rounded-md">
+          <input v-model="custmer.ngaySinh" type="date"  class="w-full px-3 py-2 border rounded-md">
         </div>
 
         <div>
           <label class="block mb-2">Giới Tính</label>
-          <select class="w-full px-3 py-2 border rounded-md">
-            <option value="nam">Nam</option>
-            <option value="nu">Nữ</option>
+          <select v-model="custmer.gioiTinh" class="w-full px-3 py-2 border rounded-md">
+            <option value="false">Nam</option>
+            <option value="true">Nữ</option>
           </select>
         </div>
       </div>
@@ -142,7 +142,7 @@
       <router-link to="/back">
         <button @click="$emit('cancel')" class="px-4 py-2 bg-gray-300 rounded-md">Hủy</button>
       </router-link>
-      <button type="submit" @click="addNhanVien()" class="px-4 py-2 bg-orange-500 text-white rounded-md">Lưu</button>
+      <button type="submit" @click="addKhachHang()" class="px-4 py-2 bg-orange-500 text-white rounded-md">Lưu</button>
     </div>
   </div>
 
@@ -154,36 +154,32 @@ import axios from "axios";
 
 
 // /add
-async function addNhanVien() {
+async function addKhachHang() {
   const employeeData = {
-    ma: employee.value.ma,
-    tenNhanVien: employee.value.tenNhanVien,
-    ngaySinh: employee.value.ngaySinh,
-    anhNhanVien: employeeImage.value,
+    tenKH: custmer.value.ten,           // Thay vì "ten"
+    email: custmer.value.email,
+    soDienThoai: custmer.value.sdt,     // Thay vì "sdt"
+    userName: custmer.value.userName,
+    cccd: custmer.value.cccd,
+    ngaySinh: custmer.value.ngaySinh ? custmer.value.ngaySinh : null,
+    diaChiCuThe: custmer.value.diaChicuthe, // Thay vì "diaChicuthe"
     thanhPho: selectedProvince.value,
     quan: selectedDistrict.value,
     phuong: selectedWard.value,
-    diaChiCuThe: employee.value.diaChicuthe,
-    cccd: employee.value.cccd,
-
-    // Thông tin tài khoản mới
-    email: employee.value.email,
-    soDienThoai: employee.value.sdt,
-    tenDangNhap: employee.value.userName,
-    gioiTinh: employee.value.gioiTinh
+    gioiTinh: custmer.value.gioiTinh === "true" // Chuyển thành boolean
   };
+  console.log('Dữ liệu gửi lên:', employeeData); // Kiểm tra dữ liệu trước khi gửi
 
   try {
-    await axios.post('http://localhost:8080/nhan-vien/add', employeeData);
-    alert('Thêm nhân viên thành công!');
+    const response = await axios.post('http://localhost:8080/khach-hang/add', employeeData);
+    console.log('Thêm khách hàng thành công:', response.data);
   } catch (error) {
-    console.error('Lỗi khi thêm nhân viên:', error.response ? error.response.data : error);
-    alert('Thêm nhân viên thất bại.');
+    console.error('Lỗi khi thêm khách hàng:', error.response?.data || error.message);
   }
 }
 
-const employee = ref({
-  tenNhanVien: '',
+const custmer = ref({
+  ten: '',
   cccd:'',
   userName: '',
   sdt: '',
@@ -191,8 +187,6 @@ const employee = ref({
   diaChicuthe: '',
   ngaySinh: '',
   gioiTinh: '',
-
-
 });
 
 //anh
@@ -217,10 +211,7 @@ function previewImage(event) {
     reader.readAsDataURL(file);
   }
 }
-//
-function saveEmployee() {
-  console.log('Thông tin nhân viên:', employee.value);
-}
+
 
 //diaChi
 const provinces = ref([]);

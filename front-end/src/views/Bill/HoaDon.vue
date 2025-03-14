@@ -1,10 +1,9 @@
 <template>
   <div class="mt-2 mx-auto">
-    <header>
-      <h2 class="bg-white shadow-lg rounded-lg p-5 mb-2 mt-2 text-2xl font-semibold text-gray-700">
-        Quản Lý Hóa Đơn
-      </h2>
-    </header>
+    <h2 class="bg-white shadow-lg rounded-lg p-5 mb-2 mt-2 text-2xl font-semibold text-gray-700">
+      Quản Lý Hóa Đơn
+    </h2>
+
     <!-- Form lọc -->
     <div
       class="bg-white shadow-lg rounded-lg p-5 mb-4 mt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
@@ -84,7 +83,7 @@
 
 
     <!-- Bảng danh sách hóa đơn -->
-    <status-bar/>
+    <statusBar/>
     <DynamicTable class="dynamic-table"
                   :data="dataTable"
                   :columns="columns"
@@ -104,9 +103,8 @@
 <script setup>
 import useHoaDonLineList from "@/views/Bill/HoaDon";
 import DynamicTable from "@/components/DynamicTable.vue";
-// import statusBar from "@/components/statusBar.vue";
+import statusBar from "@/components/statusBar.vue";
 import Pagination from '@/components/Pagination.vue';
-import StatusBar from "@/components/statusBar.vue";
 
 const {
   dataTable,

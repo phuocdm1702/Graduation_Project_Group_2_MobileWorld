@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @CrossOrigin(origins = {"http://localhost:3000/", "http://localhost:8080"})
@@ -45,13 +46,21 @@ public class NhanVienController {
         }
         return ResponseEntity.badRequest().body("nv không tồn tại");
     }
-//    @PutMapping("/update/{id}")
-//    public ResponseEntity<NhanVien> updateNv(@PathVariable Integer id, @RequestBody NhanVien nhanVien) {
-//        try {
-//            NhanVien updatedKhachHang = nhanVienServices.updatenv(id, nhanVien);
-//            return ResponseEntity.ok(updatedKhachHang);
-//        } catch (RuntimeException e) {
-//            return ResponseEntity.status(404).body(null);
-//        }
-//    }
+    @GetMapping("/detail/{id}")
+    public ResponseEntity<?> getNhanVienDetail(@PathVariable Integer id) {
+        Optional<NhanVien> nhanVien = nhanVienServices.findById(id);
+        if (nhanVien.isPresent()) {
+            return ResponseEntity.ok(nhanVien.get());
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Nhân viên không tồn tại");
+    }
+    @PutMapping("/update/{id}")
+    public ResponseEntity<?> updateNhanVien(@PathVariable Integer id, @RequestBody NhanVienDTO nhanVienDTO) {
+        try {
+            NhanVien updatedNhanVien = nhanVienServices.updateNhanVien(id, nhanVienDTO);
+            return ResponseEntity.ok(updatedNhanVien);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
+    }
 }

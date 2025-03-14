@@ -105,7 +105,7 @@ export default function useCustomerManagement() {
     { key: "ten", label: "Tên" },
     { key: "idTaiKhoan.email", label: "Email" },
     { key: "idTaiKhoan.soDienThoai", label: "SDT" },
-    { key: "createdAt", label: "Ngày tham gia", render: (value) => new Date(value).toLocaleDateString() },
+    { key: "createdAt", label: "Ngày tham gia", formatter: (value) => new Date(value).toLocaleDateString("vi-VN")},
     {
       key: "trangThai",
       label: "Trạng thái",
