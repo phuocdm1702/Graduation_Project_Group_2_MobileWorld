@@ -5,6 +5,7 @@
 
     <div class="bg-white p-4 rounded-md shadow-md">
       <h4 class="text-gray-600 text-lg font-semibold mb-4">Quản lý Đợt Giảm Giá</h4>
+      <ToastNotification ref="toast" />
 
       <!-- Container for form and product list -->
       <div class="flex gap-6 w-full">
@@ -158,6 +159,12 @@
         </footer>
       </div>
     </div>
+    <ConfirmModal
+      :show="showConfirmModal"
+      :message="confirmMessage"
+      @confirm="executeConfirmedAction"
+      @cancel="closeConfirmModal"
+    />
   </div>
 </template>
 
@@ -166,8 +173,11 @@ import { useDotGiamGia } from './ViewAddDotGiamGia.js';
 import { computed } from "vue";
 import DynamicTable from "@/components/DynamicTable.vue";
 import Pagination from '@/components/Pagination.vue';
+import ConfirmModal from '@/components/ConfirmModal.vue';
+import ToastNotification from '@/components/ToastNotification.vue';
 
 const {
+  toast,
   currentPageDSP,
   changePageDSP,
   totalPagesDSP,
@@ -189,7 +199,11 @@ const {
   columns2,
   getNestedValue2,
   displayedPagesDSP,
-  displayedPagesCTSP
+  displayedPagesCTSP,
+  showConfirmModal,
+  confirmMessage,
+  executeConfirmedAction,
+  closeConfirmModal,
 } = useDotGiamGia();
 
 const isTienMat = computed(() => {

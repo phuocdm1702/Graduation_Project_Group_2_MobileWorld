@@ -7,7 +7,8 @@
       <h2 class="bg-white shadow-lg rounded-lg p-5 mb-2 mt-2 text-2xl font-semibold text-gray-700">
         Quản Lý Đợt Giảm Giá
       </h2>
-
+      <ToastNotification ref="toast" />
+      
       <!-- Form lọc -->
       <div class="bg-white shadow-lg rounded-lg p-5 mb-4 mt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
         <!-- Ô tìm kiếm -->
@@ -148,6 +149,13 @@
       </footer>
     </div>
   </div>
+
+  <ConfirmModal
+    :show="showConfirmModal"
+    :message="confirmMessage"
+    @confirm="executeConfirmedAction"
+    @cancel="closeConfirmModal"
+  />
 </template>
 
 <script setup>
@@ -155,10 +163,14 @@ import { useDiscountManagement } from './DotVoucher.js';
 import "@vuepic/vue-datepicker/dist/main.css";
 import DynamicTable from "@/components/DynamicTable.vue";
 import Pagination from '@/components/Pagination.vue';
+import ConfirmModal from '@/components/ConfirmModal.vue';
+import ToastNotification from '@/components/ToastNotification.vue';
+
 
 const {
+  toast,
   currentPage,
-  // pageSize,
+  pageSize,
   totalPages,
   searchQuery,
   filterType,
@@ -172,7 +184,12 @@ const {
   changePage,
   fetchData,
   columns,
-  getNestedValue
+  getNestedValue,
+  showConfirmModal,
+  confirmMessage,
+  executeConfirmedAction,
+  closeConfirmModal,
+
 } = useDiscountManagement();
 </script>
 
