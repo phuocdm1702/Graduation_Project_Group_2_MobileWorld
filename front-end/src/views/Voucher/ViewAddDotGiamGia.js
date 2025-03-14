@@ -8,7 +8,6 @@ window.handleCheckboxChange = function(id) {
   if (fetchCTSPData) fetchCTSPData(id);
 };
 
-// Lưu instance của useDotGiamGia để truy cập từ hàm toàn cục
 let useDotGiamGiaInstance = null;
 
 export const useDotGiamGia = () => {
@@ -18,7 +17,14 @@ export const useDotGiamGia = () => {
   const idDSPs = ref([]);
   const selectedDongSanPham = ref(null);
   const selectedBoNhoTrong = ref(null);
-
+  const currentPageDSP = ref(0);
+  const pageSizeDSP = ref(12);
+  const totalPagesDSP = ref(0);
+  const currentPageCTSP = ref(0);
+  const pageSizeCTSP = ref(10);
+  const totalPagesCTSP = ref(0);
+  
+  
   const dotGiamGia = ref({
     id: null,
     ma: "",
@@ -39,7 +45,7 @@ export const useDotGiamGia = () => {
     const giaTriGiam = parseFloat(dotGiamGia.value.giaTriGiamGia) || 0;
     const soTienGiamToiDa = parseFloat(dotGiamGia.value.soTienGiamToiDa) || Infinity;
 
-    ctspList.value = ctspList.value.map((product) => {
+    ctspList.value.forEach((product) => {
       const giaBanDau = parseFloat(product.ctsp.giaBan) || 0;
       let giaSauGiam = giaBanDau;
 
@@ -50,12 +56,41 @@ export const useDotGiamGia = () => {
         giaSauGiam = giaBanDau - Math.min(soTienGiam, soTienGiamToiDa);
       }
 
-      return {
-        ...product,
-        giaSauKhiGiam: giaSauGiam
-      };
+      product.giaSauKhiGiam = giaSauGiam >= 0 ? giaSauGiam : 0;
     });
   };
+
+  const changePageDSP = (page) => {
+    if (page >= 0 && page < totalPagesDSP.value) {
+      currentPageDSP.value = page;
+      fetchData();
+    }
+  };
+
+  const changePageCTSP = (page) => {
+    if (page >= 0 && page < totalPagesCTSP.value) {
+      currentPageCTSP.value = page;
+      fetchData();
+    }
+  };
+
+  const displayedPagesDSP = computed(() => {
+    const maxPagesToShow = 5;
+    const half = Math.floor(maxPagesToShow / 2);
+    let start = Math.max(1, currentPageDSP.value + 1 - half);
+    let end = Math.min(totalPagesDSP.value, start + maxPagesToShow - 1);
+    start = Math.max(1, end - maxPagesToShow + 1);
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+  });
+
+  const displayedPagesCTSP = computed(() => {
+    const maxPagesToShow = 5;
+    const half = Math.floor(maxPagesToShow / 2);
+    let start = Math.max(1, currentPageCTSP.value + 1 - half);
+    let end = Math.min(totalPagesCTSP.value, start + maxPagesToShow - 1);
+    start = Math.max(1, end - maxPagesToShow + 1);
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+  });
 
   const fetchData = async () => {
     try {
@@ -65,10 +100,46 @@ export const useDotGiamGia = () => {
           keyword: searchKeyword.value,
           idDSPs: idDSPs.value || [],
           idBoNhoTrongs: selectedBoNhoTrong.value ? [selectedBoNhoTrong.value] : null
+        },
+        {
+          params: {
+            pageDSP: currentPageDSP.value,
+            sizeDSP: pageSizeDSP.value,
+            pageCTSP: currentPageCTSP.value,
+            sizeCTSP: pageSizeCTSP.value
+          }
         }
       );
+
+      // Gán danh sách DSP
       dspList.value = res.data.dspList || [];
-      ctspList.value = res.data.ctspList || [];
+
+      // Xử lý danh sách CTSP để loại bỏ trùng lặp
+      const uniqueCtspList = [];
+      const seenIds = new Set();
+      (res.data.ctspList || []).forEach(item => {
+        if (!seenIds.has(item.ctsp.id)) {
+          seenIds.add(item.ctsp.id);
+          uniqueCtspList.push(item);
+        }
+      });
+      ctspList.value = uniqueCtspList;
+
+      // Cập nhật tổng số trang
+      totalPagesDSP.value = res.data.totalPages ||
+        Math.ceil((res.data.totalElements || dspList.value.length) / pageSizeDSP.value) || 0;
+      totalPagesCTSP.value = res.data.totalPagesCTSP || 0;
+
+      // Điều chỉnh trang hiện tại nếu vượt quá tổng số trang
+      if (currentPageDSP.value >= totalPagesDSP.value && totalPagesDSP.value > 0) {
+        currentPageDSP.value = totalPagesDSP.value - 1;
+        fetchData();
+      }
+      if (currentPageCTSP.value >= totalPagesCTSP.value && totalPagesCTSP.value > 0) {
+        currentPageCTSP.value = totalPagesCTSP.value - 1;
+        fetchData();
+      }
+
       capNhatGiaSauKhiGiam();
     } catch (error) {
       console.error("Lỗi khi gọi API:", error);
@@ -81,6 +152,7 @@ export const useDotGiamGia = () => {
     } else {
       idDSPs.value.push(id);
     }
+    currentPageCTSP.value = 0;
     fetchData(); // Cập nhật dữ liệu khi tick/un-tick
   };
 
@@ -99,7 +171,7 @@ export const useDotGiamGia = () => {
         `;
       },
     },
-    { key: "index", label: "STT", formatter: (value, item, index) => index + 1 },
+    { key: "index", label: "STT", formatter: (_, __, index) => (currentPageDSP.value * pageSizeDSP.value) + index + 1 },
     { key: "ma", label: "Mã" },
     { key: "dongSanPham", label: "Dòng sản phẩm" },
   ]);
@@ -110,7 +182,7 @@ export const useDotGiamGia = () => {
     {
       key: "index",
       label: "STT",
-      formatter: (_, __, index) => index + 1,
+      formatter: (_, __, index) => (currentPageCTSP.value * pageSizeCTSP.value) + index + 1,
     },
     {
       key: "anh.duongDan",
@@ -135,7 +207,18 @@ export const useDotGiamGia = () => {
     {
       key: "soTienGiamToiDa",
       label: "Số tiền giảm tối đa",
-      formatter: () => dotGiamGia.value.soTienGiamToiDa ?? "N/A",
+      formatter: (value, item) => {
+        const loaiGiamGia = dotGiamGia.value.loaiGiamGiaApDung;
+        const giaTriGiam = parseFloat(dotGiamGia.value.giaTriGiamGia) || 0;
+        const soTienGiamToiDa = parseFloat(dotGiamGia.value.soTienGiamToiDa) || Infinity;
+        const giaBanDau = parseFloat(item.ctsp.giaBan) || 0;
+
+        if (loaiGiamGia === "Phần trăm") {
+          const soTienGiamThucTe = giaBanDau * (giaTriGiam / 100);
+          return Math.min(soTienGiamThucTe, soTienGiamToiDa).toLocaleString(); // Hiển thị số tiền giảm thực tế hoặc tối đa
+        }
+        return soTienGiamToiDa.toLocaleString(); // Mặc định cho "Tiền mặt" hoặc khi không có loại giảm giá
+      },
     },
     {
       key: "giaSauKhiGiam",
@@ -161,14 +244,17 @@ export const useDotGiamGia = () => {
 
   // Sửa filteredCTSPList để hiển thị dựa trên idDSPs
   const filteredCTSPList = computed(() => {
-    if (idDSPs.value.length === 0) return []; // Nếu không chọn dòng sản phẩm nào, trả về rỗng
+    if (idDSPs.value.length === 0) return [];
     return ctspList.value.filter(ctsp => {
-      const dspId = ctsp.dsp.id; // Giả sử ctsp.dsp có id
+      const dspId = ctsp.dsp.id;
       const matchDSP = idDSPs.value.includes(dspId);
+      const matchDongSanPham = selectedDongSanPham.value
+        ? ctsp.dsp.dongSanPham === selectedDongSanPham.value
+        : true;
       const matchBoNhoTrong = selectedBoNhoTrong.value
         ? ctsp.bnt.dungLuongBoNhoTrong === selectedBoNhoTrong.value
         : true;
-      return matchDSP && matchBoNhoTrong;
+      return matchDSP && matchDongSanPham && matchBoNhoTrong;
     });
   });
 
@@ -264,6 +350,8 @@ export const useDotGiamGia = () => {
     };
     edit.value = false;
     idDSPs.value = [];
+    selectedDongSanPham.value = null;
+    selectedBoNhoTrong.value = null;
   };
 
   const addData = async () => {
@@ -309,6 +397,19 @@ export const useDotGiamGia = () => {
   };
 
   watch(
+    () => [
+      dotGiamGia.value.loaiGiamGiaApDung,
+      dotGiamGia.value.giaTriGiamGia,
+      dotGiamGia.value.soTienGiamToiDa,
+      ctspList.value
+    ],
+    () => {
+      capNhatGiaSauKhiGiam();
+    },
+    { deep: true }
+  );
+
+  watch(
     () => route.query,
     (newQuery) => {
       if (newQuery.id) {
@@ -318,7 +419,7 @@ export const useDotGiamGia = () => {
           ma: newQuery.ma || "",
           tenDotGiamGia: newQuery.tenDotGiamGia || "",
           loaiGiamGiaApDung: newQuery.loaiGiamGiaApDung || "",
-          giaTriGiamGia: newQuery.giaTriGiamGia || "",
+          giaTriGiamGia: newQuery.giaTriGiamGia  || 0.0,
           soTienGiamToiDa: newQuery.soTienGiamToiDa || "",
           ngayBatDau: newQuery.ngayBatDau ? formatDateLocal(newQuery.ngayBatDau) : "",
           ngayKetThuc: newQuery.ngayKetThuc ? formatDateLocal(newQuery.ngayKetThuc) : "",
@@ -331,31 +432,41 @@ export const useDotGiamGia = () => {
     { immediate: true }
   );
 
-  watch(
-    () => [dotGiamGia.value.loaiGiamGiaApDung, dotGiamGia.value.giaTriGiamGia],
-    () => {
-      capNhatGiaSauKhiGiam();
-    }
-  );
+  watch(selectedDongSanPham, () => {
+    currentPageCTSP.value = 0;
+    fetchData();
+  });
 
-  watch(selectedDongSanPham, async () => {
-    await fetchData();
-    selectedBoNhoTrong.value = null;
+  watch(currentPageDSP, fetchData);
+  
+  watch(searchKeyword, () => {
+    currentPageDSP.value = 0;
+    fetchData();
+  });
+
+  watch(idDSPs, () => {
+    currentPageCTSP.value = 0;
+    fetchData();
+  });
+  
+  watch(() => dotGiamGia.value.loaiGiamGiaApDung, (newVal) => {
+    if (newVal === 'Tiền mặt') {
+      dotGiamGia.value.giaTriGiamGia = 0.0;
+    }
   });
 
   onMounted(fetchData);
-
-  watch(searchKeyword, fetchData);
-  watch(idDSPs, fetchData);
-
-  watch(() => dotGiamGia.value.loaiGiamGiaApDung, (newVal) => {
-    if (newVal === 'Tiền mặt') {
-      dotGiamGia.value.giaTriGiamGia = null;
-    }
-  });
-
+  
   // Lưu instance để dùng trong hàm toàn cục
   useDotGiamGiaInstance = {
+    currentPageDSP,
+    changePageDSP,
+    pageSizeDSP,
+    totalPagesDSP,
+    currentPageCTSP,
+    changePageCTSP,
+    pageSizeCTSP,
+    totalPagesCTSP,
     dspList,
     ctspList,
     searchKeyword,
@@ -374,7 +485,9 @@ export const useDotGiamGia = () => {
     getNestedValue,
     columns2,
     getNestedValue2,
-    fetchCTSPData
+    fetchCTSPData,
+    displayedPagesDSP,
+    displayedPagesCTSP
   };
 
   return useDotGiamGiaInstance;

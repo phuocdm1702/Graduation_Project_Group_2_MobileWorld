@@ -16,7 +16,9 @@ public interface KhachHangRepository extends JpaRepository<KhachHang, Integer> {
     @Query("SELECT COUNT(kh) > 0 FROM KhachHang kh WHERE kh.ma = :ma AND kh.id != :id")
     boolean existsByMaAndNotId(@Param("ma") String ma, @Param("id") Integer id);
 
-    @Query("SELECT k FROM KhachHang k WHERE k.deleted = false ")
+    @Query("SELECT k FROM KhachHang k")
     List<KhachHang> findAllActiveCustomers();
 
+    @Query("SELECT MAX(kh.ma) FROM KhachHang kh")
+    String findMaxMa();
 }

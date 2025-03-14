@@ -1,5 +1,6 @@
 package com.example.graduation_project_group_2_mobileworld.controller.khach_hang;
 
+import com.example.graduation_project_group_2_mobileworld.dto.khach_hang.KhachHangDTO;
 import com.example.graduation_project_group_2_mobileworld.entity.KhachHang;
 import com.example.graduation_project_group_2_mobileworld.service.khach_hang.KhachHangServices;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,12 +29,15 @@ public class KhachHangController {
     }
     // Thêm mới khách hàng
     @PostMapping("/add")
-    public ResponseEntity<KhachHang> addKhachHang(@RequestBody KhachHang khachHang) {
+    public ResponseEntity<?> addKhachHang(@RequestBody KhachHangDTO khachHangDTO) {
         try {
-            KhachHang newKhachHang = khachHangServices.addKhachHang(khachHang);
+            System.out.println("Dữ liệu nhận được: " + khachHangDTO);
+            KhachHang newKhachHang = khachHangServices.addKhachHang(khachHangDTO);
             return ResponseEntity.status(201).body(newKhachHang);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(400).body(null);
+        } catch (Exception e) {
+            System.out.println("Lỗi khi thêm khách hàng: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(400).body("Lỗi: " + e.getMessage());
         }
     }
 

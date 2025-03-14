@@ -71,25 +71,42 @@ public class dot_giam_gia_controller {
 
 
     @PostMapping("/ViewAddDotGiamGia")
-    public ResponseEntity<CombinedResponse> hienThiAdd(@RequestBody RequestDTO request) {
+    public ResponseEntity<CombinedResponse> hienThiAdd(
+            @RequestBody RequestDTO request,
+            @RequestParam(defaultValue = "0") int pageDSP, // Phân trang cho dspList
+            @RequestParam(defaultValue = "5") int sizeDSP, // Kích thước trang cho dspList
+            @RequestParam(defaultValue = "0") int pageCTSP, // Phân trang cho ctspList
+            @RequestParam(defaultValue = "5") int sizeCTSP) { // Kích thước trang cho ctspList
         String keyword = request.getKeyword();
         List<Integer> idDSPs = request.getIdDSPs();
-        List<Integer> idBoNhoTrongs = request.getIdBoNhoTrongs(); // Thêm danh sách bộ nhớ trong
+        List<Integer> idBoNhoTrongs = request.getIdBoNhoTrongs();
 
-        List<DongSanPham> dspList;
-        List<viewCTSPDTO> ctspList = new ArrayList<>();
+        // Phân trang cho dspList
+        Pageable pageableDSP = PageRequest.of(pageDSP, sizeDSP);
+        Page<DongSanPham> dspPage = (keyword == null || keyword.trim().isEmpty())
+                ? sr.getDSP(null, pageableDSP)
+                : sr.getDSP(keyword, pageableDSP);
 
-        if (keyword == null || keyword.trim().isEmpty()) {
-            dspList = sr.getDSP(null);
-        } else {
-            dspList = sr.getDSP(keyword);
-        }
-
+        // Phân trang cho ctspList
+        Pageable pageableCTSP = PageRequest.of(pageCTSP, sizeCTSP);
+        Page<viewCTSPDTO> ctspPage = null;
         if (idDSPs != null && !idDSPs.isEmpty()) {
-            ctspList = sr.getAllCTSP(idDSPs, idBoNhoTrongs); // Truyền danh sách bộ nhớ trong vào
+            ctspPage = sr.getAllCTSP(idDSPs, idBoNhoTrongs, pageableCTSP);
+        } else {
+            ctspPage = Page.empty(); // Nếu không có idDSPs, trả về trang rỗng
         }
 
-        CombinedResponse response = new CombinedResponse(dspList, ctspList);
+        // Tạo CombinedResponse với thông tin phân trang cho cả dspList và ctspList
+        CombinedResponse response = new CombinedResponse(
+                dspPage.getContent(),
+                ctspPage.getContent(),
+                dspPage.getTotalPages(),  // Gán cho totalPages
+                dspPage.getNumber(),
+                dspPage.getTotalElements(),
+                ctspPage.getTotalPages(), // Gán cho totalPagesCTSP
+                ctspPage.getNumber(),
+                ctspPage.getTotalElements()
+        );
         return ResponseEntity.ok(response);
     }
 
