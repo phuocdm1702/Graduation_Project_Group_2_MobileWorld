@@ -1,5 +1,6 @@
 import { ref, computed } from "vue";
 import axios from "axios";
+import ToggleSwitch from "@/components/ToggleSwitch.vue";
 
 export default function usePhieuGiamGia() {
   const vouchers = ref([]);
@@ -20,21 +21,20 @@ export default function usePhieuGiamGia() {
       vouchers.value = response.data || [];
     } catch (error) {
       console.error("Error loading data:", error);
-      vouchers.value = []; // Đảm bảo không bị undefined
+      vouchers.value = [];
     }
   };
-
 
   const searchPGG = async () => {
     try {
       let response;
-      if(!searchQuery.value || searchQuery.value.trim() === "") {
-        response = await axios.get(`${baseURL}/data`)
+      if (!searchQuery.value || searchQuery.value.trim() === "") {
+        response = await axios.get(`${baseURL}/data`);
       } else {
         response = await axios.get(`${baseURL}/search`, {
           params: {
             keyword: searchQuery.value.trim(),
-          }
+          },
         });
       }
       vouchers.value = response.data;
@@ -43,10 +43,47 @@ export default function usePhieuGiamGia() {
     }
   };
 
+  const toggleStatusPGG = async (item) => {
+    try {
+      const newStatus = !item.trangThai;
+      await axios.put(`${baseURL}/update-trang-thai/${item.id}`, { trangThai: newStatus });
+      item.trangThai = newStatus; // Cập nhật local state
+    } catch (error) {
+      console.error("Lỗi khi cập nhật trạng thái:", error);
+      console.log("Response từ server:", error.response?.data); // Log chi tiết lỗi từ server
+    }
+  };
+  
+
+  // Gán sau khi deletePGG đã được khai báo
+
+  const columns = ref([
+    { key: "ma", label: "Mã" },
+    { key: "tenPhieuGiamGia", label: "Tên Phiếu" },
+    { key: "loaiPhieuGiamGia", label: "Loại Phiếu" },
+    { key: "phanTramGiamGia", label: "Phần trăm giảm giá", formatter: (value) => `${value * 100}%` },
+    { key: "soTienGiamToiDa", label: "Số tiền giảm tối đa" },
+    { key: "soLuongDung", label: "Số lượng" },
+    { key: "hoaDonToiThieu", label: "Hóa đơn tối thiểu" },
+    { key: "ngayBatDau", label: "Ngày bắt đầu", formatter: (value) => new Date(value).toLocaleDateString("vi-VN") },
+    { key: "ngayKetThuc", label: "Ngày kết thúc", formatter: (value) => new Date(value).toLocaleDateString("vi-VN") },
+    { key: "moTa", label: "Mô tả" },
+    { key: "trangThai", label: "Trạng thái", cellSlot: "trangThaiSlot" },
+    {
+      key: "actions",
+      label: "Hành động",
+      cellSlot: "actionsSlot",
+    },
+  ]);
+
+  const getNestedValue = (obj, key) => {
+    return key.split(".").reduce((o, k) => (o && o[k] !== undefined ? o[k] : null), obj);
+  };
+
   const filterPGG = async () => {
     try {
       const params = {
-        loaiPhieuGiamGia: filterType.value || null, 
+        loaiPhieuGiamGia: filterType.value || null,
         trangThai: filterStatus.value || null,
         startDate: startDate.value || null,
         endDate: endDate.value || null,
@@ -54,8 +91,14 @@ export default function usePhieuGiamGia() {
         valueFilter: valueFilter.value ? Number(valueFilter.value) : null,
       };
 
-      if (!params.loaiPhieuGiamGia && !params.trangThai && !params.startDate &&
-        !params.endDate && !params.minOrder && !params.valueFilter) {
+      if (
+        !params.loaiPhieuGiamGia &&
+        !params.trangThai &&
+        !params.startDate &&
+        !params.endDate &&
+        !params.minOrder &&
+        !params.valueFilter
+      ) {
         await fetchDataPGG();
         return;
       }
@@ -68,17 +111,10 @@ export default function usePhieuGiamGia() {
     }
   };
 
-  const deletePGG = async (id) => {
-    try {
-      await axios.delete(`${baseURL}/delete/${id}`);
-      await fetchDataPGG();
-    } catch (error) {
-      console.log("Lỗi khi xóa:", error);
-    }
-  };
-
   return {
     vouchers,
+    columns,
+    getNestedValue,
     searchQuery,
     filterType,
     filterStatus,
@@ -87,8 +123,8 @@ export default function usePhieuGiamGia() {
     minOrder,
     valueFilter,
     searchPGG,
-    deletePGG,
     fetchDataPGG,
     filterPGG,
+    toggleStatusPGG,
   };
 }

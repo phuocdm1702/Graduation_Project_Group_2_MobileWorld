@@ -134,12 +134,11 @@ public class PhieuGiamGiaService {
         return phieuGiamGiaRepository.save(phieuGiamGia);
     }
 
-    public Boolean softDelete(Integer id) {
+    public Boolean updateTrangThai(Integer id, Boolean trangThai) {
         Optional<PhieuGiamGia> pggDelete = phieuGiamGiaRepository.findById(id);
         if(pggDelete.isPresent()) {
             PhieuGiamGia pgg = pggDelete.get();
-            pgg.setTrangThai(false);
-            pgg.setDeleted(true);
+            pgg.setTrangThai(trangThai);
             phieuGiamGiaRepository.save(pgg);
             return true;
         }

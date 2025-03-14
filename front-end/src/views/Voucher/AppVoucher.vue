@@ -7,6 +7,8 @@
       <h2 class="bg-white shadow-lg rounded-lg p-5 mb-2 mt-2 text-2xl font-semibold text-gray-700">
         Quản Lý Phiếu Giảm Giá
       </h2>
+      
+      
 
       <!-- Form lọc -->
       <div
@@ -126,6 +128,7 @@
         :data="vouchers"
         :columns="columns"
         :get-nested-value="getNestedValue"
+        @toggle-status="toggleStatusPGG"
       />
 
       <!-- Phân trang -->
@@ -202,7 +205,10 @@ import axios from "axios";
 
 const baseURL = "http://localhost:8080/phieu-giam-gia";
 
-const { vouchers, 
+const { 
+  vouchers, 
+  columns,
+  getNestedValue,
   searchQuery, 
   filterType, 
   filterStatus,
@@ -210,31 +216,12 @@ const { vouchers,
   endDate,
   minOrder,
   valueFilter,
+  toggleStatusPGG,
   filterPGG,
-  searchPGG, 
-  deletePGG, 
+  searchPGG,
   fetchDataPGG 
 } = AppVoucher();
-const columns = ref([
-  { key: "ma", label: "Mã" },
-  { key: "tenPhieuGiamGia", label: "Tên Phiếu" },
-  { key: "loaiPhieuGiamGia", label: "Loại Phiếu" },
-  { key: "phanTramGiamGia", label: "Phần trăm giảm giá", formatter: (value) => `${value * 100}%` },
-  { key: "soTienGiamToiDa", label: "Số tiền giảm tối đa" },
-  { key: "soLuongDung", label: "Số lượng" },
-  { key: "hoaDonToiThieu", label: "Hóa đơn tối thiểu" },
-  { key: "ngayBatDau", label: "Ngày bắt đầu", formatter: (value) => new Date(value).toLocaleDateString("vi-VN") },
-  { key: "ngayKetThuc", label: "Ngày kết thúc", formatter: (value) => new Date(value).toLocaleDateString("vi-VN") },
-  { key: "moTa", label: "Mô tả" },
-  { key: "trangThai", label: "Trạng thái", cellSlot: "trangThaiSlot"},
-  
-]);
 
-
-
-const getNestedValue = (obj, key) => {
-  return key.split(".").reduce((o, k) => (o && o[k] !== undefined ? o[k] : null), obj);
-};
 watch(searchQuery, (newQuery) =>  {
   if(newQuery.trim().length > 0) {
     searchPGG();

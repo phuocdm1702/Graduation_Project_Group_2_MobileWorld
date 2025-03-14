@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/phieu-giam-gia")
@@ -55,14 +56,21 @@ public class PhieuGiamGiaController {
         }
     }
 
-
-    @DeleteMapping("/delete/{id}")
-    public ResponseEntity<String> deletePGG(@PathVariable Integer id) {
+    @PutMapping("/update-trang-thai/{id}")
+    public ResponseEntity<String> updateTrangThai(@PathVariable Integer id, @RequestBody Map<String, Boolean> request) {
         try {
-            phieuGiamGiaService.softDelete(id);
-            return ResponseEntity.ok("Xóa thành công!");
+            Boolean trangThai = request.get("trangThai");
+            if (trangThai == null) {
+                return ResponseEntity.badRequest().body("Trạng thái không được để trống!");
+            }
+            boolean success = phieuGiamGiaService.updateTrangThai(id, trangThai);
+            if (success) {
+                return ResponseEntity.ok("Cập nhật trạng thái thành công!");
+            } else {
+                return ResponseEntity.badRequest().body("Phiếu giảm giá không tồn tại!");
+            }
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body("Phiếu giảm giá không tồn tại!");
+            return ResponseEntity.badRequest().body("Có lỗi xảy ra khi cập nhật trạng thái!");
         }
     }
 
