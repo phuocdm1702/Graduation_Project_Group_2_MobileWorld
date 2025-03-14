@@ -4,9 +4,11 @@ import com.example.graduation_project_group_2_mobileworld.entity.PhieuGiamGia;
 import com.example.graduation_project_group_2_mobileworld.service.PhieuGiamGia.PhieuGiamGiaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.query.Param;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Date;
 import java.util.List;
 
 @RestController
@@ -30,13 +32,29 @@ public class PhieuGiamGiaController {
     }
 
     @GetMapping("/filter")
-    public ResponseEntity<List<PhieuGiamGia>> filterTable(
-            @RequestParam("loaiPhieu") String loaiPhieu,
-            @RequestParam("trangThai") Boolean trangThai
-    ) {
-        List<PhieuGiamGia> listPGG = phieuGiamGiaService.filterTrangThaiLoaiPhieu(loaiPhieu, trangThai);
-        return ResponseEntity.ok(listPGG);
+    public ResponseEntity<List<PhieuGiamGia>> filterPhieuGiamGia(
+            @RequestParam(required = false) String loaiPhieuGiamGia, // Thêm tham số
+            @RequestParam(required = false) String trangThai,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date endDate,
+            @RequestParam(required = false) Double minOrder,
+            @RequestParam(required = false) Double valueFilter) {
+
+        try {
+            List<PhieuGiamGia> result = phieuGiamGiaService.filterPhieuGiamGia(
+                    loaiPhieuGiamGia, // Thêm vào
+                    trangThai,
+                    startDate,
+                    endDate,
+                    minOrder,
+                    valueFilter
+            );
+            return ResponseEntity.ok(result);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(null);
+        }
     }
+
 
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<String> deletePGG(@PathVariable Integer id) {

@@ -6,6 +6,10 @@ export default function usePhieuGiamGia() {
   const searchQuery = ref("");
   const filterType = ref("");
   const filterStatus = ref("");
+  const startDate = ref(null);
+  const endDate = ref(null);
+  const minOrder = ref(null);
+  const valueFilter = ref(null);
 
   const baseURL = "http://localhost:8080/phieu-giam-gia";
 
@@ -39,21 +43,30 @@ export default function usePhieuGiamGia() {
     }
   };
 
-  const filteredVouchers = computed(() => {
-    console.log("Danh sách voucher:", vouchers.value);
-    return vouchers.value.filter((voucher) => {
-      // Lọc theo loại phiếu
-      const matchType = filterType.value === "Tất cả loại phiếu" || voucher.loaiPhieuGiamGia === filterType.value;
+  const filterPGG = async () => {
+    try {
+      const params = {
+        loaiPhieuGiamGia: filterType.value || null, 
+        trangThai: filterStatus.value || null,
+        startDate: startDate.value || null,
+        endDate: endDate.value || null,
+        minOrder: minOrder.value ? Number(minOrder.value) : null,
+        valueFilter: valueFilter.value ? Number(valueFilter.value) : null,
+      };
 
-      // Lọc theo trạng thái
-      const matchStatus =
-        filterStatus.value === "Tất cả trạng thái" ||
-        (filterStatus.value === "Còn hạn" && voucher.trangThai == "1") ||
-        (filterStatus.value === "Hết hạn" && voucher.trangThai == "0");
+      if (!params.loaiPhieuGiamGia && !params.trangThai && !params.startDate &&
+        !params.endDate && !params.minOrder && !params.valueFilter) {
+        await fetchDataPGG();
+        return;
+      }
 
-      return matchType && matchStatus;
-    });
-  });
+      const response = await axios.get(`${baseURL}/filter`, { params });
+      vouchers.value = response.data || [];
+    } catch (error) {
+      console.error("Lỗi khi lọc phiếu giảm giá:", error);
+      vouchers.value = [];
+    }
+  };
 
   const deletePGG = async (id) => {
     try {
@@ -63,15 +76,19 @@ export default function usePhieuGiamGia() {
       console.log("Lỗi khi xóa:", error);
     }
   };
-  
+
   return {
     vouchers,
     searchQuery,
     filterType,
     filterStatus,
+    startDate,
+    endDate,
+    minOrder,
+    valueFilter,
     searchPGG,
-    filteredVouchers,
     deletePGG,
-    fetchDataPGG
+    fetchDataPGG,
+    filterPGG,
   };
 }

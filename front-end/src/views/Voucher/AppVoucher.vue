@@ -49,8 +49,8 @@
             class="input-field"
           >
             <option value="">Tất cả trạng thái</option>
-            <option value="Hoạt động">Còn hạn</option>
-            <option value="Hết hạn">Hết hạn</option>
+            <option value="Hoạt động">Hoạt động</option>
+            <option value="Không hoạt động">Không hoạt động</option>
           </select>
         </div>
 
@@ -61,6 +61,7 @@
             v-model="startDate"
             id="startDate"
             type="date"
+            @change="filterPGG"
             class="input-field"
           />
         </div>
@@ -72,6 +73,7 @@
             v-model="endDate"
             id="endDate"
             type="date"
+            @change="filterPGG"
             class="input-field"
           />
         </div>
@@ -84,6 +86,7 @@
             id="minOrder"
             type="number"
             placeholder="Hóa đơn tối thiểu"
+            @change="filterPGG"
             class="input-field"
           />
         </div>
@@ -96,6 +99,7 @@
             id="valueFilter"
             type="number"
             placeholder="Giá trị phiếu"
+            @change="filterPGG"
             class="input-field"
           />
         </div>
@@ -193,13 +197,24 @@
 import { onMounted,watch, ref } from "vue";
 import AppVoucher from "@/views/Voucher/JS/AppVoucher"
 import DynamicTable from "@/components/DynamicTable.vue";
-import ToggleSwitch from "@/components/ToggleSwitch.vue";
 import Pagination from '@/components/Pagination.vue';
 import axios from "axios";
 
 const baseURL = "http://localhost:8080/phieu-giam-gia";
 
-const { vouchers, searchQuery, filteredVouchers, searchPGG, deletePGG, fetchDataPGG } = AppVoucher();
+const { vouchers, 
+  searchQuery, 
+  filterType, 
+  filterStatus,
+  startDate,
+  endDate,
+  minOrder,
+  valueFilter,
+  filterPGG,
+  searchPGG, 
+  deletePGG, 
+  fetchDataPGG 
+} = AppVoucher();
 const columns = ref([
   { key: "ma", label: "Mã" },
   { key: "tenPhieuGiamGia", label: "Tên Phiếu" },
