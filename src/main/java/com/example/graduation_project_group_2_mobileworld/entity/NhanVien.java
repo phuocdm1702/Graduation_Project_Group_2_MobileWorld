@@ -75,7 +75,7 @@ public class NhanVien {
     private Boolean deleted;
 
     @Column(name = "created_at")
-    private Instant createdAt;
+    private Date createdAt;
 
     @Column(name = "created_by")
     private Integer createdBy;

@@ -24,6 +24,7 @@
                 <label class="text-sm font-semibold block mb-2">Nhập thông tin tìm kiếm</label>
                 <input
                   v-model="searchKH"
+                  @input="btnSearch"
                   placeholder="Tìm theo mã hoặc tên..."
                   type="text"
                   class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-400 outline-none"
@@ -35,6 +36,7 @@
                 <label class="text-sm font-semibold block mb-2">Trạng thái</label>
                 <select
                   v-model="filterStatus"
+                  @change="fetchCustomers"
                   class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-400 outline-none"
                 >
                   <option value="tat-ca">Tất cả</option>
