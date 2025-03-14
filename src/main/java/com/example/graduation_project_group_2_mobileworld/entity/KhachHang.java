@@ -24,10 +24,10 @@ public class KhachHang {
     @JoinColumn(name = "id_tai_khoan",referencedColumnName = "id")
     private TaiKhoan idTaiKhoan;
 
-//    @ManyToOne
-//    @JoinColumn(name = "id_dia_chi_khach_hang", referencedColumnName = "id")
-//    @JsonManagedReference // Phía chính sẽ được serialize
-//    private DiaChiKhachHang idDiaChiKH;
+    @ManyToOne
+    @JoinColumn(name = "id_dia_chi_khach_hang", referencedColumnName = "id")
+    @JsonManagedReference // Phía chính sẽ được serialize
+    private DiaChiKhachHang idDiaChiKH;
 
     @Size(max = 255)
     @Nationalized
@@ -51,7 +51,7 @@ public class KhachHang {
     private Date ngaySinh;
 
     @Column(name = "deleted")
-    private boolean deleted;
+    private Boolean deleted;
 
     @Column(name = "created_at")
     @Temporal(TemporalType.TIMESTAMP)
@@ -73,6 +73,10 @@ public class KhachHang {
 
     @Column(name = "updated_by")
     private Integer updatedBy;
+
+    public void setDeleted(Boolean deleted) {
+        this.deleted = deleted;
+    }
 
     public KhachHang() {
     }
@@ -117,13 +121,13 @@ public class KhachHang {
         return gioiTinh;
     }
 
-//    public DiaChiKhachHang getIdDiaChiKH() {
-//        return idDiaChiKH;
-//    }
-//
-//    public void setIdDiaChiKH(DiaChiKhachHang idDiaChiKH) {
-//        this.idDiaChiKH = idDiaChiKH;
-//    }
+    public DiaChiKhachHang getIdDiaChiKH() {
+        return idDiaChiKH;
+    }
+
+    public void setIdDiaChiKH(DiaChiKhachHang idDiaChiKH) {
+        this.idDiaChiKH = idDiaChiKH;
+    }
 
     public void setGioiTinh(Short gioiTinh) {
         this.gioiTinh = gioiTinh;
@@ -137,12 +141,8 @@ public class KhachHang {
         this.ngaySinh = ngaySinh;
     }
 
-    public boolean getDeleted() {
+    public Boolean getDeleted() {
         return deleted;
-    }
-
-    public void setDeleted(boolean deleted) {
-        this.deleted = deleted;
     }
 
     public Date getCreatedAt() {
