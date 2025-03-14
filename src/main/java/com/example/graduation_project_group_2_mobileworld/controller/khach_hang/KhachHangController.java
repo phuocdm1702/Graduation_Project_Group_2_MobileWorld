@@ -1,13 +1,17 @@
 package com.example.graduation_project_group_2_mobileworld.controller.khach_hang;
 
 import com.example.graduation_project_group_2_mobileworld.dto.khach_hang.KhachHangDTO;
+import com.example.graduation_project_group_2_mobileworld.entity.DiaChiKhachHang;
 import com.example.graduation_project_group_2_mobileworld.entity.KhachHang;
+import com.example.graduation_project_group_2_mobileworld.service.khach_hang.DiaChiKhachHangServices;
 import com.example.graduation_project_group_2_mobileworld.service.khach_hang.KhachHangServices;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/khach-hang")
@@ -15,10 +19,11 @@ import java.util.List;
 public class KhachHangController {
 
     private final KhachHangServices khachHangServices;
-
+    private final DiaChiKhachHangServices diachiservices;
     @Autowired
-    public KhachHangController(KhachHangServices khachHangServices) {
+    public KhachHangController(KhachHangServices khachHangServices, DiaChiKhachHangServices diachiservices) {
         this.khachHangServices = khachHangServices;
+        this.diachiservices = diachiservices;
     }
 
     // Lấy danh sách tất cả khách hàng
@@ -29,16 +34,22 @@ public class KhachHangController {
     }
     // Thêm mới khách hàng
     @PostMapping("/add")
-    public ResponseEntity<?> addKhachHang(@RequestBody KhachHangDTO khachHangDTO) {
+    public ResponseEntity<KhachHang> addKhachHang(@RequestBody KhachHangDTO khachHangDTO) {
         try {
-            System.out.println("Dữ liệu nhận được: " + khachHangDTO);
             KhachHang newKhachHang = khachHangServices.addKhachHang(khachHangDTO);
             return ResponseEntity.status(201).body(newKhachHang);
-        } catch (Exception e) {
-            System.out.println("Lỗi khi thêm khách hàng: " + e.getMessage());
-            e.printStackTrace();
-            return ResponseEntity.status(400).body("Lỗi: " + e.getMessage());
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(400).body(null);
         }
+    }
+
+    @GetMapping("/detail/{id}")
+    public ResponseEntity<?> getNhanVienDetail(@PathVariable Integer id) {
+        Optional<KhachHang> khachHang = khachHangServices.findByIdKH(id);
+        if (khachHang.isPresent()) {
+            return ResponseEntity.ok(khachHang.get());
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Nhân viên không tồn tại");
     }
 
     // Cập nhật khách hàng

@@ -23,7 +23,7 @@
   import CustmerForm from "@/views/AccountType/CustmerForm.vue";
   import NotFound from "../views/NotFound.vue";
   import UpdateNhanVien from "@/views/AccountType/UpdateNhanVien.vue";
-  
+  import UpdateCustmer from "@/views/AccountType/UpdateCustmer.vue";
   // Sản phẩm
   import ProductDetails from "../views/Products/SanPham/ChiTietSanPham.vue";
   
@@ -142,7 +142,12 @@
 
     { path: '/', component: EmployeeForm },
     { path: '/back', component: NhanVien },
-  
+    
+    { path: '/', component: UpdateCustmer },
+    { path: '/backKH', component: KhachHang },
+    
+    { path: '/', component: KhachHang },
+    { path: '/update-khach-hang', component: UpdateCustmer },
   ];
   
   const router = createRouter({

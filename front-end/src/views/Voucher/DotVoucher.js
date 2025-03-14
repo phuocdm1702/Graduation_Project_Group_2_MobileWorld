@@ -3,11 +3,16 @@ import { onMounted, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 
 export function useDiscountManagement() {
-  const router = useRouter();
   const toast = ref(null);
+  const router = useRouter();
   const currentPage = ref(0);
   const pageSize = ref(10);
   const totalPages = ref(0);
+  
+  //Toast
+  const showConfirmModal = ref(false);
+  const confirmMessage = ref('');
+  const confirmedAction = ref(null);
 
   // Tìm kiếm
   const searchQuery = ref("");
@@ -86,24 +91,40 @@ export function useDiscountManagement() {
       totalPages.value = res.data.totalPages || 0;
     } catch (error) {
       console.error("Lỗi:", error.response?.data || error.message);
-      toast.value?.showToast("error", "Không thể tải dữ liệu!");
+      toast.value?.kshowToast("error", "Không thể tải dữ liệu!");
     }
   };
   
   const confirmDelete = (discountId) => {
-    if (window.confirm("Bạn có chắc chắn muốn xóa đợt giảm giá này?")) {
-      deleteDotGiamGia(discountId);
+    confirmAction('Bạn có chắc chắn muốn xóa đợt giảm giá này?', () => deleteDotGiamGia(discountId));
+  };
+
+  const confirmAction = (message, action) => {
+    confirmMessage.value = message;
+    confirmedAction.value = action;
+    showConfirmModal.value = true;
+  };
+
+  const executeConfirmedAction = () => {
+    if (confirmedAction.value) {
+      confirmedAction.value();
     }
+    closeConfirmModal();
+  };
+
+  const closeConfirmModal = () => {
+    showConfirmModal.value = false;
+    confirmedAction.value = null;
   };
 
   const deleteDotGiamGia = async (id) => {
     try {
       await axios.delete(`http://localhost:8080/dot_giam_gia/${id}`);
-      toast.value?.showToast('success', 'Xóa thành công!');
+      toast.value?.kshowToast('success', 'Xóa thành công!');
       await fetchData();
     } catch (error) {
       console.error("Lỗi khi xóa đợt giảm giá:", error);
-      toast.value?.showToast('error', 'Lỗi khi xóa đợt giảm giá!');
+      toast.value?.kshowToast('error', 'Lỗi khi xóa đợt giảm giá!');
     }
   };
 
@@ -140,7 +161,7 @@ export function useDiscountManagement() {
       });
     } catch (error) {
       console.error("Lỗi khi xem cập nhật:", error);
-      toast.value?.showToast("error", "Không thể tải dữ liệu cập nhật!");
+      toast.value?.kshowToast("error", "Không thể tải dữ liệu cập nhật!");
     }
   };
 
@@ -184,7 +205,7 @@ export function useDiscountManagement() {
       key: "actions",
       label: "Hành động",
       formatter: (value, item) => `
-      <button onclick="window.confirmDelete(${item.id})" class="bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600 transition">
+      <button class="bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600 transition" data-id="${item.id}" onclick="document.dispatchEvent(new CustomEvent('confirmDelete', { detail: ${item.id} }))">
         <i class="fa-solid fa-trash"></i>
       </button>
       <button onclick="window.viewUpdate(${item.id})" class="bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600 transition">
@@ -196,8 +217,18 @@ export function useDiscountManagement() {
   
   const getNestedValue = (obj, key) => (key === "index" ? null : obj[key]);
 
+  const handleCustomEvents = () => {
+    document.addEventListener('confirmDelete', (event) => {
+      confirmDelete(event.detail);
+    });
+    document.addEventListener('viewUpdate', (event) => {
+      viewUpdate(event.detail);
+    });
+  };
+
   onMounted(() => {
     fetchData();
+    handleCustomEvents();
   });
 
   watch([searchQuery, filterType, filterStatus, startDate, endDate, minOrder, saleValue, deleted], () => {
@@ -230,5 +261,11 @@ export function useDiscountManagement() {
     viewUpdate,
     columns,
     getNestedValue,
+    showConfirmModal,
+    confirmMessage,
+    confirmedAction,
+    confirmAction,
+    executeConfirmedAction,
+    closeConfirmModal,
   };
 }

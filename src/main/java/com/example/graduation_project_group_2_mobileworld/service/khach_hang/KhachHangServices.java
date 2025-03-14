@@ -116,7 +116,11 @@ public class KhachHangServices {
         dchi.setMa(MaDchi());
         dchi.setIdKhachHang(kh);
         diaChiKhachHangRepo.save(dchi);
-
+//        kh.setIdDiaChiKH(dchi);
         return khachHangRepository.save(kh);
+    }
+
+    public Optional<KhachHang> findByIdKH(Integer id) {
+        return khachHangRepository.findById(id);
     }
 }

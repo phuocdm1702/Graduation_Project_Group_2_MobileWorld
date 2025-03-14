@@ -139,7 +139,7 @@
     </div>
 
     <div class="flex justify-end space-x-4 mt-4">
-      <router-link to="/back">
+      <router-link to="/backKH">
         <button @click="$emit('cancel')" class="px-4 py-2 bg-gray-300 rounded-md">Hủy</button>
       </router-link>
       <button type="submit" @click="addKhachHang()" class="px-4 py-2 bg-orange-500 text-white rounded-md">Lưu</button>
@@ -151,28 +151,31 @@
 <script setup>
 import {onMounted, ref} from 'vue';
 import axios from "axios";
-
+import {routes} from "vue-router/auto-routes";
+import {useRouter} from "vue-router";
+const router = useRouter();
 
 // /add
 async function addKhachHang() {
   const employeeData = {
-    tenKH: custmer.value.ten,           // Thay vì "ten"
+    tenKH: custmer.value.ten,          
     email: custmer.value.email,
-    soDienThoai: custmer.value.sdt,     // Thay vì "sdt"
+    soDienThoai: custmer.value.sdt,    
     userName: custmer.value.userName,
     cccd: custmer.value.cccd,
     ngaySinh: custmer.value.ngaySinh ? custmer.value.ngaySinh : null,
-    diaChiCuThe: custmer.value.diaChicuthe, // Thay vì "diaChicuthe"
+    diaChiCuThe: custmer.value.diaChicuthe, 
     thanhPho: selectedProvince.value,
     quan: selectedDistrict.value,
     phuong: selectedWard.value,
-    gioiTinh: custmer.value.gioiTinh === "true" // Chuyển thành boolean
+    gioiTinh: custmer.value.gioiTinh === "true" 
   };
-  console.log('Dữ liệu gửi lên:', employeeData); // Kiểm tra dữ liệu trước khi gửi
+  console.log('Dữ liệu gửi lên:', employeeData); 
 
   try {
     const response = await axios.post('http://localhost:8080/khach-hang/add', employeeData);
     console.log('Thêm khách hàng thành công:', response.data);
+    router.push({ path: '/khach-hang' });
   } catch (error) {
     console.error('Lỗi khi thêm khách hàng:', error.response?.data || error.message);
   }
