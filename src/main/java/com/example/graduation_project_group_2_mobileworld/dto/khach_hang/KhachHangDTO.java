@@ -7,7 +7,6 @@ import java.util.Date;
 public class KhachHangDTO {
     private String ma;
     private String tenKH;
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
     private Date ngaySinh;
     private String anhKH;
     private String thanhPho;
