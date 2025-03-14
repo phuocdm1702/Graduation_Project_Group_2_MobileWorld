@@ -1,8 +1,10 @@
 package com.example.graduation_project_group_2_mobileworld.controller.khach_hang;
 
 import com.example.graduation_project_group_2_mobileworld.dto.khach_hang.KhachHangDTO;
+import com.example.graduation_project_group_2_mobileworld.dto.nhan_vien.NhanVienDTO;
 import com.example.graduation_project_group_2_mobileworld.entity.DiaChiKhachHang;
 import com.example.graduation_project_group_2_mobileworld.entity.KhachHang;
+import com.example.graduation_project_group_2_mobileworld.entity.NhanVien;
 import com.example.graduation_project_group_2_mobileworld.service.khach_hang.DiaChiKhachHangServices;
 import com.example.graduation_project_group_2_mobileworld.service.khach_hang.KhachHangServices;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,12 +56,21 @@ public class KhachHangController {
 
     // Cập nhật khách hàng
     @PutMapping("/update/{id}")
-    public ResponseEntity<KhachHang> updateKhachHang(@PathVariable Integer id, @RequestBody KhachHang khachHang) {
+    public ResponseEntity<?> updateKhachHang(@PathVariable Integer id, @RequestBody KhachHangDTO khachHangDTO) {
         try {
-            KhachHang updatedKhachHang = khachHangServices.updateKH(id, khachHang);
+            KhachHang updatedKhachHang = khachHangServices.updateKhachHang(id, khachHangDTO);
             return ResponseEntity.ok(updatedKhachHang);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(404).body(null);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
+    }
+    @PutMapping("/updateDchi/{id}")
+    public ResponseEntity<?> updateDchi(@PathVariable Integer id, @RequestBody KhachHangDTO khachHangDTO) {
+        try {
+            KhachHang updateDchi = khachHangServices.updateDchi(id, khachHangDTO);
+            return ResponseEntity.ok(updateDchi);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
     }
 
@@ -72,5 +83,6 @@ public class KhachHangController {
         }
         return ResponseEntity.badRequest().body("Khách hàng không tồn tại");
     }
+
 
 }
