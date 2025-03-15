@@ -28,8 +28,8 @@
   import ProductDetails from "../views/Products/SanPham/ChiTietSanPham.vue";
   
   // Thương hiệu
-  import Manufacturer from "../views/Products/Brand/NhaSanXuat.vue";
-  import ProductLine from "../views/Products/Brand/DongSanPham.vue";
+  import Manufacturer from "../views/Products/Brand/Manufacturer/Manufacturer.vue";
+  import ProductLine from "../views/Products/Brand/ProductLine/ProductLine.vue";
   
   //NhanVien
   
@@ -63,6 +63,8 @@
   import Imel from "../views/Products/Imel/ImelSP.vue"
   import ImelDaBan from "../views/Products/Imel/ImelDaBan.vue"
   import LichSuPhieuBaoHanh from "../views/BaoHanh/LichSuPhieuBaoHanh.vue";
+  import ProductLineAdd from "@/views/Products/Brand/ProductLine/ProductLineAdd.vue";
+  import ProductLineEdit from "@/views/Products/Brand/ProductLine/ProductLineEdit.vue";
   
   
   const routes: Array<RouteRecordRaw> = [
@@ -88,7 +90,9 @@
   
     // Thương hiệu
     { path: "/nha-san-xuat", name: "Nhà Sản Xuất", component: Manufacturer },
-    { path: "/dong-san-pham", name: "Dòng Sản Phẩm", component: ProductLine },
+    { path: "/product-line", name: "product-line", component: ProductLine },
+    { path: "/product-line/add", name: "product-line-add", component: ProductLineAdd },
+    { path: "/product-line/edit/:id", name: "product-line-edit", component: ProductLineEdit },
   
     // Màn hình
     { path: "/man-hinh", name: "Màn Hình", component: Display },

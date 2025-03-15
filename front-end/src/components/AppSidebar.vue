@@ -456,7 +456,7 @@ const productCategories = [
   { name: "Nhà Sản Xuất", path: "/nha-san-xuat", route: "Nhà Sản Xuất" },
   { name: "Imel", path: "/imel", route: "ImelImel" },
   { name: "Imel đã bán", path: "/imel-da-ban", route: "Imel đã bán" },
-  { name: "Dòng Sản Phẩm", path: "/dong-san-pham", route: "Dòng Sản Phẩm" },
+  { name: "Dòng Sản Phẩm", path: "/product-line", route: "product-line" },
   { name: "Màn Hình", path: "/man-hinh", route: "Màn Hình" },
   {
     name: "Công Nghệ Màn Hình",
