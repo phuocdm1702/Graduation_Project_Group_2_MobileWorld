@@ -1,32 +1,35 @@
 import { ref, onMounted, computed } from 'vue';
 import axios from 'axios';
 
-export default function useProductLineList() {
+export default function useNhaSanXuat() {
   const toast = ref(null);
-  const productLines = ref([]);
-  const productLine = ref({ id: null, ma: '', dongSanPham: '' });
+  const manufacturers = ref([]);
+  const manufacturer = ref({ id: null, ma: '', nhaSanXuat: '' });
   const searchKeyword = ref('');
-  const searchDongSanPham = ref('');
+  const searchNhaSanXuat = ref('');
   const currentPage = ref(0);
   const pageSize = ref(5);
   const totalItems = ref(0);
-  const selectedProducts = ref([]);
-  const selectAll = ref(false);
+  const selectedManufacturers = ref([]);
   const isSearching = ref(false);
-  const showAddModal = ref(false);
-  const showEditModal = ref(false);
   const showConfirmModal = ref(false);
   const confirmMessage = ref('');
   const confirmedAction = ref(null);
 
   const totalPages = computed(() => Math.ceil(totalItems.value / pageSize.value));
 
+  // Logic để kiểm tra trạng thái của checkbox "Chọn tất cả"
+  const isAllSelected = computed(() => {
+    if (manufacturers.value.length === 0) return false;
+    return manufacturers.value.every(item => selectedManufacturers.value.includes(item.id));
+  });
+
   const fetchData = async () => {
     try {
-      const { data } = await axios.get('http://localhost:8080/api/dong-san-pham', {
+      const { data } = await axios.get('http://localhost:8080/api/nha-san-xuat', {
         params: { page: currentPage.value, size: pageSize.value },
       });
-      productLines.value = data.content;
+      manufacturers.value = data.content;
       totalItems.value = data.totalElements;
     } catch (error) {
       if (toast.value) {
@@ -39,16 +42,16 @@ export default function useProductLineList() {
   const goToPage = async (page) => {
     currentPage.value = page;
     if (isSearching.value) {
-      await searchProductLine();
+      await searchManufacturer();
     } else {
       await fetchData();
     }
   };
 
-  const searchProductLine = async () => {
+  const searchManufacturer = async () => {
     const keyword = searchKeyword.value.replace(/\s+/g, '').trim();
-    const dongSanPhamFilter = searchDongSanPham.value || '';
-    if (!keyword && !dongSanPhamFilter) {
+    const nhaSanXuatFilter = searchNhaSanXuat.value || '';
+    if (!keyword && !nhaSanXuatFilter) {
       isSearching.value = false;
       currentPage.value = 0;
       await fetchData();
@@ -56,15 +59,15 @@ export default function useProductLineList() {
     }
     isSearching.value = true;
     try {
-      const { data } = await axios.get('http://localhost:8080/api/dong-san-pham/search', {
+      const { data } = await axios.get('http://localhost:8080/api/nha-san-xuat/search', {
         params: {
           keyword: keyword || undefined,
-          dongSanPham: dongSanPhamFilter || undefined,
+          nhaSanXuat: nhaSanXuatFilter || undefined,
           page: currentPage.value,
           size: pageSize.value,
         },
       });
-      productLines.value = data.content;
+      manufacturers.value = data.content;
       totalItems.value = data.totalElements;
     } catch (error) {
       if (toast.value) {
@@ -76,7 +79,7 @@ export default function useProductLineList() {
 
   const resetSearch = () => {
     searchKeyword.value = '';
-    searchDongSanPham.value = '';
+    searchNhaSanXuat.value = '';
     isSearching.value = false;
     currentPage.value = 0;
     fetchData();
@@ -84,7 +87,7 @@ export default function useProductLineList() {
 
   const checkDuplicate = async (field, value, excludeId = null) => {
     try {
-      const { data } = await axios.get(`http://localhost:8080/api/dong-san-pham/exists/${field}`, {
+      const { data } = await axios.get(`http://localhost:8080/api/nha-san-xuat/exists/${field}`, {
         params: { [field]: value, excludeId },
       });
       return data;
@@ -96,25 +99,24 @@ export default function useProductLineList() {
     }
   };
 
-  const saveProductLine = async () => {
-    const { ma, dongSanPham } = productLine.value;
-    if (!ma || !dongSanPham) {
+  const saveManufacturer = async () => {
+    const { ma, nhaSanXuat } = manufacturer.value;
+    if (!ma || !nhaSanXuat) {
       if (toast.value) {
         toast.value?.kshowToast('error', 'Vui lòng nhập đầy đủ thông tin!');
       }
       return;
     }
     try {
-      const response = await axios.post('http://localhost:8080/api/dong-san-pham', productLine.value);
+      const response = await axios.post('http://localhost:8080/api/nha-san-xuat', manufacturer.value);
       if (toast.value) {
         toast.value?.kshowToast('success', 'Thêm mới thành công!');
       }
-      productLines.value.unshift(response.data);
+      manufacturers.value.unshift(response.data);
       totalItems.value += 1;
-      if (productLines.value.length > pageSize.value) {
-        productLines.value.pop();
+      if (manufacturers.value.length > pageSize.value) {
+        manufacturers.value.pop();
       }
-      closeModal();
     } catch (error) {
       if (toast.value) {
         toast.value?.kshowToast('error', 'Lỗi khi lưu dữ liệu: ' + (error.response?.data?.error || error.message));
@@ -123,40 +125,39 @@ export default function useProductLineList() {
     }
   };
 
-  const updateProductLine = async () => {
-    const { id, ma, dongSanPham } = productLine.value;
-    if (!id || !ma || !dongSanPham) {
+  const updateManufacturer = async () => {
+    const { id, ma, nhaSanXuat } = manufacturer.value;
+    if (!id || !ma || !nhaSanXuat) {
       if (toast.value) {
         toast.value?.kshowToast('error', 'Dữ liệu không hợp lệ! Vui lòng kiểm tra lại.');
       }
       return;
     }
-    const originalProduct = productLines.value.find((p) => p.id === id);
-    const originalMa = originalProduct?.ma;
-    const originalDongSanPham = originalProduct?.dongSanPham;
+    const originalManufacturer = manufacturers.value.find((m) => m.id === id);
+    const originalMa = originalManufacturer?.ma;
+    const originalNhaSanXuat = originalManufacturer?.nhaSanXuat;
 
     if (ma !== originalMa && (await checkDuplicate('ma', ma, id))) {
       if (toast.value) {
-        toast.value?.kshowToast('error', 'Mã dòng sản phẩm đã tồn tại!');
+        toast.value?.kshowToast('error', 'Mã nhà sản xuất đã tồn tại!');
       }
       return;
     }
-    if (dongSanPham !== originalDongSanPham && (await checkDuplicate('dongSanPham', dongSanPham, id))) {
+    if (nhaSanXuat !== originalNhaSanXuat && (await checkDuplicate('nhaSanXuat', nhaSanXuat, id))) {
       if (toast.value) {
-        toast.value?.kshowToast('error', 'Tên dòng sản phẩm đã tồn tại!');
+        toast.value?.kshowToast('error', 'Tên nhà sản xuất đã tồn tại!');
       }
       return;
     }
     try {
-      const response = await axios.put(`http://localhost:8080/api/dong-san-pham/${id}`, productLine.value);
+      const response = await axios.put(`http://localhost:8080/api/nha-san-xuat/${id}`, manufacturer.value);
       if (toast.value) {
         toast.value?.kshowToast('success', 'Cập nhật thành công!');
       }
-      const index = productLines.value.findIndex((p) => p.id === id);
+      const index = manufacturers.value.findIndex((m) => m.id === id);
       if (index !== -1) {
-        productLines.value[index] = response.data;
+        manufacturers.value[index] = response.data;
       }
-      closeModal();
     } catch (error) {
       if (toast.value) {
         toast.value?.kshowToast('error', 'Lỗi khi cập nhật dữ liệu: ' + (error.response?.data?.error || error.message));
@@ -165,9 +166,9 @@ export default function useProductLineList() {
     }
   };
 
-  const deleteProductLine = async (id) => {
+  const deleteManufacturer = async (id) => {
     try {
-      await axios.delete(`http://localhost:8080/api/dong-san-pham/${id}`);
+      await axios.delete(`http://localhost:8080/api/nha-san-xuat/${id}`);
       if (toast.value) {
         toast.value?.kshowToast('success', 'Xóa thành công!');
       }
@@ -178,7 +179,7 @@ export default function useProductLineList() {
         currentPage.value = 0;
       }
       if (isSearching.value) {
-        await searchProductLine();
+        await searchManufacturer();
       } else {
         await fetchData();
       }
@@ -190,65 +191,40 @@ export default function useProductLineList() {
     }
   };
 
-  const deleteSelectedProducts = async () => {
+  const deleteSelectedManufacturers = async () => {
     try {
-      await axios.delete('http://localhost:8080/api/dong-san-pham/bulk', {
-        data: { ids: selectedProducts.value },
+      await axios.delete('http://localhost:8080/api/nha-san-xuat/bulk', {
+        data: { ids: selectedManufacturers.value },
       });
       if (toast.value) {
         toast.value?.kshowToast('success', 'Xóa thành công!');
       }
-      totalItems.value -= selectedProducts.value.length;
+      totalItems.value -= selectedManufacturers.value.length;
       if (totalItems.value > 0 && currentPage.value >= totalPages.value) {
         currentPage.value = totalPages.value - 1;
       } else if (totalItems.value <= 0) {
         currentPage.value = 0;
       }
-      selectedProducts.value = [];
-      selectAll.value = false;
+      selectedManufacturers.value = [];
       if (isSearching.value) {
-        await searchProductLine();
+        await searchManufacturer();
       } else {
         await fetchData();
       }
     } catch (error) {
       if (toast.value) {
-        toast.value?.kshowToast('error', 'Lỗi khi xóa nhiều dòng sản phẩm!');
+        toast.value?.kshowToast('error', 'Lỗi khi xóa nhiều nhà sản xuất!');
       }
       console.error('Bulk delete error:', error);
     }
   };
 
-  const openAddModal = () => {
-    productLine.value = { id: null, ma: '', dongSanPham: '' };
-    showAddModal.value = true;
-  };
-
-  const openEditModal = (product) => {
-    productLine.value = { ...product };
-    showEditModal.value = true;
-  };
-
-  const closeModal = () => {
-    showAddModal.value = false;
-    showEditModal.value = false;
-  };
-
-  const handleFormSubmit = (data) => {
-    productLine.value = data;
-    if (showAddModal.value) {
-      confirmAction('Bạn có chắc chắn muốn thêm dòng sản phẩm này?', saveProductLine);
-    } else if (showEditModal.value) {
-      confirmAction('Bạn có chắc chắn muốn cập nhật dòng sản phẩm này?', updateProductLine);
-    }
-  };
-
   const confirmDelete = (id) => {
-    confirmAction('Bạn có chắc chắn muốn xóa dòng sản phẩm này?', () => deleteProductLine(id));
+    confirmAction('Bạn có chắc chắn muốn xóa nhà sản xuất này?', () => deleteManufacturer(id));
   };
 
   const confirmDeleteSelected = () => {
-    confirmAction(`Bạn có chắc chắn muốn xóa ${selectedProducts.value.length} dòng sản phẩm đã chọn?`, deleteSelectedProducts);
+    confirmAction(`Bạn có chắc chắn muốn xóa ${selectedManufacturers.value.length} nhà sản xuất đã chọn?`, deleteSelectedManufacturers);
   };
 
   const confirmAction = (message, action) => {
@@ -270,41 +246,39 @@ export default function useProductLineList() {
   };
 
   const toggleSelectAll = () => {
-    selectedProducts.value = selectAll.value ? productLines.value.map((p) => p.id) : [];
+    if (isAllSelected.value) {
+      selectedManufacturers.value = [];
+    } else {
+      selectedManufacturers.value = manufacturers.value.map(item => item.id);
+    }
   };
 
   onMounted(fetchData);
 
   return {
     toast,
-    productLines,
-    productLine,
+    manufacturers,
+    manufacturer,
     searchKeyword,
-    searchDongSanPham,
+    searchNhaSanXuat,
     currentPage,
     pageSize,
     totalItems,
-    selectedProducts,
-    selectAll,
+    selectedManufacturers,
     isSearching,
-    showAddModal,
-    showEditModal,
     showConfirmModal,
     confirmMessage,
     totalPages,
+    isAllSelected,
     fetchData,
     goToPage,
-    searchProductLine,
+    searchManufacturer,
     resetSearch,
     checkDuplicate,
-    saveProductLine,
-    updateProductLine,
-    deleteProductLine,
-    deleteSelectedProducts,
-    openAddModal,
-    openEditModal,
-    closeModal,
-    handleFormSubmit,
+    saveManufacturer,
+    updateManufacturer,
+    deleteManufacturer,
+    deleteSelectedManufacturers,
     confirmDelete,
     confirmDeleteSelected,
     confirmAction,

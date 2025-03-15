@@ -28,8 +28,8 @@
   import ProductDetails from "../views/Products/SanPham/ChiTietSanPham.vue";
   
   // Thương hiệu
-  import Manufacturer from "../views/Products/Brand/NhaSanXuat.vue";
-  import ProductLine from "../views/Products/Brand/DongSanPham.vue";
+  import Manufacturer from "../views/Products/Brand/Manufacturer/Manufacturer.vue";
+  import ProductLine from "../views/Products/Brand/ProductLine/ProductLine.vue";
   
   //NhanVien
   
@@ -60,9 +60,15 @@
   import ChargingPort from "../views/Products/Sac/CongSac.vue";
   
   // Imel
-  import Imel from "../views/Products/Imel/ImelSP.vue"
+  import Imel from "../views/Products/Imel/Imel.vue"
   import ImelDaBan from "../views/Products/Imel/ImelDaBan.vue"
   import LichSuPhieuBaoHanh from "../views/BaoHanh/LichSuPhieuBaoHanh.vue";
+  import ProductLineAdd from "@/views/Products/Brand/ProductLine/ProductLineAdd.vue";
+  import ProductLineEdit from "@/views/Products/Brand/ProductLine/ProductLineEdit.vue";
+  import ManufacturerAdd from "@/views/Products/Brand/Manufacturer/ManufacturerAdd.vue";
+  import ManufacturerEdit from "@/views/Products/Brand/Manufacturer/ManufacturerEdit.vue";
+  import ImelAdd from "@/views/Products/Imel/ImelAdd.vue";
+  import ImelEdit from "@/views/Products/Imel/ImelEdit.vue";
   
   
   const routes: Array<RouteRecordRaw> = [
@@ -87,8 +93,12 @@
     { path: "/san-pham/chi-tiet", name: "Chi Tiết Sản Phẩm", component: ProductDetails },
   
     // Thương hiệu
-    { path: "/nha-san-xuat", name: "Nhà Sản Xuất", component: Manufacturer },
-    { path: "/dong-san-pham", name: "Dòng Sản Phẩm", component: ProductLine },
+    { path: "/manufacturer", name: "manufacturer", component: Manufacturer },
+    { path: "/manufacturer/add", name: "manufacturer-add", component: ManufacturerAdd },
+    { path: "/manufacturer/edit/:id", name: "manufacturer-edit", component: ManufacturerEdit },
+    { path: "/product-line", name: "product-line", component: ProductLine },
+    { path: "/product-line/add", name: "product-line-add", component: ProductLineAdd },
+    { path: "/product-line/edit/:id", name: "product-line-edit", component: ProductLineEdit },
   
     // Màn hình
     { path: "/man-hinh", name: "Màn Hình", component: Display },
@@ -117,7 +127,9 @@
     { path: "/sac/cong-sac", name: "Cổng Sạc", component: ChargingPort },
   
     // Imel
-    { path: "/imel", name: "Imel", component: Imel },
+    { path: "/imel", name: "imel", component: Imel },
+    { path: "/imel/add", name: "imel-add", component: ImelAdd },
+    { path: "/imel/edit/:id", name: "imel-edit", component: ImelEdit },
     { path: "/imel-da-ban", name: "Imel đã bán", component: ImelDaBan },
   
     { path: "/:pathMatch(.*)*", component: NotFound },
