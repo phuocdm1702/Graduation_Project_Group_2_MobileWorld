@@ -184,6 +184,16 @@ export const useDotGiamGia = () => {
     {
       key: "select",
       label: "",
+      formatter: (value, item) => {
+        return `
+          <input
+            type="checkbox"
+            value="${item.id}"
+            ${idDSPs.value.includes(item.id) ? "checked" : ""}
+            onchange="handleCheckboxChange(${item.id})"
+          />
+        `;
+      },
     },
     {key: "index", label: "#", formatter: (_, __, index) => (currentPageDSP.value * pageSizeDSP.value) + index + 1},
     {key: "ma", label: "Mã"},
@@ -341,7 +351,6 @@ export const useDotGiamGia = () => {
     try {
       const response = await axios.get(`http://localhost:8080/dot_giam_gia/viewUpdate?id=${dotGiamGia.value.id}`);
       idDSPs.value = response.data.map(dsp => dsp.id);
-      fetchData();
     } catch (error) {
       console.error("Lỗi khi lấy danh sách dòng sản phẩm:", error);
     }

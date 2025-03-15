@@ -101,8 +101,6 @@
                 :data="dspList"
                 :columns="columns"
                 :getNestedValue="getNestedValue"
-                :selected-products="idDSPs"
-                @toggle-select="fetchCTSPData"
               />
             </div>
           </div>
