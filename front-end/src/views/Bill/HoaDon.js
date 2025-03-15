@@ -70,7 +70,7 @@ export default function useHoaDonLineList() {
       label: "Thao tác",
       key: "actions",
       formatter: (value, item) => `
-        <a href="/hoa-don-chi-tiet/${item.id}" class="text-orange-600 hover:text-orange-800 transition">
+        <a href="/hoa-don-chi-tiet/${item.id}" class="text-blue-500 hover:text-blue-700">
           <i class="fa-solid fa-edit text-orange-500"></i>
         </a>
       `,
