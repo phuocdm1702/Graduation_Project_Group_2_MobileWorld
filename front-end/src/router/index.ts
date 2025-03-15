@@ -15,6 +15,8 @@
   import LichSuHD from "../views/Bill/LichSuHoaDon.vue";
   import HoaDon from "../views/Bill/HoaDon.vue";
   import HoaDonChiTiet from "../views/Bill/HoaDonChiTiet.vue";
+  import ShowHoaDon from "../views/Bill/ShowHoaDon.vue"; // Import component mới
+  
   
   // Tài khoản
   import NhanVien from "../views/AccountType/NhanVien.vue";
@@ -84,6 +86,7 @@
   
   
     { path: "/hoa-don", name: "HoaDon", component: HoaDon },
+    { path: "/show-hoa-don/:id", name: "ShowHoaDon", component: ShowHoaDon, props: true }, // Thêm :id và props: true
     { path: "/lich-su-hoa-don", name: "LichSuHD", component: LichSuHD },
     { path: "/hoa-don-chi-tiet", name: "HDCT", component: HoaDonChiTiet },
     { path: "/nhan-vien", name: "NhanVien", component: NhanVien },
