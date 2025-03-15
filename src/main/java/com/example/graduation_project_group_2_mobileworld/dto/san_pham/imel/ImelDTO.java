@@ -15,13 +15,16 @@ public class ImelDTO {
     @Size(max = 255, message = "Mã Imel không được vượt quá 255 ký tự")
     private String ma;
 
-    @NotBlank(message = "Imel phẩm không được để trống")
-    @Size(max = 255, message = "Imel không được vượt quá 255 ký tự")
+    @NotBlank(message = "Tên Imel không được để trống")
+    @Size(max = 255, message = "Tên Imel không được vượt quá 255 ký tự")
     private String imel;
 
-    public ImelDTO(Integer id, String ma, String imel) {
+    private Boolean deleted;
+
+    public ImelDTO(Integer id, String ma, String imel, Boolean deleted) {
         this.id = id;
         this.ma = ma;
         this.imel = imel;
+        this.deleted = deleted;
     }
 }

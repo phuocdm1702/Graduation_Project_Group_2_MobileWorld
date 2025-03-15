@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-white p-6 rounded-lg shadow-lg ">
+  <div class="bg-white p-6 rounded-lg shadow-lg">
     <h2 class="text-2xl font-bold mb-4">Thông tin nhân viên</h2>
 
     <!-- Khu vực quét QR -->
@@ -147,7 +147,7 @@
     </div>
 
     <div class="flex justify-end space-x-4 mt-6">
-      <router-link to="/back">
+      <router-link to="/nhan-vien">
         <button @click="$emit('cancel')" class="px-4 py-2 bg-gray-300 rounded-md hover:bg-gray-400 transition-colors">
           Hủy
         </button>
@@ -155,13 +155,13 @@
 
       <button
         type="submit"
-        @click="addNhanVien()"
+        @click="addNhanVien"
         class="px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 transition-colors flex items-center"
       >
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
         </svg>
-        <a class="font-bold">Thêm nhân viên</a>
+        <span class="font-bold">Thêm nhân viên</span>
       </button>
     </div>
   </div>
@@ -177,6 +177,7 @@ const router = useRouter();
 const qrReader = ref(null);
 const isScanning = ref(false);
 
+// Dữ liệu nhân viên
 const employee = ref({
   tenNhanVien: '',
   cccd: '',
@@ -195,6 +196,11 @@ const selectedProvince = ref('');
 const selectedDistrict = ref('');
 const selectedWard = ref('');
 
+// Dữ liệu ảnh
+const employeeImage = ref(null);
+const fileInput = ref(null);
+
+// Quét mã QR
 const startScanning = async () => {
   isScanning.value = true;
   await nextTick();
@@ -248,19 +254,13 @@ const handleQRData = (data) => {
       gioiTinh: fields[4].trim() === 'Nam' ? 'False' : 'True',
       diaChicuthe: fields[5].trim(),
     };
-    console.log('Tên nhân viên sau gán:', employee.value.tenNhanVien);
     parseAddress(fields[5].trim());
   } else {
     employee.value = {
       ...employee.value,
       cccd: data.trim(),
     };
-    console.log('Chỉ gán CCCD:', employee.value.cccd);
   }
-
-  setTimeout(() => {
-    console.log('Tên nhân viên sau 1 giây:', employee.value.tenNhanVien);
-  }, 1000);
 };
 
 const isValidDateFormat = (dateStr) => {
@@ -295,6 +295,7 @@ const parseAddress = (address) => {
   }
 };
 
+// Xử lý ảnh
 async function uploadImage(file) {
   const formData = new FormData();
   formData.append('file', file);
@@ -312,15 +313,18 @@ async function uploadImage(file) {
 async function addNhanVien() {
   let imagePath = null;
   if (employeeImage.value) {
-    imagePath = await uploadImage(employeeImage.value);
-    if (!imagePath) {
-      alert('Tải lên ảnh thất bại. Vui lòng thử lại.');
-      return;
+    const file = fileInput.value.files[0];
+    if (file) {
+      imagePath = await uploadImage(file);
+      if (!imagePath) {
+        alert('Tải lên ảnh thất bại. Vui lòng thử lại.');
+        return;
+      }
     }
   }
 
   const employeeData = {
-    ma: employee.value.ma,
+    ma: employee.value.ma || '',
     tenNhanVien: employee.value.tenNhanVien,
     ngaySinh: employee.value.ngaySinh,
     anhNhanVien: imagePath,
@@ -333,18 +337,22 @@ async function addNhanVien() {
     soDienThoai: employee.value.sdt,
     tenDangNhap: employee.value.userName,
     gioiTinh: employee.value.gioiTinh,
+    createdAt: new Date().toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' })
   };
+
+  // Log dữ liệu gửi lên để kiểm tra
+  console.log('Dữ liệu gửi lên server:', employeeData);
+
   try {
-    await axios.post('http://localhost:8080/nhan-vien/add', employeeData);
+    const response = await axios.post('http://localhost:8080/nhan-vien/add', employeeData);
+    console.log('Phản hồi từ server:', response.data);
     alert('Thêm nhân viên thành công!');
     router.push({ path: '/nhan-vien' });
   } catch (error) {
     console.error('Lỗi khi thêm nhân viên:', error.response ? error.response.data : error);
+    alert('Thêm nhân viên thất bại. Vui lòng kiểm tra lại dữ liệu.');
   }
 }
-
-const employeeImage = ref(null);
-const fileInput = ref(null);
 
 function triggerFileInput() {
   fileInput.value.click();
@@ -366,6 +374,7 @@ function deleteImage() {
   fileInput.value.value = '';
 }
 
+// Tải dữ liệu tỉnh/thành phố
 onMounted(async () => {
   try {
     const response = await axios.get('https://provinces.open-api.vn/api/?depth=3');

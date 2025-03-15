@@ -19,6 +19,8 @@ public interface DongSanPhamRepository extends JpaRepository<DongSanPham, Intege
 
     Page<DongSanPham> findByDeletedFalse(Pageable pageable);
 
+    Optional<DongSanPham> findByIdAndDeletedFalse(Integer id);
+
     @Query("SELECT d FROM DongSanPham d " +
             "WHERE d.deleted = false AND " +
             "(LOWER(REPLACE(d.ma, ' ', '')) LIKE LOWER(CONCAT('%', REPLACE(:keyword, ' ', ''), '%')) OR " +
@@ -26,28 +28,30 @@ public interface DongSanPhamRepository extends JpaRepository<DongSanPham, Intege
     Page<DongSanPham> searchByKeyword(@Param("keyword") String keyword, Pageable pageable);
 
     @Query("SELECT COUNT(d) > 0 FROM DongSanPham d WHERE d.ma = :ma AND d.deleted = false")
-    boolean existsByMa(@Param("ma") String ma);
+    boolean existsByMaAndDeletedFalse(@Param("ma") String ma);
 
     @Query("SELECT COUNT(d) > 0 FROM DongSanPham d WHERE d.dongSanPham = :dongSanPham AND d.deleted = false")
-    boolean existsByDongSanPham(@Param("dongSanPham") String dongSanPham);
+    boolean existsByDongSanPhamAndDeletedFalse(@Param("dongSanPham") String dongSanPham);
+
+    @Query("SELECT COUNT(d) > 0 FROM DongSanPham d WHERE d.ma = :ma AND d.deleted = false AND d.id != :excludeId")
+    boolean existsByMaAndDeletedFalse(@Param("ma") String ma, @Param("excludeId") Integer excludeId);
+
+    @Query("SELECT COUNT(d) > 0 FROM DongSanPham d WHERE d.dongSanPham = :dongSanPham AND d.deleted = false AND d.id != :excludeId")
+    boolean existsByDongSanPhamAndDeletedFalse(@Param("dongSanPham") String dongSanPham, @Param("excludeId") Integer excludeId);
 
     @Modifying
     @Query("UPDATE DongSanPham d SET d.deleted = true WHERE d.id IN :ids AND d.deleted = false")
     int softDeleteByIds(@Param("ids") List<Integer> ids);
 
-    // Thêm phương thức để kiểm tra xem có bản ghi đã xóa mềm với ma không
     @Query("SELECT COUNT(d) > 0 FROM DongSanPham d WHERE d.ma = :ma AND d.deleted = true")
     boolean existsByMaAndDeletedTrue(@Param("ma") String ma);
 
-    // Thêm phương thức để kiểm tra xem có bản ghi đã xóa mềm với dongSanPham không
     @Query("SELECT COUNT(d) > 0 FROM DongSanPham d WHERE d.dongSanPham = :dongSanPham AND d.deleted = true")
     boolean existsByDongSanPhamAndDeletedTrue(@Param("dongSanPham") String dongSanPham);
 
-    // Thêm phương thức để tìm bản ghi đã xóa mềm với ma
     @Query("SELECT d FROM DongSanPham d WHERE d.ma = :ma AND d.deleted = true")
     Optional<DongSanPham> findByMaAndDeletedTrue(@Param("ma") String ma);
 
-    // Thêm phương thức để tìm bản ghi đã xóa mềm với dongSanPham
     @Query("SELECT d FROM DongSanPham d WHERE d.dongSanPham = :dongSanPham AND d.deleted = true")
     Optional<DongSanPham> findByDongSanPhamAndDeletedTrue(@Param("dongSanPham") String dongSanPham);
 }

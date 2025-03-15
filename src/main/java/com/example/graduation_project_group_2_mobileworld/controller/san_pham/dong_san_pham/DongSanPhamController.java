@@ -17,7 +17,13 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/dong-san-pham")
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(
+        origins = "http://localhost:3000",
+        methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.OPTIONS},
+        allowedHeaders = "*",
+        allowCredentials = "true",
+        maxAge = 3600
+)
 public class DongSanPhamController {
 
     private final DongSanPhamService service;
@@ -31,6 +37,16 @@ public class DongSanPhamController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size) {
         return ResponseEntity.ok(service.getAllDongSanPham(page, size));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getById(@PathVariable Integer id) {
+        try {
+            DongSanPhamDTO dongSanPham = service.getDongSanPhamById(id);
+            return ResponseEntity.ok(dongSanPham);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", e.getMessage()));
+        }
     }
 
     @PostMapping
@@ -110,13 +126,17 @@ public class DongSanPhamController {
     }
 
     @GetMapping("/exists/ma")
-    public ResponseEntity<Boolean> checkMa(@RequestParam String ma) {
-        return ResponseEntity.ok(service.existsByMa(ma));
+    public ResponseEntity<Boolean> checkMa(
+            @RequestParam String ma,
+            @RequestParam(required = false) Integer excludeId) {
+        return ResponseEntity.ok(service.existsByMa(ma, excludeId));
     }
 
     @GetMapping("/exists/dongSanPham")
-    public ResponseEntity<Boolean> checkDongSanPham(@RequestParam String dongSanPham) {
-        return ResponseEntity.ok(service.existsByDongSanPham(dongSanPham));
+    public ResponseEntity<Boolean> checkDongSanPham(
+            @RequestParam String dongSanPham,
+            @RequestParam(required = false) Integer excludeId) {
+        return ResponseEntity.ok(service.existsByDongSanPham(dongSanPham, excludeId));
     }
 
     private Map<String, String> getErrorMap(BindingResult result) {

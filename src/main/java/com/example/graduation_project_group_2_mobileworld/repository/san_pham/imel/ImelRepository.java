@@ -19,35 +19,33 @@ public interface ImelRepository extends JpaRepository<Imel, Integer> {
 
     Page<Imel> findByDeletedFalse(Pageable pageable);
 
-    @Query("SELECT i FROM Imel i " +
-            "WHERE i.deleted = false AND " +
-            "(LOWER(REPLACE(i.ma, ' ', '')) LIKE LOWER(CONCAT('%', REPLACE(:keyword, ' ', ''), '%')) OR " +
-            "LOWER(REPLACE(i.imel, ' ', '')) LIKE LOWER(CONCAT('%', REPLACE(:keyword, ' ', ''), '%')))")
-    Page<Imel> searchByKeyword(@Param("keyword") String keyword, Pageable pageable);
+    Optional<Imel> findByIdAndDeletedFalse(Integer id);
 
     @Query("SELECT COUNT(i) > 0 FROM Imel i WHERE i.ma = :ma AND i.deleted = false")
-    boolean existsByMa(@Param("ma") String ma);
+    boolean existsByMaAndDeletedFalse(@Param("ma") String ma);
 
     @Query("SELECT COUNT(i) > 0 FROM Imel i WHERE i.imel = :imel AND i.deleted = false")
-    boolean existsByImel(@Param("imel") String imel);
+    boolean existsByImelAndDeletedFalse(@Param("imel") String imel);
+
+    @Query("SELECT COUNT(i) > 0 FROM Imel i WHERE i.ma = :ma AND i.deleted = false AND i.id != :excludeId")
+    boolean existsByMaAndDeletedFalse(@Param("ma") String ma, @Param("excludeId") Integer excludeId);
+
+    @Query("SELECT COUNT(i) > 0 FROM Imel i WHERE i.imel = :imel AND i.deleted = false AND i.id != :excludeId")
+    boolean existsByImelAndDeletedFalse(@Param("imel") String imel, @Param("excludeId") Integer excludeId);
 
     @Modifying
     @Query("UPDATE Imel i SET i.deleted = true WHERE i.id IN :ids AND i.deleted = false")
     int softDeleteByIds(@Param("ids") List<Integer> ids);
 
-    // Thêm phương thức để kiểm tra xem có bản ghi đã xóa mềm với ma không
     @Query("SELECT COUNT(i) > 0 FROM Imel i WHERE i.ma = :ma AND i.deleted = true")
     boolean existsByMaAndDeletedTrue(@Param("ma") String ma);
 
-    // Thêm phương thức để kiểm tra xem có bản ghi đã xóa mềm với imel không
     @Query("SELECT COUNT(i) > 0 FROM Imel i WHERE i.imel = :imel AND i.deleted = true")
     boolean existsByImelAndDeletedTrue(@Param("imel") String imel);
 
-    // Thêm phương thức để tìm bản ghi đã xóa mềm với ma
     @Query("SELECT i FROM Imel i WHERE i.ma = :ma AND i.deleted = true")
     Optional<Imel> findByMaAndDeletedTrue(@Param("ma") String ma);
 
-    // Thêm phương thức để tìm bản ghi đã xóa mềm với imel
     @Query("SELECT i FROM Imel i WHERE i.imel = :imel AND i.deleted = true")
     Optional<Imel> findByImelAndDeletedTrue(@Param("imel") String imel);
 }

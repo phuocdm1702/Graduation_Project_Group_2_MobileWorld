@@ -28,8 +28,23 @@ public class DongSanPhamService {
         return repository.findByDeletedFalse(pageable).map(this::toDTO);
     }
 
+    public DongSanPhamDTO getDongSanPhamById(Integer id) {
+        DongSanPham entity = repository.findByIdAndDeletedFalse(id)
+                .orElseThrow(() -> new RuntimeException("Dòng sản phẩm không tồn tại hoặc đã bị xóa!"));
+        return toDTO(entity);
+    }
+
     @Transactional
     public DongSanPhamDTO createDongSanPham(DongSanPhamDTO dto) {
+        // Kiểm tra trùng lặp với các bản ghi chưa xóa mềm (deleted = false)
+        if (repository.existsByMaAndDeletedFalse(dto.getMa())) {
+            throw new RuntimeException("Mã dòng sản phẩm đã tồn tại!");
+        }
+        if (repository.existsByDongSanPhamAndDeletedFalse(dto.getDongSanPham())) {
+            throw new RuntimeException("Tên dòng sản phẩm đã tồn tại!");
+        }
+
+        // Kiểm tra xem có bản ghi đã xóa mềm với ma hoặc tên này không
         Optional<DongSanPham> existingDongSanPhamByMa = repository.findByMaAndDeletedTrue(dto.getMa());
         Optional<DongSanPham> existingDongSanPhamByName = repository.findByDongSanPhamAndDeletedTrue(dto.getDongSanPham());
 
@@ -54,20 +69,28 @@ public class DongSanPhamService {
 
     @Transactional
     public DongSanPhamDTO updateDongSanPham(Integer id, DongSanPhamDTO dto) {
-        return repository.findById(id)
-                .filter(d -> !d.getDeleted())
-                .map(dsp -> {
-                    dsp.setMa(dto.getMa());
-                    dsp.setDongSanPham(dto.getDongSanPham());
-                    return toDTO(repository.save(dsp));
-                })
+        DongSanPham entity = repository.findByIdAndDeletedFalse(id)
                 .orElseThrow(() -> new RuntimeException("Dòng sản phẩm không tồn tại hoặc đã bị xóa!"));
+
+        // Kiểm tra trùng lặp mã, loại trừ bản ghi hiện tại
+        if (!entity.getMa().equals(dto.getMa()) && repository.existsByMaAndDeletedFalse(dto.getMa(), id)) {
+            throw new RuntimeException("Mã dòng sản phẩm đã tồn tại!");
+        }
+
+        // Kiểm tra trùng lặp tên, loại trừ bản ghi hiện tại
+        if (!entity.getDongSanPham().equals(dto.getDongSanPham()) && repository.existsByDongSanPhamAndDeletedFalse(dto.getDongSanPham(), id)) {
+            throw new RuntimeException("Tên dòng sản phẩm đã tồn tại!");
+        }
+
+        // Cập nhật thông tin
+        entity.setMa(dto.getMa());
+        entity.setDongSanPham(dto.getDongSanPham());
+        return toDTO(repository.save(entity));
     }
 
     @Transactional
     public void deleteDongSanPham(Integer id) {
-        repository.findById(id)
-                .filter(d -> !d.getDeleted())
+        repository.findByIdAndDeletedFalse(id)
                 .ifPresentOrElse(
                         dsp -> {
                             dsp.setDeleted(true);
@@ -112,12 +135,18 @@ public class DongSanPhamService {
                 .collect(Collectors.toList());
     }
 
-    public boolean existsByMa(String ma) {
-        return repository.existsByMa(ma);
+    public boolean existsByMa(String ma, Integer excludeId) {
+        if (excludeId != null) {
+            return repository.existsByMaAndDeletedFalse(ma, excludeId);
+        }
+        return repository.existsByMaAndDeletedFalse(ma);
     }
 
-    public boolean existsByDongSanPham(String dongSanPham) {
-        return repository.existsByDongSanPham(dongSanPham);
+    public boolean existsByDongSanPham(String dongSanPham, Integer excludeId) {
+        if (excludeId != null) {
+            return repository.existsByDongSanPhamAndDeletedFalse(dongSanPham, excludeId);
+        }
+        return repository.existsByDongSanPhamAndDeletedFalse(dongSanPham);
     }
 
     private boolean matchesKeyword(DongSanPham dsp, String keyword) {

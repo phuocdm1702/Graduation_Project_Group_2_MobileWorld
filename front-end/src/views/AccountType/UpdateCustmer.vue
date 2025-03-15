@@ -299,6 +299,7 @@ const updateNhanVien = async () => {
     };
     await axios.put(`http://localhost:8080/khach-hang/update/${route.query.id}`, updatedData);
     alert("Cập nhật thành công!");
+    router.push({ path: '/khach-hang'});
   } catch (error) {
     console.error("Lỗi khi cập nhật nhân viên:", error);
     alert("Có lỗi xảy ra khi cập nhật.");
@@ -323,6 +324,7 @@ const updateDchi = async () => {
     // Gửi yêu cầu tới endpoint chính xác
     await axios.put(`http://localhost:8080/khach-hang/updateDchi/${route.query.id}`, updatedData);
     alert("Cập nhật địa chỉ thành công!");
+    router.push({ path: '/khach-hang'});
   } catch (error) {
     console.error("Lỗi khi cập nhật địa chỉ:", error);
     if (error.code === "ERR_NETWORK") {

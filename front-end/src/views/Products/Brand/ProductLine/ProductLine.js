@@ -1,16 +1,16 @@
-import { ref, onMounted, computed, watch } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import axios from 'axios';
 
-export default function useImel() {
+export default function useProductLineList() {
   const toast = ref(null);
-  const imels = ref([]);
-  const imel = ref({ id: null, ma: '', imel: '' });
+  const productLines = ref([]);
+  const productLine = ref({ id: null, ma: '', dongSanPham: '' });
   const searchKeyword = ref('');
-  const searchImel = ref(''); // Biến ref cho dropdown lọc theo tên Imel
+  const searchDongSanPham = ref('');
   const currentPage = ref(0);
   const pageSize = ref(5);
   const totalItems = ref(0);
-  const selectedImels = ref([]);
+  const selectedProducts = ref([]);
   const isSearching = ref(false);
   const showConfirmModal = ref(false);
   const confirmMessage = ref('');
@@ -18,17 +18,18 @@ export default function useImel() {
 
   const totalPages = computed(() => Math.ceil(totalItems.value / pageSize.value));
 
+  // Logic để kiểm tra trạng thái của checkbox "Chọn tất cả"
   const isAllSelected = computed(() => {
-    if (imels.value.length === 0) return false;
-    return imels.value.every(item => selectedImels.value.includes(item.id));
+    if (productLines.value.length === 0) return false;
+    return productLines.value.every(item => selectedProducts.value.includes(item.id));
   });
 
   const fetchData = async () => {
     try {
-      const { data } = await axios.get('http://localhost:8080/api/imel', {
+      const { data } = await axios.get('http://localhost:8080/api/dong-san-pham', {
         params: { page: currentPage.value, size: pageSize.value },
       });
-      imels.value = data.content;
+      productLines.value = data.content;
       totalItems.value = data.totalElements;
     } catch (error) {
       if (toast.value) {
@@ -41,16 +42,16 @@ export default function useImel() {
   const goToPage = async (page) => {
     currentPage.value = page;
     if (isSearching.value) {
-      await searchImels(); // Sử dụng hàm đã đổi tên
+      await searchProductLine();
     } else {
       await fetchData();
     }
   };
 
-  const searchImels = async () => { // Đổi tên hàm thành searchImels
+  const searchProductLine = async () => {
     const keyword = searchKeyword.value.replace(/\s+/g, '').trim();
-    const imelFilter = searchImel.value || '';
-    if (!keyword && !imelFilter) {
+    const dongSanPhamFilter = searchDongSanPham.value || '';
+    if (!keyword && !dongSanPhamFilter) {
       isSearching.value = false;
       currentPage.value = 0;
       await fetchData();
@@ -58,15 +59,15 @@ export default function useImel() {
     }
     isSearching.value = true;
     try {
-      const { data } = await axios.get('http://localhost:8080/api/imel/search', {
+      const { data } = await axios.get('http://localhost:8080/api/dong-san-pham/search', {
         params: {
           keyword: keyword || undefined,
-          imel: imelFilter || undefined,
+          dongSanPham: dongSanPhamFilter || undefined,
           page: currentPage.value,
           size: pageSize.value,
         },
       });
-      imels.value = data.content;
+      productLines.value = data.content;
       totalItems.value = data.totalElements;
     } catch (error) {
       if (toast.value) {
@@ -78,7 +79,7 @@ export default function useImel() {
 
   const resetSearch = () => {
     searchKeyword.value = '';
-    searchImel.value = '';
+    searchDongSanPham.value = '';
     isSearching.value = false;
     currentPage.value = 0;
     fetchData();
@@ -86,7 +87,7 @@ export default function useImel() {
 
   const checkDuplicate = async (field, value, excludeId = null) => {
     try {
-      const { data } = await axios.get(`http://localhost:8080/api/imel/exists/${field}`, {
+      const { data } = await axios.get(`http://localhost:8080/api/dong-san-pham/exists/${field}`, {
         params: { [field]: value, excludeId },
       });
       return data;
@@ -98,23 +99,23 @@ export default function useImel() {
     }
   };
 
-  const saveImel = async () => {
-    const { ma, imel: imelValue } = imel.value;
-    if (!ma || !imelValue) {
+  const saveProductLine = async () => {
+    const { ma, dongSanPham } = productLine.value;
+    if (!ma || !dongSanPham) {
       if (toast.value) {
         toast.value?.kshowToast('error', 'Vui lòng nhập đầy đủ thông tin!');
       }
       return;
     }
     try {
-      const response = await axios.post('http://localhost:8080/api/imel', imel.value);
+      const response = await axios.post('http://localhost:8080/api/dong-san-pham', productLine.value);
       if (toast.value) {
         toast.value?.kshowToast('success', 'Thêm mới thành công!');
       }
-      imels.value.unshift(response.data);
+      productLines.value.unshift(response.data);
       totalItems.value += 1;
-      if (imels.value.length > pageSize.value) {
-        imels.value.pop();
+      if (productLines.value.length > pageSize.value) {
+        productLines.value.pop();
       }
     } catch (error) {
       if (toast.value) {
@@ -124,38 +125,38 @@ export default function useImel() {
     }
   };
 
-  const updateImel = async () => {
-    const { id, ma, imel: imelValue } = imel.value;
-    if (!id || !ma || !imelValue) {
+  const updateProductLine = async () => {
+    const { id, ma, dongSanPham } = productLine.value;
+    if (!id || !ma || !dongSanPham) {
       if (toast.value) {
         toast.value?.kshowToast('error', 'Dữ liệu không hợp lệ! Vui lòng kiểm tra lại.');
       }
       return;
     }
-    const originalImel = imels.value.find((i) => i.id === id);
-    const originalMa = originalImel?.ma;
-    const originalImelValue = originalImel?.imel;
+    const originalProduct = productLines.value.find((p) => p.id === id);
+    const originalMa = originalProduct?.ma;
+    const originalDongSanPham = originalProduct?.dongSanPham;
 
     if (ma !== originalMa && (await checkDuplicate('ma', ma, id))) {
       if (toast.value) {
-        toast.value?.kshowToast('error', 'Mã Imel đã tồn tại!');
+        toast.value?.kshowToast('error', 'Mã dòng sản phẩm đã tồn tại!');
       }
       return;
     }
-    if (imelValue !== originalImelValue && (await checkDuplicate('imel', imelValue, id))) {
+    if (dongSanPham !== originalDongSanPham && (await checkDuplicate('dongSanPham', dongSanPham, id))) {
       if (toast.value) {
-        toast.value?.kshowToast('error', 'Tên Imel đã tồn tại!');
+        toast.value?.kshowToast('error', 'Tên dòng sản phẩm đã tồn tại!');
       }
       return;
     }
     try {
-      const response = await axios.put(`http://localhost:8080/api/imel/${id}`, imel.value);
+      const response = await axios.put(`http://localhost:8080/api/dong-san-pham/${id}`, productLine.value);
       if (toast.value) {
         toast.value?.kshowToast('success', 'Cập nhật thành công!');
       }
-      const index = imels.value.findIndex((i) => i.id === id);
+      const index = productLines.value.findIndex((p) => p.id === id);
       if (index !== -1) {
-        imels.value[index] = response.data;
+        productLines.value[index] = response.data;
       }
     } catch (error) {
       if (toast.value) {
@@ -165,9 +166,9 @@ export default function useImel() {
     }
   };
 
-  const deleteImel = async (id) => {
+  const deleteProductLine = async (id) => {
     try {
-      await axios.delete(`http://localhost:8080/api/imel/${id}`);
+      await axios.delete(`http://localhost:8080/api/dong-san-pham/${id}`);
       if (toast.value) {
         toast.value?.kshowToast('success', 'Xóa thành công!');
       }
@@ -178,7 +179,7 @@ export default function useImel() {
         currentPage.value = 0;
       }
       if (isSearching.value) {
-        await searchImels(); // Sử dụng hàm đã đổi tên
+        await searchProductLine();
       } else {
         await fetchData();
       }
@@ -190,40 +191,40 @@ export default function useImel() {
     }
   };
 
-  const deleteSelectedImels = async () => {
+  const deleteSelectedProducts = async () => {
     try {
-      await axios.delete('http://localhost:8080/api/imel/bulk', {
-        data: { ids: selectedImels.value },
+      await axios.delete('http://localhost:8080/api/dong-san-pham/bulk', {
+        data: { ids: selectedProducts.value },
       });
       if (toast.value) {
         toast.value?.kshowToast('success', 'Xóa thành công!');
       }
-      totalItems.value -= selectedImels.value.length;
+      totalItems.value -= selectedProducts.value.length;
       if (totalItems.value > 0 && currentPage.value >= totalPages.value) {
         currentPage.value = totalPages.value - 1;
       } else if (totalItems.value <= 0) {
         currentPage.value = 0;
       }
-      selectedImels.value = [];
+      selectedProducts.value = [];
       if (isSearching.value) {
-        await searchImels(); // Sử dụng hàm đã đổi tên
+        await searchProductLine();
       } else {
         await fetchData();
       }
     } catch (error) {
       if (toast.value) {
-        toast.value?.kshowToast('error', 'Lỗi khi xóa nhiều Imel!');
+        toast.value?.kshowToast('error', 'Lỗi khi xóa nhiều dòng sản phẩm!');
       }
       console.error('Bulk delete error:', error);
     }
   };
 
   const confirmDelete = (id) => {
-    confirmAction('Bạn có chắc chắn muốn xóa Imel này?', () => deleteImel(id));
+    confirmAction('Bạn có chắc chắn muốn xóa dòng sản phẩm này?', () => deleteProductLine(id));
   };
 
   const confirmDeleteSelected = () => {
-    confirmAction(`Bạn có chắc chắn muốn xóa ${selectedImels.value.length} Imel đã chọn?`, deleteSelectedImels);
+    confirmAction(`Bạn có chắc chắn muốn xóa ${selectedProducts.value.length} dòng sản phẩm đã chọn?`, deleteSelectedProducts);
   };
 
   const confirmAction = (message, action) => {
@@ -244,51 +245,48 @@ export default function useImel() {
     confirmedAction.value = null;
   };
 
+  // Hàm toggleSelectAll đã được sửa để sử dụng isAllSelected
   const toggleSelectAll = () => {
     if (isAllSelected.value) {
-      selectedImels.value = [];
+      // Nếu tất cả đã được chọn, bỏ chọn tất cả
+      selectedProducts.value = [];
     } else {
-      selectedImels.value = imels.value.map(item => item.id);
+      // Nếu chưa chọn hết, chọn tất cả
+      selectedProducts.value = productLines.value.map(item => item.id);
     }
   };
-
-  // Theo dõi thay đổi của searchKeyword và searchImel để tự động tìm kiếm
-  watch([searchKeyword, searchImel], () => {
-    currentPage.value = 0; // Reset về trang đầu khi thay đổi bộ lọc
-    searchImels(); // Gọi hàm tìm kiếm đã đổi tên
-  });
 
   onMounted(fetchData);
 
   return {
     toast,
-    imels,
-    imel,
+    productLines,
+    productLine,
     searchKeyword,
-    searchImel,
+    searchDongSanPham,
     currentPage,
     pageSize,
     totalItems,
-    selectedImels,
+    selectedProducts,
     isSearching,
     showConfirmModal,
     confirmMessage,
     totalPages,
-    isAllSelected,
     fetchData,
     goToPage,
-    searchImels, // Xuất hàm đã đổi tên
+    searchProductLine,
     resetSearch,
     checkDuplicate,
-    saveImel,
-    updateImel,
-    deleteImel,
-    deleteSelectedImels,
+    saveProductLine,
+    updateProductLine,
+    deleteProductLine,
+    deleteSelectedProducts,
     confirmDelete,
     confirmDeleteSelected,
     confirmAction,
     executeConfirmedAction,
     closeConfirmModal,
     toggleSelectAll,
+    isAllSelected, // Trả về isAllSelected để sử dụng trong component cha
   };
 }
