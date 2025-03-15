@@ -5,10 +5,8 @@
     </h2>
     <ToastNotification ref="toast" />
 
-    <!-- Form lọc -->
     <div
       class="bg-white shadow-lg rounded-lg p-5 mb-2 mt-2 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-      <!-- Ô tìm kiếm -->
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-1">Tìm kiếm</label>
         <input
@@ -19,7 +17,6 @@
         />
       </div>
 
-      <!-- Dropdown chọn tên nhà sản xuất -->
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-1">Tên nhà sản xuất</label>
         <select
@@ -30,10 +27,8 @@
           <option v-for="name in uniqueNhaSanXuatList" :key="name" :value="name">{{ name }}</option>
         </select>
       </div>
-
-      <!-- Nút chức năng -->
+      
       <div class="flex justify-end w-full col-span-full gap-2">
-        <!-- Button Đặt lại -->
         <button
           @click="resetFilters"
           class="flex items-center gap-2 px-4 py-2 bg-[#f97316] text-white font-semibold rounded-lg shadow-md hover:bg-orange-600 transition"

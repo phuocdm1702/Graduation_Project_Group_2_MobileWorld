@@ -14,6 +14,7 @@ import org.hibernate.annotations.Nationalized;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Date;
+import java.util.List;
 
 @Getter
 @Setter
@@ -25,8 +26,16 @@ import java.util.Date;
 @Table(name = "hoa_don")
 public class HoaDon {
     @Id
-    @Column(name = "id", nullable = false)
+    @Column(name = "id")
     private Integer id;
+    @OneToMany(mappedBy = "hoaDon")
+    private List<HoaDonChiTiet> chiTietHoaDon;
+
+    @OneToMany(mappedBy = "hoaDon")
+    private List<LichSuHoaDon> lichSuHoaDon;
+
+    @OneToMany(mappedBy = "hoaDon")
+    private List<HinhThucThanhToan> hinhThucThanhToan;
 
     @ManyToOne
     @JoinColumn(name = "id_khach_hang", referencedColumnName = "id")

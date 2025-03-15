@@ -10,7 +10,8 @@ import java.math.BigDecimal;
 @Getter
 @Setter
 public class HoaDonChiTietDTO {
-    private HoaDon idHoaDon;
+    private Integer id;
+    private Integer idHoaDon;
     private ChiTietSanPham idChiTietSanPham;
     private ImelDaBan idImelDaBan;
     private String ma;
@@ -18,7 +19,11 @@ public class HoaDonChiTietDTO {
     private Short trangThai;
     private String ghiChu;
 
-    public HoaDonChiTietDTO(HoaDon idHoaDon, ChiTietSanPham idChiTietSanPham, ImelDaBan idImelDaBan, String ma, BigDecimal gia, Short trangThai, String ghiChu) {
+    public HoaDonChiTietDTO() {
+
+    }
+    public HoaDonChiTietDTO(Integer id,Integer idHoaDon, ChiTietSanPham idChiTietSanPham, ImelDaBan idImelDaBan, String ma, BigDecimal gia, Short trangThai, String ghiChu) {
+        this.id = id;
         this.idHoaDon = idHoaDon;
         this.idChiTietSanPham = idChiTietSanPham;
         this.idImelDaBan = idImelDaBan;
@@ -27,4 +32,5 @@ public class HoaDonChiTietDTO {
         this.trangThai = trangThai;
         this.ghiChu = ghiChu;
     }
+
 }

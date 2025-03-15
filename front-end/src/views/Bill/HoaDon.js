@@ -1,35 +1,36 @@
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import axios from "axios";
 
 export default function useHoaDonLineList() {
   const dataTable = ref([]);
-  const currentPage = ref(1); // Trang hiện tại (bắt đầu từ 1)
-  const pageSize = ref(10); // Kích thước trang
-  const totalPages = ref(0); // Tổng số trang
-  const totalElements = ref(0); // Tổng số bản ghi
+  const currentPage = ref(0);
+  const pageSize = ref(7);
+  const totalElements = ref(0);
 
-  // Biến cho form lọc
-  const keyword = ref(""); // Thay searchQuery bằng keyword để đồng bộ với backend
+  // Filter variables
+  const keyword = ref("");
   const minAmount = ref(null);
   const maxAmount = ref(null);
   const selectedOrderType = ref("");
   const startDate = ref("");
   const endDate = ref("");
+  const isFiltering = ref(false);
 
-  // Định nghĩa cột động (điều chỉnh để phù hợp với HoaDonDTO)
+  const totalPages = computed(() => Math.ceil(totalElements.value / pageSize.value));
+
   const columns = [
     {
       label: "#",
       key: "index",
-      formatter: (_, __, index) => (currentPage.value - 1) * pageSize.value + index + 1,
+      formatter: (_, __, index) => currentPage.value * pageSize.value + index + 1,
     },
     { label: "Mã", key: "ma" },
-    { label: "Khách hàng", key: "idKhachHang.ten" },
     { label: "Nhân viên", key: "idNhanVien.ma" },
+    { label: "Khách hàng", key: "idKhachHang.ten" },
     { label: "SDT", key: "soDienThoaiKhachHang" },
     {
       label: "Tổng giá trị",
-      key: "tongTien",
+      key: "tongTienSauGiam",
       formatter: (value) => (value ? `${value.toLocaleString()} VND` : "0 VND"),
     },
     {
@@ -38,7 +39,7 @@ export default function useHoaDonLineList() {
       formatter: (phanTramGiamGia, item) => {
         if (!phanTramGiamGia || !item?.tongTien) return "0 VND";
         const giamGia = (item.tongTien * (phanTramGiamGia / 100)) || 0;
-        const formattedGiamGia = Math.round(giamGia / 1000) * 1000; // Làm tròn đến hàng nghìn
+        const formattedGiamGia = Math.round(giamGia / 1000) * 1000;
         return `(${phanTramGiamGia}%) ~ ${formattedGiamGia.toLocaleString()}đ`;
       },
     },
@@ -48,15 +49,11 @@ export default function useHoaDonLineList() {
       formatter: (value) => (value ? `${value.toLocaleString()} VND` : "0 VND"),
     },
     {
-      label: "Sau Giảm giá",
-      key: "tongTienSauGiam",
-      formatter: (value) => (value ? `${value.toLocaleString()} VND` : "0 VND"),
-    },
-    {
       label: "TG tạo",
       key: "ngayTao",
       formatter: (value) => (value ? new Date(value).toLocaleDateString() : "N/A"),
     },
+    { label: "Loại Đơn", key: "loaiDon" },
     {
       label: "Trạng thái",
       key: "trangThai",
@@ -65,102 +62,125 @@ export default function useHoaDonLineList() {
           value === 1 ? "Hoàn thành" : "Chờ xử lý"
         }</span>`,
     },
-    { label: "Loại Đơn", key: "loaiDon" },
     {
       label: "Thao tác",
       key: "actions",
       formatter: (value, item) => `
-        <a href="/hoa-don-chi-tiet/${item.id}" class="text-blue-500 hover:text-blue-700">
-          <i class="fa-solid fa-edit text-orange-500"></i>
+        <a href="/show-hoa-don/${item.id}" class="text-blue-500 hover:text-blue-700 mr-2">
+          <i class="fa-solid fa-edit" style="color: #f97316;"></i>
+        </a>
+        <a href="#" onclick="printInvoice(${item.id})" class="text-blue-500 hover:text-blue-700">
+          <i class="fa-solid fa-print" style="color: #f97316;"></i>
         </a>
       `,
     },
   ];
 
-  // Hàm lấy giá trị lồng nhau (nested value)
   const getNestedValue = (obj, path) => {
     return path.split(".").reduce((acc, part) => acc?.[part], obj) || null;
   };
 
-  // Hàm lấy dữ liệu từ API
   const fetchData = async () => {
     try {
       const res = await axios.get("http://localhost:8080/hoa-don/home", {
         params: {
-          page: currentPage.value -1, // Đồng bộ với backend (0-based)
-          pageSize: pageSize.value, // Đồng bộ với backend
+          page: currentPage.value,
+          size: pageSize.value,
         },
       });
-      console.log("Dữ liệu từ API:", res.data);
-      // Kiểm tra và gán dữ liệu từ HoaDonDTO
       dataTable.value = res.data.content || [];
-      totalPages.value = res.data.totalPages || 0;
       totalElements.value = res.data.totalElements || 0;
     } catch (error) {
       console.error("Lỗi khi gọi API:", error);
       dataTable.value = [];
-      totalPages.value = 0;
       totalElements.value = 0;
     }
   };
-  
 
-  // Hàm áp dụng bộ lọc (bao gồm tìm kiếm)
-  const applyFilters = () => {
-    currentPage.value = 1; // Reset về trang đầu tiên khi lọc hoặc tìm kiếm
-    fetchData().catch((error) => {
-      console.error("Lỗi trong applyFilters:", error);
-    });
+  const applyFilters = async () => {
+    const hasFilters = keyword.value || minAmount.value || maxAmount.value ||
+      selectedOrderType.value || startDate.value || endDate.value;
+
+    isFiltering.value = hasFilters;
+    currentPage.value = 0;
+
+    try {
+      const res = await axios.get("http://localhost:8080/hoa-don/home", {
+        params: {
+          page: currentPage.value,
+          size: pageSize.value,
+          keyword: keyword.value || undefined,
+          minAmount: minAmount.value || undefined,
+          maxAmount: maxAmount.value || undefined,
+          loaiDon: selectedOrderType.value || undefined,
+          startDate: startDate.value || undefined,
+          endDate: endDate.value || undefined,
+        },
+      });
+      dataTable.value = res.data.content || [];
+      totalElements.value = res.data.totalElements || 0;
+    } catch (error) {
+      console.error("Lỗi khi lọc dữ liệu:", error);
+      dataTable.value = [];
+      totalElements.value = 0;
+    }
   };
 
-  // Chuyển trang trước
-  const prevPage = () => {
-    if (currentPage.value > 1) {
+  const goToPage = async (page) => {
+    currentPage.value = page;
+    if (isFiltering.value) {
+      await applyFilters();
+    } else {
+      await fetchData();
+    }
+  };
+
+  const prevPage = async () => {
+    if (currentPage.value > 0) {
       currentPage.value--;
-      fetchData().catch((error) => {
-        console.error("Lỗi trong prevPage:", error);
-      });
+      if (isFiltering.value) {
+        await applyFilters();
+      } else {
+        await fetchData();
+      }
+    }
+  };
+
+  const nextPage = async () => {
+    if (currentPage.value < totalPages.value - 1) {
+      currentPage.value++;
+      if (isFiltering.value) {
+        await applyFilters();
+      } else {
+        await fetchData();
+      }
     }
   };
 
   const goToFirstPage = async () => {
-    if (currentPage.value > 1) {
-      currentPage.value = 1;
-      try {
+    if (currentPage.value > 0) {
+      currentPage.value = 0;
+      if (isFiltering.value) {
+        await applyFilters();
+      } else {
         await fetchData();
-      } catch (error) {
-        console.error("Lỗi trong goToFirstPage:", error);
       }
     }
   };
 
   const goToLastPage = async () => {
-    if (currentPage.value < totalPages.value) {
-      currentPage.value = totalPages.value;
-      try {
+    if (currentPage.value < totalPages.value - 1) {
+      currentPage.value = totalPages.value - 1;
+      if (isFiltering.value) {
+        await applyFilters();
+      } else {
         await fetchData();
-      } catch (error) {
-        console.error("Lỗi trong goToLastPage:", error);
       }
     }
   };
 
-
-  // Chuyển trang sau
-  const nextPage = () => {
-    if (currentPage.value < totalPages.value) {
-      currentPage.value++;
-      fetchData().catch((error) => {
-        console.error("Lỗi trong nextPage:", error);
-      });
-    }
-  };
-
-  // Gọi API khi component được mounted
   onMounted(() => {
-    fetchData().catch((error) => {
-      console.error("Lỗi trong onMounted:", error);
-    });
+    fetchData();
   });
 
   return {
@@ -168,9 +188,9 @@ export default function useHoaDonLineList() {
     currentPage,
     pageSize,
     totalPages,
-    prevPage,
-    nextPage,
-    keyword, // Trả về keyword thay vì searchQuery
+    totalElements,
+    goToPage,
+    keyword,
     minAmount,
     maxAmount,
     selectedOrderType,
@@ -179,7 +199,5 @@ export default function useHoaDonLineList() {
     applyFilters,
     columns,
     getNestedValue,
-    goToFirstPage,
-    goToLastPage
   };
 }
