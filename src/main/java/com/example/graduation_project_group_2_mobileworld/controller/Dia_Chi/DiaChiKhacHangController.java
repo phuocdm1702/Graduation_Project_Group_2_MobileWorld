@@ -79,4 +79,14 @@ public class DiaChiKhacHangController {
             return ResponseEntity.status(500).body(error);
         }
     }
+
+    @PutMapping("/setDefault/{id}")
+    public ResponseEntity<String> setDefaultAddress(@PathVariable Integer id, @RequestBody DiaChiKhachHang diaChi) {
+        try {
+            diachiServices.setMacDinh( id, diaChi.getMacDinh());
+            return ResponseEntity.ok("Cập nhật địa chỉ mặc định thành công!");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Lỗi khi cập nhật địa chỉ mặc định: " + e.getMessage());
+        }
+    }
     }

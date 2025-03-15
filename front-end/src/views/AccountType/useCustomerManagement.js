@@ -135,6 +135,7 @@ export default function useCustomerManagement() {
   // Table columns definition for DynamicTable
   const tableColumns = [
     { key: "index", label: "#", formatter: (value, item, index) => index + 1 },
+    { key: "ma", label: "Mã" },
     { key: "ten", label: "Tên" },
     { key: "idTaiKhoan.email", label: "Email" },
     { key: "idTaiKhoan.soDienThoai", label: "SDT" },

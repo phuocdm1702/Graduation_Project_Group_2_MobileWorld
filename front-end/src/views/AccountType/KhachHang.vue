@@ -99,7 +99,7 @@
 
     <ConfirmModal
       :show="showConfirmModal"
-      :message="'Bạn có chắc chắn muốn xóa khách hàng này không?'"
+      :message="'Bạn có chắc chắn muốn hủy kích hoạt của khách hàng này ?'"
       @confirm="confirmDelete"
       @cancel="showConfirmModal = false"
     />

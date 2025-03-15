@@ -99,5 +99,23 @@ public class DiaChiKhachHangServices {
         return resultDTO;
     }
 
-    // Thêm địa chỉ mới
+    public void setMacDinh(Integer id, Boolean macDinh) {
+        DiaChiKhachHang address = diaChiRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Địa chỉ không tồn tại với ID: " + id));
+
+        if (macDinh) {
+            // Tìm tất cả địa chỉ của khách hàng dựa trên idKhachHang của địa chỉ hiện tại
+            List<DiaChiKhachHang> allAddresses = diaChiRepo.findByIdKhachHang(address.getIdKhachHang());
+            for (DiaChiKhachHang addr : allAddresses) {
+                if (!addr.getId().equals(id)) { // Không đặt lại cho địa chỉ hiện tại
+                    addr.setMacDinh(false);
+                }
+            }
+            diaChiRepo.saveAll(allAddresses); // Lưu thay đổi
+        }
+
+        // Cập nhật địa chỉ được chọn thành mặc định
+        address.setMacDinh(macDinh);
+        diaChiRepo.save(address);
+    }
 }
