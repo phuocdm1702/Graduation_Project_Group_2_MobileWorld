@@ -1,16 +1,18 @@
 <template>
   <div class="show-hoa-don bg-white shadow-lg rounded-lg p-5 mt-2 mx-auto">
-    <h1 class="text-2xl font-semibold text-gray-700 mb-4">Chi Tiết Đơn Hàng #{{ id }}</h1>
+<!--    <h1 class="text-2xl font-semibold text-gray-700 mb-4">Chi Tiết Đơn Hàng #{{ id }}</h1>-->
 
     <!-- Thanh trạng thái -->
     <div class="timeline mb-6">
       <div class="timeline-container flex items-center justify-between relative">
         <div v-for="(status, index) in timelineStatuses" :key="index" class="timeline-item flex-1 text-center">
           <div class="relative">
-            <div :class="['w-10 h-10 rounded-full mx-auto flex items-center justify-center', status.completed ? 'bg-green-500 text-white' : 'bg-gray-300 text-gray-700']">
+            <div
+              :class="['w-10 h-10 rounded-full mx-auto flex items-center justify-center', status.completed ? 'bg-green-500 text-white' : 'bg-gray-300 text-gray-700']">
               <span class="text-sm">{{ index + 1 }}</span>
             </div>
-            <div v-if="index < timelineStatuses.length - 1" class="absolute top-5 left-1/2 w-full h-1 bg-gray-300" :class="{ 'bg-green-500': status.completed }"></div>
+            <div v-if="index < timelineStatuses.length - 1" class="absolute top-5 left-1/2 w-full h-1 bg-gray-300"
+                 :class="{ 'bg-green-500': status.completed }"></div>
           </div>
           <p class="mt-2 text-sm font-medium text-gray-700">{{ status.name }}</p>
           <p class="text-xs text-gray-500">{{ status.time || "N/A" }}</p>
@@ -43,6 +45,12 @@
         </div>
         <!-- Cột phải -->
         <div class="space-y-4">
+          <div class="flex items-start">
+            <span class="w-28 font-medium text-gray-700">Ngày đặt hàng:</span>
+            <span class="flex-1 text-gray-900">
+    {{ hoaDon?.ngayTao ? format(new Date(hoaDon.ngayTao), 'dd/MM/yyyy HH:mm:ss', {locale: vi}) : '' }}
+  </span>
+          </div>
           <div class="flex items-start">
             <span class="w-28 font-medium text-gray-700">Khách hàng:</span>
             <span class="flex-1 text-gray-900">{{ hoaDon?.idKhachHang?.ten || "Khách lẻ" }}</span>
@@ -85,7 +93,9 @@
       <div class="grid grid-cols-2 gap-4">
         <div>
           <p><strong>Tổng tiền hàng:</strong> {{ hoaDon?.tongTien?.toLocaleString() || "0" }} VND</p>
-          <p><strong>Giảm giá:</strong> {{ hoaDon?.idPhieuGiamGia?.phanTramGiamGia ? (hoaDon.tongTien * (hoaDon.idPhieuGiamGia.phanTramGiamGia / 100)).toLocaleString() : "0" }} VND</p>
+          <p><strong>Giảm giá:</strong> {{
+              hoaDon?.idPhieuGiamGia?.phanTramGiamGia ? (hoaDon.tongTien * (hoaDon.idPhieuGiamGia.phanTramGiamGia / 100)).toLocaleString() : "0"
+            }} VND</p>
         </div>
         <div>
           <p><strong>Tiền phải thanh toán:</strong> {{ hoaDon?.tongTienSauGiam?.toLocaleString() || "0" }} VND</p>
@@ -101,10 +111,11 @@
 </template>
 
 <script setup>
-import { defineProps, computed } from "vue";
+import {defineProps, computed} from "vue";
 import useShowHoaDon from "@/views/Bill/ShowHoaDon";
 import DynamicTable from "@/components/DynamicTable.vue";
-
+import { format } from 'date-fns';
+import { vi } from 'date-fns/locale'; // Thêm locale tiếng Việt
 const props = defineProps({
   id: {
     type: String,
@@ -112,14 +123,14 @@ const props = defineProps({
   },
 });
 
-const { hoaDon, getNestedValue, paymentHistoryColumns, productColumns } = useShowHoaDon(props.id);
+const {hoaDon, getNestedValue, paymentHistoryColumns, productColumns} = useShowHoaDon(props.id);
 
 // Dữ liệu giả lập cho timeline
 const timelineStatuses = computed(() => [
-  { name: "Đặt Hàng Thành Công", time: "15:45:11 - 22/01/2024", completed: true },
-  { name: "Chờ Xác Nhận", time: "15:45:11 - 22/01/2024", completed: true },
-  { name: "Đang Giao", time: null, completed: false },
-  { name: "Hoàn Thành", time: null, completed: false },
+  {name: "Đặt Hàng Thành Công", time: "15:45:11 - 22/01/2024", completed: true},
+  {name: "Chờ Xác Nhận", time: "15:45:11 - 22/01/2024", completed: true},
+  {name: "Đang Giao", time: null, completed: false},
+  {name: "Hoàn Thành", time: null, completed: false},
 ]);
 </script>
 

@@ -4,7 +4,7 @@ import axios from "axios";
 export default function useHoaDonLineList() {
   const dataTable = ref([]);
   const currentPage = ref(0);
-  const pageSize = ref(10);
+  const pageSize = ref(7);
   const totalElements = ref(0);
 
   // Filter variables

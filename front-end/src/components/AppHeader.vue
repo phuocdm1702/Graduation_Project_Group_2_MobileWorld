@@ -2,6 +2,7 @@
   <header
     class="flex items-center justify-between px-6 py-2 bg-white border-b-4 border-orange-500"
   >
+    <!-- Phần bên trái: Menu toggle và Breadcrumb -->
     <div class="flex items-center">
       <button
         @click="isOpen = true"
@@ -23,9 +24,24 @@
         </svg>
       </button>
 
-      
+      <!-- Thanh breadcrumb động -->
+      <nav class="ml-4 text-gray-600" v-if="breadcrumbItems.length">
+        <ol class="flex items-center space-x-2">
+          <li v-for="(item, index) in breadcrumbItems" :key="index">
+            <router-link
+              v-if="index < breadcrumbItems.length - 1"
+              :to="getLinkForBreadcrumb(index)"
+              class="hover:text-indigo-600 text-lg font-semibold text-gray-800 hover:underline transition-colors duration-200"
+            >{{ item }}</router-link
+            >
+            <span v-else class="text-lg font-semibold text-gray-900">{{ item }}</span>
+            <span v-if="index < breadcrumbItems.length - 1" class="before:content-['/'] before:mx-2 text-gray-400"></span>
+          </li>
+        </ol>
+      </nav>
     </div>
 
+    <!-- Phần bên phải: Thông báo và Avatar -->
     <div class="flex items-center">
       <div class="flex items-center">
         <div class="relative">
@@ -72,55 +88,9 @@
               <p class="text-sm mx-2">
                 <span class="font-bold" href="#">Evan Josh</span> replied on the
                 <span class="font-bold text-indigo-400" href="#"
-                  >Upload Image</span
+                >Upload Image</span
                 >
                 artical . 2m
-              </p>
-            </a>
-            <a
-              href="#"
-              class="flex items-center px-4 py-3 text-gray-600 hover:text-white hover:bg-indigo-600 -mx-2"
-            >
-              <img
-                class="h-8 w-8 rounded-full object-cover mx-1"
-                src="https://images.unsplash.com/photo-1531427186611-ecfd6d936c79?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=634&q=80"
-                alt="avatar"
-              />
-              <p class="text-sm mx-2">
-                <span class="font-bold" href="#">Slick Net</span> start
-                following you . 45m
-              </p>
-            </a>
-            <a
-              href="#"
-              class="flex items-center px-4 py-3 text-gray-600 hover:text-white hover:bg-indigo-600 -mx-2"
-            >
-              <img
-                class="h-8 w-8 rounded-full object-cover mx-1"
-                src="https://images.unsplash.com/photo-1450297350677-623de575f31c?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=334&q=80"
-                alt="avatar"
-              />
-              <p class="text-sm mx-2">
-                <span class="font-bold" href="#">Jane Doe</span> Like Your reply
-                on
-                <span class="font-bold text-indigo-400" href="#"
-                  >Test with TDD</span
-                >
-                artical . 1h
-              </p>
-            </a>
-            <a
-              href="#"
-              class="flex items-center px-4 py-3 text-gray-600 hover:text-white hover:bg-indigo-600 -mx-2"
-            >
-              <img
-                class="h-8 w-8 rounded-full object-cover mx-1"
-                src="https://images.unsplash.com/photo-1580489944761-15a19d654956?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=398&q=80"
-                alt="avatar"
-              />
-              <p class="text-sm mx-2">
-                <span class="font-bold" href="#">Abigail Bennett</span>
-                start following you . 3h
               </p>
             </a>
           </div>
@@ -229,10 +199,82 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import { useSidebar } from "../hooks/useSidebar";
+import { useRoute } from "vue-router";
 
 const dropdownOpen = ref(false);
 const { isOpen } = useSidebar();
 const notificationOpen = ref(false);
+
+// Lấy route hiện tại
+const route = useRoute();
+
+// Tính toán breadcrumb dựa trên meta của route
+const breadcrumbItems = computed(() => {
+  if (typeof route.meta.breadcrumb === "function") {
+    return route.meta.breadcrumb(route);
+  }
+  return route.meta?.breadcrumb || [];
+});
+
+// Hàm tạo link cho breadcrumb
+const getLinkForBreadcrumb = (index: number) => {
+  const items = breadcrumbItems.value;
+  const item = items[index];
+
+  switch (item) {
+    case "Thống kê":
+      return "/dashboard";
+    case "Phiếu giảm giá":
+      return "/phieu-giam-gia";
+    case "Đợt giảm giá":
+      return "/phieu-giam-gia/dot-giam-gia";
+    case "Thêm phiếu giảm giá":
+      return "/phieu-giam-gia/add-phieu-giam-gia";
+    case "Phiếu bảo hành":
+      return "/phieu-bao-hanh";
+    case "Lịch sử phiếu bảo hành":
+      return "/lich-su-bao-hanh";
+    case "Quản lý hóa đơn":
+      return "/hoa-don";
+    case "Lịch sử hóa đơn":
+      return "/lich-su-hoa-don";
+    case "Quản lý tài khoản":
+      return "/nhan-vien";
+    case "Nhân viên":
+      return "/nhan-vien";
+    case "Khách hàng":
+      return "/khach-hang";
+    case "Sản phẩm":
+      return "/san-pham";
+    case "Thương hiệu":
+      return "/san-pham/manufacturer";
+    case "Nhà sản xuất":
+      return "/san-pham/manufacturer";
+    case "Dòng sản phẩm":
+      return "/san-pham/product-line";
+    case "Màn hình":
+      return "/san-pham/man-hinh";
+    case "Bộ nhớ":
+      return "/san-pham/bo-nho-trong";
+    case "CPU & GPU":
+      return "/san-pham/cpu";
+    case "Camera":
+      return "/san-pham/camera-truoc";
+    case "Sạc":
+      return "/san-pham/sac/cong-nghe";
+    case "Imel":
+      return "/san-pham/imel";
+    default:
+      return "#";
+  }
+};
 </script>
+
+<style scoped>
+.breadcrumb a,
+.breadcrumb span {
+  /* text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1); /* Hiệu ứng bóng chữ (tùy chọn) */
+}
+</style>

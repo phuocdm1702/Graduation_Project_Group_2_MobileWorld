@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.Nationalized;
 
+import java.sql.Date;
 import java.sql.Time;
 import java.time.Instant;
 
@@ -39,7 +40,7 @@ public class LichSuHoaDon {
     private String hanhDong;
 
     @Column(name = "thoi_gian")
-    private Time thoiGian;
+    private Date thoiGian;
 
     @Column(name = "deleted")
     private Boolean deleted;
