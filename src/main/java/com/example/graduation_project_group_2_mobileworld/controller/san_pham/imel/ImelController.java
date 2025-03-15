@@ -1,9 +1,11 @@
 package com.example.graduation_project_group_2_mobileworld.controller.san_pham.imel;
 
 import com.example.graduation_project_group_2_mobileworld.dto.san_pham.imel.ImelDTO;
-import com.example.graduation_project_group_2_mobileworld.service.san_pham.Imel.ImelService;
+import com.example.graduation_project_group_2_mobileworld.service.san_pham.imel.ImelService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -15,7 +17,13 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/imel")
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(
+        origins = "http://localhost:3000",
+        methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.OPTIONS},
+        allowedHeaders = "*",
+        allowCredentials = "true",
+        maxAge = 3600
+)
 public class ImelController {
 
     private final ImelService service;
@@ -29,6 +37,16 @@ public class ImelController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size) {
         return ResponseEntity.ok(service.getAllImel(page, size));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getById(@PathVariable Integer id) {
+        try {
+            ImelDTO imel = service.getImelById(id);
+            return ResponseEntity.ok(imel);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", e.getMessage()));
+        }
     }
 
     @PostMapping
@@ -80,7 +98,7 @@ public class ImelController {
         }
         try {
             service.deleteMultipleImel(ids);
-            return ResponseEntity.ok(Map.of("message", "Xóa " + ids.size() + " imel thành công!"));
+            return ResponseEntity.ok(Map.of("message", "Xóa " + ids.size() + " Imel thành công!"));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
@@ -88,20 +106,37 @@ public class ImelController {
 
     @GetMapping("/search")
     public ResponseEntity<Page<ImelDTO>> search(
-            @RequestParam String keyword,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String imel,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size) {
-        return ResponseEntity.ok(service.searchImel(keyword, page, size));
+        Pageable pageable = PageRequest.of(page, size);
+        if (imel != null && !imel.isEmpty()) {
+            return ResponseEntity.ok(service.filterByImel(imel, pageable));
+        }
+        if (keyword != null && !keyword.isEmpty()) {
+            return ResponseEntity.ok(service.searchImel(keyword, page, size));
+        }
+        return ResponseEntity.ok(service.getAllImel(page, size));
+    }
+
+    @GetMapping("/all-names")
+    public ResponseEntity<List<String>> getAllImelNames() {
+        return ResponseEntity.ok(service.getAllImelNames());
     }
 
     @GetMapping("/exists/ma")
-    public ResponseEntity<Boolean> checkMa(@RequestParam String ma) {
-        return ResponseEntity.ok(service.existsByMa(ma));
+    public ResponseEntity<Boolean> checkMa(
+            @RequestParam String ma,
+            @RequestParam(required = false) Integer excludeId) {
+        return ResponseEntity.ok(service.existsByMa(ma, excludeId));
     }
 
     @GetMapping("/exists/imel")
-    public ResponseEntity<Boolean> checkImel(@RequestParam String imel) {
-        return ResponseEntity.ok(service.existsByImel(imel));
+    public ResponseEntity<Boolean> checkImel(
+            @RequestParam String imel,
+            @RequestParam(required = false) Integer excludeId) {
+        return ResponseEntity.ok(service.existsByImel(imel, excludeId));
     }
 
     private Map<String, String> getErrorMap(BindingResult result) {

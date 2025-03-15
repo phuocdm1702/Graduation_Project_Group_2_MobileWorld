@@ -1,16 +1,18 @@
-package com.example.graduation_project_group_2_mobileworld.service.san_pham.Imel;
+package com.example.graduation_project_group_2_mobileworld.service.san_pham.imel;
 
 import com.example.graduation_project_group_2_mobileworld.dto.san_pham.imel.ImelDTO;
 import com.example.graduation_project_group_2_mobileworld.entity.Imel;
 import com.example.graduation_project_group_2_mobileworld.repository.san_pham.imel.ImelRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class ImelService {
@@ -26,26 +28,35 @@ public class ImelService {
         return repository.findByDeletedFalse(pageable).map(this::toDTO);
     }
 
+    public ImelDTO getImelById(Integer id) {
+        Imel entity = repository.findByIdAndDeletedFalse(id)
+                .orElseThrow(() -> new RuntimeException("Imel không tồn tại hoặc đã bị xóa!"));
+        return toDTO(entity);
+    }
+
     @Transactional
     public ImelDTO createImel(ImelDTO dto) {
-        // Kiểm tra xem có bản ghi đã xóa mềm với ma hoặc imel không
+        if (repository.existsByMaAndDeletedFalse(dto.getMa())) {
+            throw new RuntimeException("Mã Imel đã tồn tại!");
+        }
+        if (repository.existsByImelAndDeletedFalse(dto.getImel())) {
+            throw new RuntimeException("Tên Imel đã tồn tại!");
+        }
+
         Optional<Imel> existingImelByMa = repository.findByMaAndDeletedTrue(dto.getMa());
-        Optional<Imel> existingImelByImel = repository.findByImelAndDeletedTrue(dto.getImel());
+        Optional<Imel> existingImelByName = repository.findByImelAndDeletedTrue(dto.getImel());
 
         if (existingImelByMa.isPresent()) {
-            // Khôi phục bản ghi đã xóa mềm với ma
             Imel entity = existingImelByMa.get();
             entity.setDeleted(false);
-            entity.setImel(dto.getImel()); // Cập nhật giá trị mới
+            entity.setImel(dto.getImel());
             return toDTO(repository.save(entity));
-        } else if (existingImelByImel.isPresent()) {
-            // Khôi phục bản ghi đã xóa mềm với imel
-            Imel entity = existingImelByImel.get();
+        } else if (existingImelByName.isPresent()) {
+            Imel entity = existingImelByName.get();
             entity.setDeleted(false);
-            entity.setMa(dto.getMa()); // Cập nhật giá trị mới
+            entity.setMa(dto.getMa());
             return toDTO(repository.save(entity));
         } else {
-            // Nếu không có bản ghi nào bị xóa mềm, tạo mới
             Imel entity = new Imel();
             entity.setMa(dto.getMa());
             entity.setImel(dto.getImel());
@@ -56,20 +67,25 @@ public class ImelService {
 
     @Transactional
     public ImelDTO updateImel(Integer id, ImelDTO dto) {
-        return repository.findById(id)
-                .filter(d -> !d.getDeleted())
-                .map(imel -> {
-                    imel.setMa(dto.getMa());
-                    imel.setImel(dto.getImel());
-                    return toDTO(repository.save(imel));
-                })
+        Imel entity = repository.findByIdAndDeletedFalse(id)
                 .orElseThrow(() -> new RuntimeException("Imel không tồn tại hoặc đã bị xóa!"));
+
+        if (!entity.getMa().equals(dto.getMa()) && repository.existsByMaAndDeletedFalse(dto.getMa(), id)) {
+            throw new RuntimeException("Mã Imel đã tồn tại!");
+        }
+
+        if (!entity.getImel().equals(dto.getImel()) && repository.existsByImelAndDeletedFalse(dto.getImel(), id)) {
+            throw new RuntimeException("Tên Imel đã tồn tại!");
+        }
+
+        entity.setMa(dto.getMa());
+        entity.setImel(dto.getImel());
+        return toDTO(repository.save(entity));
     }
 
     @Transactional
     public void deleteImel(Integer id) {
-        repository.findById(id)
-                .filter(d -> !d.getDeleted())
+        repository.findByIdAndDeletedFalse(id)
                 .ifPresentOrElse(
                         imel -> {
                             imel.setDeleted(true);
@@ -91,18 +107,61 @@ public class ImelService {
 
     public Page<ImelDTO> searchImel(String keyword, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        return repository.searchByKeyword(keyword, pageable).map(this::toDTO);
+        List<Imel> allResults = repository.findByDeletedFalse()
+                .stream()
+                .filter(i -> matchesKeyword(i, keyword))
+                .collect(Collectors.toList());
+        return toPage(allResults, pageable);
     }
 
-    public boolean existsByMa(String ma) {
-        return repository.existsByMa(ma);
+    public Page<ImelDTO> filterByImel(String imel, Pageable pageable) {
+        List<Imel> allResults = repository.findByDeletedFalse()
+                .stream()
+                .filter(i -> i.getImel().equalsIgnoreCase(imel))
+                .collect(Collectors.toList());
+        return toPage(allResults, pageable);
     }
 
-    public boolean existsByImel(String imel) {
-        return repository.existsByImel(imel);
+    public List<String> getAllImelNames() {
+        return repository.findByDeletedFalse()
+                .stream()
+                .map(Imel::getImel)
+                .distinct()
+                .sorted()
+                .collect(Collectors.toList());
+    }
+
+    public boolean existsByMa(String ma, Integer excludeId) {
+        if (excludeId != null) {
+            return repository.existsByMaAndDeletedFalse(ma, excludeId);
+        }
+        return repository.existsByMaAndDeletedFalse(ma);
+    }
+
+    public boolean existsByImel(String imel, Integer excludeId) {
+        if (excludeId != null) {
+            return repository.existsByImelAndDeletedFalse(imel, excludeId);
+        }
+        return repository.existsByImelAndDeletedFalse(imel);
+    }
+
+    private boolean matchesKeyword(Imel imel, String keyword) {
+        String keywordLower = keyword.toLowerCase().replaceAll("\\s+", "");
+        String maLower = imel.getMa().toLowerCase().replaceAll("\\s+", "");
+        String imelLower = imel.getImel().toLowerCase();
+        return maLower.contains(keywordLower) || imelLower.contains(keywordLower);
+    }
+
+    private Page<ImelDTO> toPage(List<Imel> results, Pageable pageable) {
+        int start = (int) pageable.getOffset();
+        int end = Math.min(start + pageable.getPageSize(), results.size());
+        List<ImelDTO> subList = start < end ? results.subList(start, end).stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList()) : List.of();
+        return new PageImpl<>(subList, pageable, results.size());
     }
 
     private ImelDTO toDTO(Imel entity) {
-        return new ImelDTO(entity.getId(), entity.getMa(), entity.getImel());
+        return new ImelDTO(entity.getId(), entity.getMa(), entity.getImel(), entity.getDeleted());
     }
 }

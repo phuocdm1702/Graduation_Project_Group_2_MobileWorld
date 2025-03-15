@@ -1,8 +1,5 @@
 package com.example.graduation_project_group_2_mobileworld.controller.phieu_bao_hanh;
 
-import com.example.graduation_project_group_2_mobileworld.dto.Imel_da_ban.ImelDaBanDTO;
-import com.example.graduation_project_group_2_mobileworld.dto.phieu_bao_hanh.PhieuBaoHanhDTO;
-import com.example.graduation_project_group_2_mobileworld.service.Imel_da_ban.ImelDaBanService;
 import com.example.graduation_project_group_2_mobileworld.service.phieu_bao_hanh.PhieuBaoHanhService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -21,23 +18,23 @@ import java.util.Map;
 @RestController
 @RequestMapping("/phieu-bao-hanh")
 public class PhieuBaoHanhController {
-    @Autowired
-    private PhieuBaoHanhService phieuBaoHanhService;
-
-    @GetMapping("/home")
-    public ResponseEntity<List<PhieuBaoHanhDTO>> getAllDataTable() {
-        return ResponseEntity.ok(phieuBaoHanhService.getAllDataPBH());
-    }
-
-    @GetMapping("/cbo")
-    public ResponseEntity<List<ImelDaBanDTO>> DataCBO() {
-        return ResponseEntity.ok(phieuBaoHanhService.getDataCBO());
-    }
-
-//    @PostMapping
-//    public ResponseEntity<PhieuBaoHanhDTO> createPhieuBaoHanh(@RequestBody PhieuBaoHanhDTO dto) {
-//        PhieuBaoHanhDTO created = phieuBaoHanhService.creatPhieuBaoHanh(dto);
-//        return ResponseEntity.ok(created);
+//    @Autowired
+//    private PhieuBaoHanhService phieuBaoHanhService;
+//
+//    @GetMapping("/home")
+//    public ResponseEntity<List<PhieuBaoHanhDTO>> getAllDataTable() {
+//        return ResponseEntity.ok(phieuBaoHanhService.getAllDataPBH());
 //    }
+//
+//    @GetMapping("/cbo")
+//    public ResponseEntity<List<ImelDaBanDTO>> DataCBO() {
+//        return ResponseEntity.ok(phieuBaoHanhService.getDataCBO());
+//    }
+//
+////    @PostMapping
+////    public ResponseEntity<PhieuBaoHanhDTO> createPhieuBaoHanh(@RequestBody PhieuBaoHanhDTO dto) {
+////        PhieuBaoHanhDTO created = phieuBaoHanhService.creatPhieuBaoHanh(dto);
+////        return ResponseEntity.ok(created);
+////    }
 
 }

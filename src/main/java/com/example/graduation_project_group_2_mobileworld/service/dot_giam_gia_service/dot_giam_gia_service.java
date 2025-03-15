@@ -46,6 +46,14 @@ public class dot_giam_gia_service {
         return repository.hienThi(pageable);
     }
 
+    public List<DotGiamGia> forExcel(){
+        return repository.ForExcel();
+    }
+
+    public List<ChiTietDotGiamGia> ForExcelCTDGG(){
+        return repo2.xuatExcel();
+    }
+
     public Page<DotGiamGia> hienThiFinish(Pageable pageable) {
         return repository.hienThiFinish(pageable);
     }
