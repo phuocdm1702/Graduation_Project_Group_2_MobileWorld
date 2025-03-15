@@ -1,66 +1,104 @@
+<!-- HoaDon.vue -->
 <template>
   <div class="mt-2 mx-auto">
-    <header>
-<!--      <h2 class="bg-white shadow-lg rounded-lg p-5 mb-2 mt-2 text-2xl font-semibold text-gray-700">-->
-<!--        Quản Lý Hóa Đơn-->
-<!--      </h2>-->
-    </header>
+    <ToastNotification ref="toast"/>
 
     <section>
       <!-- Form lọc -->
-      <div
-        class="bg-white shadow-lg rounded-lg p-5 mb-4 mt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-
+      <div class="bg-white shadow-lg rounded-lg p-5 mb-4 mt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
         <!-- Ô tìm kiếm -->
         <div>
           <label for="searchQuery" class="block text-sm font-medium text-gray-700 mb-1">Tìm kiếm hóa đơn</label>
-          <input v-model="searchQuery" id="searchQuery" type="text" placeholder="Tìm kiếm hóa đơn..."
-                 class="input-field"/>
+          <input
+            v-model="keyword"
+            id="searchQuery"
+            type="text"
+            placeholder="Tìm kiếm hóa đơn..."
+            class="input-field"
+            @input="currentPage = 0; applyFilters()"
+          />
         </div>
 
-        <!-- Dropdown chọn loại đơn -->
+        <!-- Combobox lọc theo loại đơn -->
         <div>
           <label for="orderType" class="block text-sm font-medium text-gray-700 mb-1">Loại đơn</label>
-          <select v-model="selectedOrderType" id="orderType" class="input-field">
+          <select
+            v-model="selectedOrderType"
+            id="orderType"
+            class="input-field"
+            @change="currentPage = 0; applyFilters()"
+          >
             <option value="">Tất cả loại đơn</option>
-            <option value="Online">Online</option>
-            <option value="Tại cửa hàng">Tại cửa hàng</option>
+            <option v-for="type in orderTypes" :key="type.value" :value="type.value">
+              {{ type.label }}
+            </option>
           </select>
         </div>
 
-        <!-- Thanh trượt chọn khoảng tiền -->
+        <!-- Thanh scroll lọc khoảng giá -->
         <div>
-          <label for="labels-range-input" class="block text-sm font-medium text-gray-700 mb-1">
-            Khoảng giá
-          </label>
-          <input id="labels-range-input" type="range" v-model="priceRange" min="100" max="1500"
-                 class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer 
-         accent-[#f97316]">
-          <div class="flex justify-between text-sm text-gray-500 dark:text-gray-400 mt-1">
-            <span>Min ($100)</span>
-            <span>Max ($1500)</span>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Khoảng giá</label>
+          <div class="relative pt-1">
+            <div class="flex mb-2 items-center justify-between">
+              <span class="text-xs font-semibold text-gray-700">{{ minAmount.toLocaleString() }} VND</span>
+              <span class="text-xs font-semibold text-gray-700">{{ maxAmount.toLocaleString() }} VND</span>
+            </div>
+            <div class="range-slider">
+              <input
+                type="range"
+                v-model.number="minAmount"
+                :min="minRange"
+                :max="maxRange"
+                class="range-input range-min"
+                @input="adjustMin(); currentPage = 0; applyFilters()"
+              />
+              <input
+                type="range"
+                v-model.number="maxAmount"
+                :min="minRange"
+                :max="maxRange"
+                class="range-input range-max"
+                @input="adjustMax(); currentPage = 0; applyFilters()"
+              />
+            </div>
           </div>
         </div>
 
         <!-- Chọn ngày bắt đầu -->
         <div>
           <label for="startDate" class="block text-sm font-medium text-gray-700 mb-1">Ngày bắt đầu</label>
-          <input v-model="startDate" id="startDate" type="date" class="input-field"/>
+          <input
+            v-model="startDate"
+            id="startDate"
+            type="date"
+            class="input-field"
+            @change="currentPage = 0; applyFilters()"
+          />
         </div>
 
         <!-- Chọn ngày kết thúc -->
         <div>
           <label for="endDate" class="block text-sm font-medium text-gray-700 mb-1">Ngày kết thúc</label>
-          <input v-model="endDate" id="endDate" type="date" class="input-field"/>
+          <input
+            v-model="endDate"
+            id="endDate"
+            type="date"
+            class="input-field"
+            @change="currentPage = 0; applyFilters()"
+          />
         </div>
 
+        <!-- Nút hành động -->
         <div class="flex justify-end w-full col-span-full gap-2">
-          <!-- Button Quét QR -->
           <button
-            class="flex items-center gap-2 px-4 py-2 bg-[#f97316] text-white font-semibold rounded-lg shadow-md hover:bg-orange-600 transition">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none"
-                 stroke="currentColor"
-                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            @click="exportExcel"
+            class="px-4 py-2 bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-green-700 transition flex items-center gap-2"
+          >
+            <i class="fa fa-file-excel text-white text-lg"></i>
+            Xuất Excel
+          </button>
+          <button class="flex items-center gap-2 px-4 py-2 bg-[#f97316] text-white font-semibold rounded-lg shadow-md hover:bg-orange-600 transition">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M3 3h4v4H3z"></path>
               <path d="M17 3h4v4h-4z"></path>
               <path d="M3 17h4v4H3z"></path>
@@ -72,30 +110,26 @@
             </svg>
             Quét QR
           </button>
-
-          <!-- Button Tạo Hóa Đơn -->
-          <button
-            class="flex items-center gap-2 px-4 py-2 bg-[#f97316] text-white font-semibold rounded-lg shadow-md hover:bg-orange-600 transition">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                 stroke="currentColor" class="w-5 h-5 mr-1">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
-            </svg>
-            Tạo Hóa Đơn
-          </button>
+          <RouterLink to="/create-hoa-don">
+            <button class="flex items-center gap-2 px-4 py-2 bg-[#f97316] text-white font-semibold rounded-lg shadow-md hover:bg-orange-600 transition">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-1">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
+              </svg>
+              Tạo Hóa Đơn
+            </button>
+          </RouterLink>
         </div>
       </div>
     </section>
 
     <section>
-      <!-- Bảng danh sách hóa đơn -->
-      <status-bar/>
-      <DynamicTable class="dynamic-table"
-                    :data="dataTable"
-                    :columns="columns"
-                    :get-nested-value="getNestedValue"
+      <status-bar />
+      <DynamicTable
+        class="dynamic-table"
+        :data="dataTable"
+        :columns="columns"
+        :get-nested-value="getNestedValue"
       />
-
-
       <div class="bg-white shadow-lg rounded-lg p-4 flex justify-center items-center mt-2">
         <Pagination
           :current-page="currentPage"
@@ -105,29 +139,48 @@
       </div>
     </section>
 
+    <ConfirmModal
+      :show="showConfirmModal"
+      :message="confirmMessage"
+      @confirm="executeConfirmedAction"
+      @cancel="closeConfirmModal"
+    />
   </div>
 </template>
 
 <script setup>
-import useHoaDonLineList from "@/views/Bill/HoaDon";
+import useHoaDonLineList from "@/views/Bill/HoaDon.js";
 import DynamicTable from "@/components/DynamicTable.vue";
-import Pagination from '@/components/Pagination.vue';
-import {useRouter} from "vue-router";
+import Pagination from "@/components/Pagination.vue";
 import StatusBar from "@/components/statusBar.vue";
+import ToastNotification from '@/components/ToastNotification.vue';
+import ConfirmModal from '@/components/ConfirmModal.vue';
 
-const router = useRouter();
 const {
+  toast,
   dataTable,
   currentPage,
-  goToPage,
   totalPages,
-  searchQuery,
-  priceRange,
+  keyword,
+  minAmount,
+  maxAmount,
   selectedOrderType,
   startDate,
   endDate,
+  orderTypes,
   columns,
   getNestedValue,
+  applyFilters,
+  goToPage,
+  exportExcel,
+  showConfirmModal,
+  confirmMessage,
+  executeConfirmedAction,
+  closeConfirmModal,
+  minRange,
+  maxRange,
+  adjustMin,
+  adjustMax
 } = useHoaDonLineList();
 </script>
 
@@ -139,5 +192,50 @@ const {
 .dynamic-table {
   border-top-left-radius: 0px;
   border-top-right-radius: 0px;
+}
+
+/* Range slider styles */
+.range-slider {
+  position: relative;
+  width: 100%;
+}
+
+.range-input {
+  position: absolute;
+  width: 100%;
+  height: 5px;
+  top: -5px;
+  background: none;
+  pointer-events: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  height: 17px;
+  width: 17px;
+  border-radius: 50%;
+  background: #f97316;
+  pointer-events: auto;
+  -webkit-appearance: none;
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.15);
+}
+
+input[type="range"]::-moz-range-thumb {
+  height: 17px;
+  width: 17px;
+  border-radius: 50%;
+  background: #f97316;
+  pointer-events: auto;
+  -moz-appearance: none;
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.15);
+}
+
+.range-min {
+  z-index: 1;
+}
+
+.range-max {
+  z-index: 2;
 }
 </style>

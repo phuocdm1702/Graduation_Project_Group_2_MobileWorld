@@ -15,6 +15,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,6 +48,21 @@ public class HoaDonService {
     public Page<HoaDonDTO> getHoaDonWithPagination(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         return hoaDonRepository.findAllWithPagination(pageable).map(this::toDTO);
+    }
+
+    public Page<HoaDonDTO> getHoaDonWithFilters(
+            int page, int size, String keyword, String loaiDon, Long minAmount, Long maxAmount, String startDate, String endDate) {
+        Pageable pageable = PageRequest.of(page, size);
+
+        // Chuyển đổi ngày từ String sang LocalDate (nếu có)
+        LocalDate start = (startDate != null && !startDate.isEmpty()) ?
+                LocalDate.parse(startDate, DateTimeFormatter.ofPattern("yyyy-MM-dd")) : null;
+        LocalDate end = (endDate != null && !endDate.isEmpty()) ?
+                LocalDate.parse(endDate, DateTimeFormatter.ofPattern("yyyy-MM-dd")) : null;
+
+        // Gọi repository với các tham số lọc
+        return hoaDonRepository.findHoaDonWithFilters(keyword, loaiDon, minAmount, maxAmount, start, end, pageable)
+                .map(this::toDTO);
     }
 
 

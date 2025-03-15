@@ -29,12 +29,25 @@ public class HoaDonController {
         this.hoaDonService = hoaDonService;
     }
 
-    //
+
+//    @GetMapping("/home")
+//    public ResponseEntity<Page<HoaDonDTO>> getAllHoaDon(
+//            @RequestParam(defaultValue = "0") int page,
+//            @RequestParam(defaultValue = "10") int size) {
+//        return ResponseEntity.ok(hoaDonService.getHoaDonWithPagination(page, size));
+//    }
+
     @GetMapping("/home")
     public ResponseEntity<Page<HoaDonDTO>> getAllHoaDon(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
-        return ResponseEntity.ok(hoaDonService.getHoaDonWithPagination(page, size));
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String loaiDon,
+            @RequestParam(required = false) Long minAmount,
+            @RequestParam(required = false) Long maxAmount,
+            @RequestParam(required = false) String startDate,
+            @RequestParam(required = false) String endDate) {
+        return ResponseEntity.ok(hoaDonService.getHoaDonWithFilters(page, size, keyword, loaiDon, minAmount, maxAmount, startDate, endDate));
     }
 
     @GetMapping("/detail/{id}")

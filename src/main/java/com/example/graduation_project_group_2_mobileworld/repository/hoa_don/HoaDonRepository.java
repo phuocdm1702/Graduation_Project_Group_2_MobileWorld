@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.Optional;
 
 @Repository
@@ -31,4 +32,20 @@ public interface HoaDonRepository extends JpaRepository<HoaDon, Integer> {
             "WHERE hd.id = :id")
     Optional<HoaDon> findHoaDonWithDetailsAndHistoryById(@Param("id") Integer id);
 
+    @Query("SELECT hd FROM HoaDon hd " +
+            "WHERE (:keyword IS NULL OR hd.ma LIKE %:keyword% OR hd.soDienThoaiKhachHang LIKE %:keyword%) " +
+            "AND (:loaiDon IS NULL OR hd.loaiDon = :loaiDon) " +
+            "AND (:minAmount IS NULL OR hd.tongTienSauGiam >= :minAmount) " +
+            "AND (:maxAmount IS NULL OR hd.tongTienSauGiam <= :maxAmount) " +
+            "AND (:startDate IS NULL OR hd.ngayTao >= :startDate) " +
+            "AND (:endDate IS NULL OR hd.ngayTao <= :endDate) " +
+            "ORDER BY hd.id DESC")
+    Page<HoaDon> findHoaDonWithFilters(
+            @Param("keyword") String keyword,
+            @Param("loaiDon") String loaiDon,
+            @Param("minAmount") Long minAmount,
+            @Param("maxAmount") Long maxAmount,
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate,
+            Pageable pageable);
 }

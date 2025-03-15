@@ -1,203 +1,305 @@
+// @/views/Bill/HoaDon.js
 import { ref, onMounted, computed } from "vue";
+import { useRouter } from "vue-router";
 import axios from "axios";
+import { saveAs } from 'file-saver';
 
 export default function useHoaDonLineList() {
+  const router = useRouter();
+  const toast = ref(null);
   const dataTable = ref([]);
+  const originalData = ref([]); // Lưu dữ liệu gốc
   const currentPage = ref(0);
-  const pageSize = ref(7);
+  const pageSize = ref(5);
   const totalElements = ref(0);
+  const orderTypes = ref([]);
 
   // Filter variables
   const keyword = ref("");
-  const minAmount = ref(null);
-  const maxAmount = ref(null);
+  const minAmount = ref(0);
+  const maxAmount = ref(10000000);
+  const minRange = ref(0);
+  const maxRange = ref(10000000);
   const selectedOrderType = ref("");
   const startDate = ref("");
   const endDate = ref("");
   const isFiltering = ref(false);
 
+  // Modal controls
+  const showConfirmModal = ref(false);
+  const confirmMessage = ref('');
+  const confirmedAction = ref(null);
+
   const totalPages = computed(() => Math.ceil(totalElements.value / pageSize.value));
 
-  const columns = [
+  const columns = ref([
     {
-      label: "#",
       key: "index",
-      formatter: (_, __, index) => currentPage.value * pageSize.value + index + 1,
+      label: "#",
+      formatter: (_, __, index) => currentPage.value * pageSize.value + index + 1
     },
-    { label: "Mã", key: "ma" },
-    { label: "Nhân viên", key: "idNhanVien.ma" },
-    { label: "Khách hàng", key: "idKhachHang.ten" },
-    { label: "SDT", key: "soDienThoaiKhachHang" },
+    { key: "ma", label: "Mã" },
+    { key: "idNhanVien.ma", label: "Nhân viên" },
+    { key: "idKhachHang.ten", label: "Khách hàng" },
+    { key: "soDienThoaiKhachHang", label: "SDT" },
     {
-      label: "Tổng giá trị",
       key: "tongTienSauGiam",
-      formatter: (value) => (value ? `${value.toLocaleString()} VND` : "0 VND"),
+      label: "Tổng giá trị",
+      formatter: (value) => value ? `${value.toLocaleString()} VND` : "0 VND"
     },
     {
-      label: "Tiền giảm",
       key: "idPhieuGiamGia.phanTramGiamGia",
+      label: "Tiền giảm",
       formatter: (phanTramGiamGia, item) => {
         if (!phanTramGiamGia || !item?.tongTien) return "0 VND";
         const giamGia = (item.tongTien * (phanTramGiamGia / 100)) || 0;
         const formattedGiamGia = Math.round(giamGia / 1000) * 1000;
         return `(${phanTramGiamGia}%) ~ ${formattedGiamGia.toLocaleString()}đ`;
-      },
+      }
     },
     {
-      label: "Phí",
       key: "phi_van_chuyen",
-      formatter: (value) => (value ? `${value.toLocaleString()} VND` : "0 VND"),
+      label: "Phí",
+      formatter: (value) => value ? `${value.toLocaleString()} VND` : "0 VND"
     },
     {
-      label: "TG tạo",
       key: "ngayTao",
-      formatter: (value) => (value ? new Date(value).toLocaleDateString() : "N/A"),
+      label: "TG tạo",
+      formatter: (value) => value ? new Date(value).toLocaleDateString() : "N/A"
     },
-    { label: "Loại Đơn", key: "loaiDon" },
+    { key: "loaiDon", label: "Loại Đơn" },
     {
-      label: "Trạng thái",
       key: "trangThai",
-      formatter: (value) =>
-        `<span class="${value === 1 ? "text-green-500" : "text-red-500"}">${
-          value === 1 ? "Hoàn thành" : "Chờ xử lý"
-        }</span>`,
+      label: "Trạng thái",
+      formatter: (value) => value === 1 ? "Hoàn thành" : "Chờ xử lý"
     },
     {
-      label: "Thao tác",
       key: "actions",
+      label: "Thao tác",
       formatter: (value, item) => `
-        <a href="/show-hoa-don/${item.id}" class="text-blue-500 hover:text-blue-700 mr-2">
+        <button class="text-blue-500 hover:text-blue-700 mr-2" onclick="window.viewUpdate(${item.id})">
           <i class="fa-solid fa-edit" style="color: #f97316;"></i>
-        </a>
-        <a href="#" onclick="printInvoice(${item.id})" class="text-blue-500 hover:text-blue-700">
+        </button>
+        <button class="text-blue-500 hover:text-blue-700" onclick="printInvoice(${item.id})">
           <i class="fa-solid fa-print" style="color: #f97316;"></i>
-        </a>
-      `,
-    },
-  ];
+        </button>
+      `
+    }
+  ]);
 
   const getNestedValue = (obj, path) => {
     return path.split(".").reduce((acc, part) => acc?.[part], obj) || null;
   };
 
-  const fetchData = async () => {
+  const fetchOrderTypes = async () => {
+    try {
+      const res = await axios.get("http://localhost:8080/hoa-don/order-types");
+      orderTypes.value = res.data || [];
+    } catch (error) {
+      console.error("Lỗi khi lấy danh sách loại đơn:", error);
+      orderTypes.value = [
+        { value: "online", label: "Online" },
+        { value: "trực tiếp", label: "Trực tiếp" }
+      ];
+    }
+  };
+
+  const fetchInitialData = async () => {
     try {
       const res = await axios.get("http://localhost:8080/hoa-don/home", {
         params: {
           page: currentPage.value,
-          size: pageSize.value,
-        },
+          size: pageSize.value
+        }
       });
       dataTable.value = res.data.content || [];
+      originalData.value = [...dataTable.value]; // Lưu dữ liệu gốc
       totalElements.value = res.data.totalElements || 0;
+
+      // Cập nhật maxRange dựa trên dữ liệu thực tế
+      const maxValue = Math.max(...dataTable.value.map(item => item.tongTienSauGiam || 0));
+      if (maxValue > maxRange.value) {
+        maxRange.value = Math.ceil(maxValue / 1000000) * 1000000;
+        maxAmount.value = maxRange.value;
+      }
     } catch (error) {
       console.error("Lỗi khi gọi API:", error);
+      toast.value?.kshowToast("error", "Không thể tải dữ liệu!");
       dataTable.value = [];
+      originalData.value = [];
       totalElements.value = 0;
     }
   };
 
-  const applyFilters = async () => {
-    const hasFilters = keyword.value || minAmount.value || maxAmount.value ||
-      selectedOrderType.value || startDate.value || endDate.value;
+  const searchAllFields = (data, searchKeyword) => {
+    if (!searchKeyword) return data;
+    const lowerKeyword = searchKeyword.toLowerCase();
 
-    isFiltering.value = hasFilters;
-    currentPage.value = 0;
+    return data.filter(item => {
+      // Các trường cần tìm kiếm
+      const fields = [
+        item.ma || "",
+        getNestedValue(item, "idNhanVien.ma") || "",
+        getNestedValue(item, "idKhachHang.ten") || "",
+        item.soDienThoaiKhachHang || "",
+        item.tongTienSauGiam ? item.tongTienSauGiam.toString() : "",
+        getNestedValue(item, "idPhieuGiamGia.phanTramGiamGia") ?
+          `${getNestedValue(item, "idPhieuGiamGia.phanTramGiamGia")} %` : "",
+        item.phi_van_chuyen ? item.phi_van_chuyen.toString() : "",
+        item.ngayTao ? new Date(item.ngayTao).toLocaleDateString() : "",
+        item.loaiDon || "",
+        item.trangThai === 1 ? "Hoàn thành" : "Chờ xử lý"
+      ];
 
+      // Kiểm tra xem có bất kỳ trường nào khớp với từ khóa không
+      return fields.some(field => field.toLowerCase().includes(lowerKeyword));
+    });
+  };
+
+  const fetchData = async () => {
     try {
-      const res = await axios.get("http://localhost:8080/hoa-don/home", {
-        params: {
-          page: currentPage.value,
-          size: pageSize.value,
-          keyword: keyword.value || undefined,
-          minAmount: minAmount.value || undefined,
-          maxAmount: maxAmount.value || undefined,
-          loaiDon: selectedOrderType.value || undefined,
-          startDate: startDate.value || undefined,
-          endDate: endDate.value || undefined,
-        },
-      });
-      dataTable.value = res.data.content || [];
+      const params = {
+        page: currentPage.value,
+        size: pageSize.value,
+        keyword: keyword.value || null,
+        loaiDon: selectedOrderType.value || null,
+        minAmount: minAmount.value !== minRange.value ? Number(minAmount.value) : null,
+        maxAmount: maxAmount.value !== maxRange.value ? Number(maxAmount.value) : null,
+        startDate: startDate.value || null,
+        endDate: endDate.value || null
+      };
+
+      // Gọi API với các tham số
+      const res = await axios.get("http://localhost:8080/hoa-don/home", { params });
+      let filteredData = res.data.content || [];
       totalElements.value = res.data.totalElements || 0;
+
+      // Nếu API không hỗ trợ tìm kiếm trên tất cả các trường, lọc phía client
+      if (keyword.value) {
+        filteredData = searchAllFields(filteredData, keyword.value);
+        totalElements.value = filteredData.length; // Cập nhật tổng số phần tử sau khi lọc
+      }
+
+      // Chỉ gọi API nếu có bộ lọc được áp dụng
+      const hasFilters =
+        keyword.value ||
+        selectedOrderType.value ||
+        minAmount.value !== minRange.value ||
+        maxAmount.value !== maxRange.value ||
+        startDate.value ||
+        endDate.value;
+
+      if (hasFilters) {
+        dataTable.value = filteredData;
+        isFiltering.value = true;
+      } else {
+        // Nếu không có bộ lọc, sử dụng dữ liệu gốc
+        dataTable.value = originalData.value;
+        totalElements.value = originalData.value.length;
+        isFiltering.value = false;
+      }
     } catch (error) {
-      console.error("Lỗi khi lọc dữ liệu:", error);
+      console.error("Lỗi khi gọi API:", error);
+      toast.value?.kshowToast("error", "Không thể tải dữ liệu!");
       dataTable.value = [];
       totalElements.value = 0;
     }
   };
 
-  const goToPage = async (page) => {
+  const applyFilters = () => {
+    fetchData();
+  };
+
+  const goToPage = (page) => {
     currentPage.value = page;
     if (isFiltering.value) {
-      await applyFilters();
+      fetchData();
     } else {
-      await fetchData();
+      fetchInitialData();
     }
   };
 
-  const prevPage = async () => {
-    if (currentPage.value > 0) {
-      currentPage.value--;
-      if (isFiltering.value) {
-        await applyFilters();
-      } else {
-        await fetchData();
-      }
+  const viewUpdate = (id) => {
+    router.push(`/show-hoa-don/${id}`);
+  };
+
+  const exportExcel = async () => {
+    try {
+      const response = await axios.get('http://localhost:8080/hoa-don/exportExcel', {
+        responseType: 'blob',
+      });
+      const blob = response.data;
+      saveAs(blob, 'hoaDon.xlsx');
+      toast.value?.kshowToast('success', 'Xuất Excel thành công!');
+    } catch (error) {
+      console.error('Lỗi khi xuất Excel:', error);
+      toast.value?.kshowToast('error', 'Không thể xuất file Excel!');
     }
   };
 
-  const nextPage = async () => {
-    if (currentPage.value < totalPages.value - 1) {
-      currentPage.value++;
-      if (isFiltering.value) {
-        await applyFilters();
-      } else {
-        await fetchData();
-      }
+  const confirmAction = (message, action) => {
+    confirmMessage.value = message;
+    confirmedAction.value = action;
+    showConfirmModal.value = true;
+  };
+
+  const executeConfirmedAction = () => {
+    if (confirmedAction.value) {
+      confirmedAction.value();
+    }
+    closeConfirmModal();
+  };
+
+  const closeConfirmModal = () => {
+    showConfirmModal.value = false;
+    confirmedAction.value = null;
+  };
+
+  // Range slider adjustments
+  const adjustMin = () => {
+    if (minAmount.value > maxAmount.value) {
+      minAmount.value = maxAmount.value;
     }
   };
 
-  const goToFirstPage = async () => {
-    if (currentPage.value > 0) {
-      currentPage.value = 0;
-      if (isFiltering.value) {
-        await applyFilters();
-      } else {
-        await fetchData();
-      }
+  const adjustMax = () => {
+    if (maxAmount.value < minAmount.value) {
+      maxAmount.value = minAmount.value;
     }
   };
 
-  const goToLastPage = async () => {
-    if (currentPage.value < totalPages.value - 1) {
-      currentPage.value = totalPages.value - 1;
-      if (isFiltering.value) {
-        await applyFilters();
-      } else {
-        await fetchData();
-      }
-    }
-  };
+  // Global functions
+  window.viewUpdate = viewUpdate;
 
   onMounted(() => {
-    fetchData();
+    fetchOrderTypes();
+    fetchInitialData();
   });
 
   return {
+    toast,
     dataTable,
     currentPage,
-    pageSize,
     totalPages,
-    totalElements,
-    goToPage,
     keyword,
     minAmount,
     maxAmount,
     selectedOrderType,
     startDate,
     endDate,
-    applyFilters,
+    orderTypes,
     columns,
     getNestedValue,
+    applyFilters,
+    goToPage,
+    exportExcel,
+    showConfirmModal,
+    confirmMessage,
+    executeConfirmedAction,
+    closeConfirmModal,
+    minRange,
+    maxRange,
+    adjustMin,
+    adjustMax
   };
 }
