@@ -15,6 +15,11 @@ export default function useEmployeeManagement() {
   const dataTable = ref([]);
   const originalData = ref([]); // Lưu trữ dữ liệu gốc để tìm kiếm
 
+  // Pagination
+  const currentPage = ref(0); // Trang hiện tại
+  const itemsPerPage = 10; // 5 bản ghi mỗi trang
+  const totalPages = ref(0); // Tổng số trang
+
   // Confirm modal
   const showConfirmModal = ref(false);
   const selectedNVId = ref(null);
@@ -40,15 +45,14 @@ export default function useEmployeeManagement() {
     try {
       const res = await axios.get("http://localhost:8080/nhan-vien/home");
       originalData.value = res.data || []; // Lưu trữ dữ liệu gốc
-
-      applyFilterAndSearch(); // Áp dụng lọc và tìm kiếm
+      applyFilterAndSearch(); // Áp dụng lọc, tìm kiếm và phân trang
     } catch (error) {
       console.error("Lỗi khi lấy danh sách nhân viên:", error);
       showToast("error", "Không thể lấy danh sách nhân viên!");
     }
   };
 
-  // Apply filter and search logic
+  // Apply filter, search, and pagination logic
   const applyFilterAndSearch = () => {
     let filteredData = [...originalData.value];
 
@@ -69,16 +73,30 @@ export default function useEmployeeManagement() {
       );
     }
 
-    dataTable.value = filteredData;
+    // Tính tổng số trang
+    totalPages.value = Math.ceil(filteredData.length / itemsPerPage);
+
+    // Áp dụng phân trang
+    const start = currentPage.value * itemsPerPage;
+    const end = start + itemsPerPage;
+    dataTable.value = filteredData.slice(start, end);
   };
 
   // Search handler
   const btnSearch = () => {
+    currentPage.value = 0; // Reset về trang đầu khi tìm kiếm
     applyFilterAndSearch();
   };
 
   // Filter handler
   const onFilterChange = () => {
+    currentPage.value = 0; // Reset về trang đầu khi lọc
+    applyFilterAndSearch();
+  };
+
+  // Pagination handler
+  const goToPage = (page) => {
+    currentPage.value = page;
     applyFilterAndSearch();
   };
 
@@ -117,7 +135,7 @@ export default function useEmployeeManagement() {
 
   // Định nghĩa các cột cho DynamicTable
   const tableColumns = [
-    { key: "index", label: "#", formatter: (value, item, index) => index + 1 },
+    { key: "index", label: "#", formatter: (value, item, index) => currentPage.value * itemsPerPage + index + 1 },
     { key: "ma", label: "Mã" },
     { key: "tenNhanVien", label: "Tên" },
     { key: "idTaiKhoan.email", label: "Email" },
@@ -206,9 +224,12 @@ export default function useEmployeeManagement() {
     fetchNhanVien,
     searchNV,
     btnSearch,
-    onFilterChange, // Trả về để sử dụng trong template khi filter thay đổi
-    deleteNv, // Hàm xóa nhân viên
+    onFilterChange,
+    deleteNv,
     tableColumns,
     getNestedValue,
+    currentPage, // Trả về để sử dụng trong template
+    totalPages,  // Trả về để sử dụng trong template
+    goToPage,    // Trả về để xử lý sự kiện thay đổi trang
   };
 }
