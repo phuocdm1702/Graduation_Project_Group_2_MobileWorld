@@ -24,6 +24,31 @@ export const useDotGiamGia = () => {
   const pageSizeCTSP = ref(10);
   const totalPagesCTSP = ref(0);
   
+  //Toast
+  const toast = ref(null);
+  const showConfirmModal = ref(false);
+  const confirmMessage = ref('');
+  const confirmedAction = ref(null);
+
+  
+  const confirmActionToast = (message, action) => {
+    confirmMessage.value = message;
+    confirmedAction.value = action;
+    showConfirmModal.value = true;
+  };
+
+  const executeConfirmedAction = () => {
+    if (confirmedAction.value) {
+      confirmedAction.value();
+    }
+    closeConfirmModal();
+  };
+
+  const closeConfirmModal = () => {
+    showConfirmModal.value = false;
+    confirmedAction.value = null;
+  };
+  
   
   const dotGiamGia = ref({
     id: null,
@@ -171,7 +196,7 @@ export const useDotGiamGia = () => {
         `;
       },
     },
-    { key: "index", label: "STT", formatter: (_, __, index) => (currentPageDSP.value * pageSizeDSP.value) + index + 1 },
+    { key: "index", label: "#", formatter: (_, __, index) => (currentPageDSP.value * pageSizeDSP.value) + index + 1 },
     { key: "ma", label: "Mã" },
     { key: "dongSanPham", label: "Dòng sản phẩm" },
   ]);
@@ -181,7 +206,7 @@ export const useDotGiamGia = () => {
   const columns2 = ref([
     {
       key: "index",
-      label: "STT",
+      label: "#",
       formatter: (_, __, index) => (currentPageCTSP.value * pageSizeCTSP.value) + index + 1,
     },
     {
@@ -266,7 +291,7 @@ export const useDotGiamGia = () => {
       return data;
     } catch (error) {
       console.error("Error calling API:", error);
-      alert("Sảy ra lỗi");
+      toast.value?.kshowToast("error", "Sảy ra lỗi");
       return false;
     }
   };
@@ -274,46 +299,50 @@ export const useDotGiamGia = () => {
   const validate = async function () {
     const today = new Date().toISOString().split("T")[0];
     if (dotGiamGia.value.ma == "") {
-      alert("Vui lòng nhập mã");
+      toast.value?.kshowToast("error", "Vui lòng nhập mã");
       return false;
     }
     if (edit.value == false) {
       const isDuplicate = await checkDuplicate('ma', dotGiamGia.value.ma);
       if (isDuplicate) {
-        alert("Mã đã tồn tại");
+        toast.value?.kshowToast("error", "Mã đã tồn tại");
         return false;
       }
     }
+    if(dotGiamGia.value.tenDotGiamGia==""){
+      toast.value?.kshowToast("error", "Vui lòng nhập tên đợt giảm giá");
+      return false;
+    }
     if (dotGiamGia.value.loaiGiamGiaApDung == "") {
-      alert("Vui lòng chọn loại giảm giá");
+      toast.value?.kshowToast("error", "Vui lòng chọn loại giảm giá");
       return false;
     }
     if (dotGiamGia.value.giaTriGiamGia == 0 && dotGiamGia.value.loaiGiamGiaApDung != "Tiền mặt") {
-      alert("Vui lòng nhập giá trị giảm giá");
+      toast.value?.kshowToast("error", "Vui lòng nhập giá trị giảm giá");
       return false;
     }
     if (dotGiamGia.value.soTienGiamToiDa == 0) {
-      alert("Vui lòng nhập số tiền giảm tối đa");
+      toast.value?.kshowToast("error", "Vui lòng nhập số tiền giảm tối đa");
       return false;
     }
     if (dotGiamGia.value.ngayBatDau == "") {
-      alert("Vui lòng chọn ngày bắt đầu");
+      toast.value?.kshowToast("error", "Vui lòng chọn ngày bắt đầu");
       return false;
     }
     if (dotGiamGia.value.ngayBatDau < today) {
-      alert("Ngày bắt đầu không được nhỏ hơn ngày hiện tại");
+      toast.value?.kshowToast("error", "Ngày bắt đầu không được nhỏ hơn ngày hiện tại"); 
       return false;
     }
     if (dotGiamGia.value.ngayKetThuc == "" || dotGiamGia.value.ngayKetThuc < dotGiamGia.value.ngayBatDau) {
-      alert("Vui lòng chọn lại ngày kết thúc");
+      toast.value?.kshowToast("error", "Vui lòng chọn lại ngày kết thúc");
       return false;
     }
     if (dotGiamGia.value.ngayKetThuc < dotGiamGia.value.ngayBatDau) {
-      alert("Ngày kết thúc không được nhỏ hơn ngày bắt đầu");
+      toast.value?.kshowToast("error", "Ngày kết thúc không được nhỏ hơn ngày bắt đầu");
       return false;
     }
     if (idDSPs.value.length === 0) {
-      alert("Vui lòng chọn dòng sản phẩm trong đợt giảm giá");
+      toast.value?.kshowToast("error", "Vui lòng chọn dòng sản phẩm trong đợt giảm giá");
       return false;
     }
     return true;
@@ -328,12 +357,14 @@ export const useDotGiamGia = () => {
     }
   };
 
+
   const confirmAction = async () => {
     const message = edit.value ? "Có muốn cập nhật dữ liệu không?" : "Có muốn thêm dữ liệu không?";
-    if (confirm(message)) {
+    confirmActionToast(message, async () => {
       await addData();
-    }
+    });
   };
+  
 
   const resetForm = () => {
     dotGiamGia.value = {
@@ -370,7 +401,7 @@ export const useDotGiamGia = () => {
             requestData,
             { headers: { "Content-Type": "application/json" } }
           );
-          alert("Sửa thành công");
+          toast.value?.kshowToast("success", "Sửa thành công")
           resetForm();
         } else {
           console.log("Dữ liệu gửi đi:", requestData);
@@ -379,12 +410,12 @@ export const useDotGiamGia = () => {
             requestData,
             { headers: { "Content-Type": "application/json" } }
           );
-          alert("Thêm thành công");
+          toast.value?.kshowToast("success", "Thêm thành công");
           resetForm();
         }
       } catch (error) {
         console.error("Lỗi khi thêm đợt giảm giá:", error);
-        alert("Thêm thất bại!");
+        toast.value?.kshowToast("error", "Thêm thất bại!");
       }
     }
   };
@@ -459,6 +490,7 @@ export const useDotGiamGia = () => {
   
   // Lưu instance để dùng trong hàm toàn cục
   useDotGiamGiaInstance = {
+    toast,
     currentPageDSP,
     changePageDSP,
     pageSizeDSP,
@@ -487,7 +519,13 @@ export const useDotGiamGia = () => {
     getNestedValue2,
     fetchCTSPData,
     displayedPagesDSP,
-    displayedPagesCTSP
+    displayedPagesCTSP,
+    showConfirmModal,
+    confirmMessage,
+    confirmedAction,
+    confirmActionToast,
+    executeConfirmedAction,
+    closeConfirmModal,
   };
 
   return useDotGiamGiaInstance;

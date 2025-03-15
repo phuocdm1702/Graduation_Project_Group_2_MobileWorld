@@ -1,5 +1,6 @@
 package com.example.graduation_project_group_2_mobileworld.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
@@ -23,6 +24,11 @@ public class KhachHang {
     @JoinColumn(name = "id_tai_khoan",referencedColumnName = "id")
     private TaiKhoan idTaiKhoan;
 
+    @ManyToOne
+    @JoinColumn(name = "id_dia_chi_khach_hang", referencedColumnName = "id")
+    @JsonManagedReference // Phía chính sẽ được serialize
+    private DiaChiKhachHang idDiaChiKH;
+
     @Size(max = 255)
     @Nationalized
     @Column(name = "ma")
@@ -45,10 +51,11 @@ public class KhachHang {
     private Date ngaySinh;
 
     @Column(name = "deleted")
-    private boolean deleted;
+    private Boolean deleted;
 
     @Column(name = "created_at")
-    private Instant createdAt;
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date createdAt;
 
     public @Size(max = 255) String getCccd() {
         return cccd;
@@ -66,6 +73,10 @@ public class KhachHang {
 
     @Column(name = "updated_by")
     private Integer updatedBy;
+
+    public void setDeleted(Boolean deleted) {
+        this.deleted = deleted;
+    }
 
     public KhachHang() {
     }
@@ -110,6 +121,14 @@ public class KhachHang {
         return gioiTinh;
     }
 
+    public DiaChiKhachHang getIdDiaChiKH() {
+        return idDiaChiKH;
+    }
+
+    public void setIdDiaChiKH(DiaChiKhachHang idDiaChiKH) {
+        this.idDiaChiKH = idDiaChiKH;
+    }
+
     public void setGioiTinh(Short gioiTinh) {
         this.gioiTinh = gioiTinh;
     }
@@ -122,19 +141,15 @@ public class KhachHang {
         this.ngaySinh = ngaySinh;
     }
 
-    public boolean getDeleted() {
+    public Boolean getDeleted() {
         return deleted;
     }
 
-    public void setDeleted(boolean deleted) {
-        this.deleted = deleted;
-    }
-
-    public Instant getCreatedAt() {
+    public Date getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(Instant createdAt) {
+    public void setCreatedAt(Date createdAt) {
         this.createdAt = createdAt;
     }
 

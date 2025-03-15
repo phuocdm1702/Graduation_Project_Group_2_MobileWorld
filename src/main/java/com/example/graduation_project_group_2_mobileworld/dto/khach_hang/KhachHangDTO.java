@@ -7,19 +7,37 @@ import java.util.Date;
 public class KhachHangDTO {
     private String ma;
     private String tenKH;
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
     private Date ngaySinh;
     private String anhKH;
     private String thanhPho;
     private String quan;
     private String phuong;
     private String diaChiCuThe;
+
+    public Date getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Date createdAt) {
+        this.createdAt = createdAt;
+    }
+
     private String cccd;
     private String email;
     private String soDienThoai;
     private String userName;
     private Boolean gioiTinh;
+    private Date createdAt;
 
+    public Boolean getMacDinh() {
+        return macDinh;
+    }
+
+    public void setMacDinh(Boolean macDinh) {
+        this.macDinh = macDinh;
+    }
+
+    private Boolean macDinh;
     public Boolean getGioiTinh() {
         return gioiTinh;
     }

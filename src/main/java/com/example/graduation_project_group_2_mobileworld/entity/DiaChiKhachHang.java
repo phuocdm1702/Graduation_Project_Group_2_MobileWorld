@@ -1,5 +1,6 @@
 package com.example.graduation_project_group_2_mobileworld.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -20,6 +21,7 @@ public class DiaChiKhachHang {
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "id_khach_hang", nullable = false)
+    @JsonBackReference // Phía này sẽ không được serialize để tránh vòng lặp
     private KhachHang idKhachHang;
 
     @Size(max = 255)

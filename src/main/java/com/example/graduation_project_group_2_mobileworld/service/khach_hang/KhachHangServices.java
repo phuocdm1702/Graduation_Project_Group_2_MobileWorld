@@ -7,6 +7,7 @@ import com.example.graduation_project_group_2_mobileworld.repository.khach_hang.
 import com.example.graduation_project_group_2_mobileworld.repository.tai_khoan.TaiKhoanRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,23 +29,7 @@ public class KhachHangServices {
         Optional<KhachHang> khachHang = khachHangRepository.findById(id);
         return khachHang.orElseThrow(() -> new RuntimeException("Không tìm thấy khách hàng với ID: " + id));
     }
-    public KhachHang updateKH(Integer id, KhachHang khachHang) {
-        Optional<KhachHang> existingKhachHang = khachHangRepository.findById(id);
-        if (existingKhachHang.isPresent()) {
-            KhachHang kh = existingKhachHang.get();
-            // Kiểm tra trùng mã với các khách hàng khác (trừ chính nó)
-            if (khachHangRepository.existsByMaAndNotId(khachHang.getMa(), id)) {
-                throw new RuntimeException("Mã khách hàng đã tồn tại: " + khachHang.getMa());
-            }
-            kh.setMa(khachHang.getMa());
-            kh.setTen(khachHang.getTen());
-            kh.setGioiTinh(khachHang.getGioiTinh());
-            kh.setNgaySinh(khachHang.getNgaySinh());
-            return khachHangRepository.save(kh);
-        } else {
-            throw new RuntimeException("Không tìm thấy khách hàng với ID: " + id);
-        }
-    }
+
 
     public boolean delete(Integer id) {
         Optional<KhachHang> optionalKH = khachHangRepository.findById(id);
@@ -99,6 +84,9 @@ public class KhachHangServices {
         taiKhoan = taiKhoanRepository.save(taiKhoan);
 
         KhachHang kh = new KhachHang();
+        if (kh.getCreatedAt() == null) {
+            kh.setCreatedAt(new Date()); // Tự động thêm nếu không có
+        }
         kh.setMa(generateMaKH());
         kh.setIdTaiKhoan(taiKhoan);
         kh.setTen(khachHangDTO.getTenKH());
@@ -106,17 +94,64 @@ public class KhachHangServices {
         kh.setCccd(khachHangDTO.getCccd());
         kh.setDeleted(false);
         kh.setGioiTinh(khachHangDTO.getGioiTinh() != null && khachHangDTO.getGioiTinh() ? (short) 1 : (short) 0);
-        kh = khachHangRepository.save(kh);
+        kh = khachHangRepository.save(kh); // Lưu trước để có ID
 
         DiaChiKhachHang dchi = new DiaChiKhachHang();
+        dchi.setMa(MaDchi());
         dchi.setThanhPho(khachHangDTO.getThanhPho());
         dchi.setQuan(khachHangDTO.getQuan());
         dchi.setPhuong(khachHangDTO.getPhuong());
         dchi.setDiaChiCuThe(khachHangDTO.getDiaChiCuThe());
-        dchi.setMa(MaDchi());
         dchi.setIdKhachHang(kh);
         diaChiKhachHangRepo.save(dchi);
 
+        kh.setIdDiaChiKH(dchi); // Gán lại địa chỉ khách hàng vào khachHang
         return khachHangRepository.save(kh);
     }
+
+    public Optional<KhachHang> findByIdKH(Integer id) {
+        return khachHangRepository.findById(id);
+    }
+
+
+    public KhachHang updateKhachHang(Integer id, KhachHangDTO khachHangDTO) {
+        return khachHangRepository.findById(id)
+                .map(existingNhanVien -> {
+                    existingNhanVien.setCccd(khachHangDTO.getCccd());
+                    existingNhanVien.setNgaySinh(khachHangDTO.getNgaySinh());
+                    // Lấy thông tin tài khoản qua idTaiKhoan
+                    if (existingNhanVien.getIdTaiKhoan() != null) {
+                        TaiKhoan taiKhoan = taiKhoanRepository.findById(existingNhanVien.getIdTaiKhoan().getId())
+                                .orElseThrow(() -> new RuntimeException("Tài khoản không tồn tại!"));
+
+                        taiKhoan.setEmail(khachHangDTO.getEmail());
+                        taiKhoan.setSoDienThoai(khachHangDTO.getSoDienThoai());
+                        taiKhoan.setDeleted(khachHangDTO.getGioiTinh());
+                        taiKhoanRepository.save(taiKhoan);
+                    }
+                    return khachHangRepository.save(existingNhanVien);
+                }).orElseThrow(() -> new RuntimeException("Nhân viên không tồn tại!"));
+}
+
+    public KhachHang updateDchi(Integer id, KhachHangDTO khachHangDTO) {
+        return khachHangRepository.findById(id)
+                .map(existingKhachHang -> {
+                    // Sửa logic nếu cần: CCCD hay tên khách hàng?
+                    existingKhachHang.setTen(khachHangDTO.getTenKH());
+                    if (existingKhachHang.getIdDiaChiKH() != null) {
+                        DiaChiKhachHang diachi = diaChiKhachHangRepo.findById(existingKhachHang.getIdDiaChiKH().getId())
+                                .orElseThrow(() -> new RuntimeException("Địa chỉ không tồn tại"));
+                        diachi.setDiaChiCuThe(khachHangDTO.getDiaChiCuThe());
+                        diachi.setPhuong(khachHangDTO.getPhuong());
+                        diachi.setThanhPho(khachHangDTO.getThanhPho());
+                        diachi.setQuan(khachHangDTO.getQuan());
+                        diaChiKhachHangRepo.save(diachi);
+                    }
+                    return khachHangRepository.save(existingKhachHang);
+                }).orElseThrow(() -> new RuntimeException("Khách hàng không tồn tại"));
+    }
+
+
+
+
 }

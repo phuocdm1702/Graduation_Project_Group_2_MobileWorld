@@ -1,15 +1,17 @@
 <template>
   <div>
     <!-- Breadcrumb -->
-    <Breadcrumb breadcrumb="Đợt Giảm Giá" />
+    <Breadcrumb breadcrumb="Đợt Giảm Giá"/>
 
     <div class="mt-2 mx-auto">
       <h2 class="bg-white shadow-lg rounded-lg p-5 mb-2 mt-2 text-2xl font-semibold text-gray-700">
         Quản Lý Đợt Giảm Giá
       </h2>
+      <ToastNotification ref="toast"/>
 
       <!-- Form lọc -->
-      <div class="bg-white shadow-lg rounded-lg p-5 mb-4 mt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+      <div
+        class="bg-white shadow-lg rounded-lg p-5 mb-2 mt-2 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
         <!-- Ô tìm kiếm -->
         <div>
           <label for="searchQuery" class="block text-sm font-medium text-gray-700 mb-1">Tìm kiếm đợt giảm giá</label>
@@ -47,7 +49,7 @@
             class="input-field"
             @change="currentPage = 1; fetchData()"
           >
-            <option value="">Các trạng thái hoạt động</option>
+            <option value="">Tất cả trạng thái hoạt động</option>
             <option value="0">Đang diễn ra</option>
             <option value="1">Sắp diễn ra</option>
           </select>
@@ -115,13 +117,21 @@
           <label for="deleted" class="block text-sm font-medium text-gray-700">Đã kết thúc</label>
         </div>
 
-        <!-- Nút Thêm Đợt Giảm Giá -->
+
         <div class="flex justify-end w-full col-span-full gap-2">
+          <!--Xuat Excel-->
+          <button @click="exportExcel"
+                  class="px-4 py-2 bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-600 transition flex items-center gap-2">
+            <i class="fa fa-file-excel text-white text-lg"></i>
+            Xuất Excel
+          </button>
+
+          <!--View Add-->
           <RouterLink to="/ViewAddDotGiamGia">
             <button
-              class="flex items-center gap-2 px-4 py-2 bg-[#f97316] text-white font-semibold rounded-lg shadow-md hover:bg-orange-600 transition"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-1">
+              class="flex items-center gap-2 px-4 py-2 bg-[#f97316] text-white font-semibold rounded-lg shadow-md hover:bg-orange-600 transition">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                   stroke="currentColor" class="w-5 h-5 mr-1">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
               </svg>
               Thêm Đợt Giảm Giá
@@ -129,6 +139,7 @@
           </RouterLink>
         </div>
       </div>
+
 
       <!-- Bảng danh sách đợt giảm giá -->
       <DynamicTable
@@ -148,17 +159,28 @@
       </footer>
     </div>
   </div>
+
+  <ConfirmModal
+    :show="showConfirmModal"
+    :message="confirmMessage"
+    @confirm="executeConfirmedAction"
+    @cancel="closeConfirmModal"
+  />
 </template>
 
 <script setup>
-import { useDiscountManagement } from './DotVoucher.js';
+import {useDiscountManagement} from './DotVoucher.js';
 import "@vuepic/vue-datepicker/dist/main.css";
 import DynamicTable from "@/components/DynamicTable.vue";
 import Pagination from '@/components/Pagination.vue';
+import ConfirmModal from '@/components/ConfirmModal.vue';
+import ToastNotification from '@/components/ToastNotification.vue';
+
 
 const {
+  toast,
   currentPage,
-  // pageSize,
+  pageSize,
   totalPages,
   searchQuery,
   filterType,
@@ -172,7 +194,12 @@ const {
   changePage,
   fetchData,
   columns,
-  getNestedValue
+  getNestedValue,
+  showConfirmModal,
+  confirmMessage,
+  executeConfirmedAction,
+  closeConfirmModal,
+  exportExcel
 } = useDiscountManagement();
 </script>
 

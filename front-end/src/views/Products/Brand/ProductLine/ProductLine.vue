@@ -1,5 +1,5 @@
 <template>
-  <div class="mt-2 max-w-screen-xl mx-auto">
+  <div class="mt-2 mx-auto">
     <h2 class="bg-white shadow-lg rounded-lg p-5 mb-2 mt-2 text-2xl font-semibold text-gray-700">
       Quản Lý Dòng Sản Phẩm
     </h2>
@@ -7,7 +7,7 @@
 
     <!-- Form lọc -->
     <div
-      class="bg-white shadow-lg rounded-lg p-5 mb-4 mt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+      class="bg-white shadow-lg rounded-lg p-5 mb-2 mt-2 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
       <!-- Ô tìm kiếm -->
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-1">Tìm kiếm</label>
@@ -48,7 +48,7 @@
 
         <!-- Button Thêm mới -->
         <button
-          @click="openAddModal"
+          @click="navigateToAddPage"
           class="flex items-center gap-2 px-4 py-2 bg-[#f97316] text-white font-semibold rounded-lg shadow-md hover:bg-orange-600 transition"
         >
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
@@ -61,7 +61,7 @@
     </div>
 
     <!-- Nút xóa các dòng sản phẩm đã chọn -->
-    <div v-if="selectedProducts.length" class="mb-6 flex justify-end">
+    <div v-if="selectedProducts.length" class="bg-white shadow-lg rounded-lg p-5 mb-4 mt-4 flex justify-end">
       <button
         @click="confirmDeleteSelected"
         class="flex items-center gap-2 px-4 py-2 bg-red-500 text-white font-semibold rounded-lg shadow-md hover:bg-red-600 transition"
@@ -80,7 +80,28 @@
       :data="productLines"
       :columns="columns"
       :get-nested-value="getNestedValue"
-    />
+      :selected-products="selectedProducts"
+      @toggle-select="toggleSelect"
+    >
+      <!-- Slot để render checkbox "Chọn tất cả" trong tiêu đề cột select -->
+      <template #header-select>
+        <input
+          type="checkbox"
+          class="w-4 h-4 rounded"
+          :checked="isAllSelected"
+          @change="toggleSelectAll"
+        >
+      </template>
+      <!-- Slot để render checkbox trong các dòng -->
+      <template #cell-select="{ item }">
+        <input
+          type="checkbox"
+          class="w-4 h-4 rounded"
+          :checked="selectedProducts.includes(item.id)"
+          @change="toggleSelect(item.id)"
+        >
+      </template>
+    </DynamicTable>
 
     <!-- Phân trang -->
     <footer class="bg-white shadow-lg rounded-lg p-4 flex justify-center items-center mt-2">
@@ -90,43 +111,6 @@
         @page-changed="goToPage"
       />
     </footer>
-
-    <!-- Modal thêm/sửa dòng sản phẩm -->
-    <ProductLineFormModal
-      :show="showAddModal || showEditModal"
-      :is-edit="showEditModal"
-      :entity-name="'Dòng Sản Phẩm'"
-      :entity-data="productLine"
-      :icon-class="showEditModal ? 'fa-edit' : 'fa-plus-circle'"
-      :icon-color="showEditModal ? 'text-blue-500' : 'text-green-500'"
-      @submit="handleFormSubmit"
-      @close="closeModal"
-    >
-      <template #default="{ entityData }">
-        <div class="grid grid-cols-1 gap-6">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Mã dòng sản phẩm</label>
-            <input
-              v-model.trim="entityData.ma"
-              type="text"
-              placeholder="Nhập mã dòng sản phẩm"
-              class="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-[var(--ring-color)] focus:border-transparent transition-all duration-200"
-              required
-            />
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Tên dòng sản phẩm</label>
-            <input
-              v-model.trim="entityData.dongSanPham"
-              type="text"
-              placeholder="Nhập tên dòng sản phẩm"
-              class="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-[var(--ring-color)] focus:border-transparent transition-all duration-200"
-              required
-            />
-          </div>
-        </div>
-      </template>
-    </ProductLineFormModal>
 
     <!-- Modal xác nhận -->
     <ConfirmModal
@@ -140,28 +124,25 @@
 
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue';
-import useProductLineList from './DongSanPham.js';
+import { useRouter } from 'vue-router';
+import useProductLineList from '@/views/Products/Brand/ProductLine/ProductLine.js';
 import ToastNotification from '@/components/ToastNotification.vue';
 import Pagination from '@/components/Pagination.vue';
-import ProductLineFormModal from '@/components/FormModal.vue';
 import ConfirmModal from '@/components/ConfirmModal.vue';
 import DynamicTable from '@/components/DynamicTable.vue';
 import axios from 'axios';
 
+const router = useRouter();
+
 const {
   toast,
   productLines,
-  productLine,
   searchKeyword,
   searchDongSanPham,
   currentPage,
-  pageSize, // Đảm bảo bạn có pageSize từ useProductLineList
-  totalItems,
+  pageSize,
   selectedProducts,
-  selectAll,
   isSearching,
-  showAddModal,
-  showEditModal,
   showConfirmModal,
   confirmMessage,
   totalPages,
@@ -170,14 +151,6 @@ const {
   searchProductLine,
   resetSearch,
   checkDuplicate,
-  saveProductLine,
-  updateProductLine,
-  deleteProductLine,
-  deleteSelectedProducts,
-  openAddModal,
-  openEditModal,
-  closeModal,
-  handleFormSubmit,
   confirmDelete,
   confirmDeleteSelected,
   confirmAction,
@@ -185,6 +158,10 @@ const {
   closeConfirmModal,
   toggleSelectAll,
 } = useProductLineList();
+
+const navigateToAddPage = () => {
+  router.push('/product-line/add');
+};
 
 const getNestedValue = (obj, path) => {
   return path.split('.').reduce((acc, part) => acc && acc[part], obj);
@@ -207,8 +184,23 @@ const resetFilters = () => {
   resetSearch();
 };
 
+// Logic để kiểm tra trạng thái của checkbox "Chọn tất cả"
+const isAllSelected = computed(() => {
+  if (productLines.value.length === 0) return false;
+  return productLines.value.every(item => selectedProducts.value.includes(item.id));
+});
+
+// Hàm xử lý sự kiện toggle select cho từng dòng
+const toggleSelect = (id) => {
+  if (selectedProducts.value.includes(id)) {
+    selectedProducts.value = selectedProducts.value.filter(selectedId => selectedId !== id);
+  } else {
+    selectedProducts.value.push(id);
+  }
+};
+
 watch([searchKeyword, searchDongSanPham], () => {
-  currentPage.value = 0; // Reset về trang đầu khi thay đổi bộ lọc
+  currentPage.value = 0;
   if (searchKeyword.value || searchDongSanPham.value) {
     isSearching.value = true;
     searchProductLine();
@@ -218,21 +210,14 @@ watch([searchKeyword, searchDongSanPham], () => {
   }
 });
 
-// Định nghĩa các cột cho bảng
 const columns = [
   {
     key: 'select',
-    label: '',
-    formatter: (value, item) => {
-      return `
-        <input type="checkbox" value="${item.id}" class="w-4 h-4 rounded" ${selectedProducts.value.includes(item.id) ? 'checked' : ''} onchange="document.dispatchEvent(new CustomEvent('toggleSelect', { detail: ${item.id} }))">
-      `;
-    },
+    label: '', // Không cần cung cấp label nữa vì slot sẽ xử lý
   },
   {
-    key: 'stt',
-    label: 'STT',
-    // Sửa lại logic tính STT để tiếp tục tăng dựa trên trang hiện tại
+    key: '#',
+    label: '#',
     formatter: (value, item, index) => {
       return (currentPage.value * pageSize.value) + index + 1;
     },
@@ -255,8 +240,8 @@ const columns = [
       const safeItem = JSON.stringify(item);
       return `
         <div class="space-x-4">
-          <button class="text-blue-600 hover:text-blue-800 transition" data-item='${safeItem}' onclick="document.dispatchEvent(new CustomEvent('openEditModal', { detail: JSON.parse(this.dataset.item) }))">
-            <i class="fa-solid fa-edit"></i>
+          <button class="text-orange-600 hover:text-orange-800 transition" data-item='${safeItem}' onclick="document.dispatchEvent(new CustomEvent('openEditModal', { detail: JSON.parse(this.dataset.item) }))">
+            <i class="fa-solid fa-edit text-orange-500"></i>
           </button>
           <button class="text-red-600 hover:text-red-800 transition" data-id="${item.id}" onclick="document.dispatchEvent(new CustomEvent('confirmDelete', { detail: this.dataset.id }))">
             <i class="fa-solid fa-trash"></i>
@@ -269,18 +254,10 @@ const columns = [
 
 const handleCustomEvents = () => {
   document.addEventListener('openEditModal', (event) => {
-    openEditModal(event.detail);
+    router.push(`/product-line/edit/${event.detail.id}`);
   });
   document.addEventListener('confirmDelete', (event) => {
     confirmDelete(event.detail);
-  });
-  document.addEventListener('toggleSelect', (event) => {
-    const id = event.detail;
-    if (selectedProducts.value.includes(id)) {
-      selectedProducts.value = selectedProducts.value.filter((selectedId) => selectedId !== id);
-    } else {
-      selectedProducts.value.push(id);
-    }
   });
 };
 
@@ -300,9 +277,5 @@ handleCustomEvents();
 .dynamic-table {
   border-top-left-radius: 0px;
   border-top-right-radius: 0px;
-}
-
-.fixed.inset-0 {
-  overflow-y: auto;
 }
 </style>

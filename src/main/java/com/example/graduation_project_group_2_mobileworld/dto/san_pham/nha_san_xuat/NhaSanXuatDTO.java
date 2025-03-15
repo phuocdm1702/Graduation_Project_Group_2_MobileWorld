@@ -19,9 +19,13 @@ public class NhaSanXuatDTO {
     @Size(max = 255, message = "Tên nhà sản xuất không được vượt quá 255 ký tự")
     private String nhaSanXuat;
 
-    public NhaSanXuatDTO(Integer id, String ma, String nhaSanXuat) {
+    private Boolean deleted;
+
+
+    public NhaSanXuatDTO(Integer id, String ma, String nhaSanXuat, boolean deleted) {
         this.id = id;
         this.ma = ma;
         this.nhaSanXuat = nhaSanXuat;
+        this.deleted = deleted;
     }
 }

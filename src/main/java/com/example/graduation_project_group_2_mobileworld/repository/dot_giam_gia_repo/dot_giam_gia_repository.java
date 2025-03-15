@@ -21,6 +21,9 @@ public interface dot_giam_gia_repository extends JpaRepository<DotGiamGia, Integ
     @Query("SELECT dgg FROM DotGiamGia dgg WHERE dgg.deleted = false")
     public Page<DotGiamGia> hienThi(Pageable pageable);
 
+    @Query("Select dgg From DotGiamGia dgg")
+    public List<DotGiamGia> ForExcel();
+
     @Query("SELECT dgg FROM DotGiamGia dgg WHERE dgg.deleted = true")
     public Page<DotGiamGia> hienThiFinish(Pageable pageable);
 
