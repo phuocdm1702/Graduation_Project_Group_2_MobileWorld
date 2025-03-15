@@ -28,6 +28,16 @@ public class KhachHangDTO {
     private String userName;
     private Boolean gioiTinh;
     private Date createdAt;
+
+    public Boolean getMacDinh() {
+        return macDinh;
+    }
+
+    public void setMacDinh(Boolean macDinh) {
+        this.macDinh = macDinh;
+    }
+
+    private Boolean macDinh;
     public Boolean getGioiTinh() {
         return gioiTinh;
     }

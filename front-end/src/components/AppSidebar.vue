@@ -453,10 +453,10 @@ const productCategories = [
     path: "/san-pham/chi-tiet",
     route: "Chi Tiết Sản Phẩm",
   },
-  { name: "Nhà Sản Xuất", path: "/nha-san-xuat", route: "Nhà Sản Xuất" },
-  { name: "Imel", path: "/imel", route: "ImelImel" },
+  { name: "Nhà Sản Xuất", path: "/manufacturer", route: "manufacturer" },
+  { name: "imel", path: "/imel", route: "imel" },
   { name: "Imel đã bán", path: "/imel-da-ban", route: "Imel đã bán" },
-  { name: "Dòng Sản Phẩm", path: "/dong-san-pham", route: "Dòng Sản Phẩm" },
+  { name: "Dòng Sản Phẩm", path: "/product-line", route: "product-line" },
   { name: "Màn Hình", path: "/man-hinh", route: "Màn Hình" },
   {
     name: "Công Nghệ Màn Hình",

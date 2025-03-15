@@ -65,6 +65,8 @@ public class NhanVienServices {
     }
     //themnhanvien
     public NhanVien addNhanVien(NhanVienDTO dto) {
+
+
         QuyenHan quyenHan = new QuyenHan();;
         quyenHan.setId(3);
         TaiKhoan taiKhoan = new TaiKhoan();
@@ -78,6 +80,9 @@ public class NhanVienServices {
         taiKhoan = taiKhoanRepository.save(taiKhoan);
 
         NhanVien nhanVien = new NhanVien();
+        if (nhanVien.getCreatedAt() == null) {
+            nhanVien.setCreatedAt(new Date()); // Tự động thêm nếu không có
+        }
         nhanVien.setMa(generateMaNhanVien());
         nhanVien.setIdTaiKhoan(taiKhoan);
         nhanVien.setTenNhanVien(dto.getTenNhanVien());

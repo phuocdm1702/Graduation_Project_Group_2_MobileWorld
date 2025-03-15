@@ -4,7 +4,9 @@
       <thead>
       <tr class="bg-gray-100 text-gray-700 text-sm font-semibold">
         <th v-for="column in columns" :key="column.key" class="th-cell">
-          {{ column.label }}
+          <slot :name="`header-${column.key}`" :column="column">
+            <span>{{ column.label }}</span>
+          </slot>
         </th>
       </tr>
       </thead>
@@ -16,8 +18,17 @@
       </tr>
       <tr v-else v-for="(item, index) in data" :key="item.id" class="text-gray-700 border-b hover:bg-gray-50">
         <td v-for="column in columns" :key="column.key" class="td-cell">
-          <span v-if="column.key === 'trangThai'">
-            <!-- Thay checkbox bằng chữ có viền và màu -->
+          <template v-if="column.key === 'select'">
+            <slot :name="`cell-${column.key}`" :item="item" :index="index">
+              <input
+                type="checkbox"
+                class="w-4 h-4 rounded"
+                :checked="isSelected(item.id)"
+                @change="toggleSelect(item.id)"
+              >
+            </slot>
+          </template>
+          <span v-else-if="column.key === 'trangThai'">
             <span
               :class="{
                 'bg-gray-200 text-red-500': item.trangThai,
@@ -39,9 +50,9 @@
 </template>
 
 <script setup>
-import { defineProps } from 'vue';
+import { defineProps, defineEmits } from 'vue';
 
-defineProps({
+const props = defineProps({
   data: {
     type: Array,
     required: true,
@@ -54,7 +65,22 @@ defineProps({
     type: Function,
     required: true,
   },
+  selectedProducts: {
+    type: Array,
+    required: false, // Không bắt buộc
+    default: () => [], // Giá trị mặc định là mảng rỗng
+  },
 });
+
+const emit = defineEmits(['toggle-select']);
+
+const isSelected = (id) => {
+  return props.selectedProducts.includes(id);
+};
+
+const toggleSelect = (id) => {
+  emit('toggle-select', id);
+};
 </script>
 
 <style scoped>
