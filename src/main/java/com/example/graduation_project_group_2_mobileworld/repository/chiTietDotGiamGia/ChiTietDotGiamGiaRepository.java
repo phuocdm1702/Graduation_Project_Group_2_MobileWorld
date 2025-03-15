@@ -11,6 +11,9 @@ import java.math.BigDecimal;
 import java.util.List;
 
 public interface ChiTietDotGiamGiaRepository extends JpaRepository<ChiTietDotGiamGia, Integer> {
+    @Query("Select ctdgg From ChiTietDotGiamGia ctdgg")
+    List<ChiTietDotGiamGia> xuatExcel();
+
     @Query("SELECT c FROM ChiTietDotGiamGia c WHERE c.idDongSanPham = :idDongSanPham AND c.dotGiamGia = :dotGiamGia AND c.deleted = false")
     List<ChiTietDotGiamGia> findByIdDongSanPhamAndDotGiamGia(@Param("idDongSanPham") DongSanPham idDongSanPham,
                                                        @Param("dotGiamGia") DotGiamGia dotGiamGia);

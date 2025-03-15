@@ -196,7 +196,7 @@ export const useDotGiamGia = () => {
         `;
       },
     },
-    { key: "index", label: "STT", formatter: (_, __, index) => (currentPageDSP.value * pageSizeDSP.value) + index + 1 },
+    { key: "index", label: "#", formatter: (_, __, index) => (currentPageDSP.value * pageSizeDSP.value) + index + 1 },
     { key: "ma", label: "Mã" },
     { key: "dongSanPham", label: "Dòng sản phẩm" },
   ]);
@@ -206,7 +206,7 @@ export const useDotGiamGia = () => {
   const columns2 = ref([
     {
       key: "index",
-      label: "STT",
+      label: "#",
       formatter: (_, __, index) => (currentPageCTSP.value * pageSizeCTSP.value) + index + 1,
     },
     {

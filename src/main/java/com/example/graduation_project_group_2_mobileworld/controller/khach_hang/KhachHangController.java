@@ -45,6 +45,7 @@ public class KhachHangController {
         }
     }
 
+
     @GetMapping("/detail/{id}")
     public ResponseEntity<?> getNhanVienDetail(@PathVariable Integer id) {
         Optional<KhachHang> khachHang = khachHangServices.findByIdKH(id);
@@ -83,6 +84,10 @@ public class KhachHangController {
         }
         return ResponseEntity.badRequest().body("Khách hàng không tồn tại");
     }
+
+
+
+
 
 
 }

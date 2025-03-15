@@ -84,6 +84,9 @@ public class KhachHangServices {
         taiKhoan = taiKhoanRepository.save(taiKhoan);
 
         KhachHang kh = new KhachHang();
+        if (kh.getCreatedAt() == null) {
+            kh.setCreatedAt(new Date()); // Tự động thêm nếu không có
+        }
         kh.setMa(generateMaKH());
         kh.setIdTaiKhoan(taiKhoan);
         kh.setTen(khachHangDTO.getTenKH());
@@ -99,7 +102,7 @@ public class KhachHangServices {
         dchi.setQuan(khachHangDTO.getQuan());
         dchi.setPhuong(khachHangDTO.getPhuong());
         dchi.setDiaChiCuThe(khachHangDTO.getDiaChiCuThe());
-        dchi.setIdKhachHang(kh); // Gán ID khách hàng sau khi đã lưu kh
+        dchi.setIdKhachHang(kh);
         diaChiKhachHangRepo.save(dchi);
 
         kh.setIdDiaChiKH(dchi); // Gán lại địa chỉ khách hàng vào khachHang
@@ -147,4 +150,8 @@ public class KhachHangServices {
                     return khachHangRepository.save(existingKhachHang);
                 }).orElseThrow(() -> new RuntimeException("Khách hàng không tồn tại"));
     }
+
+
+
+
 }

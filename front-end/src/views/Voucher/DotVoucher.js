@@ -1,6 +1,7 @@
 import axios from "axios";
 import { onMounted, ref, watch } from "vue";
 import { useRouter } from "vue-router";
+import {saveAs} from 'file-saver';
 
 export function useDiscountManagement() {
   const toast = ref(null);
@@ -165,12 +166,32 @@ export function useDiscountManagement() {
     }
   };
 
+
+  const exportExcel = async () => {
+    try {
+      const response = await axios.get('http://localhost:8080/dot_giam_gia/exportExcel', {
+        responseType: 'blob',
+      });
+      const blob = response.data;
+      saveAs(blob, 'dotGiamGia.xlsx')
+    } catch (error) {
+      console.error('Lỗi khi xuất Excel:', error);
+      if (error.response) {
+        const errorText = await error.response.data.text();
+        toast.value?.kshowToast('error', `Không thể xuất file Excel: ${errorText}`);
+      } else {
+        toast.value?.kshowToast('error', 'Không thể xuất file Excel!');
+      }
+    }
+  };
+
+  
   // Định nghĩa biến toàn cục
   window.confirmDelete = confirmDelete;
   window.viewUpdate = viewUpdate;
 
   const columns = ref([
-    { key: "index", label: "STT",  formatter: (value, item, index) => {
+    { key: "index", label: "#",  formatter: (value, item, index) => {
         return (currentPage.value * pageSize.value) + (index + 1);
       } },
     { key: "ma", label: "Mã" },
@@ -267,5 +288,6 @@ export function useDiscountManagement() {
     confirmAction,
     executeConfirmedAction,
     closeConfirmModal,
+    exportExcel
   };
 }
