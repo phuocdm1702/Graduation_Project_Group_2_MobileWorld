@@ -7,6 +7,7 @@ import Dashboard from "../views/ThongKe/AppDashboard.vue";
 import Voucher from "../views/Voucher/AppVoucher.vue";
 import DotVoucher from "../views/Voucher/DotVoucher.vue";
 import FormAddPgg from "../views/Voucher/components/FormAddPgg.vue";
+import FormUpdatePgg from "@/views/Voucher/components/FormUpdatePgg.vue";
 import PhieuBaoHanh from "../views/BaoHanh/PhieuBaoHanh.vue";
 
 // View Login
@@ -115,6 +116,17 @@ const routes: Array<RouteRecordRaw> = [
     name: "FormAddPgg",
     component: FormAddPgg,
     meta: { breadcrumb: ["Quản Lý Phiếu Giảm Giá","Phiếu giảm giá", "Thêm phiếu giảm giá"] },
+  },
+  {
+    path: "/update-phieu-giam-gia",
+    name: "FormUpdatePgg",
+    component: FormUpdatePgg,
+    meta: { breadcrumb: ["Quản Lý Phiếu Giảm Giá","Phiếu giảm giá", "Sửa phiếu giảm giá"] },
+  },{
+    path: "/update-phieu-giam-gia/:id",
+    name: "FormUpdatePgg",
+    component: FormUpdatePgg,
+    meta: { breadcrumb: ["Quản Lý Phiếu Giảm Giá","Phiếu giảm giá", "Sửa phiếu giảm giá"] },
   },
 
   // Đơn hàng

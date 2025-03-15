@@ -232,6 +232,8 @@ const getLinkForBreadcrumb = (index: number) => {
       return "/phieu-giam-gia/dot-giam-gia";
     case "Thêm phiếu giảm giá":
       return "/phieu-giam-gia/add-phieu-giam-gia";
+    case "Sửa phiếu giảm giá":
+      return "/phieu-giam-gia/update-phieu-giam-gia";
     case "Phiếu bảo hành":
       return "/phieu-bao-hanh";
     case "Lịch sử phiếu bảo hành":
