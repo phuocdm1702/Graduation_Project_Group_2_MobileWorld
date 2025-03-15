@@ -1,10 +1,10 @@
 package com.example.graduation_project_group_2_mobileworld.service.PhieuGiamGia;
 
 import com.example.graduation_project_group_2_mobileworld.entity.PhieuGiamGia;
-import com.example.graduation_project_group_2_mobileworld.entity.PhieuGiamGiaCaNhan;
-import com.example.graduation_project_group_2_mobileworld.repository.giam_gia.PhieuGiamGiaCaNhanRepository;
 import com.example.graduation_project_group_2_mobileworld.repository.giam_gia.PhieuGiamGiaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -23,8 +23,8 @@ public class PhieuGiamGiaService {
         this.phieuGiamGiaRepository = phieuGiamGiaRepository;
     }
 
-    public List<PhieuGiamGia> getPGG() {
-        List<PhieuGiamGia> listPgg = phieuGiamGiaRepository.findAll();
+    public Page<PhieuGiamGia> getPGG(Pageable pageable) {
+        Page<PhieuGiamGia> listPgg = (Page<PhieuGiamGia>) phieuGiamGiaRepository.findAll(pageable);
         Date now = new Date();
 
         for (PhieuGiamGia pgg : listPgg) {
@@ -71,20 +71,21 @@ public class PhieuGiamGiaService {
         }
     }
 
-    public List<PhieuGiamGia> searchData(String keyword) {
+    public Page<PhieuGiamGia> searchData(String keyword, Pageable pageable) {
         if (keyword == null || keyword.trim().isEmpty()) {
-            return phieuGiamGiaRepository.findAll(); // Trả về tất cả nếu không có điều kiện lọc
+            return (Page<PhieuGiamGia>) phieuGiamGiaRepository.findAll(); // Trả về tất cả nếu không có điều kiện lọc
         }
-        return phieuGiamGiaRepository.search(keyword);
+        return phieuGiamGiaRepository.search(keyword, pageable);
     }
 
-    public List<PhieuGiamGia> filterPhieuGiamGia(
+    public Page<PhieuGiamGia> filterPhieuGiamGia(
             String loaiPhieuGiamGia, // Thêm tham số
             String trangThai,
-            Date startDate,
-            Date endDate,
+            Date ngayBatDau,
+            Date ngayKetThuc,
             Double minOrder,
-            Double valueFilter) {
+            Double valueFilter,
+            Pageable pageable) {
 
         String loaiPhieu = loaiPhieuGiamGia;
         if (loaiPhieu != null && ("Tất cả loại phiếu".equals(loaiPhieu) || loaiPhieu.isEmpty())) {
@@ -101,12 +102,12 @@ public class PhieuGiamGiaService {
         }
 
         // Nếu không có filter nào được chọn, trả về tất cả
-        if (loaiPhieu == null && trangThaiBoolean == null && startDate == null &&
-                endDate == null && minOrder == null && valueFilter == null) {
-            return phieuGiamGiaRepository.findAll();
+        if (loaiPhieu == null && trangThaiBoolean == null && ngayBatDau == null &&
+                ngayKetThuc == null && minOrder == null && valueFilter == null) {
+            return (Page<PhieuGiamGia>) phieuGiamGiaRepository.findAll();
         }
 
-        if (startDate != null && endDate != null && startDate.after(endDate)) {
+        if (ngayBatDau != null && ngayKetThuc != null && ngayBatDau.after(ngayKetThuc)) {
             throw new IllegalArgumentException("Ngày bắt đầu không thể lớn hơn ngày kết thúc");
         }
 
@@ -122,13 +123,17 @@ public class PhieuGiamGiaService {
         return phieuGiamGiaRepository.filterPhieuGiamGia(
                 loaiPhieu, // Thêm vào
                 trangThaiBoolean,
-                startDate,
-                endDate,
+                ngayBatDau,
+                ngayKetThuc,
                 minOrder,
-                valueFilter
+                valueFilter,
+                pageable
         );
     }
 
+    public Optional<PhieuGiamGia> getById(Integer id) {
+        return phieuGiamGiaRepository.findById(id);
+    }
 
     public PhieuGiamGia addPGG(PhieuGiamGia phieuGiamGia) {
         return phieuGiamGiaRepository.save(phieuGiamGia);
@@ -145,23 +150,8 @@ public class PhieuGiamGiaService {
         return false;
     }
 
-    public void updatePGG(Integer id, PhieuGiamGia editPGG) {
-        PhieuGiamGia existingPGG = phieuGiamGiaRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Phiếu giảm giá không tồn tại!"));
-
-        existingPGG.setMa(editPGG.getMa());
-        existingPGG.setTenPhieuGiamGia(editPGG.getTenPhieuGiamGia());
-        existingPGG.setLoaiPhieuGiamGia(editPGG.getLoaiPhieuGiamGia());
-        existingPGG.setPhanTramGiamGia(editPGG.getPhanTramGiamGia());
-        existingPGG.setSoTienGiamToiDa(editPGG.getSoTienGiamToiDa());
-        existingPGG.setHoaDonToiThieu(editPGG.getHoaDonToiThieu());
-        existingPGG.setSoLuongDung(editPGG.getSoLuongDung());
-        existingPGG.setNgayBatDau(editPGG.getNgayBatDau());
-        existingPGG.setNgayKetThuc(editPGG.getNgayKetThuc());
-        existingPGG.setTrangThai(editPGG.getTrangThai());
-        existingPGG.setRiengTu(editPGG.getRiengTu());
-
-        phieuGiamGiaRepository.save(existingPGG);
+    public void updatePGG(PhieuGiamGia editPGG) {
+        phieuGiamGiaRepository.save(editPGG);
     }
 
 }

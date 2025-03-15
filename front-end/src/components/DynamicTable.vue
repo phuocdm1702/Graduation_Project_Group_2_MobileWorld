@@ -21,7 +21,7 @@
               <!-- Nút Sửa -->
               <button
                 @click="editItem(item)"
-                class="bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600 transition"
+                class="px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
               >
                 Sửa
               </button>
@@ -64,6 +64,7 @@
 
 <script setup>
 import { defineProps } from 'vue';
+import {useRouter} from "vue-router";
 import ToggleSwitch from "@/components/ToggleSwitch.vue";
 
 defineProps({
@@ -83,8 +84,10 @@ defineProps({
 
 const emit = defineEmits(['editItem', 'toggleStatus']);
 
+const router = useRouter();
+
 const editItem = (item) => {
-  emit('editItem', item);
+  router.push({ name: 'FormUpdatePgg', params: { id: item.id } });
 };
 
 const toggleStatus = (item) => {

@@ -6,6 +6,7 @@
   import Voucher from "../views/Voucher/AppVoucher.vue";
   import DotVoucher from "../views/Voucher/DotVoucher.vue"
   import FormAddPgg from "../views/Voucher/components/FormAddPgg.vue";
+  import FormUpdatePgg from "@/views/Voucher/components/FormUpdatePgg.vue";
   import PhieuBaoHanh from "../views/BaoHanh/PhieuBaoHanh.vue";
   
   // View Login
@@ -75,6 +76,8 @@
     { path: "/lich-su-bao-hanh", name: "LichSuPhieuBaoHanh", component: LichSuPhieuBaoHanh },
     { path: "/dot-giam-gia", name: "DotVoucher", component: DotVoucher },
     { path: "/add-phieu-giam-gia", name: "FormAddPgg", component: FormAddPgg },
+    { path: "/update-phieu-giam-gia", name: "FormUpdatePgg", component: FormUpdatePgg },
+    { path: "/update-phieu-giam-gia/:id", name: "FormUpdatePgg", component: FormUpdatePgg },
   
   
     { path: "/hoa-don", name: "HoaDon", component: HoaDon },
