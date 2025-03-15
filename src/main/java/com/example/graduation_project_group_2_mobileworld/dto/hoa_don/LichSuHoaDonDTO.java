@@ -9,17 +9,24 @@ import java.sql.Time;
 @Setter
 @Getter
 public class LichSuHoaDonDTO {
-    private HoaDon idHoaDon;
+    private Integer id;
+    private Integer idHoaDon;
     private NhanVien idNhanVien;
     private String ma;
     private String hanhDong;
     private Time thoiGian;
 
-    public LichSuHoaDonDTO(HoaDon idHoaDon, NhanVien idNhanVien, String ma, String hanhDong, Time thoiGian) {
+    public LichSuHoaDonDTO(Integer id,Integer idHoaDon, NhanVien idNhanVien, String ma, String hanhDong, Time thoiGian) {
+       this.id = id;
         this.idHoaDon = idHoaDon;
         this.idNhanVien = idNhanVien;
         this.ma = ma;
         this.hanhDong = hanhDong;
         this.thoiGian = thoiGian;
     }
+
+    public LichSuHoaDonDTO() {
+
+    }
+
 }
