@@ -10,7 +10,6 @@ export default function usePhieuGiamGia() {
   const endDate = ref(null);
   const minOrder = ref(null);
   const valueFilter = ref(null);
-
   const currentPage = ref(0); 
   const pageSize = ref(10);   
   const totalPages = ref(0); 

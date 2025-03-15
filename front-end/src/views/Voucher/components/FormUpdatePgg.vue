@@ -3,81 +3,94 @@
     <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-2xl mx-auto">
       <h3 class="text-2xl font-semibold mb-6 text-gray-800">Chỉnh sửa Phiếu Giảm Giá</h3>
 
-      <div class="space-y-6">
-        <!-- Voucher Code -->
-        <div>
-          <label class="block text-sm font-medium text-gray-700">Mã phiếu</label>
-          <input v-model="editingVoucher.ma" type="text" class="form-input w-full" />
-          <p v-if="errors.ma" class="error">{{ errors.ma }}</p>
-        </div>
-
-        <!-- Voucher Name -->
-        <div>
-          <label class="block text-sm font-medium text-gray-700">Tên phiếu</label>
-          <input v-model="editingVoucher.tenPhieuGiamGia" type="text" class="form-input w-full" />
-          <p v-if="errors.tenPhieuGiamGia" class="error">{{ errors.tenPhieuGiamGia }}</p>
-        </div>
-
-        <!-- Voucher Type -->
-        <div>
-          <label class="block text-sm font-medium text-gray-700">Loại phiếu</label>
-          <select v-model="editingVoucher.loaiPhieuGiamGia" class="form-input w-full">
-            <option value="Phần trăm">Phần trăm</option>
-            <option value="Tiền mặt">Tiền mặt</option>
-          </select>
-          <p v-if="errors.loaiPhieuGiamGia" class="error">{{ errors.loaiPhieuGiamGia }}</p>
-        </div>
-
-        <!-- Discount Cash -->
-        <div>
-          <label class="block text-sm font-medium text-gray-700">Số tiền giảm tối đa</label>
-          <input v-model.number="editingVoucher.soTienGiamToiDa" type="number" class="form-input w-full" />
-          <p v-if="errors.soTienGiamToiDa" class="error">{{ errors.soTienGiamToiDa }}</p>
-        </div>
-
-        <!-- Discount Percentage -->
-        <div>
-          <label class="block text-sm font-medium text-gray-700">Phần trăm giảm giá (%)</label>
-          <input v-model.number="editingVoucher.phanTramGiamGia" type="number" class="form-input w-full" />
-          <p v-if="errors.phanTramGiamGia" class="error">{{ errors.phanTramGiamGia }}</p>
-        </div>
-
-        <!-- Start Date -->
-        <div>
-          <label class="block text-sm font-medium text-gray-700">Ngày bắt đầu</label>
-          <input v-model="editingVoucher.ngayBatDau" type="date" class="form-input w-full" />
-          <p v-if="errors.ngayBatDau" class="error">{{ errors.ngayBatDau }}</p>
-        </div>
-
-        <!-- End Date -->
-        <div>
-          <label class="block text-sm font-medium text-gray-700">Ngày kết thúc</label>
-          <input v-model="editingVoucher.ngayKetThuc" type="date" class="form-input w-full" />
-          <p v-if="errors.ngayKetThuc" class="error">{{ errors.ngayKetThuc }}</p>
-        </div>
+      <!-- Hiển thị trạng thái loading -->
+      <div v-if="loading" class="text-center text-gray-500">
+        Đang tải dữ liệu...
       </div>
 
-      <div class="flex justify-end gap-3 mt-6">
-        <router-link to="/phieu-giam-gia">
-          <button class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition text-sm">
-            Hủy
+      <!-- Hiển thị thông báo lỗi -->
+      <div v-if="errorMessage" class="text-red-500 text-center mb-4">
+        {{ errorMessage }}
+      </div>
+
+      <!-- Chỉ hiển thị form nếu không có lỗi và không đang tải -->
+      <div v-if="!loading && !errorMessage">
+        <div class="space-y-6">
+          <!-- Voucher Code -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Mã phiếu</label>
+            <input v-model="editingVoucher.ma" type="text" class="form-input w-full" />
+            <p v-if="errors.ma" class="error">{{ errors.ma }}</p>
+          </div>
+
+          <!-- Voucher Name -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Tên phiếu</label>
+            <input v-model="editingVoucher.tenPhieuGiamGia" type="text" class="form-input w-full" />
+            <p v-if="errors.tenPhieuGiamGia" class="error">{{ errors.tenPhieuGiamGia }}</p>
+          </div>
+
+          <!-- Voucher Type -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Loại phiếu</label>
+            <select v-model="editingVoucher.loaiPhieuGiamGia" class="form-input w-full">
+              <option value="Phần trăm">Phần trăm</option>
+              <option value="Tiền mặt">Tiền mặt</option>
+            </select>
+            <p v-if="errors.loaiPhieuGiamGia" class="error">{{ errors.loaiPhieuGiamGia }}</p>
+          </div>
+
+          <!-- Discount Cash -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Số tiền giảm tối đa</label>
+            <input v-model.number="editingVoucher.soTienGiamToiDa" type="number" class="form-input w-full" />
+            <p v-if="errors.soTienGiamToiDa" class="error">{{ errors.soTienGiamToiDa }}</p>
+          </div>
+
+          <!-- Discount Percentage -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Phần trăm giảm giá (%)</label>
+            <input v-model.number="editingVoucher.phanTramGiamGia" type="number" class="form-input w-full" />
+            <p v-if="errors.phanTramGiamGia" class="error">{{ errors.phanTramGiamGia }}</p>
+          </div>
+
+          <!-- Start Date -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Ngày bắt đầu</label>
+            <input v-model="editingVoucher.ngayBatDau" type="date" class="form-input w-full" />
+            <p v-if="errors.ngayBatDau" class="error">{{ errors.ngayBatDau }}</p>
+          </div>
+
+          <!-- End Date -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Ngày kết thúc</label>
+            <input v-model="editingVoucher.ngayKetThuc" type="date" class="form-input w-full" />
+            <p v-if="errors.ngayKetThuc" class="error">{{ errors.ngayKetThuc }}</p>
+          </div>
+        </div>
+
+        <div class="flex justify-end gap-3 mt-6">
+          <router-link to="/phieu-giam-gia">
+            <button class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition text-sm">
+              Hủy
+            </button>
+          </router-link>
+          <button @click="updatePGG" class="px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 transition text-sm flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+            </svg>
+            Cập nhật
           </button>
-        </router-link>
-        <button @click="updatePGG" class="px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 transition text-sm flex items-center gap-2">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
-          </svg>
-          Cập nhật
-        </button>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import {onMounted, ref} from "vue";
+import { onMounted, ref } from "vue";
 import axios from "axios";
-import {useRoute, useRouter} from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 
 const route = useRoute();
 const router = useRouter();
@@ -86,6 +99,8 @@ const baseURL = "http://localhost:8080/phieu-giam-gia";
 
 const editingVoucher = ref({});
 const errors = ref({});
+const loading = ref(false);
+const errorMessage = ref(null);
 
 const formatDateForInput = (dateString) => {
   const date = new Date(dateString);
@@ -97,26 +112,47 @@ const formatDateForInput = (dateString) => {
 };
 
 const getDataUpdateId = async (id) => {
+  if (!id || isNaN(parseInt(id))) {
+    console.error("ID không hợp lệ:", id);
+    errorMessage.value = "ID không hợp lệ. Vui lòng kiểm tra lại.";
+    loading.value = false;
+    return;
+  }
+
+  loading.value = true;
+  errorMessage.value = null;
+
   try {
     const response = await axios.get(`${baseURL}/data`);
-    const voucher = response.data.find(v => v.id === parseInt(id));
-    if(voucher) {
+    console.log("API Response:", response.data);
+    console.log("ID cần tìm:", parseInt(id));
+
+    let dataArray = response.data.content; // Trích xuất mảng từ content
+    if (!Array.isArray(dataArray)) {
+      console.error("Dữ liệu content không phải mảng:", response.data.content);
+      errorMessage.value = "Dữ liệu từ server không hợp lệ.";
+      return;
+    }
+
+    const voucher = dataArray.find(v => v.id === parseInt(id));
+    if (voucher) {
+      console.log("Voucher found:", voucher);
       editingVoucher.value = {
         ...voucher,
         ngayBatDau: formatDateForInput(voucher.ngayBatDau),
         ngayKetThuc: formatDateForInput(voucher.ngayKetThuc),
       };
     } else {
-      console.error("Không tìm thấy phiếu giảm giá!");
-      router.push("/phieu-giam-gia");
+      console.error("Không tìm thấy phiếu giảm giá với id:", id);
+      errorMessage.value = "Không tìm thấy phiếu giảm giá.";
     }
-  } catch(error) {
+  } catch (error) {
     console.error("Lỗi khi lấy dữ liệu phiếu:", error);
-    router.push('/phieu-giam-gia');
+    errorMessage.value = "Lỗi khi lấy dữ liệu. Vui lòng thử lại sau.";
+  } finally {
+    loading.value = false;
   }
-}
-
-const emit = defineEmits(['close']);
+};
 
 const validateForm = () => {
   errors.value = {}; // Reset lỗi
@@ -141,9 +177,8 @@ const validateForm = () => {
   return Object.keys(errors.value).length === 0;
 };
 
-
 const updatePGG = async () => {
-  if(!validateForm()) {
+  if (!validateForm()) {
     return;
   }
   try {
@@ -154,13 +189,16 @@ const updatePGG = async () => {
   }
 };
 
-
 onMounted(() => {
   const id = route.params.id;
-  if(id) {
+  console.log("Route params id:", id);
+  if (id) {
     getDataUpdateId(id);
+  } else {
+    errorMessage.value = "Không tìm thấy ID phiếu giảm giá.";
+    loading.value = false;
   }
-})
+});
 </script>
 
 <style scoped>

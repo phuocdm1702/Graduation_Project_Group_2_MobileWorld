@@ -118,15 +118,11 @@ const routes: Array<RouteRecordRaw> = [
     meta: { breadcrumb: ["Quản Lý Phiếu Giảm Giá","Phiếu giảm giá", "Thêm phiếu giảm giá"] },
   },
   {
-    path: "/update-phieu-giam-gia",
-    name: "FormUpdatePgg",
-    component: FormUpdatePgg,
-    meta: { breadcrumb: ["Quản Lý Phiếu Giảm Giá","Phiếu giảm giá", "Sửa phiếu giảm giá"] },
-  },{
     path: "/update-phieu-giam-gia/:id",
     name: "FormUpdatePgg",
     component: FormUpdatePgg,
-    meta: { breadcrumb: ["Quản Lý Phiếu Giảm Giá","Phiếu giảm giá", "Sửa phiếu giảm giá"] },
+    props: true,
+    meta: { breadcrumb: ["Quản Lý Phiếu Giảm Giá","Phiếu giảm giá", `Sửa phiếu giảm giá`] },
   },
 
   // Đơn hàng
