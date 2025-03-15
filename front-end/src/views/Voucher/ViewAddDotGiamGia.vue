@@ -4,7 +4,6 @@
     <Breadcrumb breadcrumb="Đợt Giảm Giá" />
 
     <div class="bg-white p-4 rounded-md shadow-md">
-      <h4 class="text-gray-600 text-lg font-semibold mb-4">Quản lý Đợt Giảm Giá</h4>
       <ToastNotification ref="toast" />
 
       <!-- Container for form and product list -->
@@ -97,11 +96,15 @@
             class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-400 outline-none mb-4"
           />
           <div class="max-h-[700px] overflow-y-auto">
-            <DynamicTable
-              :data="dspList"
-              :columns="columns"
-              :getNestedValue="getNestedValue"
-            />
+            <div class="max-h-[700px] overflow-y-auto">
+              <DynamicTable
+                :data="dspList"
+                :columns="columns"
+                :getNestedValue="getNestedValue"
+                :selected-products="idDSPs"
+                @toggle-select="fetchCTSPData"
+              />
+            </div>
           </div>
           <footer class="bg-white shadow-lg rounded-lg p-4 flex justify-center items-center mt-2">
             <Pagination
@@ -204,6 +207,8 @@ const {
   confirmMessage,
   executeConfirmedAction,
   closeConfirmModal,
+  fetchCTSPData,
+  idDSPs,
 } = useDotGiamGia();
 
 const isTienMat = computed(() => {
