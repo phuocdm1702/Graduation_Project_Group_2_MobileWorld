@@ -26,7 +26,8 @@ public class LichSuHoaDonService {
 
     private LichSuHoaDonDTO toDTO(LichSuHoaDon lichSuHoaDon) {
         return new LichSuHoaDonDTO(
-                lichSuHoaDon.getIdHoaDon(),
+                lichSuHoaDon.getId(),
+                lichSuHoaDon.getHoaDon().getId(),
                 lichSuHoaDon.getIdNhanVien(),
                 lichSuHoaDon.getMa(),
                 lichSuHoaDon.getHanhDong(),
