@@ -19,9 +19,9 @@ public class HinhThucThanhToan {
     private Integer id;
 
     @NotNull
-    @ManyToOne
-    @JoinColumn(name = "id_hoa_don",referencedColumnName = "id")
-    private HoaDon hoaDon;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "id_hoa_don", nullable = false)
+    private HoaDon idHoaDon;
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

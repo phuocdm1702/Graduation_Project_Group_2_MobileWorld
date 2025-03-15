@@ -11,7 +11,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -37,10 +36,13 @@ public class HoaDonController {
         return ResponseEntity.ok(hoaDonService.getHoaDonWithPagination(page, size));
     }
 
-    @GetMapping("/detail/{id}")
-    public ResponseEntity<HoaDonDTO> getFullHoaDonDetail(@PathVariable("id") Integer id) {
-        return ResponseEntity.ok(hoaDonService.getFullHoaDonDetails(id));
-    }
-
+//    @GetMapping("/home")
+//    public ResponseEntity<Page<HoaDonDTO>> getAllHoaDon(
+//            @RequestParam(defaultValue = "0") int page,
+//            @RequestParam(defaultValue = "10") int size) {
+//        Pageable pageable = PageRequest.of(page, size, Sort.by("ngayTao").descending());
+//        Page<HoaDonDTO> hoaDonPage = hoaDonService.getAllData(pageable);
+//        return ResponseEntity.ok(hoaDonPage);
+//    }
 }
 

@@ -29,7 +29,7 @@ public class HoaDonChiTiet {
     @NotNull
     @ManyToOne
     @JoinColumn(name = "id_hoa_don",referencedColumnName = "id")
-    private HoaDon hoaDon;
+    private HoaDon idHoaDon;
 
     @NotNull
     @ManyToOne
