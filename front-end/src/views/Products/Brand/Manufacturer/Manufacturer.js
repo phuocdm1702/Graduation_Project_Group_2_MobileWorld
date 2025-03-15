@@ -1,35 +1,27 @@
-import { ref, onMounted, computed, watch } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import axios from 'axios';
-import ToastNotification from '@/components/ToastNotification.vue';
-import Pagination from '@/components/Pagination.vue';
-import ProductLineFormModal from '@/components/FormModal.vue';
-import ConfirmModal from '@/components/ConfirmModal.vue';
 
 export default function useNhaSanXuat() {
   const toast = ref(null);
   const manufacturers = ref([]);
   const manufacturer = ref({ id: null, ma: '', nhaSanXuat: '' });
   const searchKeyword = ref('');
+  const searchNhaSanXuat = ref('');
   const currentPage = ref(0);
   const pageSize = ref(5);
   const totalItems = ref(0);
   const selectedManufacturers = ref([]);
-  const selectAll = ref(false);
   const isSearching = ref(false);
-  const showAddModal = ref(false);
-  const showEditModal = ref(false);
   const showConfirmModal = ref(false);
   const confirmMessage = ref('');
   const confirmedAction = ref(null);
 
   const totalPages = computed(() => Math.ceil(totalItems.value / pageSize.value));
 
-  watch(searchKeyword, (newValue) => {
-    isSearching.value = !!newValue.trim();
-    if (newValue !== searchKeyword.value) {
-      currentPage.value = 0;
-      searchManufacturer();
-    }
+  // Logic để kiểm tra trạng thái của checkbox "Chọn tất cả"
+  const isAllSelected = computed(() => {
+    if (manufacturers.value.length === 0) return false;
+    return manufacturers.value.every(item => selectedManufacturers.value.includes(item.id));
   });
 
   const fetchData = async () => {
@@ -40,14 +32,16 @@ export default function useNhaSanXuat() {
       manufacturers.value = data.content;
       totalItems.value = data.totalElements;
     } catch (error) {
-      toast.value?.kshowToast('error', 'Không thể tải dữ liệu!');
+      if (toast.value) {
+        toast.value?.kshowToast('error', 'Không thể tải dữ liệu!');
+      }
       console.error('Fetch error:', error);
     }
   };
 
   const goToPage = async (page) => {
     currentPage.value = page;
-    if (isSearching.value && searchKeyword.value.trim()) {
+    if (isSearching.value) {
       await searchManufacturer();
     } else {
       await fetchData();
@@ -56,7 +50,8 @@ export default function useNhaSanXuat() {
 
   const searchManufacturer = async () => {
     const keyword = searchKeyword.value.replace(/\s+/g, '').trim();
-    if (!keyword) {
+    const nhaSanXuatFilter = searchNhaSanXuat.value || '';
+    if (!keyword && !nhaSanXuatFilter) {
       isSearching.value = false;
       currentPage.value = 0;
       await fetchData();
@@ -65,18 +60,26 @@ export default function useNhaSanXuat() {
     isSearching.value = true;
     try {
       const { data } = await axios.get('http://localhost:8080/api/nha-san-xuat/search', {
-        params: { keyword, page: currentPage.value, size: pageSize.value },
+        params: {
+          keyword: keyword || undefined,
+          nhaSanXuat: nhaSanXuatFilter || undefined,
+          page: currentPage.value,
+          size: pageSize.value,
+        },
       });
       manufacturers.value = data.content;
       totalItems.value = data.totalElements;
     } catch (error) {
-      toast.value?.kshowToast('error', 'Lỗi tìm kiếm!');
+      if (toast.value) {
+        toast.value?.kshowToast('error', 'Lỗi tìm kiếm!');
+      }
       console.error('Search error:', error);
     }
   };
 
   const resetSearch = () => {
     searchKeyword.value = '';
+    searchNhaSanXuat.value = '';
     isSearching.value = false;
     currentPage.value = 0;
     fetchData();
@@ -89,7 +92,9 @@ export default function useNhaSanXuat() {
       });
       return data;
     } catch (error) {
-      toast.value?.kshowToast('error', `Lỗi kiểm tra ${field}!`);
+      if (toast.value) {
+        toast.value?.kshowToast('error', `Lỗi kiểm tra ${field}!`);
+      }
       return false;
     }
   };
@@ -97,20 +102,25 @@ export default function useNhaSanXuat() {
   const saveManufacturer = async () => {
     const { ma, nhaSanXuat } = manufacturer.value;
     if (!ma || !nhaSanXuat) {
-      toast.value?.kshowToast('error', 'Vui lòng nhập đầy đủ thông tin!');
+      if (toast.value) {
+        toast.value?.kshowToast('error', 'Vui lòng nhập đầy đủ thông tin!');
+      }
       return;
     }
     try {
       const response = await axios.post('http://localhost:8080/api/nha-san-xuat', manufacturer.value);
-      toast.value?.kshowToast('success', 'Thêm mới thành công!');
+      if (toast.value) {
+        toast.value?.kshowToast('success', 'Thêm mới thành công!');
+      }
       manufacturers.value.unshift(response.data);
       totalItems.value += 1;
       if (manufacturers.value.length > pageSize.value) {
         manufacturers.value.pop();
       }
-      closeModal();
     } catch (error) {
-      toast.value?.kshowToast('error', 'Lỗi khi lưu dữ liệu: ' + (error.response?.data || error.message));
+      if (toast.value) {
+        toast.value?.kshowToast('error', 'Lỗi khi lưu dữ liệu: ' + (error.response?.data?.error || error.message));
+      }
       console.error('Save error:', error);
     }
   };
@@ -140,12 +150,7 @@ export default function useNhaSanXuat() {
       return;
     }
     try {
-      console.log('Sending update request with data:', manufacturer.value);
       const response = await axios.put(`http://localhost:8080/api/nha-san-xuat/${id}`, manufacturer.value);
-      console.log('Response from server:', response.data);
-      if (!response.data || typeof response.data !== 'object') {
-        throw new Error('Dữ liệu trả về từ server không hợp lệ');
-      }
       if (toast.value) {
         toast.value?.kshowToast('success', 'Cập nhật thành công!');
       }
@@ -153,10 +158,9 @@ export default function useNhaSanXuat() {
       if (index !== -1) {
         manufacturers.value[index] = response.data;
       }
-      closeModal();
     } catch (error) {
       if (toast.value) {
-        toast.value?.kshowToast('error', 'Lỗi khi cập nhật dữ liệu: ' + (error.response?.data || error.message));
+        toast.value?.kshowToast('error', 'Lỗi khi cập nhật dữ liệu: ' + (error.response?.data?.error || error.message));
       }
       console.error('Update error:', error);
     }
@@ -165,20 +169,24 @@ export default function useNhaSanXuat() {
   const deleteManufacturer = async (id) => {
     try {
       await axios.delete(`http://localhost:8080/api/nha-san-xuat/${id}`);
-      toast.value?.kshowToast('success', 'Xóa thành công!');
+      if (toast.value) {
+        toast.value?.kshowToast('success', 'Xóa thành công!');
+      }
       totalItems.value -= 1;
       if (totalItems.value > 0 && currentPage.value >= totalPages.value) {
         currentPage.value = totalPages.value - 1;
       } else if (totalItems.value <= 0) {
         currentPage.value = 0;
       }
-      if (isSearching.value && searchKeyword.value.trim()) {
+      if (isSearching.value) {
         await searchManufacturer();
       } else {
         await fetchData();
       }
     } catch (error) {
-      toast.value?.kshowToast('error', 'Lỗi khi xóa!');
+      if (toast.value) {
+        toast.value?.kshowToast('error', 'Lỗi khi xóa!');
+      }
       console.error('Delete error:', error);
     }
   };
@@ -188,7 +196,9 @@ export default function useNhaSanXuat() {
       await axios.delete('http://localhost:8080/api/nha-san-xuat/bulk', {
         data: { ids: selectedManufacturers.value },
       });
-      toast.value?.kshowToast('success', 'Xóa thành công!');
+      if (toast.value) {
+        toast.value?.kshowToast('success', 'Xóa thành công!');
+      }
       totalItems.value -= selectedManufacturers.value.length;
       if (totalItems.value > 0 && currentPage.value >= totalPages.value) {
         currentPage.value = totalPages.value - 1;
@@ -196,39 +206,16 @@ export default function useNhaSanXuat() {
         currentPage.value = 0;
       }
       selectedManufacturers.value = [];
-      selectAll.value = false;
-      if (isSearching.value && searchKeyword.value.trim()) {
+      if (isSearching.value) {
         await searchManufacturer();
       } else {
         await fetchData();
       }
     } catch (error) {
-      toast.value?.kshowToast('error', 'Lỗi khi xóa nhiều nhà sản xuất!');
+      if (toast.value) {
+        toast.value?.kshowToast('error', 'Lỗi khi xóa nhiều nhà sản xuất!');
+      }
       console.error('Bulk delete error:', error);
-    }
-  };
-
-  const openAddModal = () => {
-    manufacturer.value = { id: null, ma: '', nhaSanXuat: '' };
-    showAddModal.value = true;
-  };
-
-  const openEditModal = (manufacturerData) => {
-    manufacturer.value = { ...manufacturerData };
-    showEditModal.value = true;
-  };
-
-  const closeModal = () => {
-    showAddModal.value = false;
-    showEditModal.value = false;
-  };
-
-  const handleFormSubmit = (data) => {
-    manufacturer.value = data;
-    if (showAddModal.value) {
-      confirmAction('Bạn có chắc chắn muốn thêm nhà sản xuất này?', saveManufacturer);
-    } else if (showEditModal.value) {
-      confirmAction('Bạn có chắc chắn muốn cập nhật nhà sản xuất này?', updateManufacturer);
     }
   };
 
@@ -259,7 +246,11 @@ export default function useNhaSanXuat() {
   };
 
   const toggleSelectAll = () => {
-    selectedManufacturers.value = selectAll.value ? manufacturers.value.map((m) => m.id) : [];
+    if (isAllSelected.value) {
+      selectedManufacturers.value = [];
+    } else {
+      selectedManufacturers.value = manufacturers.value.map(item => item.id);
+    }
   };
 
   onMounted(fetchData);
@@ -269,17 +260,16 @@ export default function useNhaSanXuat() {
     manufacturers,
     manufacturer,
     searchKeyword,
+    searchNhaSanXuat,
     currentPage,
     pageSize,
     totalItems,
     selectedManufacturers,
-    selectAll,
     isSearching,
-    showAddModal,
-    showEditModal,
     showConfirmModal,
     confirmMessage,
     totalPages,
+    isAllSelected,
     fetchData,
     goToPage,
     searchManufacturer,
@@ -289,10 +279,6 @@ export default function useNhaSanXuat() {
     updateManufacturer,
     deleteManufacturer,
     deleteSelectedManufacturers,
-    openAddModal,
-    openEditModal,
-    closeModal,
-    handleFormSubmit,
     confirmDelete,
     confirmDeleteSelected,
     confirmAction,

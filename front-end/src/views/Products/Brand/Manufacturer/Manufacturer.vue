@@ -1,113 +1,118 @@
 <template>
-  <div class="container mx-auto p-4 relative">
-    <!-- Toast thông báo -->
+  <div class="mt-2 mx-auto">
+    <h2 class="bg-white shadow-lg rounded-lg p-5 mb-2 mt-2 text-2xl font-semibold text-gray-700">
+      Quản Lý Nhà Sản Xuất
+    </h2>
     <ToastNotification ref="toast" />
 
-    <!-- Tiêu đề và nút mở modal -->
-    <div class="flex justify-between items-center mb-6">
-      <h2 class="text-xl text-gray-600">Quản lý Nhà Sản Xuất</h2>
-      <button
-        @click="openAddModal"
-        class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition"
-      >
-        Thêm mới
-      </button>
-    </div>
-
-    <!-- Search Section -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
+    <!-- Form lọc -->
+    <div
+      class="bg-white shadow-lg rounded-lg p-5 mb-2 mt-2 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+      <!-- Ô tìm kiếm -->
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-1">Tìm kiếm</label>
         <input
           v-model.trim="searchKeyword"
           type="text"
           placeholder="Tìm kiếm theo mã hoặc tên..."
-          class="w-full border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          class="input-field"
         />
       </div>
+
+      <!-- Dropdown chọn tên nhà sản xuất -->
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-1">Tên nhà sản xuất</label>
         <select
           v-model="searchNhaSanXuat"
-          class="w-full border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          class="input-field"
         >
           <option value="">Tất cả</option>
           <option v-for="name in uniqueNhaSanXuatList" :key="name" :value="name">{{ name }}</option>
         </select>
       </div>
-      <div class="flex gap-3 items-end">
+
+      <!-- Nút chức năng -->
+      <div class="flex justify-end w-full col-span-full gap-2">
+        <!-- Button Đặt lại -->
         <button
           @click="resetFilters"
-          class="bg-gray-400 text-white px-4 py-2 rounded-lg hover:bg-gray-500 transition"
+          class="flex items-center gap-2 px-4 py-2 bg-[#f97316] text-white font-semibold rounded-lg shadow-md hover:bg-orange-600 transition"
         >
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+               stroke="currentColor" class="w-5 h-5 mr-1">
+            <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.992"/>
+          </svg>
           Đặt lại
+        </button>
+
+        <!-- Button Thêm mới -->
+        <button
+          @click="navigateToAddPage"
+          class="flex items-center gap-2 px-4 py-2 bg-[#f97316] text-white font-semibold rounded-lg shadow-md hover:bg-orange-600 transition"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+               stroke="currentColor" class="w-5 h-5 mr-1">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
+          </svg>
+          Thêm mới
         </button>
       </div>
     </div>
 
-    <!-- Bulk Delete Button -->
-    <div v-if="selectedManufacturers.length" class="mb-6 flex justify-end">
+    <!-- Nút xóa các nhà sản xuất đã chọn -->
+    <div v-if="selectedManufacturers.length" class="bg-white shadow-lg rounded-lg p-5 mb-4 mt-4 flex justify-end">
       <button
         @click="confirmDeleteSelected"
-        class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition"
+        class="flex items-center gap-2 px-4 py-2 bg-red-500 text-white font-semibold rounded-lg shadow-md hover:bg-red-600 transition"
       >
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+             stroke="currentColor" class="w-5 h-5 mr-1">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
         Xóa {{ selectedManufacturers.length }} nhà sản xuất đã chọn
       </button>
     </div>
 
-    <!-- DynamicTable -->
+    <!-- Bảng danh sách nhà sản xuất -->
     <DynamicTable
-      :data="filteredManufacturers"
+      class="dynamic-table"
+      :data="manufacturers"
       :columns="columns"
-      :getNestedValue="getNestedValue"
-    />
-
-    <!-- Pagination -->
-    <Pagination
-      :current-page="currentPage"
-      :total-pages="totalPages"
-      @page-changed="goToPage"
-      class="mt-6"
-    />
-
-    <!-- Modal Form (Thêm mới và Cập nhật) -->
-    <ProductLineFormModal
-      :show="showAddModal || showEditModal"
-      :is-edit="showEditModal"
-      :entity-name="'Nhà Sản Xuất'"
-      :entity-data="manufacturer"
-      :icon-class="showEditModal ? 'fa-edit' : 'fa-plus-circle'"
-      :icon-color="showEditModal ? 'text-blue-500' : 'text-green-500'"
-      @submit="handleFormSubmit"
-      @close="closeModal"
+      :get-nested-value="getNestedValue"
+      :selected-products="selectedManufacturers"
+      @toggle-select="toggleSelect"
     >
-      <template #default="{ entityData }">
-        <div class="grid grid-cols-1 gap-6">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Mã nhà sản xuất</label>
-            <input
-              v-model.trim="entityData.ma"
-              type="text"
-              placeholder="Nhập mã nhà sản xuất"
-              class="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-[var(--ring-color)] focus:border-transparent transition-all duration-200"
-              required
-            />
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Tên nhà sản xuất</label>
-            <input
-              v-model.trim="entityData.nhaSanXuat"
-              type="text"
-              placeholder="Nhập tên nhà sản xuất"
-              class="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-[var(--ring-color)] focus:border-transparent transition-all duration-200"
-              required
-            />
-          </div>
-        </div>
+      <!-- Slot để render checkbox "Chọn tất cả" trong tiêu đề cột select -->
+      <template #header-select>
+        <input
+          type="checkbox"
+          class="w-4 h-4 rounded"
+          :checked="isAllSelected"
+          @change="toggleSelectAll"
+        >
       </template>
-    </ProductLineFormModal>
+      <!-- Slot để render checkbox trong các dòng -->
+      <template #cell-select="{ item }">
+        <input
+          type="checkbox"
+          class="w-4 h-4 rounded"
+          :checked="selectedManufacturers.includes(item.id)"
+          @change="toggleSelect(item.id)"
+        >
+      </template>
+    </DynamicTable>
 
-    <!-- Modal Confirm -->
+    <!-- Phân trang -->
+    <footer class="bg-white shadow-lg rounded-lg p-4 flex justify-center items-center mt-2">
+      <Pagination
+        :current-page="currentPage"
+        :total-pages="totalPages"
+        @page-changed="goToPage"
+      />
+    </footer>
+
+    <!-- Modal xác nhận -->
     <ConfirmModal
       :show="showConfirmModal"
       :message="confirmMessage"
@@ -118,44 +123,34 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 import useNhaSanXuat from './Manufacturer.js';
 import ToastNotification from '@/components/ToastNotification.vue';
 import Pagination from '@/components/Pagination.vue';
-import ProductLineFormModal from '@/components/FormModal.vue';
 import ConfirmModal from '@/components/ConfirmModal.vue';
 import DynamicTable from '@/components/DynamicTable.vue';
+import axios from 'axios';
 
-// Lấy tất cả từ useNhaSanXuat
+const router = useRouter();
+
 const {
   toast,
   manufacturers,
-  manufacturer,
   searchKeyword,
+  searchNhaSanXuat,
   currentPage,
   pageSize,
-  totalItems,
   selectedManufacturers,
-  selectAll,
   isSearching,
-  showAddModal,
-  showEditModal,
   showConfirmModal,
   confirmMessage,
   totalPages,
+  isAllSelected,
   fetchData,
   goToPage,
   searchManufacturer,
   resetSearch,
-  checkDuplicate,
-  saveManufacturer,
-  updateManufacturer,
-  deleteManufacturer,
-  deleteSelectedManufacturers,
-  openAddModal,
-  openEditModal,
-  closeModal,
-  handleFormSubmit,
   confirmDelete,
   confirmDeleteSelected,
   confirmAction,
@@ -164,43 +159,41 @@ const {
   toggleSelectAll,
 } = useNhaSanXuat();
 
-// Hàm lấy giá trị lồng nhau
+const navigateToAddPage = () => {
+  router.push('/manufacturer/add');
+};
+
 const getNestedValue = (obj, path) => {
   return path.split('.').reduce((acc, part) => acc && acc[part], obj);
 };
 
-// Bộ lọc bằng combobox
-const searchNhaSanXuat = ref('');
+const uniqueNhaSanXuatList = ref([]);
 
-// Danh sách tên nhà sản xuất duy nhất
-const uniqueNhaSanXuatList = computed(() => {
-  return [...new Set(manufacturers.value.map((item) => item.nhaSanXuat))].sort();
-});
-
-// Dữ liệu đã lọc
-const filteredManufacturers = computed(() => {
-  let filtered = manufacturers.value;
-  if (searchKeyword.value) {
-    filtered = filtered.filter((item) =>
-      item.ma.toLowerCase().includes(searchKeyword.value.toLowerCase()) ||
-      item.nhaSanXuat.toLowerCase().includes(searchKeyword.value.toLowerCase())
-    );
+const fetchManufacturerNames = async () => {
+  try {
+    const { data } = await axios.get('http://localhost:8080/api/nha-san-xuat/all-names');
+    uniqueNhaSanXuatList.value = data;
+  } catch (error) {
+    console.error('Error fetching manufacturer names:', error);
   }
-  if (searchNhaSanXuat.value) {
-    filtered = filtered.filter((item) => item.nhaSanXuat === searchNhaSanXuat.value);
-  }
-  return filtered;
-});
+};
 
-// Đặt lại bộ lọc
 const resetFilters = () => {
   searchKeyword.value = '';
   searchNhaSanXuat.value = '';
   resetSearch();
 };
 
-// Theo dõi thay đổi để lọc tự động
+const toggleSelect = (id) => {
+  if (selectedManufacturers.value.includes(id)) {
+    selectedManufacturers.value = selectedManufacturers.value.filter(selectedId => selectedId !== id);
+  } else {
+    selectedManufacturers.value.push(id);
+  }
+};
+
 watch([searchKeyword, searchNhaSanXuat], () => {
+  currentPage.value = 0;
   if (searchKeyword.value || searchNhaSanXuat.value) {
     isSearching.value = true;
     searchManufacturer();
@@ -210,24 +203,29 @@ watch([searchKeyword, searchNhaSanXuat], () => {
   }
 });
 
-// Định nghĩa các cột cho DynamicTable
 const columns = [
   {
     key: 'select',
     label: '',
-    formatter: (value, item) => {
-      return `
-        <input type="checkbox" value="${item.id}" class="w-4 h-4 rounded" ${selectedManufacturers.value.includes(item.id) ? 'checked' : ''} onchange="document.dispatchEvent(new CustomEvent('toggleSelect', { detail: ${item.id} }))">
-      `;
-    },
   },
   {
-    key: 'stt',
-    label: 'STT',
-    formatter: (value, item, index) => index + 1,
+    key: '#',
+    label: '#',
+    formatter: (value, item, index) => {
+      return (currentPage.value * pageSize.value) + index + 1;
+    },
   },
   { key: 'ma', label: 'Mã' },
   { key: 'nhaSanXuat', label: 'Tên Nhà Sản Xuất' },
+  {
+    key: 'trangThai',
+    label: 'Trạng Thái',
+    formatter: (value, item) => {
+      return item.deleted ?
+        '<span class="text-red-600">Hết hàng</span>' :
+        '<span class="text-green-600">Còn hàng</span>';
+    },
+  },
   {
     key: 'actions',
     label: 'Hành động',
@@ -235,8 +233,8 @@ const columns = [
       const safeItem = JSON.stringify(item);
       return `
         <div class="space-x-4">
-          <button class="text-blue-600 hover:text-blue-800 transition" data-item='${safeItem}' onclick="document.dispatchEvent(new CustomEvent('openEditModal', { detail: JSON.parse(this.dataset.item) }))">
-            <i class="fa-solid fa-edit"></i>
+          <button class="text-orange-600 hover:text-orange-800 transition" data-item='${safeItem}' onclick="document.dispatchEvent(new CustomEvent('openEditModal', { detail: JSON.parse(this.dataset.item) }))">
+            <i class="fa-solid fa-edit text-orange-500"></i>
           </button>
           <button class="text-red-600 hover:text-red-800 transition" data-id="${item.id}" onclick="document.dispatchEvent(new CustomEvent('confirmDelete', { detail: this.dataset.id }))">
             <i class="fa-solid fa-trash"></i>
@@ -247,31 +245,29 @@ const columns = [
   },
 ];
 
-// Xử lý các sự kiện từ DynamicTable
 const handleCustomEvents = () => {
   document.addEventListener('openEditModal', (event) => {
-    openEditModal(event.detail);
+    router.push(`/manufacturer/edit/${event.detail.id}`);
   });
-
   document.addEventListener('confirmDelete', (event) => {
     confirmDelete(event.detail);
   });
-
-  document.addEventListener('toggleSelect', (event) => {
-    const id = event.detail;
-    if (selectedManufacturers.value.includes(id)) {
-      selectedManufacturers.value = selectedManufacturers.value.filter((selectedId) => selectedId !== id);
-    } else {
-      selectedManufacturers.value.push(id);
-    }
-  });
 };
 
-handleCustomEvents();
+onMounted(() => {
+  fetchData();
+  fetchManufacturerNames();
+  handleCustomEvents();
+});
 </script>
 
 <style scoped>
-.fixed.inset-0 {
-  overflow-y: auto;
+.input-field {
+  @apply w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm;
+}
+
+.dynamic-table {
+  border-top-left-radius: 0px;
+  border-top-right-radius: 0px;
 }
 </style>

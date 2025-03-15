@@ -4,7 +4,6 @@
       <thead>
       <tr class="bg-gray-100 text-gray-700 text-sm font-semibold">
         <th v-for="column in columns" :key="column.key" class="th-cell">
-          <!-- Sử dụng slot để render tiêu đề cột -->
           <slot :name="`header-${column.key}`" :column="column">
             <span>{{ column.label }}</span>
           </slot>
@@ -19,7 +18,6 @@
       </tr>
       <tr v-else v-for="(item, index) in data" :key="item.id" class="text-gray-700 border-b hover:bg-gray-50">
         <td v-for="column in columns" :key="column.key" class="td-cell">
-          <!-- Xử lý đặc biệt cho cột select -->
           <template v-if="column.key === 'select'">
             <slot :name="`cell-${column.key}`" :item="item" :index="index">
               <input
@@ -31,7 +29,6 @@
             </slot>
           </template>
           <span v-else-if="column.key === 'trangThai'">
-            <!-- Thay checkbox bằng chữ có viền và màu -->
             <span
               :class="{
                 'bg-gray-200 text-red-500': item.trangThai,
@@ -55,7 +52,7 @@
 <script setup>
 import { defineProps, defineEmits } from 'vue';
 
-defineProps({
+const props = defineProps({
   data: {
     type: Array,
     required: true,
@@ -68,20 +65,19 @@ defineProps({
     type: Function,
     required: true,
   },
-  selectedProducts: { // Thêm prop để nhận trạng thái selectedProducts từ component cha
+  selectedProducts: {
     type: Array,
-    required: true,
+    required: false, // Không bắt buộc
+    default: () => [], // Giá trị mặc định là mảng rỗng
   },
 });
 
 const emit = defineEmits(['toggle-select']);
 
-// Hàm kiểm tra trạng thái chọn của một dòng
 const isSelected = (id) => {
-  return this.selectedProducts.includes(id); // Sử dụng selectedProducts từ props
+  return props.selectedProducts.includes(id);
 };
 
-// Hàm xử lý sự kiện toggle select
 const toggleSelect = (id) => {
   emit('toggle-select', id);
 };

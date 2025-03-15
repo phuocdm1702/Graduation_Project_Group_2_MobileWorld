@@ -4,6 +4,8 @@ import com.example.graduation_project_group_2_mobileworld.dto.san_pham.nha_san_x
 import com.example.graduation_project_group_2_mobileworld.service.san_pham.nha_san_xuat.NhaSanXuatService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -15,7 +17,13 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/nha-san-xuat")
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(
+        origins = "http://localhost:3000",
+        methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.OPTIONS},
+        allowedHeaders = "*",
+        allowCredentials = "true",
+        maxAge = 3600
+)
 public class NhaSanXuatController {
 
     private final NhaSanXuatService service;
@@ -26,9 +34,19 @@ public class NhaSanXuatController {
 
     @GetMapping
     public ResponseEntity<Page<NhaSanXuatDTO>> getAll(
-            @RequestParam(defaultValue = "0") Integer page,
-            @RequestParam(required = false) Integer size) {
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size) {
         return ResponseEntity.ok(service.getAllNhaSanXuat(page, size));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getById(@PathVariable Integer id) {
+        try {
+            NhaSanXuatDTO nhaSanXuat = service.getNhaSanXuatById(id);
+            return ResponseEntity.ok(nhaSanXuat);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", e.getMessage()));
+        }
     }
 
     @PostMapping
@@ -88,20 +106,37 @@ public class NhaSanXuatController {
 
     @GetMapping("/search")
     public ResponseEntity<Page<NhaSanXuatDTO>> search(
-            @RequestParam String keyword,
-            @RequestParam(defaultValue = "0") Integer page,
-            @RequestParam(required = false) Integer size) {
-        return ResponseEntity.ok(service.searchNhaSanXuat(keyword, page, size));
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String nhaSanXuat,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        if (nhaSanXuat != null && !nhaSanXuat.isEmpty()) {
+            return ResponseEntity.ok(service.filterByNhaSanXuat(nhaSanXuat, pageable));
+        }
+        if (keyword != null && !keyword.isEmpty()) {
+            return ResponseEntity.ok(service.searchNhaSanXuat(keyword, page, size));
+        }
+        return ResponseEntity.ok(service.getAllNhaSanXuat(page, size));
+    }
+
+    @GetMapping("/all-names")
+    public ResponseEntity<List<String>> getAllManufacturerNames() {
+        return ResponseEntity.ok(service.getAllManufacturerNames());
     }
 
     @GetMapping("/exists/ma")
-    public ResponseEntity<Boolean> checkMa(@RequestParam String ma) {
-        return ResponseEntity.ok(service.existsByMa(ma));
+    public ResponseEntity<Boolean> checkMa(
+            @RequestParam String ma,
+            @RequestParam(required = false) Integer excludeId) {
+        return ResponseEntity.ok(service.existsByMa(ma, excludeId));
     }
 
     @GetMapping("/exists/nhaSanXuat")
-    public ResponseEntity<Boolean> checkNhaSanXuat(@RequestParam String nhaSanXuat) {
-        return ResponseEntity.ok(service.existsByNhaSanXuat(nhaSanXuat));
+    public ResponseEntity<Boolean> checkNhaSanXuat(
+            @RequestParam String nhaSanXuat,
+            @RequestParam(required = false) Integer excludeId) {
+        return ResponseEntity.ok(service.existsByNhaSanXuat(nhaSanXuat, excludeId));
     }
 
     private Map<String, String> getErrorMap(BindingResult result) {

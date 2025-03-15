@@ -1,7 +1,7 @@
 <template>
   <div class="mt-2 mx-auto">
     <h2 class="bg-white shadow-lg rounded-lg p-5 mb-2 mt-2 text-2xl font-semibold text-gray-700">
-      Quản Lý Dòng Sản Phẩm
+      Quản Lý Imel
     </h2>
     <ToastNotification ref="toast" />
 
@@ -19,15 +19,15 @@
         />
       </div>
 
-      <!-- Dropdown chọn dòng sản phẩm -->
+      <!-- Dropdown chọn tên Imel -->
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Tên dòng sản phẩm</label>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Tên Imel</label>
         <select
-          v-model="searchDongSanPham"
+          v-model="searchImel"
           class="input-field"
         >
           <option value="">Tất cả</option>
-          <option v-for="name in uniqueDongSanPhamList" :key="name" :value="name">{{ name }}</option>
+          <option v-for="name in uniqueImelList" :key="name" :value="name">{{ name }}</option>
         </select>
       </div>
 
@@ -60,8 +60,8 @@
       </div>
     </div>
 
-    <!-- Nút xóa các dòng sản phẩm đã chọn -->
-    <div v-if="selectedProducts.length" class="bg-white shadow-lg rounded-lg p-5 mb-4 mt-4 flex justify-end">
+    <!-- Nút xóa các Imel đã chọn -->
+    <div v-if="selectedImels.length" class="bg-white shadow-lg rounded-lg p-5 mb-4 mt-4 flex justify-end">
       <button
         @click="confirmDeleteSelected"
         class="flex items-center gap-2 px-4 py-2 bg-red-500 text-white font-semibold rounded-lg shadow-md hover:bg-red-600 transition"
@@ -70,17 +70,17 @@
              stroke="currentColor" class="w-5 h-5 mr-1">
           <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
         </svg>
-        Xóa {{ selectedProducts.length }} dòng sản phẩm đã chọn
+        Xóa {{ selectedImels.length }} Imel đã chọn
       </button>
     </div>
 
-    <!-- Bảng danh sách dòng sản phẩm -->
+    <!-- Bảng danh sách Imel -->
     <DynamicTable
       class="dynamic-table"
-      :data="productLines"
+      :data="imels"
       :columns="columns"
       :get-nested-value="getNestedValue"
-      :selected-products="selectedProducts"
+      :selected-products="selectedImels"
       @toggle-select="toggleSelect"
     >
       <!-- Slot để render checkbox "Chọn tất cả" trong tiêu đề cột select -->
@@ -97,7 +97,7 @@
         <input
           type="checkbox"
           class="w-4 h-4 rounded"
-          :checked="selectedProducts.includes(item.id)"
+          :checked="selectedImels.includes(item.id)"
           @change="toggleSelect(item.id)"
         >
       </template>
@@ -125,7 +125,7 @@
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import useProductLineList from '@/views/Products/Brand/ProductLine/ProductLine.js';
+import useImel from './Imel.js';
 import ToastNotification from '@/components/ToastNotification.vue';
 import Pagination from '@/components/Pagination.vue';
 import ConfirmModal from '@/components/ConfirmModal.vue';
@@ -136,74 +136,67 @@ const router = useRouter();
 
 const {
   toast,
-  productLines,
+  imels,
   searchKeyword,
-  searchDongSanPham,
+  searchImel,
   currentPage,
   pageSize,
-  selectedProducts,
+  selectedImels,
   isSearching,
   showConfirmModal,
   confirmMessage,
   totalPages,
+  isAllSelected,
   fetchData,
   goToPage,
-  searchProductLine,
+  searchImels, // Sửa từ searchImelFunc thành searchImels
   resetSearch,
-  checkDuplicate,
   confirmDelete,
   confirmDeleteSelected,
   confirmAction,
   executeConfirmedAction,
   closeConfirmModal,
   toggleSelectAll,
-} = useProductLineList();
+} = useImel();
 
 const navigateToAddPage = () => {
-  router.push('/product-line/add');
+  router.push('/imel/add');
 };
 
 const getNestedValue = (obj, path) => {
   return path.split('.').reduce((acc, part) => acc && acc[part], obj);
 };
 
-const uniqueDongSanPhamList = ref([]);
+const uniqueImelList = ref([]);
 
-const fetchProductLineNames = async () => {
+const fetchImelNames = async () => {
   try {
-    const { data } = await axios.get('http://localhost:8080/api/dong-san-pham/all-names');
-    uniqueDongSanPhamList.value = data;
+    const { data } = await axios.get('http://localhost:8080/api/imel/all-names');
+    uniqueImelList.value = data;
   } catch (error) {
-    console.error('Error fetching product line names:', error);
+    console.error('Error fetching Imel names:', error);
   }
 };
 
 const resetFilters = () => {
   searchKeyword.value = '';
-  searchDongSanPham.value = '';
+  searchImel.value = '';
   resetSearch();
 };
 
-// Logic để kiểm tra trạng thái của checkbox "Chọn tất cả"
-const isAllSelected = computed(() => {
-  if (productLines.value.length === 0) return false;
-  return productLines.value.every(item => selectedProducts.value.includes(item.id));
-});
-
-// Hàm xử lý sự kiện toggle select cho từng dòng
 const toggleSelect = (id) => {
-  if (selectedProducts.value.includes(id)) {
-    selectedProducts.value = selectedProducts.value.filter(selectedId => selectedId !== id);
+  if (selectedImels.value.includes(id)) {
+    selectedImels.value = selectedImels.value.filter(selectedId => selectedId !== id);
   } else {
-    selectedProducts.value.push(id);
+    selectedImels.value.push(id);
   }
 };
 
-watch([searchKeyword, searchDongSanPham], () => {
+watch([searchKeyword, searchImel], () => {
   currentPage.value = 0;
-  if (searchKeyword.value || searchDongSanPham.value) {
+  if (searchKeyword.value || searchImel.value) {
     isSearching.value = true;
-    searchProductLine();
+    searchImels(); // Sửa từ searchImelFunc thành searchImels
   } else {
     isSearching.value = false;
     fetchData();
@@ -213,7 +206,7 @@ watch([searchKeyword, searchDongSanPham], () => {
 const columns = [
   {
     key: 'select',
-    label: '', // Không cần cung cấp label nữa vì slot sẽ xử lý
+    label: '',
   },
   {
     key: '#',
@@ -223,7 +216,7 @@ const columns = [
     },
   },
   { key: 'ma', label: 'Mã' },
-  { key: 'dongSanPham', label: 'Tên Dòng Sản Phẩm' },
+  { key: 'imel', label: 'Tên Imel' },
   {
     key: 'trangThai',
     label: 'Trạng Thái',
@@ -254,7 +247,7 @@ const columns = [
 
 const handleCustomEvents = () => {
   document.addEventListener('openEditModal', (event) => {
-    router.push(`/product-line/edit/${event.detail.id}`);
+    router.push(`/imel/edit/${event.detail.id}`);
   });
   document.addEventListener('confirmDelete', (event) => {
     confirmDelete(event.detail);
@@ -263,10 +256,9 @@ const handleCustomEvents = () => {
 
 onMounted(() => {
   fetchData();
-  fetchProductLineNames();
+  fetchImelNames();
+  handleCustomEvents();
 });
-
-handleCustomEvents();
 </script>
 
 <style scoped>
