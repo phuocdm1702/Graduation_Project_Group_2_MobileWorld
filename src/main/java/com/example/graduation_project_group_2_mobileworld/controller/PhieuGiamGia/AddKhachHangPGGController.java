@@ -35,6 +35,12 @@ public class AddKhachHangPGGController {
         return listKH;
     }
 
+    @GetMapping("/search-kh")
+    public ResponseEntity<?> searchKHAddPgg(@RequestParam("keyword") String keyword) {
+        List<KhachHang> listSearch = khachHangService.searchFormAddPgg(keyword);
+        return ResponseEntity.ok(listSearch);
+    }
+
     @PostMapping("/addPhieuGiamGia")
     public ResponseEntity<String> addPGG(@RequestBody PhieuGiamGiaDTO dtoPGG) {
         PhieuGiamGia pgg = new PhieuGiamGia();
