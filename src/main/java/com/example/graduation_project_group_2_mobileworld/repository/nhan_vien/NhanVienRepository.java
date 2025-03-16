@@ -20,4 +20,12 @@ public interface NhanVienRepository extends JpaRepository<NhanVien, Integer> {
     Integer findMaxMa();
 
     boolean existsByMa(String finalCode);
+
+    @Query("SELECT nv FROM NhanVien nv JOIN nv.idTaiKhoan tk " +
+            "WHERE (LOWER(nv.ma) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+            "OR LOWER(nv.tenNhanVien) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+            "OR LOWER(tk.email) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+            "OR LOWER(tk.soDienThoai) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
+            "AND (:status = 'tat-ca' OR (nv.deleted = true AND :status = 'da-nghi') OR (nv.deleted = false AND :status = 'dang-lam'))")
+    List<NhanVien> searchNhanVien(@Param("keyword") String keyword, @Param("status") String status);
 }

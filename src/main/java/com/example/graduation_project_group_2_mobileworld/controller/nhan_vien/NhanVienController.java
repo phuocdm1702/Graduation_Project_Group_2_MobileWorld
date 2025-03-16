@@ -63,4 +63,15 @@ public class NhanVienController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
     }
+    @GetMapping("/search")
+    public ResponseEntity<List<NhanVien>> searchNhanVien(
+            @RequestParam(value = "keyword", required = false) String keyword,
+            @RequestParam(value = "status", required = false) String status) {
+        try {
+            List<NhanVien> nhanViens = nhanVienServices.searchNhanVien(keyword, status);
+            return ResponseEntity.ok(nhanViens);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 }
