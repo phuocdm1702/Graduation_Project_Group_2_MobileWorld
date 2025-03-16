@@ -1,179 +1,428 @@
-  import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
-  // Thống kê
-  import Dashboard from "../views/ThongKe/AppDashboard.vue";
-  
+import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
+
+// Thống kê
+import Dashboard from "../views/ThongKe/AppDashboard.vue";
+
+// Giảm giá
+import Voucher from "../views/Voucher/AppVoucher.vue";
+import DotVoucher from "../views/Voucher/DotVoucher.vue";
+import FormAddPgg from "../views/Voucher/components/FormAddPgg.vue";
+import FormUpdatePgg from "@/views/Voucher/components/FormUpdatePgg.vue";
+import PhieuBaoHanh from "../views/BaoHanh/PhieuBaoHanh.vue";
+
+// View Login
+import Login from "../views/LoginView/AppLogin.vue";
+
+// Đơn hàng
+import LichSuHD from "../views/Bill/LichSuHoaDon.vue";
+import HoaDon from "../views/Bill/HoaDon.vue";
+import HoaDonChiTiet from "../views/Bill/HoaDonChiTiet.vue";
+import ShowHoaDon from "../views/Bill/ShowHoaDon.vue";
+
+// Tài khoản
+import NhanVien from "../views/AccountType/NhanVien.vue";
+import EmployeeForm from "@/views/AccountType/EmployeeForm.vue";
+import KhachHang from "../views/AccountType/KhachHang.vue";
+import CustmerForm from "@/views/AccountType/CustmerForm.vue";
+import NotFound from "../views/NotFound.vue";
+import UpdateNhanVien from "@/views/AccountType/UpdateNhanVien.vue";
+import UpdateCustmer from "@/views/AccountType/UpdateCustmer.vue";
+
+// Sản phẩm
+import ProductDetails from "../views/Products/SanPham/ChiTietSanPham.vue";
+import ProductDetailAdd from "@/views/Products/SanPham/ProductDetailAdd.vue";
+
+// Thương hiệu
+import Manufacturer from "../views/Products/Brand/Manufacturer/Manufacturer.vue";
+import ProductLine from "../views/Products/Brand/ProductLine/ProductLine.vue";
+import ProductLineAdd from "@/views/Products/Brand/ProductLine/ProductLineAdd.vue";
+import ProductLineEdit from "@/views/Products/Brand/ProductLine/ProductLineEdit.vue";
+import ManufacturerAdd from "@/views/Products/Brand/Manufacturer/ManufacturerAdd.vue";
+import ManufacturerEdit from "@/views/Products/Brand/Manufacturer/ManufacturerEdit.vue";
+
+// Màn hình
+import Display from "../views/Products/Screen/ManHinh.vue";
+import DisplayTech from "../views/Products/Screen/CongNgheMH.vue";
+import Ram from "../views/Products/MemorySanPham/RamSanPham.vue";
+import ManHinhAdd from "@/views/Products/Screen/ManHinhAdd.vue";
+import ManHinhEdit from "@/views/Products/Screen/ManHinhEdit.vue";
+import AddCongNgheManHinh from "@/views/Products/Screen/AddCongNgheManHinh.vue";
+import EditCongNgheManHinh from "@/views/Products/Screen/EditCongNgheManHinh.vue";
+
+// Bộ nhớ
+import InternalStorage from "../views/Products/MemorySanPham/BoNhoTrong.vue";
+import ExternalStorage from "../views/Products/MemorySanPham/BoNhoNgoai.vue";
+
+// CPU & GPU
+import CPU from "../views/Products/Chip/CPU.vue";
+import GPU from "../views/Products/Chip/GPU.vue";
+
+// Camera
+import FrontCameraSpec from "../views/Products/CameraSanPham/CameraTruoc.vue";
+import RearCameraSpec from "../views/Products/CameraSanPham/CameraSau.vue";
+import FrontCameraDetail from "../views/Products/CameraSanPham/ChiTietCameraTruoc.vue";
+import RearCameraDetail from "../views/Products/CameraSanPham/ChiTietCameraSau.vue";
+import CameraModule from "../views/Products/CameraSanPham/CumCamera.vue";
+
+// Sạc
+import ChargingTech from "../views/Products/Sac/CongNgheSac.vue";
+import ChargingSupport from "../views/Products/Sac/HoTroCongNgheSac.vue";
+import Charging from "../views/Products/Sac/HoTroSac.vue";
+import ChargingPort from "../views/Products/Sac/CongSac.vue";
+
+// Imel
+import Imel from "../views/Products/Imel/Imel.vue";
+import ImelDaBan from "../views/Products/Imel/ImelDaBan.vue";
+import ImelAdd from "@/views/Products/Imel/ImelAdd.vue";
+import ImelEdit from "@/views/Products/Imel/ImelEdit.vue";
+import LichSuPhieuBaoHanh from "../views/BaoHanh/LichSuPhieuBaoHanh.vue";
+
+const routes: Array<RouteRecordRaw> = [
+  // Login
+  {
+    path: "/",
+    name: "Login",
+    component: Login,
+    meta: { layout: "empty", breadcrumb: [] },
+  },
+
+  // Dashboard
+  {
+    path: "/dashboard",
+    name: "Dashboard",
+    component: Dashboard,
+    meta: { breadcrumb: ["Thống kê"] },
+  },
+
   // Giảm giá
-  import Voucher from "../views/Voucher/AppVoucher.vue";
-  import DotVoucher from "../views/Voucher/DotVoucher.vue"
-  import FormAddPgg from "../views/Voucher/components/FormAddPgg.vue";
-  import PhieuBaoHanh from "../views/BaoHanh/PhieuBaoHanh.vue";
-  
-  // View Login
-  import Login from "../views/LoginView/AppLogin.vue";
-  
+  {
+    path: "/phieu-giam-gia",
+    name: "Voucher",
+    component: Voucher,
+    meta: { breadcrumb: ["Quản Lý Phiếu Giảm Giá", "Phiếu giảm giá"] },
+  },
+  {
+    path: "/phieu-bao-hanh",
+    name: "PhieuBaoHanh",
+    component: PhieuBaoHanh,
+    meta: { breadcrumb: ["Bảo hành", "Phiếu bảo hành"] },
+  },
+  {
+    path: "/lich-su-bao-hanh",
+    name: "LichSuPhieuBaoHanh",
+    component: LichSuPhieuBaoHanh,
+    meta: { breadcrumb: ["Bảo hành", "Lịch sử phiếu bảo hành"] },
+  },
+  {
+    path: "/dot-giam-gia",
+    name: "DotVoucher",
+    component: DotVoucher,
+    meta: { breadcrumb: ["Quản Lý Phiếu Giảm Giá", "Đợt giảm giá"] },
+  },
+  {
+    path: "/add-phieu-giam-gia",
+    name: "FormAddPgg",
+    component: FormAddPgg,
+    meta: { breadcrumb: ["Quản Lý Phiếu Giảm Giá", "Phiếu giảm giá", "Thêm phiếu giảm giá"] },
+  },
+  {
+    path: "/update-phieu-giam-gia/:id",
+    name: "FormUpdatePgg",
+    component: FormUpdatePgg,
+    props: true,
+    meta: { breadcrumb: ["Quản Lý Phiếu Giảm Giá", "Phiếu giảm giá", "Sửa phiếu giảm giá"] },
+  },
+  {
+    path: "/ViewAddDotGiamGia",
+    name: "ViewAddDotGiamGia",
+    component: () => import("@/views/Voucher/ViewAddDotGiamGia.vue"),
+    meta: { breadcrumb: ["Quản Lý Phiếu Giảm Giá", "Đợt giảm giá", "Thêm đợt giảm giá"] },
+  },
+
   // Đơn hàng
-  import LichSuHD from "../views/Bill/LichSuHoaDon.vue";
-  import HoaDon from "../views/Bill/HoaDon.vue";
-  import HoaDonChiTiet from "../views/Bill/HoaDonChiTiet.vue";
-  
+  {
+    path: "/hoa-don",
+    name: "HoaDon",
+    component: HoaDon,
+    meta: { breadcrumb: ["Quản lý hóa đơn"] },
+  },
+  {
+    path: "/show-hoa-don/:id",
+    name: "ShowHoaDon",
+    component: ShowHoaDon,
+    props: true,
+    meta: { breadcrumb: (route: any) => ["Quản lý hóa đơn", `Chi tiết hóa đơn #${route.params.id}`] },
+  },
+  {
+    path: "/lich-su-hoa-don",
+    name: "LichSuHD",
+    component: LichSuHD,
+    meta: { breadcrumb: ["Lịch sử hóa đơn"] },
+  },
+  {
+    path: "/hoa-don-chi-tiet",
+    name: "HDCT",
+    component: HoaDonChiTiet,
+    meta: { breadcrumb: ["Quản lý hóa đơn", "Hóa đơn chi tiết"] },
+  },
+
   // Tài khoản
-  import NhanVien from "../views/AccountType/NhanVien.vue";
-  import EmployeeForm from "@/views/AccountType/EmployeeForm.vue";
-  import KhachHang from "../views/AccountType/KhachHang.vue";
-  import CustmerForm from "@/views/AccountType/CustmerForm.vue";
-  import NotFound from "../views/NotFound.vue";
-  import UpdateNhanVien from "@/views/AccountType/UpdateNhanVien.vue";
-  import UpdateCustmer from "@/views/AccountType/UpdateCustmer.vue";
+  {
+    path: "/nhan-vien",
+    name: "NhanVien",
+    component: NhanVien,
+    meta: { breadcrumb: ["Quản lý tài khoản", "Nhân viên"] },
+  },
+  {
+    path: "/them-nhan-vien",
+    name: "ThemNhanVien",
+    component: EmployeeForm,
+    meta: { breadcrumb: ["Quản lý tài khoản", "Nhân viên", "Thêm nhân viên"] },
+  },
+  {
+    path: "/update-nhan-vien",
+    name: "UpdateNhanVien",
+    component: UpdateNhanVien,
+    meta: { breadcrumb: ["Quản lý tài khoản", "Nhân viên", "Cập nhật nhân viên"] },
+  },
+  {
+    path: "/khach-hang",
+    name: "KhachHang",
+    component: KhachHang,
+    meta: { breadcrumb: ["Quản lý tài khoản", "Khách hàng"] },
+  },
+  {
+    path: "/them-khach-hang",
+    name: "ThemKhachHang",
+    component: CustmerForm,
+    meta: { breadcrumb: ["Quản lý tài khoản", "Khách hàng", "Thêm khách hàng"] },
+  },
+  {
+    path: "/update-khach-hang",
+    name: "UpdateKhachHang",
+    component: UpdateCustmer,
+    meta: { breadcrumb: ["Quản lý tài khoản", "Khách hàng", "Cập nhật khách hàng"] },
+  },
+
   // Sản phẩm
-  import ProductDetails from "../views/Products/SanPham/ChiTietSanPham.vue";
-  
+  {
+    path: "/san-pham/chi-tiet",
+    name: "ChiTietSanPham",
+    component: ProductDetails,
+    meta: { breadcrumb: ["Sản phẩm", "Chi tiết sản phẩm"] },
+  },
+  {
+    path: "/product-detail/add",
+    name: "ThemChiTietSanPham",
+    component: ProductDetailAdd,
+    meta: { breadcrumb: ["Sản phẩm", "Chi tiết sản phẩm", "Thêm chi tiết sản phẩm"] },
+  },
+
   // Thương hiệu
-  import Manufacturer from "../views/Products/Brand/Manufacturer/Manufacturer.vue";
-  import ProductLine from "../views/Products/Brand/ProductLine/ProductLine.vue";
-  
-  //NhanVien
-  
+  {
+    path: "/manufacturer",
+    name: "manufacturer",
+    component: Manufacturer,
+    meta: { breadcrumb: ["Sản phẩm", "Nhà sản xuất"] },
+  },
+  {
+    path: "/manufacturer/add",
+    name: "manufacturer-add",
+    component: ManufacturerAdd,
+    meta: { breadcrumb: ["Sản phẩm", "Nhà sản xuất", "Thêm nhà sản xuất"] },
+  },
+  {
+    path: "/manufacturer/edit/:id",
+    name: "manufacturer-edit",
+    component: ManufacturerEdit,
+    meta: { breadcrumb: (route: any) => ["Sản phẩm", "Nhà sản xuất", `Cập nhật nhà sản xuất #${route.params.id}`] },
+  },
+  {
+    path: "/product-line",
+    name: "product-line",
+    component: ProductLine,
+    meta: { breadcrumb: ["Sản phẩm", "Dòng sản phẩm"] },
+  },
+  {
+    path: "/product-line/add",
+    name: "product-line-add",
+    component: ProductLineAdd,
+    meta: { breadcrumb: ["Sản phẩm", "Dòng sản phẩm", "Thêm dòng sản phẩm"] },
+  },
+  {
+    path: "/product-line/edit/:id",
+    name: "product-line-edit",
+    component: ProductLineEdit,
+    meta: { breadcrumb: (route: any) => ["Sản phẩm", "Dòng sản phẩm", `Cập nhật dòng sản phẩm #${route.params.id}`] },
+  },
+
   // Màn hình
-  import Display from "../views/Products/Screen/ManHinh.vue";
-  import DisplayTech from "../views/Products/Screen/CongNgheMH.vue";
-  import Ram from "../views/Products/MemorySanPham/RamSanPham.vue";
-  
+  {
+    path: "/man-hinh",
+    name: "ManHinh",
+    component: Display,
+    meta: { breadcrumb: ["Sản phẩm", "Màn hình"] },
+  },
+  {
+    path: "/screen/add",
+    name: "screen-add",
+    component: ManHinhAdd,
+    meta: { breadcrumb: ["Sản phẩm", "Màn hình", "Thêm màn hình"] },
+  },
+  {
+    path: "/screen/edit/:id",
+    name: "screen-edit",
+    component: ManHinhEdit,
+    meta: { breadcrumb: (route: any) => ["Sản phẩm", "Màn hình", `Cập nhật màn hình #${route.params.id}`] },
+  },
+  {
+    path: "/man-hinh/cong-nghe",
+    name: "CongNgheManHinh",
+    component: DisplayTech,
+    meta: { breadcrumb: ["Sản phẩm", "Công nghệ màn hình"] },
+  },
+  {
+    path: "/cong-nghe-man-hinh/add",
+    name: "ThemCongNgheManHinh",
+    component: AddCongNgheManHinh,
+    meta: { breadcrumb: ["Sản phẩm", "Công nghệ màn hình", "Thêm công nghệ màn hình"] },
+  },
+  {
+    path: "/cong-nghe-man-hinh/edit/:id",
+    name: "SuaCongNgheManHinh",
+    component: EditCongNgheManHinh,
+    meta: { breadcrumb: (route: any) => ["Sản phẩm", "Công nghệ màn hình", `Cập nhật công nghệ màn hình #${route.params.id}`] },
+  },
+  {
+    path: "/ram",
+    name: "RAM",
+    component: Ram,
+    meta: { breadcrumb: ["Sản phẩm", "RAM"] },
+  },
+
   // Bộ nhớ
-  import InternalStorage from "../views/Products/MemorySanPham/BoNhoTrong.vue";
-  import ExternalStorage from "../views/Products/MemorySanPham/BoNhoNgoai.vue";
-  
+  {
+    path: "/bo-nho-trong",
+    name: "BoNhoTrong",
+    component: InternalStorage,
+    meta: { breadcrumb: ["Sản phẩm", "Bộ nhớ trong"] },
+  },
+  {
+    path: "/bo-nho-ngoai",
+    name: "BoNhoNgoai",
+    component: ExternalStorage,
+    meta: { breadcrumb: ["Sản phẩm", "Bộ nhớ ngoài"] },
+  },
+
   // CPU & GPU
-  import CPU from "../views/Products/Chip/CPU.vue";
-  import GPU from "../views/Products/Chip/GPU.vue";
-  
+  {
+    path: "/cpu",
+    name: "CPU",
+    component: CPU,
+    meta: { breadcrumb: ["Sản phẩm", "CPU"] },
+  },
+  {
+    path: "/gpu",
+    name: "GPU",
+    component: GPU,
+    meta: { breadcrumb: ["Sản phẩm", "GPU"] },
+  },
+
   // Camera
-  import FrontCameraSpec from "../views/Products/CameraSanPham/CameraTruoc.vue";
-  import RearCameraSpec from "../views/Products/CameraSanPham/CameraSau.vue";
-  import FrontCameraDetail from "../views/Products/CameraSanPham/ChiTietCameraTruoc.vue";
-  import RearCameraDetail from "../views/Products/CameraSanPham/ChiTietCameraSau.vue";
-  import CameraModule from "../views/Products/CameraSanPham/CumCamera.vue";
-  
+  {
+    path: "/camera-truoc",
+    name: "CameraTruoc",
+    component: FrontCameraSpec,
+    meta: { breadcrumb: ["Sản phẩm", "Thông số camera trước"] },
+  },
+  {
+    path: "/camera-sau",
+    name: "CameraSau",
+    component: RearCameraSpec,
+    meta: { breadcrumb: ["Sản phẩm", "Thông số camera sau"] },
+  },
+  {
+    path: "/chi-tiet-camera-truoc",
+    name: "ChiTietCameraTruoc",
+    component: FrontCameraDetail,
+    meta: { breadcrumb: ["Sản phẩm", "Chi tiết camera trước"] },
+  },
+  {
+    path: "/chi-tiet-camera-sau",
+    name: "ChiTietCameraSau",
+    component: RearCameraDetail,
+    meta: { breadcrumb: ["Sản phẩm", "Chi tiết camera sau"] },
+  },
+  {
+    path: "/cum-camera",
+    name: "CumCamera",
+    component: CameraModule,
+    meta: { breadcrumb: ["Sản phẩm", "Cụm camera"] },
+  },
+
   // Sạc
-  import ChargingTech from "../views/Products/Sac/CongNgheSac.vue";
-  import ChargingSupport from "../views/Products/Sac/HoTroCongNgheSac.vue";
-  import Charging from "../views/Products/Sac/HoTroSac.vue";
-  import ChargingPort from "../views/Products/Sac/CongSac.vue";
-  
+  {
+    path: "/sac/cong-nghe",
+    name: "CongNgheSac",
+    component: ChargingTech,
+    meta: { breadcrumb: ["Sản phẩm", "Công nghệ sạc"] },
+  },
+  {
+    path: "/sac/ho-tro-cong-nghe",
+    name: "HoTroCongNgheSac",
+    component: ChargingSupport,
+    meta: { breadcrumb: ["Sản phẩm", "Hỗ trợ công nghệ sạc"] },
+  },
+  {
+    path: "/sac/ho-tro",
+    name: "HoTroSac",
+    component: Charging,
+    meta: { breadcrumb: ["Sản phẩm", "Hỗ trợ sạc"] },
+  },
+  {
+    path: "/sac/cong-sac",
+    name: "CongSac",
+    component: ChargingPort,
+    meta: { breadcrumb: ["Sản phẩm", "Cổng sạc"] },
+  },
+
   // Imel
-  import Imel from "../views/Products/Imel/Imel.vue"
-  import ImelDaBan from "../views/Products/Imel/ImelDaBan.vue"
-  import LichSuPhieuBaoHanh from "../views/BaoHanh/LichSuPhieuBaoHanh.vue";
-  import ProductLineAdd from "@/views/Products/Brand/ProductLine/ProductLineAdd.vue";
-  import ProductLineEdit from "@/views/Products/Brand/ProductLine/ProductLineEdit.vue";
-  import ManufacturerAdd from "@/views/Products/Brand/Manufacturer/ManufacturerAdd.vue";
-  import ManufacturerEdit from "@/views/Products/Brand/Manufacturer/ManufacturerEdit.vue";
-  import ImelAdd from "@/views/Products/Imel/ImelAdd.vue";
-  import ImelEdit from "@/views/Products/Imel/ImelEdit.vue";
-  import ManHinh from "@/views/Products/Screen/ManHinh.vue";
-  import ManHinhAdd from "@/views/Products/Screen/ManHinhAdd.vue";
-  import ManHinhEdit from "@/views/Products/Screen/ManHinhEdit.vue";
-  import AddCongNgheManHinh from "@/views/Products/Screen/AddCongNgheManHinh.vue";
-  import EditCongNgheManHinh from "@/views/Products/Screen/EditCongNgheManHinh.vue";
-  
-  
-  const routes: Array<RouteRecordRaw> = [
-    { path: "/", name: "Login", component: Login, meta: { layout: "empty" } },
-    { path: "/dashboard", name: "Dashboard", component: Dashboard },
-  
-    // Giam gia
-    { path: "/phieu-giam-gia", name: "Voucher", component: Voucher },
-    { path: "/phieu-bao-hanh", name: "PhieuBaoHanh", component: PhieuBaoHanh },
-    { path: "/lich-su-bao-hanh", name: "LichSuPhieuBaoHanh", component: LichSuPhieuBaoHanh },
-    { path: "/dot-giam-gia", name: "DotVoucher", component: DotVoucher },
-    { path: "/add-phieu-giam-gia", name: "FormAddPgg", component: FormAddPgg },
-  
-  
-    { path: "/hoa-don", name: "HoaDon", component: HoaDon },
-    { path: "/lich-su-hoa-don", name: "LichSuHD", component: LichSuHD },
-    { path: "/hoa-don-chi-tiet", name: "HDCT", component: HoaDonChiTiet },
-    { path: "/nhan-vien", name: "NhanVien", component: NhanVien },
-    { path: "/khach-hang", name: "KhachHang", component: KhachHang },
-  
-    // Sản phẩm
-    { path: "/san-pham/chi-tiet", name: "Chi Tiết Sản Phẩm", component: ProductDetails },
-  
-    // Thương hiệu
-    { path: "/manufacturer", name: "manufacturer", component: Manufacturer },
-    { path: "/manufacturer/add", name: "manufacturer-add", component: ManufacturerAdd },
-    { path: "/manufacturer/edit/:id", name: "manufacturer-edit", component: ManufacturerEdit },
-    { path: "/product-line", name: "product-line", component: ProductLine },
-    { path: "/product-line/add", name: "product-line-add", component: ProductLineAdd },
-    { path: "/product-line/edit/:id", name: "product-line-edit", component: ProductLineEdit },
-  
-    // Màn hình
-    { path: "/screen", name: "screen", component: ManHinh },
-    { path: "/screen/add", name: "screen-add", component: ManHinhAdd },
-    { path: "/screen/edit/:id", name: "screen-edit", component: ManHinhEdit },
-    { path: "/cong-nghe-man-hinh", name: "Công Nghệ Màn Hình", component: DisplayTech },
-    { path: "/cong-nghe-man-hinh/add", name: "Thêm Công Nghệ Màn Hình", component: AddCongNgheManHinh },
-    { path: "/cong-nghe-man-hinh/edit/:id", name: "Sửa Công Nghệ Màn Hình", component: EditCongNgheManHinh },
-    { path: "/ram", name: "RAM", component: Ram },
-  
-    // Bộ nhớ
-    { path: "/bo-nho-trong", name: "Bộ Nhớ Trong", component: InternalStorage },
-    { path: "/bo-nho-trong", name: "Bộ Nhớ Trong", component: ExternalStorage },
-  
-    // CPU & GPU
-    { path: "/cpu", name: "CPU", component: CPU },
-    { path: "/gpu", name: "GPU", component: GPU },
-  
-    // Camera
-    { path: "/camera-truoc", name: "Thông Số Camera Trước", component: FrontCameraSpec },
-    { path: "/camera-sau", name: "Thông Số Camera Sau", component: RearCameraSpec },
-    { path: "/chi-tiet-camera-truoc", name: "Chi Tiết Camera Trước", component: FrontCameraDetail },
-    { path: "/chi-tiet-camera-sau", name: "Chi Tiết Camera Sau", component: RearCameraDetail },
-    { path: "/cum-camera", name: "Cụm Camera", component: CameraModule },
-  
-    // Sạc
-    { path: "/sac/cong-nghe", name: "Công Nghệ Sạc", component: ChargingTech },
-    { path: "/sac/ho-tro-cong-nghe", name: "Hỗ Trợ Công Nghệ Sạc", component: ChargingSupport },
-    { path: "/sac/ho-tro", name: "Hỗ Trợ Sạc", component: Charging },
-    { path: "/sac/cong-sac", name: "Cổng Sạc", component: ChargingPort },
-  
-    // Imel
-    { path: "/imel", name: "imel", component: Imel },
-    { path: "/imel/add", name: "imel-add", component: ImelAdd },
-    { path: "/imel/edit/:id", name: "imel-edit", component: ImelEdit },
-    { path: "/imel-da-ban", name: "Imel đã bán", component: ImelDaBan },
-  
-    { path: "/:pathMatch(.*)*", component: NotFound },
-  
-    {
-      path: "/ViewAddDotGiamGia",
-      name: "ViewAddDotGiamGia",
-      component: () => import("@/views/Voucher/ViewAddDotGiamGia.vue"),
-    },
-    
-    { path: '/', component: NhanVien },
-    { path: '/them-nhan-vien', component: EmployeeForm },
-  
-    { path: '/', component: EmployeeForm },
-    { path: '/back', component: NhanVien },
-  
-    { path: '/', component: KhachHang },
-    { path: '/them-khach-hang', component: CustmerForm },
+  {
+    path: "/imel",
+    name: "imel",
+    component: Imel,
+    meta: { breadcrumb: ["Sản phẩm", "Imel"] },
+  },
+  {
+    path: "/imel/add",
+    name: "imel-add",
+    component: ImelAdd,
+    meta: { breadcrumb: ["Sản phẩm", "Imel", "Thêm Imel"] },
+  },
+  {
+    path: "/imel/edit/:id",
+    name: "imel-edit",
+    component: ImelEdit,
+    meta: { breadcrumb: (route: any) => ["Sản phẩm", "Imel", `Cập nhật Imel #${route.params.id}`] },
+  },
+  {
+    path: "/imel-da-ban",
+    name: "ImelDaBan",
+    component: ImelDaBan,
+    meta: { breadcrumb: ["Sản phẩm", "Imel đã bán"] },
+  },
 
-    { path: '/', component: NhanVien },
-    { path: '/update-nhan-vien', component: UpdateNhanVien },
+  // 404 Not Found
+  {
+    path: "/:pathMatch(.*)*",
+    component: NotFound,
+    meta: { breadcrumb: ["Không tìm thấy"] },
+  },
+];
 
-    { path: '/', component: EmployeeForm },
-    { path: '/back', component: NhanVien },
-    
-    { path: '/', component: UpdateCustmer },
-    { path: '/backKH', component: KhachHang },
-    
-    { path: '/', component: KhachHang },
-    { path: '/update-khach-hang', component: UpdateCustmer },
-  ];
-  
-  const router = createRouter({
-    history: createWebHistory(process.env.BASE_URL),
-    routes,
-  });
-  
-  export default router;
+const router = createRouter({
+  history: createWebHistory(process.env.BASE_URL),
+  routes,
+});
+
+export default router;

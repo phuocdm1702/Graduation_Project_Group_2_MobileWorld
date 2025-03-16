@@ -450,7 +450,7 @@ function scrollToSection() {
 const productCategories = [
   {
     name: "Chi Tiết Sản Phẩm",
-    path: "/san-pham/chi-tiet",
+    path: "/san-pham-chi-tiet",
     route: "Chi Tiết Sản Phẩm",
   },
   { name: "Nhà Sản Xuất", path: "/manufacturer", route: "manufacturer" },
