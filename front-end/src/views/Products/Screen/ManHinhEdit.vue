@@ -1,117 +1,123 @@
 <template>
-  <div class="mt-2 mx-auto">
-    <h2 class="bg-white shadow-lg rounded-lg p-5 mb-2 mt-2 text-2xl font-semibold text-gray-700">
-      Chỉnh Sửa Màn Hình
-    </h2>
-    <ToastNotification ref="toast" />
+  <div>
+    <!-- Thêm BreadcrumbWrapper -->
+    <BreadcrumbWrapper :breadcrumb-items="breadcrumbItems" />
 
-    <!-- Form chỉnh sửa -->
-    <div class="bg-white shadow-lg rounded-lg p-5 mb-4 mt-4">
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">ID Công nghệ màn hình</label>
-          <select
-            v-model="manHinh.idCongNgheManHinh"
-            class="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-[var(--ring-color)] focus:border-transparent transition-all duration-200"
-            required
+    <div class="mt-2 mx-auto">
+<!--      <h2 class="bg-white shadow-lg rounded-lg p-5 mb-2 mt-2 text-2xl font-semibold text-gray-700">-->
+<!--        Chỉnh Sửa Màn Hình-->
+<!--      </h2>-->
+      <ToastNotification ref="toast" />
+
+      <!-- Form chỉnh sửa -->
+      <div class="bg-white shadow-lg rounded-lg p-5 mb-4 mt-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">ID Công nghệ màn hình</label>
+            <select
+              v-model="manHinh.idCongNgheManHinh"
+              class="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-[var(--ring-color)] focus:border-transparent transition-all duration-200"
+              required
+            >
+              <option v-for="tech in congNgheManHinhs" :key="tech.id" :value="tech.id">{{ tech.congNgheManHinh }}</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Mã màn hình</label>
+            <input
+              v-model.trim="manHinh.ma"
+              type="text"
+              placeholder="Nhập mã màn hình"
+              class="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-[var(--ring-color)] focus:border-transparent transition-all duration-200"
+              required
+            />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Kích thước</label>
+            <input
+              v-model.trim="manHinh.kichThuoc"
+              type="text"
+              placeholder="Nhập kích thước (inch)"
+              class="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-[var(--ring-color)] focus:border-transparent transition-all duration-200"
+              required
+            />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Độ phân giải</label>
+            <input
+              v-model.trim="manHinh.doPhanGiai"
+              type="text"
+              placeholder="Nhập độ phân giải"
+              class="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-[var(--ring-color)] focus:border-transparent transition-all duration-200"
+              required
+            />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Độ sáng tối đa</label>
+            <input
+              v-model.trim="manHinh.doSangToiDa"
+              type="text"
+              placeholder="Nhập độ sáng tối đa (nits)"
+              class="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-[var(--ring-color)] focus:border-transparent transition-all duration-200"
+              required
+            />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Tần số quét</label>
+            <input
+              v-model.trim="manHinh.tanSoQuet"
+              type="text"
+              placeholder="Nhập tần số quét (Hz)"
+              class="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-[var(--ring-color)] focus:border-transparent transition-all duration-200"
+              required
+            />
+          </div>
+          <div class="md:col-span-2">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Kiểu màn hình</label>
+            <input
+              v-model.trim="manHinh.kieuManHinh"
+              type="text"
+              placeholder="Nhập kiểu màn hình"
+              class="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-[var(--ring-color)] focus:border-transparent transition-all duration-200"
+              required
+            />
+          </div>
+        </div>
+
+        <!-- Nút chức năng -->
+        <div class="flex justify-end gap-2 mt-6">
+          <button
+            @click="goBack"
+            class="px-4 py-2 bg-gray-500 text-white font-semibold rounded-lg shadow-md hover:bg-gray-600 transition"
           >
-            <option v-for="tech in congNgheManHinhs" :key="tech.id" :value="tech.id">{{ tech.congNgheManHinh }}</option>
-          </select>
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Mã màn hình</label>
-          <input
-            v-model.trim="manHinh.ma"
-            type="text"
-            placeholder="Nhập mã màn hình"
-            class="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-[var(--ring-color)] focus:border-transparent transition-all duration-200"
-            required
-          />
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Kích thước</label>
-          <input
-            v-model.trim="manHinh.kichThuoc"
-            type="text"
-            placeholder="Nhập kích thước (inch)"
-            class="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-[var(--ring-color)] focus:border-transparent transition-all duration-200"
-            required
-          />
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Độ phân giải</label>
-          <input
-            v-model.trim="manHinh.doPhanGiai"
-            type="text"
-            placeholder="Nhập độ phân giải"
-            class="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-[var(--ring-color)] focus:border-transparent transition-all duration-200"
-            required
-          />
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Độ sáng tối đa</label>
-          <input
-            v-model.trim="manHinh.doSangToiDa"
-            type="text"
-            placeholder="Nhập độ sáng tối đa (nits)"
-            class="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-[var(--ring-color)] focus:border-transparent transition-all duration-200"
-            required
-          />
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Tần số quét</label>
-          <input
-            v-model.trim="manHinh.tanSoQuet"
-            type="text"
-            placeholder="Nhập tần số quét (Hz)"
-            class="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-[var(--ring-color)] focus:border-transparent transition-all duration-200"
-            required
-          />
-        </div>
-        <div class="md:col-span-2">
-          <label class="block text-sm font-medium text-gray-700 mb-1">Kiểu màn hình</label>
-          <input
-            v-model.trim="manHinh.kieuManHinh"
-            type="text"
-            placeholder="Nhập kiểu màn hình"
-            class="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-[var(--ring-color)] focus:border-transparent transition-all duration-200"
-            required
-          />
+            Hủy
+          </button>
+          <button
+            @click="handleSubmit"
+            class="px-4 py-2 bg-[#f97316] text-white font-semibold rounded-lg shadow-md hover:bg-orange-600 transition"
+          >
+            Lưu
+          </button>
         </div>
       </div>
 
-      <!-- Nút chức năng -->
-      <div class="flex justify-end gap-2 mt-6">
-        <button
-          @click="goBack"
-          class="px-4 py-2 bg-gray-500 text-white font-semibold rounded-lg shadow-md hover:bg-gray-600 transition"
-        >
-          Hủy
-        </button>
-        <button
-          @click="handleSubmit"
-          class="px-4 py-2 bg-[#f97316] text-white font-semibold rounded-lg shadow-md hover:bg-orange-600 transition"
-        >
-          Lưu
-        </button>
-      </div>
+      <!-- Modal xác nhận -->
+      <ConfirmModal
+        :show="showConfirmModal"
+        :message="confirmMessage"
+        @confirm="executeConfirmedAction"
+        @cancel="closeConfirmModal"
+      />
     </div>
-
-    <!-- Modal xác nhận -->
-    <ConfirmModal
-      :show="showConfirmModal"
-      :message="confirmMessage"
-      @confirm="executeConfirmedAction"
-      @cancel="closeConfirmModal"
-    />
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import ToastNotification from '@/components/ToastNotification.vue';
 import ConfirmModal from '@/components/ConfirmModal.vue';
+import BreadcrumbWrapper from '@/components/BreadcrumbWrapper.vue'; // Import BreadcrumbWrapper
 import useManHinh from './useManHinh.js';
 import axios from 'axios';
 
@@ -132,6 +138,14 @@ const {
   executeConfirmedAction,
   closeConfirmModal,
 } = useManHinh(toast);
+
+// Tính toán breadcrumb dựa trên meta của route
+const breadcrumbItems = computed(() => {
+  if (typeof route.meta.breadcrumb === "function") {
+    return route.meta.breadcrumb(route);
+  }
+  return route.meta?.breadcrumb || ["Quản Lý Màn Hình", "Chỉnh Sửa Màn Hình"]; // Mặc định nếu không có breadcrumb
+});
 
 const fetchManHinh = async (id) => {
   try {

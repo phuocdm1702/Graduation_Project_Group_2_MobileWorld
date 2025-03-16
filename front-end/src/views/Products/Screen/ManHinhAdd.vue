@@ -1,127 +1,134 @@
 <template>
-  <div class="mt-2 mx-auto">
-    <h2 class="bg-white shadow-lg rounded-lg p-5 mb-2 mt-2 text-2xl font-semibold text-gray-700">
-      Thêm Mới Màn Hình
-    </h2>
-    <ToastNotification ref="toast" />
+  <div>
+    <!-- Thêm BreadcrumbWrapper -->
+    <BreadcrumbWrapper :breadcrumb-items="breadcrumbItems" />
 
-    <!-- Form thêm mới -->
-    <div class="bg-white shadow-lg rounded-lg p-5 mb-4 mt-4">
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">ID Công nghệ màn hình</label>
-          <select
-            v-model="manHinh.idCongNgheManHinh"
-            class="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-[var(--ring-color)] focus:border-transparent transition-all duration-200"
-            required
-          >
-            <option value="">Chọn công nghệ</option>
-            <option v-for="tech in congNgheManHinhs" :key="tech.id" :value="tech.id">{{ tech.congNgheManHinh }}</option>
-          </select>
+    <div class="mt-2 mx-auto">
+<!--      <h2 class="bg-white shadow-lg rounded-lg p-5 mb-2 mt-2 text-2xl font-semibold text-gray-700">-->
+<!--        Thêm Mới Màn Hình-->
+<!--      </h2>-->
+      <ToastNotification ref="toast" />
+
+      <!-- Form thêm mới -->
+      <div class="bg-white shadow-lg rounded-lg p-5 mb-4 mt-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">ID Công nghệ màn hình</label>
+            <select
+              v-model="manHinh.idCongNgheManHinh"
+              class="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-[var(--ring-color)] focus:border-transparent transition-all duration-200"
+              required
+            >
+              <option value="">Chọn công nghệ</option>
+              <option v-for="tech in congNgheManHinhs" :key="tech.id" :value="tech.id">{{ tech.congNgheManHinh }}</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Mã màn hình</label>
+            <input
+              v-model.trim="manHinh.ma"
+              type="text"
+              placeholder="Nhập mã màn hình"
+              class="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-[var(--ring-color)] focus:border-transparent transition-all duration-200"
+              required
+            />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Kích thước</label>
+            <select
+              v-model="manHinh.kichThuoc"
+              class="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-[var(--ring-color)] focus:border-transparent transition-all duration-200"
+              required
+            >
+              <option value="">Chọn kích thước</option>
+              <option v-for="kichThuoc in uniqueKichThuocList" :key="kichThuoc" :value="kichThuoc">{{ kichThuoc }}</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Độ phân giải</label>
+            <select
+              v-model="manHinh.doPhanGiai"
+              class="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-[var(--ring-color)] focus:border-transparent transition-all duration-200"
+              required
+            >
+              <option value="">Chọn độ phân giải</option>
+              <option v-for="doPhanGiai in uniqueDoPhanGiaiList" :key="doPhanGiai" :value="doPhanGiai">{{ doPhanGiai }}</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Độ sáng tối đa</label>
+            <select
+              v-model="manHinh.doSangToiDa"
+              class="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-[var(--ring-color)] focus:border-transparent transition-all duration-200"
+              required
+            >
+              <option value="">Chọn độ sáng</option>
+              <option v-for="doSang in uniqueDoSangToiDaList" :key="doSang" :value="doSang">{{ doSang }}</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Tần số quét</label>
+            <select
+              v-model="manHinh.tanSoQuet"
+              class="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-[var(--ring-color)] focus:border-transparent transition-all duration-200"
+              required
+            >
+              <option value="">Chọn tần số quét</option>
+              <option v-for="tanSo in uniqueTanSoQuetList" :key="tanSo" :value="tanSo">{{ tanSo }}</option>
+            </select>
+          </div>
+          <div class="md:col-span-2">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Kiểu màn hình</label>
+            <select
+              v-model="manHinh.kieuManHinh"
+              class="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-[var(--ring-color)] focus:border-transparent transition-all duration-200"
+              required
+            >
+              <option value="">Chọn kiểu màn hình</option>
+              <option v-for="kieu in uniqueKieuManHinhList" :key="kieu" :value="kieu">{{ kieu }}</option>
+            </select>
+          </div>
         </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Mã màn hình</label>
-          <input
-            v-model.trim="manHinh.ma"
-            type="text"
-            placeholder="Nhập mã màn hình"
-            class="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-[var(--ring-color)] focus:border-transparent transition-all duration-200"
-            required
-          />
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Kích thước</label>
-          <select
-            v-model="manHinh.kichThuoc"
-            class="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-[var(--ring-color)] focus:border-transparent transition-all duration-200"
-            required
+
+        <!-- Nút chức năng -->
+        <div class="flex justify-end gap-2 mt-6">
+          <button
+            @click="goBack"
+            class="px-4 py-2 bg-gray-500 text-white font-semibold rounded-lg shadow-md hover:bg-gray-600 transition"
           >
-            <option value="">Chọn kích thước</option>
-            <option v-for="kichThuoc in uniqueKichThuocList" :key="kichThuoc" :value="kichThuoc">{{ kichThuoc }}</option>
-          </select>
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Độ phân giải</label>
-          <select
-            v-model="manHinh.doPhanGiai"
-            class="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-[var(--ring-color)] focus:border-transparent transition-all duration-200"
-            required
+            Hủy
+          </button>
+          <button
+            @click="handleSubmit"
+            class="px-4 py-2 bg-[#f97316] text-white font-semibold rounded-lg shadow-md hover:bg-orange-600 transition"
           >
-            <option value="">Chọn độ phân giải</option>
-            <option v-for="doPhanGiai in uniqueDoPhanGiaiList" :key="doPhanGiai" :value="doPhanGiai">{{ doPhanGiai }}</option>
-          </select>
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Độ sáng tối đa</label>
-          <select
-            v-model="manHinh.doSangToiDa"
-            class="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-[var(--ring-color)] focus:border-transparent transition-all duration-200"
-            required
-          >
-            <option value="">Chọn độ sáng</option>
-            <option v-for="doSang in uniqueDoSangToiDaList" :key="doSang" :value="doSang">{{ doSang }}</option>
-          </select>
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Tần số quét</label>
-          <select
-            v-model="manHinh.tanSoQuet"
-            class="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-[var(--ring-color)] focus:border-transparent transition-all duration-200"
-            required
-          >
-            <option value="">Chọn tần số quét</option>
-            <option v-for="tanSo in uniqueTanSoQuetList" :key="tanSo" :value="tanSo">{{ tanSo }}</option>
-          </select>
-        </div>
-        <div class="md:col-span-2">
-          <label class="block text-sm font-medium text-gray-700 mb-1">Kiểu màn hình</label>
-          <select
-            v-model="manHinh.kieuManHinh"
-            class="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-[var(--ring-color)] focus:border-transparent transition-all duration-200"
-            required
-          >
-            <option value="">Chọn kiểu màn hình</option>
-            <option v-for="kieu in uniqueKieuManHinhList" :key="kieu" :value="kieu">{{ kieu }}</option>
-          </select>
+            Thêm
+          </button>
         </div>
       </div>
 
-      <!-- Nút chức năng -->
-      <div class="flex justify-end gap-2 mt-6">
-        <button
-          @click="goBack"
-          class="px-4 py-2 bg-gray-500 text-white font-semibold rounded-lg shadow-md hover:bg-gray-600 transition"
-        >
-          Hủy
-        </button>
-        <button
-          @click="handleSubmit"
-          class="px-4 py-2 bg-[#f97316] text-white font-semibold rounded-lg shadow-md hover:bg-orange-600 transition"
-        >
-          Thêm
-        </button>
-      </div>
+      <!-- Modal xác nhận -->
+      <ConfirmModal
+        :show="showConfirmModal"
+        :message="confirmMessage"
+        @confirm="executeConfirmedAction"
+        @cancel="closeConfirmModal"
+      />
     </div>
-
-    <!-- Modal xác nhận -->
-    <ConfirmModal
-      :show="showConfirmModal"
-      :message="confirmMessage"
-      @confirm="executeConfirmedAction"
-      @cancel="closeConfirmModal"
-    />
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
+import { ref, computed, onMounted } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
 import ToastNotification from '@/components/ToastNotification.vue';
 import ConfirmModal from '@/components/ConfirmModal.vue';
+import BreadcrumbWrapper from '@/components/BreadcrumbWrapper.vue'; // Import BreadcrumbWrapper
 import useManHinh from './useManHinh.js';
 import axios from 'axios';
 
 const router = useRouter();
+const route = useRoute();
 const toast = ref(null);
 
 const {
@@ -181,6 +188,14 @@ const uniqueDoPhanGiaiList = ref([...new Set(doPhanGiaiData)].sort());
 const uniqueDoSangToiDaList = ref([...new Set(doSangToiDaData)].sort((a, b) => parseInt(a) - parseInt(b)));
 const uniqueTanSoQuetList = ref([...new Set(tanSoQuetData)].sort((a, b) => parseInt(a) - parseInt(b)));
 const uniqueKieuManHinhList = ref([...new Set(kieuManHinhData)].sort());
+
+// Tính toán breadcrumb dựa trên meta của route
+const breadcrumbItems = computed(() => {
+  if (typeof route.meta.breadcrumb === "function") {
+    return route.meta.breadcrumb(route);
+  }
+  return route.meta?.breadcrumb || ["Quản Lý Màn Hình", "Thêm Mới Màn Hình"]; // Mặc định nếu không có breadcrumb
+});
 
 const fetchCongNgheManHinhs = async () => {
   try {

@@ -4,9 +4,9 @@
     <BreadcrumbWrapper :breadcrumb-items="breadcrumbItems" />
 
     <div class="mt-2 mx-auto">
-      <h2 class="bg-white shadow-lg rounded-lg p-5 mb-2 mt-2 text-2xl font-semibold text-gray-700">
-        Quản Lý Phiếu Giảm Giá
-      </h2>
+<!--      <h2 class="bg-white shadow-lg rounded-lg p-5 mb-2 mt-2 text-2xl font-semibold text-gray-700">-->
+<!--        Quản Lý Phiếu Giảm Giá-->
+<!--      </h2>-->
 
       <!-- Form lọc -->
       <div

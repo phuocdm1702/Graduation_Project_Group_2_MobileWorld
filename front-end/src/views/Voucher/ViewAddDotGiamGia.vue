@@ -1,6 +1,5 @@
 <template>
   <div>
-    <!-- Thay Breadcrumb bằng BreadcrumbWrapper -->
     <BreadcrumbWrapper :breadcrumb-items="breadcrumbItems" />
 
     <div class="bg-white p-4 rounded-md shadow-md">
@@ -74,7 +73,7 @@
               <button
                 class="flex items-center gap-2 px-4 py-2 bg-[#f97316] text-white font-semibold rounded-lg shadow-md hover:bg-orange-600 transition"
               >
-                {{ edit ? 'Cập nhật' : 'Thêm' }}
+                {{ isEditMode ? 'Cập nhật' : 'Thêm' }}
               </button>
               <router-link to="/dot-giam-gia">
                 <button
@@ -96,13 +95,11 @@
             class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-400 outline-none mb-4"
           />
           <div class="max-h-[700px] overflow-y-auto">
-            <div class="max-h-[700px] overflow-y-auto">
-              <DynamicTable
-                :data="dspList"
-                :columns="columns"
-                :getNestedValue="getNestedValue"
-              />
-            </div>
+            <DynamicTable
+              :data="dspList"
+              :columns="columns"
+              :getNestedValue="getNestedValue"
+            />
           </div>
           <footer class="bg-white shadow-lg rounded-lg p-4 flex justify-center items-center mt-2">
             <Pagination
@@ -171,22 +168,26 @@
 
 <script setup>
 import { useDotGiamGia } from './ViewAddDotGiamGia.js';
-import { computed } from "vue";
-import { useRoute } from 'vue-router';
+import { computed, onMounted } from "vue";
+import { useRoute, useRouter } from 'vue-router';
 import DynamicTable from "@/components/DynamicTable.vue";
 import Pagination from '@/components/Pagination.vue';
 import ConfirmModal from '@/components/ConfirmModal.vue';
 import ToastNotification from '@/components/ToastNotification.vue';
-import BreadcrumbWrapper from '@/components/BreadcrumbWrapper.vue'; // Import BreadcrumbWrapper
+import BreadcrumbWrapper from '@/components/BreadcrumbWrapper.vue';
 
 const route = useRoute();
+const router = useRouter();
 
-// Tính toán breadcrumb dựa trên meta của route
+// Kiểm tra xem đang ở chế độ chỉnh sửa hay thêm mới
+const isEditMode = computed(() => route.path.includes('/update-dot-giam-gia'));
+
+// Tính toán breadcrumb dựa trên route
 const breadcrumbItems = computed(() => {
-  if (typeof route.meta.breadcrumb === "function") {
-    return route.meta.breadcrumb(route);
+  if (isEditMode.value && route.params.id) {
+    return ["Quản Lý Phiếu Giảm Giá", "Đợt giảm giá", `Cập nhật đợt giảm giá #${route.params.id}`];
   }
-  return route.meta?.breadcrumb || ["Đợt Giảm Giá", "Thêm Đợt Giảm Giá"]; // Mặc định cho trang thêm
+  return ["Quản Lý Phiếu Giảm Giá", "Đợt giảm giá", "Thêm đợt giảm giá"];
 });
 
 const {

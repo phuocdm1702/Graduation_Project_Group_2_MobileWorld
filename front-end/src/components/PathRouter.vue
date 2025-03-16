@@ -1,7 +1,7 @@
 <template>
   <nav class="ml-4 text-gray-600" v-if="breadcrumbItems.length">
     <ol class="flex items-center space-x-2">
-      <li v-for="(item, index) in breadcrumbItems" :key="index">
+      <li v-for="(item, index) in breadcrumbItems" :key="index" class="flex items-center">
         <router-link
           v-if="index < breadcrumbItems.length - 1"
           :to="getLinkForBreadcrumb(index)"
@@ -12,8 +12,8 @@
         <span v-else class="text-lg font-semibold text-gray-900">{{ item }}</span>
         <span
           v-if="index < breadcrumbItems.length - 1"
-          class="before:content-['/'] before:mx-2 text-gray-400"
-        ></span>
+          class="mx-2 text-gray-400"
+        >/</span>
       </li>
     </ol>
   </nav>
@@ -27,7 +27,6 @@ defineProps<{
   breadcrumbItems: string[];
 }>();
 
-// Lấy route hiện tại
 const route = useRoute();
 
 // Tính toán breadcrumb dựa trên meta của route
@@ -38,65 +37,89 @@ const breadcrumbItems = computed(() => {
   return route.meta?.breadcrumb || [];
 });
 
-// Hàm tạo link cho breadcrumb
+// Hàm tạo link cho breadcrumb dựa trên danh sách route
 const getLinkForBreadcrumb = (index: number) => {
-  const items = breadcrumbItems.value;
-  const item = items[index];
+  const items = breadcrumbItems.value.slice(0, index + 1); // Lấy các phần tử từ đầu đến index hiện tại
+  const lastItem = items[index];
 
-  switch (item) {
-    case "Thống kê":
-      return "/dashboard";
-    case "Phiếu giảm giá":
-      return "/phieu-giam-gia";
-    case "Đợt giảm giá":
-      return "/phieu-giam-gia/dot-giam-gia";
-    case "Thêm phiếu giảm giá":
-      return "/phieu-giam-gia/add-phieu-giam-gia";
-    case "Sửa phiếu giảm giá":
-      return "/phieu-giam-gia/update-phieu-giam-gia";
-    case "Phiếu bảo hành":
-      return "/phieu-bao-hanh";
-    case "Lịch sử phiếu bảo hành":
-      return "/lich-su-bao-hanh";
-    case "Quản lý hóa đơn":
-      return "/hoa-don";
-    case "Lịch sử hóa đơn":
-      return "/lich-su-hoa-don";
-    case "Quản lý tài khoản":
-      return "/nhan-vien";
-    case "Nhân viên":
-      return "/nhan-vien";
-    case "Khách hàng":
-      return "/khach-hang";
-    case "Sản phẩm":
-      return "/san-pham";
-    case "Thương hiệu":
-      return "/san-pham/manufacturer";
-    case "Nhà sản xuất":
-      return "/san-pham/manufacturer";
-    case "Dòng sản phẩm":
-      return "/san-pham/product-line";
-    case "Màn hình":
-      return "/san-pham/screen";
-    case "Bộ nhớ":
-      return "/san-pham/bo-nho-trong";
-    case "CPU & GPU":
-      return "/san-pham/cpu";
-    case "Camera":
-      return "/san-pham/camera-truoc";
-    case "Sạc":
-      return "/san-pham/sac/cong-nghe";
-    case "Imel":
-      return "/san-pham/imel";
-    default:
-      return "#";
+  // Map các tên breadcrumb với đường dẫn tương ứng
+  const breadcrumbMap: { [key: string]: string } = {
+    "Thống kê": "/dashboard",
+    "Quản Lý Phiếu Giảm Giá": "/phieu-giam-gia",
+    "Phiếu giảm giá": "/phieu-giam-gia",
+    "Đợt giảm giá": "/dot-giam-gia",
+    "Thêm phiếu giảm giá": "/add-phieu-giam-gia",
+    "Cập nhật phiếu giảm giá": `/update-phieu-giam-gia/:id`,
+    "Thêm đợt giảm giá": "/ViewAddDotGiamGia",
+    "Cập nhật đợt giảm giá": `/update-dot-giam-gia/${route.params.id || ":id"}`, // Thêm đường dẫn mới
+    "Bảo hành": "/phieu-bao-hanh",
+    "Quản lý Phiếu bảo hành": "/phieu-bao-hanh",
+    "Quản lý Lịch sử phiếu bảo hành": "/lich-su-bao-hanh",
+    "Quản lý hóa đơn": "/hoa-don",
+    "Lịch sử hóa đơn": "/lich-su-hoa-don",
+    "Hóa đơn chi tiết": "/hoa-don-chi-tiet",
+    "Chi tiết hóa đơn": `/show-hoa-don/${route.params.id || ":id"}`,
+    "Quản lý tài khoản": "/nhan-vien",
+    "Nhân viên": "/nhan-vien",
+    "Thêm nhân viên": "/them-nhan-vien",
+    "Cập nhật nhân viên": "/update-nhan-vien",
+    "Khách hàng": "/khach-hang",
+    "Thêm khách hàng": "/them-khach-hang",
+    "Cập nhật khách hàng": "/update-khach-hang",
+    "Sản phẩm": "/san-pham-chi-tiet",
+    "Chi tiết sản phẩm": "/san-pham-chi-tiet",
+    "Quản lý Chi tiết sản phẩm": "/san-pham-chi-tiet",
+    "Thêm chi tiết sản phẩm": "/product-detail/add",
+    "Thêm Sản Phẩm": "/add-product",
+    "Quản Lý Nhà Sản Xuất": "/manufacturer",
+    "Thêm nhà sản xuất": "/manufacturer/add",
+    "Cập nhật Nhà Sản Xuất": `/manufacturer/edit/${route.params.id || ":id"}`,
+    "Quản lý Dòng sản phẩm": "/product-line",
+    "Thêm dòng sản phẩm": "/product-line/add",
+    "Cập nhật dòng sản phẩm": `/product-line/edit/${route.params.id || ":id"}`,
+    "Quản lý Màn hình": "/screen",
+    "Thêm màn hình": "/screen/add",
+    "Cập nhật màn hình": `/screen/edit/${route.params.id || ":id"}`,
+    "Quản lý Công nghệ màn hình": "/man-hinh/cong-nghe",
+    "Thêm công nghệ màn hình": "/man-hinh/cong-nghe/add",
+    "Cập nhật công nghệ màn hình": `/man-hinh/cong-nghe/edit/${route.params.id || ":id"}`,
+    "Quản lý RAM": "/ram",
+    "Quản lý Bộ nhớ trong": "/bo-nho-trong",
+    "Quản lý Bộ nhớ ngoài": "/bo-nho-ngoai",
+    "Quản lý CPU": "/cpu",
+    "Quản lý GPU": "/gpu",
+    "Quản lý Thông số camera trước": "/camera-truoc",
+    "Quản lý Thông số camera sau": "/camera-sau",
+    "Quản lý Chi tiết camera trước": "/chi-tiet-camera-truoc",
+    "Quản lý Chi tiết camera sau": "/chi-tiet-camera-sau",
+    "Quản lý Cụm camera": "/cum-camera",
+    "Quản lý Công nghệ sạc": "/sac/cong-nghe",
+    "Quản lý Hỗ trợ công nghệ sạc": "/sac/ho-tro-cong-nghe",
+    "Quản lý Hỗ trợ sạc": "/sac/ho-tro",
+    "Quản lý Cổng sạc": "/sac/cong-sac",
+    "Quản lý Imel": "/imel",
+    "Thêm Imel": "/imel/add",
+    "Cập nhật Imel": `/imel/edit/${route.params.id || ":id"}`,
+    "Quản lý Imel đã bán": "/imel-da-ban",
+    "Không tìm thấy": "/:pathMatch(.*)*"
+  };
+
+  // Tạo đường dẫn dựa trên các phần tử trước đó
+  for (let i = items.length - 1; i >= 0; i--) {
+    const key = items[i];
+    if (breadcrumbMap[key]) {
+      return breadcrumbMap[key];
+    }
   }
+
+  return "#"; // Mặc định nếu không tìm thấy
 };
 </script>
 
 <style scoped>
-.breadcrumb a,
-.breadcrumb span {
-  /* text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1); /* Hiệu ứng bóng chữ (tùy chọn) */
+/* Tối ưu hóa CSS */
+nav {
+  display: flex;
+  align-items: center;
 }
 </style>
