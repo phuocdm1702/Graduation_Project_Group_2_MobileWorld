@@ -89,7 +89,7 @@
         </div>
 
         <div class="flex justify-end gap-4 mt-6">
-          <router-link to="/back">
+          <router-link to="/nhan-vien">
             <button
               @click="$emit('cancel')"
               class="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-all duration-300"
