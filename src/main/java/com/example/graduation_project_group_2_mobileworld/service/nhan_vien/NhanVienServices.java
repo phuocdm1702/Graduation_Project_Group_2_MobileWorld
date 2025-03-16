@@ -14,6 +14,7 @@ import java.text.Normalizer;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class NhanVienServices {
@@ -153,4 +154,31 @@ public class NhanVienServices {
     }
 
 
+    public List<NhanVien> searchNhanVien(String keyword, String status) {
+        List<NhanVien> allNhanViens = nhanVienRepository.findAll();
+
+        // Lọc theo trạng thái
+        if (status != null && !status.isEmpty()) {
+            boolean isDeleted = status.equals("da-nghi");
+            allNhanViens = allNhanViens.stream()
+                    .filter(nv -> nv.getDeleted() == isDeleted)
+                    .collect(Collectors.toList());
+        }
+
+        // Nếu không có từ khóa, trả về danh sách đã lọc theo trạng thái
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return allNhanViens;
+        }
+
+        // Tìm kiếm theo từ khóa (mã, tên, email, số điện thoại)
+        String keywordLower = keyword.toLowerCase();
+        return allNhanViens.stream()
+                .filter(nv ->
+                        (nv.getMa() != null && nv.getMa().toLowerCase().contains(keywordLower)) ||
+                                (nv.getTenNhanVien() != null && nv.getTenNhanVien().toLowerCase().contains(keywordLower)) ||
+                                (nv.getIdTaiKhoan() != null && nv.getIdTaiKhoan().getEmail() != null && nv.getIdTaiKhoan().getEmail().toLowerCase().contains(keywordLower)) ||
+                                (nv.getIdTaiKhoan() != null && nv.getIdTaiKhoan().getSoDienThoai() != null && nv.getIdTaiKhoan().getSoDienThoai().toLowerCase().contains(keywordLower))
+                )
+                .collect(Collectors.toList());
+    }
 }

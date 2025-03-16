@@ -122,7 +122,7 @@ export default function useEmployeeManagement() {
 
     try {
       await axios.put(`http://localhost:8080/nhan-vien/delete/${selectedNVId.value}`);
-      showToast("success", "Xóa nhân viên thành công!");
+      showToast("success", "Cho nhân viên nghỉ thành công!");
       await fetchNhanVien();
     } catch (error) {
       console.error("Lỗi khi xóa nhân viên:", error);
@@ -160,7 +160,7 @@ export default function useEmployeeManagement() {
       label: "Thao Tác",
       formatter: (value, item) => `
         <td class="px-6 py-4 text-center">
-          <a href="/update-nhan-vien?id=${item.id}" class="text-blue-600 hover:text-blue-800 transition">
+          <a href="/update-nhan-vien?id=${item.id}" class="text-orange-500 hover:text-orange-500 transition">
             <i class="fas fa-pen-to-square"></i>
           </a>
           <button class="text-red-600 hover:text-red-800 transition ml-4" onclick="document.dispatchEvent(new CustomEvent('showDeleteConfirm', { detail: '${item.id}' }))">

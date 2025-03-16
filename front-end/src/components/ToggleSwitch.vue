@@ -1,104 +1,94 @@
 <template>
-  <label class="switch">
-    <input
-      type="checkbox"
-      :checked="checked"
-      @change="$emit('change', $event.target.checked)"
-    >
-    <div class="slider"></div>
-    <div class="slider-card">
-      <div class="slider-card-face slider-card-front"></div>
-      <div class="slider-card-face slider-card-back"></div>
-    </div>
-  </label>
+  <div class="toggle-switch">
+    <input class="toggle-input" :id="uniqueId" type="checkbox"
+           :checked="checked"
+           @change="$emit('change', $event.target.checked)">
+    <label class="toggle-label" :for="uniqueId"></label>
+  </div>
 </template>
 
 <script setup>
-import { defineProps, defineEmits } from 'vue';
+import { defineProps, defineEmits, computed } from 'vue';
 
-defineProps({
-  checked: {
-    type: Boolean,
-    default: false
-  }
+// Đảm bảo id được khai báo trong defineProps
+const props = defineProps({
+  checked: { type: Boolean, default: false },
+  id: { type: [String, Number], default: '' } // Đảm bảo id được khai báo
 });
 
 defineEmits(['change']);
+
+// Sử dụng props.id để truy cập
+const uniqueId = computed(() => `toggle-${props.id}`);
 </script>
 
 <style scoped>
-.switch {
-  --circle-dim: 1.4em;
-  font-size: 17px;
+.toggle-switch {
   position: relative;
   display: inline-block;
-  width: 3.5em;
-  height: 2em;
+  width: 40px;
+  height: 24px;
+  margin: 10px;
 }
 
-/* Hide default HTML checkbox */
-.switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
+.toggle-switch .toggle-input {
+  display: none;
 }
 
-/* The slider */
-.slider {
+.toggle-switch .toggle-label {
   position: absolute;
-  cursor: pointer;
   top: 0;
   left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: #f5aeae;
-  transition: .4s;
-  border-radius: 30px;
+  width: 40px;
+  height: 24px;
+  background-color: #E32636;
+  border-radius: 34px;
+  cursor: pointer;
+  transition: background-color 0.3s;
 }
 
-.slider-card {
-  position: absolute;
+.toggle-switch .toggle-label::before {
   content: "";
-  height: var(--circle-dim);
-  width: var(--circle-dim);
-  border-radius: 20px;
-  left: 0.3em;
-  bottom: 0.3em;
-  transition: .4s;
-  pointer-events: none;
-}
-
-.slider-card-face {
   position: absolute;
-  inset: 0;
-  backface-visibility: hidden;
-  perspective: 1000px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
-  transition: .4s transform;
+  top: 2px;
+  left: 2px;
+  background-color: #fff;
+  box-shadow: 0px 2px 5px 0px rgba(0, 0, 0, 0.3);
+  transition: transform 0.3s;
 }
 
-.slider-card-front {
-  background-color: #DC3535;
+.toggle-switch .toggle-input:checked + .toggle-label {
+  background-color: #4CAF50;
 }
 
-.slider-card-back {
-  background-color: #379237;
-  transform: rotateY(180deg);
+.toggle-switch .toggle-input:checked + .toggle-label::before {
+  transform: translateX(16px);
 }
 
-input:checked ~ .slider-card .slider-card-back {
-  transform: rotateY(0);
+.toggle-switch.light .toggle-label {
+  background-color: #BEBEBE;
 }
 
-input:checked ~ .slider-card .slider-card-front {
-  transform: rotateY(-180deg);
+.toggle-switch.light .toggle-input:checked + .toggle-label {
+  background-color: #9B9B9B;
 }
 
-input:checked ~ .slider-card {
-  transform: translateX(1.5em);
+.toggle-switch.light .toggle-input:checked + .toggle-label::before {
+  transform: translateX(6px);
 }
 
-input:checked ~ .slider {
-  background-color: #9ed99c;
+.toggle-switch.dark .toggle-label {
+  background-color: #4B4B4B;
+}
+
+.toggle-switch.dark .toggle-input:checked + .toggle-label {
+  background-color: #717171;
+}
+
+.toggle-switch.dark .toggle-input:checked + .toggle-label::before {
+  transform: translateX(16px);
 }
 </style>

@@ -8,17 +8,28 @@ import org.springframework.web.multipart.MultipartFile;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Map;
+
 @RestController
 @CrossOrigin(origins = {"http://localhost:3000/", "http://localhost:8080"})
 @RequestMapping("/img")
 public class FileUploadController {
-    @PostMapping("/api/upload")
-    public ResponseEntity<?> uploadFile(@RequestParam("file") MultipartFile file) {
-        try {
-            // Định nghĩa thư mục lưu trữ (thay đổi theo nhu cầu)
-            String uploadDir = "src/main/resources/static/images/";
-            Path uploadPath = Paths.get(uploadDir);
+    private static final String UPLOAD_DIR = "src/main/resources/static/images/";
 
+    @PostMapping("/api/upload")
+    public ResponseEntity<Map<String, String>> uploadFile(@RequestParam("file") MultipartFile file) {
+        Map<String, String> response = new HashMap<>();
+
+        try {
+            // Kiểm tra file
+            if (file.isEmpty()) {
+                response.put("message", "File không được để trống");
+                return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+            }
+
+            // Tạo thư mục nếu chưa tồn tại
+            Path uploadPath = Paths.get(UPLOAD_DIR);
             if (!Files.exists(uploadPath)) {
                 Files.createDirectories(uploadPath);
             }
@@ -26,13 +37,18 @@ public class FileUploadController {
             // Tạo tên file duy nhất
             String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
             Path filePath = uploadPath.resolve(fileName);
+
+            // Lưu file
             Files.copy(file.getInputStream(), filePath);
 
-            // Trả về đường dẫn hoặc tên file
-            String imageUrl = "/images/" + fileName; // Đường dẫn tương đối
-            return new ResponseEntity<>(new UploadResponse(imageUrl), HttpStatus.OK);
+            // Tạo URL để frontend truy cập
+            String imageUrl = "/images/" + fileName;
+            response.put("imageUrl", imageUrl);
+
+            return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (Exception e) {
-            return new ResponseEntity<>("Lỗi khi upload file: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            response.put("message", "Lỗi khi upload file: " + e.getMessage());
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 

@@ -9,10 +9,7 @@
     <Breadcrumb breadcrumb="Quản lý Nhân Viên" />
 
     <div class="mt-2 mx-auto">
-      <h2 class="bg-white shadow-lg rounded-lg p-5 mb-2 mt-2 text-2xl font-semibold text-gray-700">
-        Quản Lý Nhân Viên
-      </h2>
-
+      
       <!-- Phần form (search và trạng thái) -->
       <div class="mt-2 w-full bg-white border rounded-md shadow-md">
         <form @submit.prevent>
@@ -25,7 +22,7 @@
                 <input
                   v-model="searchNV"
                   @input="btnSearch"
-                  placeholder="Tìm theo mã hoặc tên..."
+                  placeholder="Tìm theo mã,tên,email,sđt...."
                   type="text"
                   class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-400 outline-none"
                 />

@@ -88,7 +88,7 @@
         </div>
 
         <div class="flex justify-end gap-4 mt-6">
-          <router-link to="/backKH">
+          <router-link to="/khach-hang">
             <button
               @click="$emit('cancel')"
               class="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-all duration-300"
@@ -817,8 +817,8 @@ onMounted(async () => {
 .switch {
   position: relative;
   display: inline-block;
-  width: 40px;
-  height: 20px;
+  width: 60px; /* Tăng chiều rộng */
+  height: 30px; /* Tăng chiều cao */
 }
 
 .switch input {
@@ -834,43 +834,56 @@ onMounted(async () => {
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: #ccc;
-  transition: 0.4s;
-  border-radius: 20px;
+  background-color: #d1d5db; /* Màu xám nhạt hiện đại hơn */
+  transition: 0.4s ease; /* Hiệu ứng mượt mà */
+  border-radius: 30px; /* Bo góc lớn hơn */
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1); /* Thêm bóng đổ nhẹ */
 }
 
 .slider:before {
   position: absolute;
   content: "✕";
-  height: 16px;
-  width: 16px;
-  left: 2px;
-  bottom: 2px;
-  background-color: white;
-  transition: 0.4s;
+  height: 24px; 
+  width: 24px;
+  left: 3px;
+  bottom: 3px;
+  background-color: #ffffff; 
+  transition: 0.4s ease; 
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 12px;
-  color: #666;
+  font-size: 14px; 
+  color: #6b7280; 
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); 
 }
 
 input:checked + .slider {
-  background-color: #2196F3;
+  background-color: #f97316;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.15); 
 }
 
 input:checked + .slider:before {
-  transform: translateX(20px);
+  transform: translateX(30px); 
   content: "✔";
-  color: white;
+  color: #ffffff; 
+  font-weight: bold;
 }
 
 .slider.round {
-  border-radius: 20px;
+  border-radius: 30px;
 }
 
 .slider.round:before {
   border-radius: 50%;
+}
+
+/* Hiệu ứng hover */
+.switch:hover .slider {
+  background-color: #e5e7eb; 
+}
+
+input:checked + .slider:hover {
+  background-color: #fb923c; 
 }
 </style>

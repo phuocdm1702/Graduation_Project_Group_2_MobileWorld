@@ -114,7 +114,7 @@ export default function useCustomerManagement() {
 
     try {
       await axios.put(`http://localhost:8080/khach-hang/delete/${selectedCustomerId.value}`);
-      showToast("success", "Xóa mềm thành công!");
+      showToast("success", "Hủy kích hoạt khách hàng thành công!");
       await fetchCustomers(currentPage.value); // Cập nhật lại dữ liệu sau khi xóa
     } catch (error) {
       console.error("Lỗi khi xóa khách hàng:", error);
@@ -173,7 +173,7 @@ export default function useCustomerManagement() {
       label: "Thao Tác",
       formatter: (value, item) => `
         <td class="px-6 py-4 text-center">
-          <a href="/update-khach-hang?id=${item.id}" class="text-blue-600 hover:text-blue-800 transition">
+          <a href="/update-khach-hang?id=${item.id}" class="text-orange-500 hover:text-orange-500 transition">
             <i class="fas fa-pen-to-square"></i>
           </a>
           <button class="text-red-600 hover:text-red-800 transition ml-4" onclick="document.dispatchEvent(new CustomEvent('showDeleteConfirm', { detail: '${item.id}' }))">
