@@ -1,27 +1,28 @@
 <template>
   <div class="toggle-switch">
-    <input class="toggle-input" id="toggle" type="checkbox"
+    <input class="toggle-input" :id="uniqueId" type="checkbox"
            :checked="checked"
            @change="$emit('change', $event.target.checked)">
-    <label class="toggle-label" for="toggle"></label>
+    <label class="toggle-label" :for="uniqueId"></label>
   </div>
 </template>
 
 <script setup>
-import { defineProps, defineEmits } from 'vue';
+import { defineProps, defineEmits, computed } from 'vue';
 
-defineProps({
-  checked: {
-    type: Boolean,
-    default: false
-  }
+// Đảm bảo id được khai báo trong defineProps
+const props = defineProps({
+  checked: { type: Boolean, default: false },
+  id: { type: [String, Number], default: '' } // Đảm bảo id được khai báo
 });
 
 defineEmits(['change']);
+
+// Sử dụng props.id để truy cập
+const uniqueId = computed(() => `toggle-${props.id}`);
 </script>
 
 <style scoped>
-/* Genel stil */
 .toggle-switch {
   position: relative;
   display: inline-block;
@@ -30,12 +31,10 @@ defineEmits(['change']);
   margin: 10px;
 }
 
-/* Giriş stil */
 .toggle-switch .toggle-input {
   display: none;
 }
 
-/* Anahtarın stilinin etrafındaki etiketin stil */
 .toggle-switch .toggle-label {
   position: absolute;
   top: 0;
@@ -48,7 +47,6 @@ defineEmits(['change']);
   transition: background-color 0.3s;
 }
 
-/* Anahtarın yuvarlak kısmının stil */
 .toggle-switch .toggle-label::before {
   content: "";
   position: absolute;
@@ -62,7 +60,6 @@ defineEmits(['change']);
   transition: transform 0.3s;
 }
 
-/* Anahtarın etkin hale gelmesindeki stil değişiklikleri */
 .toggle-switch .toggle-input:checked + .toggle-label {
   background-color: #4CAF50;
 }
@@ -71,7 +68,6 @@ defineEmits(['change']);
   transform: translateX(16px);
 }
 
-/* Light tema */
 .toggle-switch.light .toggle-label {
   background-color: #BEBEBE;
 }
@@ -84,7 +80,6 @@ defineEmits(['change']);
   transform: translateX(6px);
 }
 
-/* Dark tema */
 .toggle-switch.dark .toggle-label {
   background-color: #4B4B4B;
 }

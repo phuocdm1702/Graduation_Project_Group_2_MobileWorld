@@ -7,7 +7,7 @@
     <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-100 max-w-md w-full z-50">
       <h2 class="text-2xl font-semibold text-gray-800 mb-6 flex items-center">
         <i :class="`fa-solid ${iconClass} ${iconColor} mr-2`"></i>
-        {{ isEdit ? `Cập Nhật ${entityName}` : `Thêm ${entityName}` }}
+        Thêm {{ entityName }}
       </h2>
       <form @submit.prevent="submitForm" class="space-y-6">
         <div class="grid grid-cols-1 gap-6">
@@ -24,10 +24,9 @@
           </button>
           <button
             type="submit"
-            :class="isEdit ? 'bg-blue-600 hover:bg-blue-700' : 'bg-green-600 hover:bg-green-700'"
-            class="text-white px-5 py-2 rounded-lg transition-all duration-200 font-medium flex items-center"
+            class="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-lg transition-all duration-200 font-medium flex items-center"
           >
-            <i class="fa-solid fa-save mr-2"></i> {{ isEdit ? 'Cập nhật' : 'Thêm mới' }}
+            <i class="fa-solid fa-save mr-2"></i> Thêm mới
           </button>
         </div>
       </form>
@@ -40,14 +39,13 @@ import { ref, watch } from 'vue';
 
 const props = defineProps({
   show: Boolean,
-  isEdit: Boolean,
   entityName: {
     type: String,
     required: true,
   },
   entityData: {
     type: Object,
-    default: () => ({ id: null }),
+    default: () => ({}),
   },
   iconClass: {
     type: String,
@@ -66,28 +64,76 @@ const localEntityData = ref({ ...props.entityData });
 watch(
   () => props.entityData,
   (newValue) => {
-    console.log('Syncing entityData:', newValue);
     localEntityData.value = { ...newValue };
   },
   { immediate: true }
 );
 
 const submitForm = () => {
-  console.log('Submitting entity data:', localEntityData.value);
-
   let requiredFields = [];
   switch (props.entityName) {
-    case 'Dòng Sản Phẩm':
-      requiredFields = ['ma', 'dongSanPham'];
+    case 'id':
+      requiredFields = ['id'];
       break;
-    case 'Nhà Sản Xuất':
-      requiredFields = ['ma', 'nhaSanXuat'];
+    case 'heDieuHanh':
+      requiredFields = ['tenHeDieuHanh'];
       break;
-    case 'Imel':
-      requiredFields = ['ma', 'imel'];
+    case 'manHinh':
+      requiredFields = ['kichThuoc'];
+      break;
+    case 'nhaSanXuat':
+      requiredFields = ['tenNhaSanXuat'];
+      break;
+    case 'cumCamera':
+      requiredFields = ['tenCamera'];
+      break;
+    case 'sim':
+      requiredFields = ['loaiSim'];
+      break;
+    case 'thietKe':
+      requiredFields = ['tenThietKe'];
+      break;
+    case 'pin':
+      requiredFields = ['dungLuong'];
+      break;
+    case 'cpu':
+      requiredFields = ['tenCpu'];
+      break;
+    case 'gpu':
+      requiredFields = ['tenGpu'];
+      break;
+    case 'congNgheMang':
+      requiredFields = ['tenCongNghe'];
+      break;
+    case 'congSac':
+      requiredFields = ['tenCongNghe'];
+      break;
+    case 'hoTroCongNgheSac':
+      requiredFields = ['ten'];
+      break;
+    case 'chiSoKhangBuiVaNuoc':
+      requiredFields = ['maChiSo'];
+      break;
+    case 'tinhTrang':
+      requiredFields = ['tenTinhTrang'];
+      break;
+    case 'ram':
+      requiredFields = ['dungLuong'];
+      break;
+    case 'boNhoTrong':
+      requiredFields = ['dungLuong'];
+      break;
+    case 'mauSac':
+      requiredFields = ['tenMau'];
+      break;
+    case 'tienIchDacBiet':
+      requiredFields = ['tienIchDacBiet'];
+      break;
+    case 'giaBan':
+      requiredFields = ['giaBan'];
       break;
     default:
-      requiredFields = Object.keys(localEntityData.value).filter(key => key !== 'id');
+      requiredFields = Object.keys(localEntityData.value);
   }
 
   const missingFields = requiredFields.filter(field => !localEntityData.value[field]);

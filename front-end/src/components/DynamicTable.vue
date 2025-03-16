@@ -19,21 +19,18 @@
           <template v-if="column.cellSlot === 'actionsSlot'">
             <slot name="actionsSlot" :item="item">
               <div class="flex items-center space-x-2">
-                <!-- Nút Sửa -->
                 <button @click="editItem(item)" class="bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600 transition">
                   <i class="fa-solid fa-edit"></i>
                 </button>
-                <!-- ToggleSwitch -->
                 <ToggleSwitch
                   :checked="!item.trangThai"
                   @change="toggleStatus(item)"
+                  :id="item.id"
                 />
               </div>
             </slot>
           </template>
           <template v-else-if="column.key === 'trangThai'">
-            <span v-if="column.key === 'trangThai'">
-            <!-- Thay checkbox bằng chữ có viền và màu -->
             <span
               :class="{
                 'bg-gray-200 text-red-500': item.trangThai,
@@ -41,9 +38,8 @@
               }"
               class="inline-block px-3 py-1 border rounded-full text-sm font-semibold"
             >
-              {{ item.trangThai ? 'Không hoạt động' : ' Hoạt động' }}
+              {{ item.trangThai ? 'Không hoạt động' : 'Hoạt động' }}
             </span>
-          </span>
           </template>
           <span v-else-if="column.formatter"
                 v-html="column.formatter(getNestedValue(item, column.key), item, index)"></span>
@@ -56,28 +52,17 @@
 </template>
 
 <script setup>
-import { defineProps } from 'vue';
-import {useRouter} from "vue-router";
-import ToggleSwitch from "@/components/ToggleSwitch.vue";
+import { defineProps, defineEmits } from 'vue';
+import { useRouter } from 'vue-router';
+import ToggleSwitch from '@/components/ToggleSwitch.vue';
 
 defineProps({
-  data: {
-    type: Array,
-    required: true,
-  },
-  columns: {
-    type: Array,
-    required: true,
-  },
-  getNestedValue: {
-    type: Function,
-    required: true,
-  },
+  data: { type: Array, required: true },
+  columns: { type: Array, required: true },
+  getNestedValue: { type: Function, required: true },
 });
 
 const emit = defineEmits(['editItem', 'toggleStatus']);
-
-
 const router = useRouter();
 
 const editItem = (item) => {
