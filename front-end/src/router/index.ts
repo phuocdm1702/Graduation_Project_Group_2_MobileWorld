@@ -258,8 +258,8 @@ const routes: Array<RouteRecordRaw> = [
 
   // Màn hình
   {
-    path: "/man-hinh",
-    name: "ManHinh",
+    path: "/screen",
+    name: "screen",
     component: Display,
     meta: { breadcrumb: ["Sản phẩm", "Màn hình"] },
   },

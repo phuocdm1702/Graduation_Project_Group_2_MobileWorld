@@ -23,4 +23,24 @@ public class ChiTietSanPhamFilterDTO {
     private Integer idLoaiTinhTrang;
     private Integer page;
     private Integer size;
+
+    // Các trường tên thuộc tính để hiển thị trên combobox
+    private String dongSanPham;
+    private String tenNhaSanXuat;
+    private String tenMauSac;
+    private String dungLuongPin;
+    private String kichThuocManHinh;
+    private String dungLuongRam;
+    private String dungLuongBoNhoTrong;
+    private String tenCpu;
+    private String tenGpu;
+    private String tenCumCamera;
+    private String tenHeDieuHanh;
+    private String maChiSoKhangBuiVaNuoc;
+    private String tenThietKe;
+    private String loaiSim;
+    private String tenCongSac;
+    private String tenHoTroCongNgheSac;
+    private String tenCongNgheMang;
+    private String tenTinhTrang;
 }

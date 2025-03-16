@@ -257,7 +257,7 @@ const getLinkForBreadcrumb = (index: number) => {
     case "Dòng sản phẩm":
       return "/san-pham/product-line";
     case "Màn hình":
-      return "/san-pham/man-hinh";
+      return "/san-pham/screen";
     case "Bộ nhớ":
       return "/san-pham/bo-nho-trong";
     case "CPU & GPU":
