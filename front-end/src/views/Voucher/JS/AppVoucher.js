@@ -77,73 +77,35 @@ export default function usePhieuGiamGia() {
     {
       key: "stt",
       label: "#",
-      formatter: (_, __, index) => index + 1 + currentPage.value * pageSize.value // Tính STT dựa trên trang hiện tại và kích thước trang
+      formatter: (_, __, index) => index + 1 + currentPage.value * pageSize.value,
     },
-    {
-      key: "ma",
-      label: "Mã"
-    },
-    {
-      key: "tenPhieuGiamGia",
-      label: "Tên Phiếu"
-    },
-    {
-      key: "loaiPhieuGiamGia",
-      label: "Loại Phiếu"
-    },
-    {
-      key: "phanTramGiamGia",
-      label: "Phần trăm giảm giá",
-      formatter: (value) => `${value}%`
-    },
+    { key: "ma", label: "Mã" },
+    { key: "tenPhieuGiamGia", label: "Tên Phiếu" },
+    { key: "loaiPhieuGiamGia", label: "Loại Phiếu" },
+    { key: "phanTramGiamGia", label: "% Giảm Giá", formatter: (value) => `${value}%` }, // Chia nhỏ hơn
     {
       key: "soTienGiamToiDa",
-      label: "Số tiền giảm tối đa",
+      label: "Số Tiền Giảm TĐ", // Viết tắt "TĐ" cho "Tối đa"
       formatter: (value, item) => {
         if (item.loaiPhieuGiamGia === "Phần trăm") {
-          const phanTramGiamGia = item.phanTramGiamGia || 0; // Giá trị phần trăm giảm giá
-          const hoaDonToiThieu = item.hoaDonToiThieu || 0; // Giá trị hóa đơn tối thiểu
-          const soTienGiamToiDa = (phanTramGiamGia / 100) * hoaDonToiThieu; // Tính số tiền giảm tối đa
+          const phanTramGiamGia = item.phanTramGiamGia || 0;
+          const hoaDonToiThieu = item.hoaDonToiThieu || 0;
+          const soTienGiamToiDa = (phanTramGiamGia / 100) * hoaDonToiThieu;
           return soTienGiamToiDa.toLocaleString("vi-VN", {
             style: "currency",
             currency: "VND",
-          }); 
+          });
         }
-        return value ? value.toLocaleString("vi-VN", {style: "currency", currency: "VND"}) : "0 ₫";
-      }  
+        return value ? value.toLocaleString("vi-VN", { style: "currency", currency: "VND" }) : "0 ₫";
+      },
     },
-    {
-      key: "soLuongDung",
-      label: "Số lượng"
-    },
-    {
-      key: "hoaDonToiThieu",
-      label: "Hóa đơn tối thiểu"
-    },
-    {
-      key: "ngayBatDau",
-      label: "Ngày bắt đầu",
-      formatter: (value) => new Date(value).toLocaleDateString("vi-VN")
-    },
-    {
-      key: "ngayKetThuc",
-      label: "Ngày kết thúc",
-      formatter: (value) => new Date(value).toLocaleDateString("vi-VN")
-    },
-    {
-      key: "moTa",
-      label: "Mô tả"
-    },
-    {
-      key: "trangThai",
-      label: "Trạng thái",
-      cellSlot: "trangThaiSlot"
-    },
-    {
-      key: "actions",
-      label: "Hành động",
-      cellSlot: "actionsSlot",
-    },
+    { key: "soLuongDung", label: "Số lượng" },
+    { key: "hoaDonToiThieu", label: "Hóa\nĐơn\nTối\nThiểu",},
+    { key: "ngayBatDau", label: "Ngày\nBĐ", formatter: (value) => new Date(value).toLocaleDateString("vi-VN") }, // "BĐ" cho "Bắt đầu"
+    { key: "ngayKetThuc", label: "Ngày\nKT", formatter: (value) => new Date(value).toLocaleDateString("vi-VN") }, // "KT" cho "Kết thúc"
+    { key: "moTa", label: "Mô tả" },
+    { key: "trangThai", label: "Trạng thái", cellSlot: "trangThaiSlot" },
+    { key: "actions", label: "Hành động", cellSlot: "actionsSlot" },
   ]);
 
   const getNestedValue = (obj, key) => {
