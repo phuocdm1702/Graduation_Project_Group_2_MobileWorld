@@ -217,9 +217,6 @@ const startScanning = async () => {
         handleQRData(decodedText);
         stopScanning();
       },
-      (error) => {
-        console.error('Lỗi quét QR chi tiết:', error);
-      }
     )
     .catch((err) => {
       console.error('Lỗi khởi động quét QR:', err);
@@ -300,7 +297,7 @@ async function uploadImage(file) {
   const formData = new FormData();
   formData.append('file', file);
   try {
-    const response = await axios.post('http://localhost:8080/api/upload', formData, {
+    const response = await axios.post('http://localhost:8080/img/api/upload', formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
     return response.data;
@@ -340,17 +337,22 @@ async function addNhanVien() {
     createdAt: new Date().toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' })
   };
 
-  // Log dữ liệu gửi lên để kiểm tra
   console.log('Dữ liệu gửi lên server:', employeeData);
 
   try {
-    const response = await axios.post('http://localhost:8080/nhan-vien/add', employeeData);
+    const response = await axios.post('http://localhost:8080/nhan-vien/add', employeeData, {
+      headers: { 'Content-Type': 'application/json' },
+    });
     console.log('Phản hồi từ server:', response.data);
     alert('Thêm nhân viên thành công!');
-    router.push({ path: '/nhan-vien' });
+
+    router.push({
+      path: '/nhan-vien',
+      query: { newEmployee: JSON.stringify(response.data) }
+    });
   } catch (error) {
-    console.error('Lỗi khi thêm nhân viên:', error.response ? error.response.data : error);
-    alert('Thêm nhân viên thất bại. Vui lòng kiểm tra lại dữ liệu.');
+    console.error('Lỗi khi thêm nhân viên:', error.response ? error.response.data : error.message);
+    alert('Thêm nhân viên thất bại: ' + (error.response ? error.response.data : error.message));
   }
 }
 

@@ -1,8 +1,13 @@
 import { ref, onMounted, onUnmounted } from "vue";
 import axios from "axios";
-import { RouterLink } from "vue-router";
+import { useRouter, useRoute } from "vue-router"; // Thêm useRoute để lấy query
+import { format } from 'date-fns';
+import { vi } from 'date-fns/locale';
 
 export default function useEmployeeManagement() {
+  const router = useRouter();
+  const route = useRoute(); // Thêm route để đọc query
+
   // Toast notification
   const visible = ref(false);
   const message = ref("");
@@ -11,20 +16,16 @@ export default function useEmployeeManagement() {
   // Employee image
   const employeeImage = ref(null);
 
-  // Data table
   const dataTable = ref([]);
   const originalData = ref([]); // Lưu trữ dữ liệu gốc để tìm kiếm
 
-  // Pagination
-  const currentPage = ref(0); // Trang hiện tại
-  const itemsPerPage = 10; // 5 bản ghi mỗi trang
-  const totalPages = ref(0); // Tổng số trang
+  const currentPage = ref(0);
+  const itemsPerPage = 10;
+  const totalPages = ref(0);
 
-  // Confirm modal
   const showConfirmModal = ref(false);
   const selectedNVId = ref(null);
 
-  // Filter and search
   const filterStatus = ref("tat-ca");
   const searchNV = ref("");
 
@@ -44,26 +45,32 @@ export default function useEmployeeManagement() {
   const fetchNhanVien = async () => {
     try {
       const res = await axios.get("http://localhost:8080/nhan-vien/home");
-      originalData.value = res.data || []; // Lưu trữ dữ liệu gốc
-      applyFilterAndSearch(); // Áp dụng lọc, tìm kiếm và phân trang
+      originalData.value = res.data || [];
+
+      // Kiểm tra nếu có nhân viên mới từ query
+      const newEmployee = route.query.newEmployee;
+      if (newEmployee) {
+        const parsedEmployee = JSON.parse(newEmployee);
+        originalData.value.unshift(parsedEmployee); // Thêm nhân viên mới vào đầu danh sách
+        router.replace({ query: null }); // Xóa query sau khi xử lý
+      }
+
+      applyFilterAndSearch();
     } catch (error) {
       console.error("Lỗi khi lấy danh sách nhân viên:", error);
       showToast("error", "Không thể lấy danh sách nhân viên!");
     }
   };
 
-  // Apply filter, search, and pagination logic
   const applyFilterAndSearch = () => {
     let filteredData = [...originalData.value];
 
-    // Lọc theo trạng thái
     if (filterStatus.value === "dang-lam") {
-      filteredData = filteredData.filter((nv) => !nv.deleted); // Đang làm
+      filteredData = filteredData.filter((nv) => !nv.deleted);
     } else if (filterStatus.value === "da-nghi") {
-      filteredData = filteredData.filter((nv) => nv.deleted); // Đã nghỉ
+      filteredData = filteredData.filter((nv) => nv.deleted);
     }
 
-    // Tìm kiếm
     if (searchNV.value.trim()) {
       filteredData = filteredData.filter(
         (nhanvien) =>
@@ -73,34 +80,28 @@ export default function useEmployeeManagement() {
       );
     }
 
-    // Tính tổng số trang
     totalPages.value = Math.ceil(filteredData.length / itemsPerPage);
 
-    // Áp dụng phân trang
     const start = currentPage.value * itemsPerPage;
     const end = start + itemsPerPage;
     dataTable.value = filteredData.slice(start, end);
   };
 
-  // Search handler
   const btnSearch = () => {
-    currentPage.value = 0; // Reset về trang đầu khi tìm kiếm
+    currentPage.value = 0;
     applyFilterAndSearch();
   };
 
-  // Filter handler
   const onFilterChange = () => {
-    currentPage.value = 0; // Reset về trang đầu khi lọc
+    currentPage.value = 0;
     applyFilterAndSearch();
   };
 
-  // Pagination handler
   const goToPage = (page) => {
     currentPage.value = page;
     applyFilterAndSearch();
   };
 
-  // Show toast notification
   const showToast = (toastType, msg) => {
     message.value = msg;
     type.value = toastType;
@@ -110,7 +111,6 @@ export default function useEmployeeManagement() {
     }, 3000);
   };
 
-  // Show confirm modal for deletion
   const showDeleteConfirm = (id) => {
     selectedNVId.value = id;
     showConfirmModal.value = true;
@@ -123,7 +123,7 @@ export default function useEmployeeManagement() {
     try {
       await axios.put(`http://localhost:8080/nhan-vien/delete/${selectedNVId.value}`);
       showToast("success", "Xóa nhân viên thành công!");
-      await fetchNhanVien(); // Cập nhật lại danh sách sau khi xóa
+      await fetchNhanVien();
     } catch (error) {
       console.error("Lỗi khi xóa nhân viên:", error);
       showToast("error", "Xóa nhân viên thất bại!");
@@ -133,7 +133,6 @@ export default function useEmployeeManagement() {
     }
   };
 
-  // Định nghĩa các cột cho DynamicTable
   const tableColumns = [
     { key: "index", label: "#", formatter: (value, item, index) => currentPage.value * itemsPerPage + index + 1 },
     { key: "ma", label: "Mã" },
@@ -145,9 +144,7 @@ export default function useEmployeeManagement() {
       label: "Ngày tham gia",
       formatter: (value) => {
         if (!value || isNaN(Date.parse(value))) return "Chưa có dữ liệu";
-        return new Date(value).toLocaleString("vi-VN", {
-          timeZone: "Asia/Ho_Chi_Minh",
-        });
+        return format(new Date(value), 'dd/MM/yyyy HH:mm:ss', { locale: vi });
       },
     },
     {
@@ -155,22 +152,8 @@ export default function useEmployeeManagement() {
       label: "Trạng thái",
       formatter: (value) =>
         value
-          ? `<div style="
-              display: inline-block;
-              background-color: #f3f4f6;
-              color: #ef4444;
-              padding: 4px 12px;
-              border-radius: 16px;
-              font-weight: 500;
-            ">Đã nghỉ</div>`
-          : `<div style="
-              display: inline-block;
-              background-color: #f3f4f6;
-              color: #10b981;
-              padding: 4px 12px;
-              border-radius: 16px;
-              font-weight: 500;
-            ">Đang làm</div>`,
+          ? `<div style="display: inline-block; background-color: #f3f4f6; color: #ef4444; padding: 4px 12px; border-radius: 16px; font-weight: 500;">Đã nghỉ</div>`
+          : `<div style="display: inline-block; background-color: #f3f4f6; color: #10b981; padding: 4px 12px; border-radius: 16px; font-weight: 500;">Đang làm</div>`,
     },
     {
       key: "actions",
@@ -188,7 +171,6 @@ export default function useEmployeeManagement() {
     },
   ];
 
-  // Hàm getNestedValue để truy cập thuộc tính lồng nhau
   const getNestedValue = (obj, path) => {
     return path.split(".").reduce((acc, part) => acc && acc[part], obj) || "";
   };
@@ -198,13 +180,11 @@ export default function useEmployeeManagement() {
     showDeleteConfirm(event.detail);
   };
 
-  // Thêm sự kiện lắng nghe và dọn dẹp
   onMounted(() => {
     document.addEventListener("showDeleteConfirm", handleShowDeleteConfirm);
     fetchNhanVien();
   });
 
-  // Dọn dẹp sự kiện khi component bị hủy
   onUnmounted(() => {
     document.removeEventListener("showDeleteConfirm", handleShowDeleteConfirm);
   });
@@ -228,8 +208,8 @@ export default function useEmployeeManagement() {
     deleteNv,
     tableColumns,
     getNestedValue,
-    currentPage, // Trả về để sử dụng trong template
-    totalPages,  // Trả về để sử dụng trong template
-    goToPage,    // Trả về để xử lý sự kiện thay đổi trang
+    currentPage,
+    totalPages,
+    goToPage,
   };
 }
