@@ -3,6 +3,11 @@
   <div class="mt-2 mx-auto">
     <ToastNotification ref="toast"/>
 
+    <!-- Thêm PathRouter với background -->
+    <div class="bg-white shadow-lg rounded-lg p-5 mb-4 mt-4">
+      <PathRouter :breadcrumb-items="breadcrumbItems" />
+    </div>
+
     <section>
       <!-- Form lọc -->
       <div class="bg-white shadow-lg rounded-lg p-5 mb-4 mt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
@@ -149,12 +154,15 @@
 </template>
 
 <script setup>
+import { computed } from "vue";
+import { useRoute } from "vue-router";
 import useHoaDonLineList from "@/views/Bill/HoaDon.js";
 import DynamicTable from "@/components/DynamicTable.vue";
 import Pagination from "@/components/Pagination.vue";
 import StatusBar from "@/components/statusBar.vue";
 import ToastNotification from '@/components/ToastNotification.vue';
 import ConfirmModal from '@/components/ConfirmModal.vue';
+import PathRouter from "@/components/PathRouter.vue"; // Import PathRouter
 
 const {
   toast,
@@ -182,6 +190,17 @@ const {
   adjustMin,
   adjustMax
 } = useHoaDonLineList();
+
+// Lấy route hiện tại
+const route = useRoute();
+
+// Tính toán breadcrumb dựa trên meta của route
+const breadcrumbItems = computed(() => {
+  if (typeof route.meta.breadcrumb === "function") {
+    return route.meta.breadcrumb(route);
+  }
+  return route.meta?.breadcrumb || ["Quản lý hóa đơn"]; // Mặc định nếu không có breadcrumb
+});
 </script>
 
 <style scoped>
