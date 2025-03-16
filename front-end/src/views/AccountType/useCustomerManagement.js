@@ -114,7 +114,7 @@ export default function useCustomerManagement() {
 
     try {
       await axios.put(`http://localhost:8080/khach-hang/delete/${selectedCustomerId.value}`);
-      showToast("success", "Xóa mềm thành công!");
+      showToast("success", "Hủy kích hoạt khách hàng thành công!");
       await fetchCustomers(currentPage.value); // Cập nhật lại dữ liệu sau khi xóa
     } catch (error) {
       console.error("Lỗi khi xóa khách hàng:", error);

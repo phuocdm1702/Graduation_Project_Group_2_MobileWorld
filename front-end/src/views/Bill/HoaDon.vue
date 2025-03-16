@@ -198,44 +198,61 @@ const {
 .range-slider {
   position: relative;
   width: 100%;
+  height: 20px; /* Chiều cao của thanh trượt */
 }
 
 .range-input {
   position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
-  height: 5px;
-  top: -5px;
-  background: none;
-  pointer-events: none;
-  -webkit-appearance: none;
-  appearance: none;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background: none; /* Xóa nền mặc định */
+  -webkit-appearance: none; /* Loại bỏ kiểu mặc định của Webkit */
+  pointer-events: none; /* Đảm bảo sự kiện chỉ áp dụng cho thumb */
 }
 
-input[type="range"]::-webkit-slider-thumb {
-  height: 17px;
-  width: 17px;
+.range-input::-webkit-slider-runnable-track {
+  width: 100%;
+  height: 6px; /* Độ dày của thanh trượt */
+  background: #ddd; /* Màu nền của thanh trượt */
+  border-radius: 3px;
+}
+
+.range-input::-webkit-slider-thumb {
+  height: 16px; /* Chiều cao của nút trượt */
+  width: 16px; /* Chiều rộng của nút trượt */
   border-radius: 50%;
-  background: #f97316;
-  pointer-events: auto;
+  background: #007bff; /* Màu của nút trượt */
+  cursor: pointer;
   -webkit-appearance: none;
-  box-shadow: 0 0 6px rgba(0, 0, 0, 0.15);
+  margin-top: -5px; /* Căn giữa nút trượt trên thanh */
+  pointer-events: auto; /* Cho phép tương tác với nút trượt */
 }
 
-input[type="range"]::-moz-range-thumb {
-  height: 17px;
-  width: 17px;
+.range-input::-moz-range-track {
+  width: 100%;
+  height: 6px;
+  background: #ddd;
+  border-radius: 3px;
+}
+
+.range-input::-moz-range-thumb {
+  height: 16px;
+  width: 16px;
   border-radius: 50%;
-  background: #f97316;
-  pointer-events: auto;
-  -moz-appearance: none;
-  box-shadow: 0 0 6px rgba(0, 0, 0, 0.15);
+  background: #007bff;
+  cursor: pointer;
 }
 
+/* Đảm bảo thanh min và max hiển thị đúng */
 .range-min {
-  z-index: 1;
+  z-index: 2; /* Thanh min ở trên */
 }
 
 .range-max {
-  z-index: 2;
+  z-index: 1; /* Thanh max ở dưới */
 }
 </style>

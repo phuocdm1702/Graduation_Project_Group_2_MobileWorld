@@ -122,7 +122,7 @@ export default function useEmployeeManagement() {
 
     try {
       await axios.put(`http://localhost:8080/nhan-vien/delete/${selectedNVId.value}`);
-      showToast("success", "Xóa nhân viên thành công!");
+      showToast("success", "Cho nhân viên nghỉ thành công!");
       await fetchNhanVien();
     } catch (error) {
       console.error("Lỗi khi xóa nhân viên:", error);
