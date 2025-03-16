@@ -69,9 +69,9 @@ export default function useHoaDonLineList() {
     },
     { key: "loaiDon", label: "Loại Đơn" },
     {
-      key: "trangThai",
+      key: "trangThaiFormatted", // Sử dụng trường mới
       label: "Trạng thái",
-      formatter: (value) => value === 1 ? "Hoàn thành" : "Chờ xử lý"
+      formatter: (value) => value  // Trả về chuỗi HTML đã được xử lý
     },
     {
       key: "actions",
@@ -103,7 +103,6 @@ export default function useHoaDonLineList() {
       ];
     }
   };
-
   const fetchInitialData = async () => {
     try {
       const res = await axios.get("http://localhost:8080/hoa-don/home", {
@@ -112,8 +111,25 @@ export default function useHoaDonLineList() {
           size: pageSize.value
         }
       });
-      dataTable.value = res.data.content || [];
-      originalData.value = [...dataTable.value]; // Lưu dữ liệu gốc
+
+      // Debug: Kiểm tra dữ liệu từ API
+      console.log("Initial Data Response:", res.data.content);
+
+      const processedData = res.data.content && res.data.content.length > 0
+        ? res.data.content.map(item => {
+          // Xác định trạng thái, xử lý trường hợp null hoặc undefined
+          const status = item.trangThai !== undefined && item.trangThai !== null ? item.trangThai : 0;
+          let colorClass = status === 1 ? "bg-green-500" : "bg-yellow-500";
+          let text = status === 1 ? "Hoàn thành" : "Chờ xử lý";
+          return {
+            ...item,
+            trangThaiFormatted: `<span class="px-3 py-1 inline-block text-white font-semibold rounded-full ${colorClass}">${text}</span>`
+          };
+        })
+        : [];
+
+      dataTable.value = processedData;
+      originalData.value = [...processedData]; // Lưu dữ liệu gốc
       totalElements.value = res.data.totalElements || 0;
 
       // Cập nhật maxRange dựa trên dữ liệu thực tế
@@ -130,6 +146,57 @@ export default function useHoaDonLineList() {
       totalElements.value = 0;
     }
   };
+  // const fetchInitialData = async () => {
+  //   try {
+  //     const res = await axios.get("http://localhost:8080/hoa-don/home", {
+  //       params: {
+  //         page: currentPage.value,
+  //         size: pageSize.value
+  //       }
+  //     });
+  //     dataTable.value = res.data.content || [];
+  //     originalData.value = [...dataTable.value]; // Lưu dữ liệu gốc
+  //     totalElements.value = res.data.totalElements || 0;
+  //
+  //     // Cập nhật maxRange dựa trên dữ liệu thực tế
+  //     const maxValue = Math.max(...dataTable.value.map(item => item.tongTienSauGiam || 0));
+  //     if (maxValue > maxRange.value) {
+  //       maxRange.value = Math.ceil(maxValue / 1000000) * 1000000;
+  //       maxAmount.value = maxRange.value;
+  //     }
+  //   } catch (error) {
+  //     console.error("Lỗi khi gọi API:", error);
+  //     toast.value?.kshowToast("error", "Không thể tải dữ liệu!");
+  //     dataTable.value = [];
+  //     originalData.value = [];
+  //     totalElements.value = 0;
+  //   }
+  // };
+
+  // const searchAllFields = (data, searchKeyword) => {
+  //   if (!searchKeyword) return data;
+  //   const lowerKeyword = searchKeyword.toLowerCase();
+  //
+  //   return data.filter(item => {
+  //     // Các trường cần tìm kiếm
+  //     const fields = [
+  //       item.ma || "",
+  //       getNestedValue(item, "idNhanVien.ma") || "",
+  //       getNestedValue(item, "idKhachHang.ten") || "",
+  //       item.soDienThoaiKhachHang || "",
+  //       item.tongTienSauGiam ? item.tongTienSauGiam.toString() : "",
+  //       getNestedValue(item, "idPhieuGiamGia.phanTramGiamGia") ?
+  //         `${getNestedValue(item, "idPhieuGiamGia.phanTramGiamGia")} %` : "",
+  //       item.phi_van_chuyen ? item.phi_van_chuyen.toString() : "",
+  //       item.ngayTao ? new Date(item.ngayTao).toLocaleDateString() : "",
+  //       item.loaiDon || "",
+  //       item.trangThai === 1 ? "Hoàn thành" : "Chờ xử lý"
+  //     ];
+  //
+  //     // Kiểm tra xem có bất kỳ trường nào khớp với từ khóa không
+  //     return fields.some(field => field.toLowerCase().includes(lowerKeyword));
+  //   });
+  // };
 
   const searchAllFields = (data, searchKeyword) => {
     if (!searchKeyword) return data;
@@ -148,14 +215,13 @@ export default function useHoaDonLineList() {
         item.phi_van_chuyen ? item.phi_van_chuyen.toString() : "",
         item.ngayTao ? new Date(item.ngayTao).toLocaleDateString() : "",
         item.loaiDon || "",
-        item.trangThai === 1 ? "Hoàn thành" : "Chờ xử lý"
+        item.trangThai === 1 ? "Hoàn thành" : "Chờ xử lý" // Tìm kiếm dựa trên trạng thái văn bản
       ];
 
       // Kiểm tra xem có bất kỳ trường nào khớp với từ khóa không
       return fields.some(field => field.toLowerCase().includes(lowerKeyword));
     });
   };
-
   const fetchData = async () => {
     try {
       const params = {
@@ -174,10 +240,31 @@ export default function useHoaDonLineList() {
       let filteredData = res.data.content || [];
       totalElements.value = res.data.totalElements || 0;
 
-      // Nếu API không hỗ trợ tìm kiếm trên tất cả các trường, lọc phía client
+      // Debug: Kiểm tra dữ liệu từ API
+      console.log("API Response:", res.data.content);
+
+      // Xử lý dữ liệu để thêm trường trangThaiFormatted
+      const processedData = filteredData.length > 0
+        ? filteredData.map(item => {
+          // Xác định trạng thái, xử lý trường hợp null hoặc undefined
+          const status = item.trangThai !== undefined && item.trangThai !== null ? item.trangThai : 0;
+          let colorClass = status === 1 ? "bg-green-500" : "bg-yellow-500";
+          let text = status === 1 ? "Hoàn thành" : "Chờ xử lý";
+
+          // Thêm trường trangThaiFormatted vào mỗi item
+          return {
+            ...item,
+            trangThaiFormatted: `<span class="px-3 py-1 inline-block text-white font-semibold rounded-full ${colorClass}">${text}</span>`
+          };
+        })
+        : [];
+
+      // Nếu có từ khóa tìm kiếm, lọc thêm trên client
       if (keyword.value) {
-        filteredData = searchAllFields(filteredData, keyword.value);
+        filteredData = searchAllFields(processedData, keyword.value);
         totalElements.value = filteredData.length; // Cập nhật tổng số phần tử sau khi lọc
+      } else {
+        filteredData = processedData;
       }
 
       // Chỉ gọi API nếu có bộ lọc được áp dụng
@@ -194,8 +281,8 @@ export default function useHoaDonLineList() {
         isFiltering.value = true;
       } else {
         // Nếu không có bộ lọc, sử dụng dữ liệu gốc
-        dataTable.value = originalData.value;
-        totalElements.value = originalData.value.length;
+        dataTable.value = processedData;
+        totalElements.value = res.data.totalElements || 0;
         isFiltering.value = false;
       }
     } catch (error) {
@@ -205,6 +292,55 @@ export default function useHoaDonLineList() {
       totalElements.value = 0;
     }
   };
+  // const fetchData = async () => {
+  //   try {
+  //     const params = {
+  //       page: currentPage.value,
+  //       size: pageSize.value,
+  //       keyword: keyword.value || null,
+  //       loaiDon: selectedOrderType.value || null,
+  //       minAmount: minAmount.value !== minRange.value ? Number(minAmount.value) : null,
+  //       maxAmount: maxAmount.value !== maxRange.value ? Number(maxAmount.value) : null,
+  //       startDate: startDate.value || null,
+  //       endDate: endDate.value || null
+  //     };
+  //
+  //     // Gọi API với các tham số
+  //     const res = await axios.get("http://localhost:8080/hoa-don/home", { params });
+  //     let filteredData = res.data.content || [];
+  //     totalElements.value = res.data.totalElements || 0;
+  //
+  //     // Nếu API không hỗ trợ tìm kiếm trên tất cả các trường, lọc phía client
+  //     if (keyword.value) {
+  //       filteredData = searchAllFields(filteredData, keyword.value);
+  //       totalElements.value = filteredData.length; // Cập nhật tổng số phần tử sau khi lọc
+  //     }
+  //
+  //     // Chỉ gọi API nếu có bộ lọc được áp dụng
+  //     const hasFilters =
+  //       keyword.value ||
+  //       selectedOrderType.value ||
+  //       minAmount.value !== minRange.value ||
+  //       maxAmount.value !== maxRange.value ||
+  //       startDate.value ||
+  //       endDate.value;
+  //
+  //     if (hasFilters) {
+  //       dataTable.value = filteredData;
+  //       isFiltering.value = true;
+  //     } else {
+  //       // Nếu không có bộ lọc, sử dụng dữ liệu gốc
+  //       dataTable.value = originalData.value;
+  //       totalElements.value = originalData.value.length;
+  //       isFiltering.value = false;
+  //     }
+  //   } catch (error) {
+  //     console.error("Lỗi khi gọi API:", error);
+  //     toast.value?.kshowToast("error", "Không thể tải dữ liệu!");
+  //     dataTable.value = [];
+  //     totalElements.value = 0;
+  //   }
+  // };
 
   const applyFilters = () => {
     fetchData();
