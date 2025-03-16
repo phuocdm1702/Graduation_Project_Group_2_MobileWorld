@@ -146,6 +146,69 @@
 .input-field {
   @apply w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-400 outline-none;
 }
+
+.dynamic-table td {
+  max-width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis; /* Cắt bớt nội dung dài */
+  white-space: nowrap; /* Ngăn xuống dòng trong ô dữ liệu */
+}
+
+.dynamic-table td:hover {
+  overflow: visible;
+  white-space: normal; /* Hiển thị đầy đủ khi hover */
+  text-overflow: clip;
+}
+
+/* Định dạng bảng từ lớp cha */
+.dynamic-table table {
+  width: 100% !important; /* Đảm bảo bảng chiếm toàn bộ chiều rộng */
+  border-collapse: collapse;
+  table-layout: fixed; /* Cố định kích thước cột */
+}
+
+.dynamic-table th,
+.dynamic-table td {
+  padding: 6px 2px; /* Giảm padding để tiết kiệm không gian hơn */
+  text-align: left;
+  border: 1px solid #ddd;
+  word-wrap: break-word; /* Cho phép xuống dòng */
+  white-space: normal; /* Đảm bảo văn bản xuống dòng tự nhiên */
+  font-size: 13px; /* Giảm kích thước chữ thêm */
+  max-width: 100px; /* Giới hạn chiều rộng tối đa cho tất cả cột */
+  min-width: 70px; /* Giảm min-width để cột nhỏ hơn */
+}
+
+/* Tùy chỉnh các cột có nhãn dài, thu nhỏ hơn */
+.dynamic-table th:nth-child(5), /* Phần trăm giảm giá */
+.dynamic-table th:nth-child(6), /* Số tiền giảm tối đa */
+.dynamic-table th:nth-child(8) { /* Hóa đơn tối thiểu */
+  max-width: 80px; /* Thu nhỏ chiều rộng hơn */
+  line-height: 1.1; /* Giảm khoảng cách dòng để nhãn vừa khít */
+}
+
+/* Giữ nguyên các cột khác */
+.dynamic-table th:nth-child(9), /* Ngày bắt đầu */
+.dynamic-table th:nth-child(10) { /* Ngày kết thúc */
+  max-width: 90px; /* Điều chỉnh nhẹ để vừa khít */
+}
+
+/* Responsive design */
+@media (max-width: 1024px) {
+  .dynamic-table th,
+  .dynamic-table td {
+    max-width: 90px;
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 768px) {
+  .dynamic-table th,
+  .dynamic-table td {
+    max-width: 70px;
+    font-size: 10px;
+  }
+}
 </style>
 
 <script setup>

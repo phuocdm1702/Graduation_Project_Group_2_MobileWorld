@@ -20,11 +20,8 @@
             <slot name="actionsSlot" :item="item">
               <div class="flex items-center space-x-2">
                 <!-- Nút Sửa -->
-                <button
-                  @click="editItem(item)"
-                  class="px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
-                >
-                  Sửa
+                <button @click="editItem(item)" class="bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600 transition">
+                  <i class="fa-solid fa-edit"></i>
                 </button>
                 <!-- ToggleSwitch -->
                 <ToggleSwitch
