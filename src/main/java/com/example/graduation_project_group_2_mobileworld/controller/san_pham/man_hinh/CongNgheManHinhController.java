@@ -88,25 +88,33 @@ public class CongNgheManHinhController {
 
     @GetMapping("/search")
     public ResponseEntity<Page<CongNgheManHinhDTO>> search(
-            @RequestParam String keyword,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String congNgheManHinh,
+            @RequestParam(required = false) String chuanManHinh,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size) {
-        return ResponseEntity.ok(service.searchCongNgheManHinh(keyword, page, size));
+        return ResponseEntity.ok(service.searchCongNgheManHinh(keyword, congNgheManHinh, chuanManHinh, page, size));
     }
 
     @GetMapping("/exists/ma")
-    public ResponseEntity<Boolean> checkMa(@RequestParam String ma) {
-        return ResponseEntity.ok(service.existsByMa(ma));
+    public ResponseEntity<Boolean> checkMa(
+            @RequestParam String ma,
+            @RequestParam(required = false) Integer excludeId) {
+        return ResponseEntity.ok(excludeId != null ? service.existsByMa(ma, excludeId) : service.existsByMa(ma, excludeId));
     }
 
     @GetMapping("/exists/cong-nghe-man-hinh")
-    public ResponseEntity<Boolean> checkCongNgheManHinh(@RequestParam("congNgheManHinh") String congNgheManHinh) {
-        return ResponseEntity.ok(service.existsByCongNgheManHinh(congNgheManHinh));
+    public ResponseEntity<Boolean> checkCongNgheManHinh(
+            @RequestParam("congNgheManHinh") String congNgheManHinh,
+            @RequestParam(required = false) Integer excludeId) {
+        return ResponseEntity.ok(excludeId != null ? service.existsByCongNgheManHinh(congNgheManHinh, excludeId) : service.existsByCongNgheManHinh(congNgheManHinh, excludeId));
     }
 
     @GetMapping("/exists/chuan-man-hinh")
-    public ResponseEntity<Boolean> checkChuanManHinh(@RequestParam("chuanManHinh") String chuanManHinh) {
-        return ResponseEntity.ok(service.existsByChuanManHinh(chuanManHinh));
+    public ResponseEntity<Boolean> checkChuanManHinh(
+            @RequestParam("chuanManHinh") String chuanManHinh,
+            @RequestParam(required = false) Integer excludeId) {
+        return ResponseEntity.ok(excludeId != null ? service.existsByChuanManHinh(chuanManHinh, excludeId) : service.existsByChuanManHinh(chuanManHinh, excludeId));
     }
 
     private Map<String, String> getErrorMap(BindingResult result) {

@@ -104,7 +104,7 @@ const handleSubmit = async () => {
 
   confirmAction('Bạn có chắc chắn muốn thêm dòng sản phẩm này?', async () => {
     await saveProductLine();
-    router.push('/product-line'); // Quay lại danh sách sau khi lưu thành công
+    await router.push('/product-line'); // Quay lại danh sách sau khi lưu thành công
   });
 };
 

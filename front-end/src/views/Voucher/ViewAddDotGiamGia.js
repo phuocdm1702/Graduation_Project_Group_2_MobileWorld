@@ -1,10 +1,10 @@
 import axios from "axios";
-import { onMounted, ref, watch, computed } from "vue";
-import { useRoute } from "vue-router";
+import {onMounted, ref, watch, computed} from "vue";
+import {useRoute} from "vue-router";
 
 // Định nghĩa hàm toàn cục để gọi từ formatter
-window.handleCheckboxChange = function(id) {
-  const { fetchCTSPData } = useDotGiamGiaInstance;
+window.handleCheckboxChange = function (id) {
+  const {fetchCTSPData} = useDotGiamGiaInstance;
   if (fetchCTSPData) fetchCTSPData(id);
 };
 
@@ -23,14 +23,14 @@ export const useDotGiamGia = () => {
   const currentPageCTSP = ref(0);
   const pageSizeCTSP = ref(10);
   const totalPagesCTSP = ref(0);
-  
+
   //Toast
   const toast = ref(null);
   const showConfirmModal = ref(false);
   const confirmMessage = ref('');
   const confirmedAction = ref(null);
 
-  
+
   const confirmActionToast = (message, action) => {
     confirmMessage.value = message;
     confirmedAction.value = action;
@@ -48,8 +48,8 @@ export const useDotGiamGia = () => {
     showConfirmModal.value = false;
     confirmedAction.value = null;
   };
-  
-  
+
+
   const dotGiamGia = ref({
     id: null,
     ma: "",
@@ -105,7 +105,7 @@ export const useDotGiamGia = () => {
     let start = Math.max(1, currentPageDSP.value + 1 - half);
     let end = Math.min(totalPagesDSP.value, start + maxPagesToShow - 1);
     start = Math.max(1, end - maxPagesToShow + 1);
-    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+    return Array.from({length: end - start + 1}, (_, i) => start + i);
   });
 
   const displayedPagesCTSP = computed(() => {
@@ -114,7 +114,7 @@ export const useDotGiamGia = () => {
     let start = Math.max(1, currentPageCTSP.value + 1 - half);
     let end = Math.min(totalPagesCTSP.value, start + maxPagesToShow - 1);
     start = Math.max(1, end - maxPagesToShow + 1);
-    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+    return Array.from({length: end - start + 1}, (_, i) => start + i);
   });
 
   const fetchData = async () => {
@@ -151,8 +151,7 @@ export const useDotGiamGia = () => {
       ctspList.value = uniqueCtspList;
 
       // Cập nhật tổng số trang
-      totalPagesDSP.value = res.data.totalPages ||
-        Math.ceil((res.data.totalElements || dspList.value.length) / pageSizeDSP.value) || 0;
+      totalPagesDSP.value = res.data.totalPages || Math.ceil((res.data.totalElements || dspList.value.length) / pageSizeDSP.value) || 0;
       totalPagesCTSP.value = res.data.totalPagesCTSP || 0;
 
       // Điều chỉnh trang hiện tại nếu vượt quá tổng số trang
@@ -178,7 +177,7 @@ export const useDotGiamGia = () => {
       idDSPs.value.push(id);
     }
     currentPageCTSP.value = 0;
-    fetchData(); // Cập nhật dữ liệu khi tick/un-tick
+    fetchData();
   };
 
   const columns = ref([
@@ -190,15 +189,15 @@ export const useDotGiamGia = () => {
           <input
             type="checkbox"
             value="${item.id}"
-            ${idDSPs.value.includes(item.id) ? 'checked' : ''}
+            ${idDSPs.value.includes(item.id) ? "checked" : ""}
             onchange="handleCheckboxChange(${item.id})"
           />
         `;
       },
     },
-    { key: "index", label: "#", formatter: (_, __, index) => (currentPageDSP.value * pageSizeDSP.value) + index + 1 },
-    { key: "ma", label: "Mã" },
-    { key: "dongSanPham", label: "Dòng sản phẩm" },
+    {key: "index", label: "#", formatter: (_, __, index) => (currentPageDSP.value * pageSizeDSP.value) + index + 1},
+    {key: "ma", label: "Mã"},
+    {key: "dongSanPham", label: "Dòng sản phẩm"},
   ]);
 
   const getNestedValue = (obj, key) => (key === "index" ? null : obj[key]);
@@ -285,8 +284,8 @@ export const useDotGiamGia = () => {
 
   const checkDuplicate = async (field, value, excludeId = null) => {
     try {
-      const { data } = await axios.get(`http://localhost:8080/dot_giam_gia/ViewAddDotGiamGia/exists/${field}`, {
-        params: { [field]: value, excludeId },
+      const {data} = await axios.get(`http://localhost:8080/dot_giam_gia/ViewAddDotGiamGia/exists/${field}`, {
+        params: {[field]: value, excludeId},
       });
       return data;
     } catch (error) {
@@ -309,7 +308,7 @@ export const useDotGiamGia = () => {
         return false;
       }
     }
-    if(dotGiamGia.value.tenDotGiamGia==""){
+    if (dotGiamGia.value.tenDotGiamGia == "") {
       toast.value?.kshowToast("error", "Vui lòng nhập tên đợt giảm giá");
       return false;
     }
@@ -330,7 +329,7 @@ export const useDotGiamGia = () => {
       return false;
     }
     if (dotGiamGia.value.ngayBatDau < today) {
-      toast.value?.kshowToast("error", "Ngày bắt đầu không được nhỏ hơn ngày hiện tại"); 
+      toast.value?.kshowToast("error", "Ngày bắt đầu không được nhỏ hơn ngày hiện tại");
       return false;
     }
     if (dotGiamGia.value.ngayKetThuc == "" || dotGiamGia.value.ngayKetThuc < dotGiamGia.value.ngayBatDau) {
@@ -364,7 +363,7 @@ export const useDotGiamGia = () => {
       await addData();
     });
   };
-  
+
 
   const resetForm = () => {
     dotGiamGia.value = {
@@ -399,7 +398,7 @@ export const useDotGiamGia = () => {
           const response = await axios.put(
             `http://localhost:8080/dot_giam_gia/AddDotGiamGia/${dotGiamGia.value.id}`,
             requestData,
-            { headers: { "Content-Type": "application/json" } }
+            {headers: {"Content-Type": "application/json"}}
           );
           toast.value?.kshowToast("success", "Sửa thành công")
           resetForm();
@@ -408,7 +407,7 @@ export const useDotGiamGia = () => {
           const response = await axios.post(
             "http://localhost:8080/dot_giam_gia/AddDotGiamGia",
             requestData,
-            { headers: { "Content-Type": "application/json" } }
+            {headers: {"Content-Type": "application/json"}}
           );
           toast.value?.kshowToast("success", "Thêm thành công");
           resetForm();
@@ -437,7 +436,7 @@ export const useDotGiamGia = () => {
     () => {
       capNhatGiaSauKhiGiam();
     },
-    { deep: true }
+    {deep: true}
   );
 
   watch(
@@ -450,7 +449,7 @@ export const useDotGiamGia = () => {
           ma: newQuery.ma || "",
           tenDotGiamGia: newQuery.tenDotGiamGia || "",
           loaiGiamGiaApDung: newQuery.loaiGiamGiaApDung || "",
-          giaTriGiamGia: newQuery.giaTriGiamGia  || 0.0,
+          giaTriGiamGia: newQuery.giaTriGiamGia || 0.0,
           soTienGiamToiDa: newQuery.soTienGiamToiDa || "",
           ngayBatDau: newQuery.ngayBatDau ? formatDateLocal(newQuery.ngayBatDau) : "",
           ngayKetThuc: newQuery.ngayKetThuc ? formatDateLocal(newQuery.ngayKetThuc) : "",
@@ -460,7 +459,7 @@ export const useDotGiamGia = () => {
         fetchDongSanPham();
       }
     },
-    { immediate: true }
+    {immediate: true}
   );
 
   watch(selectedDongSanPham, () => {
@@ -469,17 +468,18 @@ export const useDotGiamGia = () => {
   });
 
   watch(currentPageDSP, fetchData);
-  
+
   watch(searchKeyword, () => {
     currentPageDSP.value = 0;
     fetchData();
   });
 
-  watch(idDSPs, () => {
+  watch(idDSPs, (newValue, oldValue) => {
+    console.log("Watcher triggered - idDSPs changed from:", oldValue, "to:", newValue);
     currentPageCTSP.value = 0;
     fetchData();
   });
-  
+
   watch(() => dotGiamGia.value.loaiGiamGiaApDung, (newVal) => {
     if (newVal === 'Tiền mặt') {
       dotGiamGia.value.giaTriGiamGia = 0.0;
@@ -487,7 +487,7 @@ export const useDotGiamGia = () => {
   });
 
   onMounted(fetchData);
-  
+
   // Lưu instance để dùng trong hàm toàn cục
   useDotGiamGiaInstance = {
     toast,

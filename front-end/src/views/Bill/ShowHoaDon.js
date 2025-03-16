@@ -1,6 +1,7 @@
 import { ref, onMounted } from "vue";
 import axios from "axios";
-
+import { format } from 'date-fns';
+import { vi } from 'date-fns/locale'; // Locale tiếng Việt
 export default function useShowHoaDon(id) {
   const hoaDon = ref(null);
 
@@ -56,7 +57,7 @@ export default function useShowHoaDon(id) {
 
         // Tính tổng tiền từ các hình thức thanh toán liên quan đến hóa đơn
         const totalAmount = htttList
-          .filter(httt => httt.idHoaDon === item.idHoaDon)
+          .filter(httt => httt.idHoaDon === item.idHoaDon)  
           .reduce((sum, httt) => {
             const tienMat = httt.tienMat || 0;
             const tienCK = httt.tienChuyenKhoan || 0;
@@ -69,16 +70,16 @@ export default function useShowHoaDon(id) {
     {
       label: "Thời gian",
       key: "thoiGian",
-      // formatter: (value) => (value ? new Date(value).toLocaleString() : "N/A"),
+      formatter: (value) => (value ? format(new Date(value), 'dd/MM/yyyy HH:mm:ss', { locale: vi }) : 'N/A'),
     },
     {
       label: "Ghi chú",
-      key: "ghiChu",
+      key: "hanhDong",
       formatter: (value) => value || "...",
     },
     {
       label: "Người xác nhận",
-      key: "idNhanVien.ma",
+      key: "idNhanVien.tenNhanVien",
       formatter: (value) => value || "N/A",
     },
   ];

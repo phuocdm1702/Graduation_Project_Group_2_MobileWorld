@@ -15,30 +15,41 @@ import java.util.Optional;
 @Repository
 public interface ManHinhRepository extends JpaRepository<ManHinh, Integer> {
 
+    List<ManHinh> findByDeletedFalse();
+
     Page<ManHinh> findByDeletedFalse(Pageable pageable);
 
-    @Query("SELECT mh FROM ManHinh mh " +
-            "WHERE mh.deleted = false AND " +
-            "(LOWER(REPLACE(mh.ma, ' ', '')) LIKE LOWER(CONCAT('%', REPLACE(:keyword, ' ', ''), '%')) OR " +
-            "LOWER(REPLACE(mh.kichThuoc, ' ', '')) LIKE LOWER(CONCAT('%', REPLACE(:keyword, ' ', ''), '%')) OR " +
-            "LOWER(REPLACE(mh.doPhanGiai, ' ', '')) LIKE LOWER(CONCAT('%', REPLACE(:keyword, ' ', ''), '%')) OR " +
-            "LOWER(REPLACE(mh.tanSoQuet, ' ', '')) LIKE LOWER(CONCAT('%', REPLACE(:keyword, ' ', ''), '%')) OR " +
-            "LOWER(REPLACE(mh.kieuManHinh, ' ', '')) LIKE LOWER(CONCAT('%', REPLACE(:keyword, ' ', ''), '%')))")
+    Optional<ManHinh> findByIdAndDeletedFalse(Integer id);
+
+    @Query("SELECT m FROM ManHinh m " +
+            "WHERE m.deleted = false AND " +
+            "(LOWER(REPLACE(m.ma, ' ', '')) LIKE LOWER(CONCAT('%', REPLACE(:keyword, ' ', ''), '%')) OR " +
+            "LOWER(REPLACE(m.kichThuoc, ' ', '')) LIKE LOWER(CONCAT('%', REPLACE(:keyword, ' ', ''), '%')) OR " +
+            "LOWER(REPLACE(m.doPhanGiai, ' ', '')) LIKE LOWER(CONCAT('%', REPLACE(:keyword, ' ', ''), '%')) OR " +
+            "LOWER(REPLACE(m.doSangToiDa, ' ', '')) LIKE LOWER(CONCAT('%', REPLACE(:keyword, ' ', ''), '%')) OR " +
+            "LOWER(REPLACE(m.tanSoQuet, ' ', '')) LIKE LOWER(CONCAT('%', REPLACE(:keyword, ' ', ''), '%')) OR " +
+            "LOWER(REPLACE(m.kieuManHinh, ' ', '')) LIKE LOWER(CONCAT('%', REPLACE(:keyword, ' ', ''), '%')))")
     Page<ManHinh> searchByKeyword(@Param("keyword") String keyword, Pageable pageable);
 
-    @Query("SELECT COUNT(mh) > 0 FROM ManHinh mh WHERE mh.ma = :ma AND mh.deleted = false")
-    boolean existsByMa(@Param("ma") String ma);
+    @Query("SELECT COUNT(m) > 0 FROM ManHinh m WHERE m.ma = :ma AND m.deleted = false")
+    boolean existsByMaAndDeletedFalse(@Param("ma") String ma);
 
-    @Query("SELECT COUNT(mh) > 0 FROM ManHinh mh WHERE mh.kieuManHinh = :kieuManHinh AND mh.deleted = false")
-    boolean existsByKieuManHinh(@Param("kieuManHinh") String kieuManHinh);
+    @Query("SELECT COUNT(m) > 0 FROM ManHinh m WHERE m.kieuManHinh = :kieuManHinh AND m.deleted = false")
+    boolean existsByKieuManHinhAndDeletedFalse(@Param("kieuManHinh") String kieuManHinh);
+
+    @Query("SELECT COUNT(m) > 0 FROM ManHinh m WHERE m.ma = :ma AND m.deleted = false AND m.id != :excludeId")
+    boolean existsByMaAndDeletedFalse(@Param("ma") String ma, @Param("excludeId") Integer excludeId);
+
+    @Query("SELECT COUNT(m) > 0 FROM ManHinh m WHERE m.kieuManHinh = :kieuManHinh AND m.deleted = false AND m.id != :excludeId")
+    boolean existsByKieuManHinhAndDeletedFalse(@Param("kieuManHinh") String kieuManHinh, @Param("excludeId") Integer excludeId);
 
     @Modifying
-    @Query("UPDATE ManHinh mh SET mh.deleted = true WHERE mh.id IN :ids AND mh.deleted = false")
+    @Query("UPDATE ManHinh m SET m.deleted = true WHERE m.id IN :ids AND m.deleted = false")
     int softDeleteByIds(@Param("ids") List<Integer> ids);
 
-    @Query("SELECT mh FROM ManHinh mh WHERE mh.ma = :ma AND mh.deleted = true")
+    @Query("SELECT m FROM ManHinh m WHERE m.ma = :ma AND m.deleted = true")
     Optional<ManHinh> findByMaAndDeletedTrue(@Param("ma") String ma);
 
-    @Query("SELECT mh FROM ManHinh mh WHERE mh.kieuManHinh = :kieuManHinh AND mh.deleted = true")
+    @Query("SELECT m FROM ManHinh m WHERE m.kieuManHinh = :kieuManHinh AND m.deleted = true")
     Optional<ManHinh> findByKieuManHinhAndDeletedTrue(@Param("kieuManHinh") String kieuManHinh);
 }

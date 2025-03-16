@@ -28,54 +28,87 @@ public class CongNgheManHinhService {
 
     @Transactional
     public CongNgheManHinhDTO createCongNgheManHinh(CongNgheManHinhDTO dto) {
-        // Kiểm tra xem có bản ghi đã xóa mềm với mã, tên hoặc chuẩn màn hình không
+        if (dto.getMa() == null || dto.getMa().isEmpty()) {
+            throw new RuntimeException("Mã công nghệ màn hình không được để trống!");
+        }
+        if (dto.getCongNgheManHinh() == null || dto.getCongNgheManHinh().isEmpty()) {
+            throw new RuntimeException("Tên công nghệ màn hình không được để trống!");
+        }
+        if (dto.getChuanManHinh() == null || dto.getChuanManHinh().isEmpty()) {
+            throw new RuntimeException("Chuẩn màn hình không được để trống!");
+        }
+
+        if (existsByMa(dto.getMa(), null)) {
+            throw new RuntimeException("Mã công nghệ màn hình đã tồn tại!");
+        }
+        if (existsByCongNgheManHinh(dto.getCongNgheManHinh(), null)) {
+            throw new RuntimeException("Tên công nghệ màn hình đã tồn tại!");
+        }
+        if (existsByChuanManHinh(dto.getChuanManHinh(), null)) {
+            throw new RuntimeException("Chuẩn màn hình đã tồn tại!");
+        }
+
         Optional<CongNgheManHinh> existingByMa = repository.findByMaAndDeletedTrue(dto.getMa());
         Optional<CongNgheManHinh> existingByCongNgheManHinh = repository.findByCongNgheManHinhAndDeletedTrue(dto.getCongNgheManHinh());
         Optional<CongNgheManHinh> existingByChuan = repository.findByChuanManHinhAndDeletedTrue(dto.getChuanManHinh());
 
+        CongNgheManHinh entity;
         if (existingByMa.isPresent()) {
-            // Khôi phục bản ghi đã xóa mềm với mã
-            CongNgheManHinh entity = existingByMa.get();
+            entity = existingByMa.get();
             entity.setDeleted(false);
             entity.setCongNgheManHinh(dto.getCongNgheManHinh());
             entity.setChuanManHinh(dto.getChuanManHinh());
-            return toDTO(repository.save(entity));
         } else if (existingByCongNgheManHinh.isPresent()) {
-            // Khôi phục bản ghi đã xóa mềm với tên
-            CongNgheManHinh entity = existingByCongNgheManHinh.get();
+            entity = existingByCongNgheManHinh.get();
             entity.setDeleted(false);
             entity.setMa(dto.getMa());
             entity.setChuanManHinh(dto.getChuanManHinh());
-            return toDTO(repository.save(entity));
         } else if (existingByChuan.isPresent()) {
-            // Khôi phục bản ghi đã xóa mềm với chuẩn màn hình
-            CongNgheManHinh entity = existingByChuan.get();
+            entity = existingByChuan.get();
             entity.setDeleted(false);
             entity.setMa(dto.getMa());
             entity.setCongNgheManHinh(dto.getCongNgheManHinh());
-            return toDTO(repository.save(entity));
         } else {
-            // Nếu không có bản ghi nào bị xóa mềm, tạo mới
-            CongNgheManHinh entity = new CongNgheManHinh();
+            entity = new CongNgheManHinh();
             entity.setMa(dto.getMa());
             entity.setCongNgheManHinh(dto.getCongNgheManHinh());
             entity.setChuanManHinh(dto.getChuanManHinh());
             entity.setDeleted(false);
-            return toDTO(repository.save(entity));
         }
+
+        return toDTO(repository.save(entity));
     }
 
     @Transactional
     public CongNgheManHinhDTO updateCongNgheManHinh(Integer id, CongNgheManHinhDTO dto) {
-        return repository.findById(id)
+        CongNgheManHinh entity = repository.findById(id)
                 .filter(d -> !d.getDeleted())
-                .map(entity -> {
-                    entity.setMa(dto.getMa());
-                    entity.setCongNgheManHinh(dto.getCongNgheManHinh());
-                    entity.setChuanManHinh(dto.getChuanManHinh());
-                    return toDTO(repository.save(entity));
-                })
                 .orElseThrow(() -> new RuntimeException("Công nghệ màn hình không tồn tại hoặc đã bị xóa!"));
+
+        if (dto.getMa() == null || dto.getMa().isEmpty()) {
+            throw new RuntimeException("Mã công nghệ màn hình không được để trống!");
+        }
+        if (dto.getCongNgheManHinh() == null || dto.getCongNgheManHinh().isEmpty()) {
+            throw new RuntimeException("Tên công nghệ màn hình không được để trống!");
+        }
+        if (dto.getChuanManHinh() == null || dto.getChuanManHinh().isEmpty()) {
+            throw new RuntimeException("Chuẩn màn hình không được để trống!");
+        }
+
+        if (!entity.getMa().equals(dto.getMa()) && existsByMa(dto.getMa(), id)) {
+            throw new RuntimeException("Mã công nghệ màn hình đã tồn tại!");
+        }
+        if (!entity.getCongNgheManHinh().equals(dto.getCongNgheManHinh()) && existsByCongNgheManHinh(dto.getCongNgheManHinh(), id)) {
+            throw new RuntimeException("Tên công nghệ màn hình đã tồn tại!");
+        }
+        if (!entity.getChuanManHinh().equals(dto.getChuanManHinh()) && existsByChuanManHinh(dto.getChuanManHinh(), id)) {
+            throw new RuntimeException("Chuẩn màn hình đã tồn tại!");
+        }
+
+        entity.setMa(dto.getMa());
+        entity.setCongNgheManHinh(dto.getCongNgheManHinh());
+        entity.setChuanManHinh(dto.getChuanManHinh());
+        return toDTO(repository.save(entity));
     }
 
     @Transactional
@@ -101,21 +134,21 @@ public class CongNgheManHinhService {
         }
     }
 
-    public Page<CongNgheManHinhDTO> searchCongNgheManHinh(String keyword, int page, int size) {
+    public Page<CongNgheManHinhDTO> searchCongNgheManHinh(String keyword, String congNgheManHinh, String chuanManHinh, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        return repository.searchByKeyword(keyword, pageable).map(this::toDTO);
+        return repository.searchByKeyword(keyword, congNgheManHinh, chuanManHinh, pageable).map(this::toDTO);
     }
 
-    public boolean existsByMa(String ma) {
-        return repository.existsByMa(ma);
+    public boolean existsByMa(String ma, Integer excludeId) {
+        return repository.existsByMaAndNotId(ma, excludeId);
     }
 
-    public boolean existsByCongNgheManHinh(String congNgheManHinh) {
-        return repository.existsByCongNgheManHinh(congNgheManHinh);
+    public boolean existsByCongNgheManHinh(String congNgheManHinh, Integer excludeId) {
+        return repository.existsByCongNgheManHinhAndNotId(congNgheManHinh, excludeId);
     }
 
-    public boolean existsByChuanManHinh(String chuanManHinh) {
-        return repository.existsByChuanManHinh(chuanManHinh);
+    public boolean existsByChuanManHinh(String chuanManHinh, Integer excludeId) {
+        return repository.existsByChuanManHinhAndNotId(chuanManHinh, excludeId);
     }
 
     private CongNgheManHinhDTO toDTO(CongNgheManHinh entity) {

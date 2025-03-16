@@ -1,3 +1,31 @@
+<template>
+  <label class="switch">
+    <input
+      type="checkbox"
+      :checked="checked"
+      @change="$emit('change', $event.target.checked)"
+    >
+    <div class="slider"></div>
+    <div class="slider-card">
+      <div class="slider-card-face slider-card-front"></div>
+      <div class="slider-card-face slider-card-back"></div>
+    </div>
+  </label>
+</template>
+
+<script setup>
+import { defineProps, defineEmits } from 'vue';
+
+defineProps({
+  checked: {
+    type: Boolean,
+    default: false
+  }
+});
+
+defineEmits(['change']);
+</script>
+
 <style scoped>
 .switch {
   --circle-dim: 1.4em;
@@ -74,14 +102,3 @@ input:checked ~ .slider {
   background-color: #9ed99c;
 }
 </style>
-
-<template>
-  <label class="switch">
-    <input type="checkbox">
-    <div class="slider"></div>
-    <div class="slider-card">
-      <div class="slider-card-face slider-card-front"></div>
-      <div class="slider-card-face slider-card-back"></div>
-    </div>
-  </label>
-</template>

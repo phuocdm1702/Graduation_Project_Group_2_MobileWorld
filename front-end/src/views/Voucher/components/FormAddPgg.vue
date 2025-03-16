@@ -1,95 +1,95 @@
 <template>
-  <div class="flex h-screen p-2 bg-gray-100">
-    <!-- Form container -->
-    <div class="w-3/4 p-6 bg-white border rounded-md shadow-md">
-      <form>
+  <div class="flex h-screen p-4 bg-gray-100 gap-4">
+    <!-- Form Container -->
+    <div class="w-2/3 p-6 bg-white rounded-lg shadow-md">
+      <form @submit.prevent="submitForm">
         <!-- Header -->
-        <div class="flex items-center justify-between pb-4 border-b">
-          <h3 class="text-lg font-semibold">Thêm Phiếu Giảm Giá</h3>
-        </div>
+        <h3 class="text-xl font-semibold mb-4 text-gray-800">Thêm Phiếu Giảm Giá</h3>
 
-        <!-- Form nội dung -->
-        <div class="grid grid-cols-3 gap-4 mt-4">
-          <div>
-            <label class="text-sm font-medium">Mã</label>
-            <input type="text" class="form-input" v-model="ma" />
-            <p class="error" v-if="errors.ma">{{ errors.ma }}</p>
-          </div>
-          <div>
-            <label class="text-sm font-medium">Tên Phiếu Giảm Giá</label>
-            <input type="text" class="form-input" v-model="tenPhieuGiamGia" />
-            <p class="error" v-if="errors.tenPhieuGiamGia">{{ errors.tenPhieuGiamGia }}</p>
-          </div>
-          <div>
-            <label class="text-sm font-medium">Loại Phiếu</label>
-            <div class="flex items-center mt-2 space-x-4">
-              <label class="flex items-center">
-                <input type="radio" name="voucherType" value="Phần trăm" v-model="loaiPhieuGiamGia" class="mr-2" />
-                Phần trăm
-              </label>
-              <label class="flex items-center">
-                <input type="radio" name="voucherType" value="Tiền mặt" v-model="loaiPhieuGiamGia" class="mr-2" />
-                Tiền mặt
-              </label>
-              <p class="error" v-if="errors.loaiPhieuGiamGia">{{ errors.loaiPhieuGiamGia }}</p>
+        <!-- Form Content -->
+        <div class="space-y-6">
+          <!-- Discount Details -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Mã</label>
+              <input type="text" v-model="ma" class="form-input" />
+              <p v-if="errors.ma" class="error">{{ errors.ma }}</p>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Tên Phiếu Giảm Giá</label>
+              <input type="text" v-model="tenPhieuGiamGia" class="form-input" />
+              <p v-if="errors.tenPhieuGiamGia" class="error">{{ errors.tenPhieuGiamGia }}</p>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Loại Phiếu</label>
+              <div class="flex items-center mt-2 space-x-4">
+                <label class="flex items-center">
+                  <input type="radio" name="voucherType" value="Phần trăm" v-model="loaiPhieuGiamGia" class="form-radio" />
+                  <span class="ml-2">Phần trăm</span>
+                </label>
+                <label class="flex items-center">
+                  <input type="radio" name="voucherType" value="Tiền mặt" v-model="loaiPhieuGiamGia" class="form-radio" />
+                  <span class="ml-2">Tiền mặt</span>
+                </label>
+              </div>
+              <p v-if="errors.loaiPhieuGiamGia" class="error">{{ errors.loaiPhieuGiamGia }}</p>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Phần trăm giảm giá</label>
+              <input type="number" v-model="phanTramGiamGia" class="form-input" />
+              <p v-if="errors.phanTramGiamGia" class="error">{{ errors.phanTramGiamGia }}</p>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Số tiền giảm tối đa</label>
+              <input type="number" v-model="soTienGiamToiDa" class="form-input" />
+              <p v-if="errors.soTienGiamToiDa" class="error">{{ errors.soTienGiamToiDa }}</p>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Hóa đơn tối thiểu</label>
+              <input type="number" v-model="hoaDonToiThieu" class="form-input" />
+              <p v-if="errors.hoaDonToiThieu" class="error">{{ errors.hoaDonToiThieu }}</p>
             </div>
           </div>
-          <div>
-            <label class="text-sm font-medium">Phần trăm giảm giá</label>
-            <input type="number" class="form-input" v-model="phanTramGiamGia" />
-            <p class="error" v-if="errors.phanTramGiamGia">{{ errors.phanTramGiamGia }}</p>
+
+          <!-- Date Range and Usage -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Số lượng sử dụng</label>
+              <input type="number" v-model="soLuongDung" class="form-input" />
+              <p v-if="errors.soLuongDung" class="error">{{ errors.soLuongDung }}</p>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Ngày bắt đầu</label>
+              <input type="date" v-model="ngayBatDau" class="form-input" />
+              <p v-if="errors.ngayBatDau" class="error">{{ errors.ngayBatDau }}</p>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Ngày kết thúc</label>
+              <input type="date" v-model="ngayKetThuc" class="form-input" />
+              <p v-if="errors.ngayKetThuc" class="error">{{ errors.ngayKetThuc }}</p>
+            </div>
           </div>
-          <div>
-            <label class="text-sm font-medium">Số tiền giảm tối đa</label>
-            <input type="number" class="form-input" v-model="soTienGiamToiDa" />
-            <p class="error" v-if="errors.soTienGiamToiDa">{{ errors.soTienGiamToiDa }}</p>
-          </div>
-          <div>
-            <label class="text-sm font-medium">Hóa đơn tối thiểu</label>
-            <input type="number" class="form-input" v-model="hoaDonToiThieu" />
-            <p class="error" v-if="errors.hoaDonToiThieu">{{ errors.hoaDonToiThieu }}</p>
-          </div>
-          <div>
-            <label class="text-sm font-medium">Số lượng sử dụng</label>
-            <input type="number" class="form-input" v-model="soLuongDung" />
-            <p class="error" v-if="errors.soLuongDung">{{ errors.soLuongDung }}</p>
-          </div>
-          <div>
-            <label class="text-sm font-medium">Ngày bắt đầu</label>
-            <input type="date" class="form-input" v-model="ngayBatDau" />
-            <p class="error" v-if="errors.ngayBatDau">{{ errors.ngayBatDau }}</p>
-          </div>
-          <div>
-            <label class="text-sm font-medium">Ngày kết thúc</label>
-            <input type="date" class="form-input" v-model="ngayKetThuc" />
-            <p class="error" v-if="errors.ngayKetThuc">{{ errors.ngayKetThuc }}</p>
-          </div>
-          <div class="flex items-center">
-            <label class="text-sm font-medium">Trạng thái</label>
-            <input type="checkbox" v-model="trangThai" class="ml-2" checked/>
-          </div>
-          <div class="flex items-center">
-            <label class="text-sm font-medium">Riêng tư</label>
-            <input type="checkbox" v-model="riengTu" class="ml-2" />
-          </div>
-          <div>
-            <label class="text-sm font-medium">Mô tả</label>
-            <textarea class="form-input" v-model="moTa"></textarea>
+
+          <!-- Privacy and Description -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="flex items-center">
+              <label class="block text-sm font-medium text-gray-700">Riêng tư</label>
+              <input type="checkbox" v-model="riengTu" class="ml-2 form-checkbox" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Mô tả</label>
+              <textarea v-model="moTa" class="form-input resize-none" rows="3"></textarea>
+            </div>
           </div>
         </div>
 
-        <!-- Button actions -->
-        <div class="flex justify-between mt-4">
-          <button
-            class="flex items-center gap-2 px-4 py-2 bg-gray-300 rounded-md hover:bg-gray-400 font-semibold "
-          >
-            Hủy
-          </button>
-          <button
-            @click="submitForm"
-            class="flex items-center gap-2 px-4 py-2 bg-[#f97316] text-white font-semibold rounded-lg shadow-md hover:bg-orange-600 transition">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                 stroke="currentColor" class="w-5 h-5 mr-1">
+        <!-- Buttons -->
+        <div class="flex justify-end gap-3 mt-6">
+          <router-link to="/phieu-giam-gia">
+            <button type="button" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition">Hủy</button>
+          </router-link>
+          <button type="submit" class="flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 transition">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
               <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
             </svg>
             Thêm
@@ -97,27 +97,28 @@
         </div>
       </form>
     </div>
-    
-    <div
-      class="w-2/4 ml-4 p-4 bg-white border rounded-md shadow-md"
-    >
-      <h4 class="text-lg font-semibold mb-2">Chọn Khách Hàng</h4>
+
+    <!-- Customer Selection -->
+    <div class="w-1/3 p-6 bg-white rounded-lg shadow-md">
+      <h4 class="text-xl font-semibold mb-4 text-gray-800">Chọn Khách Hàng</h4>
       <div class="table-container">
-        <table class="w-full">
+        <table class="w-full text-sm">
           <thead>
-          <tr>
-            <th>Chọn</th>
-            <th>Mã KH</th>
-            <th>Tên Khách Hàng</th>
-            <th>Ngày sinh</th>
+          <tr class="bg-gray-100">
+            <th class="p-3 text-left font-semibold">Chọn</th>
+            <th class="p-3 text-left font-semibold">Mã KH</th>
+            <th class="p-3 text-left font-semibold">Tên Khách Hàng</th>
+            <th class="p-3 text-left font-semibold">Ngày sinh</th>
           </tr>
           </thead>
           <tbody>
-          <tr v-for="customer in customers" :key="customer.id">
-            <td><input type="checkbox" v-model="selectedCustomers" :value="customer.id" /></td>
-            <td>{{ customer.ma }}</td>
-            <td>{{ customer.ten }}</td>
-            <td>{{ new Date(customer.ngaySinh).toLocaleDateString('vi-VN') }}</td>
+          <tr v-for="customer in customers" :key="customer.id" class="border-b hover:bg-gray-50">
+            <td class="p-3">
+              <input type="checkbox" v-model="selectedCustomers" :value="customer.id" class="form-checkbox" />
+            </td>
+            <td class="p-3">{{ customer.ma }}</td>
+            <td class="p-3">{{ customer.ten }}</td>
+            <td class="p-3">{{ new Date(customer.ngaySinh).toLocaleDateString('vi-VN') }}</td>
           </tr>
           </tbody>
         </table>
@@ -197,7 +198,6 @@ const submitForm = async () => {
     soLuongDung: soLuongDung.value,
     ngayBatDau: ngayBatDau.value ? new Date(ngayBatDau.value).toISOString() : null,
     ngayKetThuc: ngayKetThuc.value ? new Date(ngayKetThuc.value).toISOString() : null,
-    trangThai: trangThai.value ? 1 : 0, 
     riengTu: riengTu.value ? 1 : 0, 
     moTa: moTa.value,
     deleted: deleted.value,
@@ -223,38 +223,38 @@ onMounted(fetchDataKH);
 
 <style scoped>
 .form-input {
-  width: 100%;
-  padding: 8px;
-  border: 1px solid #ccc; 
-  border-radius: 4px;
+  @apply w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 transition;
 }
 
-table {
-  width: 100%;
-  border-collapse: collapse;
+.form-radio {
+  @apply h-4 w-4 text-orange-500 focus:ring-orange-500;
 }
 
-th, td {
-  white-space: nowrap; 
-  text-align: left;
-  padding: 8px;
+.form-checkbox {
+  @apply h-4 w-4 text-orange-500 focus:ring-orange-500;
 }
 
-th {
-  background-color: #f3f4f6;
-  font-weight: bold;
-}
-
-thead {
-  display: table-header-group;
-}
-
-tbody {
-  display: table-row-group;
+.error {
+  @apply text-red-500 text-xs mt-1;
 }
 
 .table-container {
-  overflow-x: auto;
+  @apply max-h-96 overflow-y-auto;
 }
 
+table {
+  @apply w-full border-collapse;
+}
+
+th, td {
+  @apply text-left;
+}
+
+th {
+  @apply bg-gray-100 font-semibold text-gray-700;
+}
+
+tbody tr {
+  @apply transition-colors;
+}
 </style>
