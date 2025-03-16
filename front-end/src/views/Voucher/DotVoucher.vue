@@ -4,9 +4,6 @@
     <Breadcrumb breadcrumb="Đợt Giảm Giá"/>
 
     <div class="mt-2 mx-auto">
-      <h2 class="bg-white shadow-lg rounded-lg p-5 mb-2 mt-2 text-2xl font-semibold text-gray-700">
-        Quản Lý Đợt Giảm Giá
-      </h2>
       <ToastNotification ref="toast"/>
 
       <!-- Form lọc -->

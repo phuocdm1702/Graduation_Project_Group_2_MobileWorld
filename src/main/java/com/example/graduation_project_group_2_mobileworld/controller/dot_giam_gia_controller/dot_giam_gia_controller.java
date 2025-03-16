@@ -113,7 +113,6 @@ public class dot_giam_gia_controller {
             ctspPage = Page.empty(); // Nếu không có idDSPs, trả về trang rỗng
         }
 
-        // Tạo CombinedResponse với thông tin phân trang cho cả dspList và ctspList
         CombinedResponse response = new CombinedResponse(
                 dspPage.getContent(),
                 ctspPage.getContent(),

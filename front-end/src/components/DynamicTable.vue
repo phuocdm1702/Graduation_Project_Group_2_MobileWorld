@@ -4,9 +4,7 @@
       <thead>
       <tr class="bg-gray-100 text-gray-700 text-sm font-semibold">
         <th v-for="column in columns" :key="column.key" class="th-cell">
-          <slot :name="`header-${column.key}`" :column="column">
-            <span>{{ column.label }}</span>
-          </slot>
+          {{ column.label }}
         </th>
       </tr>
       </thead>
@@ -18,17 +16,28 @@
       </tr>
       <tr v-else v-for="(item, index) in data" :key="item.id" class="text-gray-700 border-b hover:bg-gray-50">
         <td v-for="column in columns" :key="column.key" class="td-cell">
-          <template v-if="column.key === 'select'">
-            <slot :name="`cell-${column.key}`" :item="item" :index="index">
-              <input
-                type="checkbox"
-                class="w-4 h-4 rounded"
-                :checked="isSelected(item.id)"
-                @change="toggleSelect(item.id)"
+          <template v-if="column.cellSlot === 'actionsSlot'">
+            <slot name="actionsSlot" :item="item">
+              <!-- Nút Sửa -->
+              <button
+                @click="editItem(item)"
+                class="px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
               >
+                Sửa
+              </button>
+              <!-- ToggleSwitch -->
+              <label class="switch ml-2">
+                <ToggleSwitch
+                  class="ml-2"
+                  :checked="!item.trangThai"
+                  @change="toggleStatus(item)"
+                />
+              </label>
             </slot>
           </template>
-          <span v-else-if="column.key === 'trangThai'">
+          <template v-else-if="column.key === 'trangThai'">
+            <span v-if="column.key === 'trangThai'">
+            <!-- Thay checkbox bằng chữ có viền và màu -->
             <span
               :class="{
                 'bg-gray-200 text-red-500': item.trangThai,
@@ -39,6 +48,7 @@
               {{ item.trangThai ? 'Không hoạt động' : ' Hoạt động' }}
             </span>
           </span>
+          </template>
           <span v-else-if="column.formatter"
                 v-html="column.formatter(getNestedValue(item, column.key), item, index)"></span>
           <span v-else>{{ getNestedValue(item, column.key) || 'N/A' }}</span>
@@ -50,9 +60,11 @@
 </template>
 
 <script setup>
-import { defineProps, defineEmits } from 'vue';
+import { defineProps } from 'vue';
+import {useRouter} from "vue-router";
+import ToggleSwitch from "@/components/ToggleSwitch.vue";
 
-const props = defineProps({
+defineProps({
   data: {
     type: Array,
     required: true,
@@ -65,21 +77,19 @@ const props = defineProps({
     type: Function,
     required: true,
   },
-  selectedProducts: {
-    type: Array,
-    required: false, // Không bắt buộc
-    default: () => [], // Giá trị mặc định là mảng rỗng
-  },
 });
 
-const emit = defineEmits(['toggle-select']);
+const emit = defineEmits(['editItem', 'toggleStatus']);
 
-const isSelected = (id) => {
-  return props.selectedProducts.includes(id);
+
+const router = useRouter();
+
+const editItem = (item) => {
+  router.push({ name: 'FormUpdatePgg', params: { id: item.id } });
 };
 
-const toggleSelect = (id) => {
-  emit('toggle-select', id);
+const toggleStatus = (item) => {
+  emit('toggleStatus', item);
 };
 </script>
 

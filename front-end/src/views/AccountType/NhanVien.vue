@@ -8,7 +8,7 @@
     <!-- Breadcrumb -->
     <Breadcrumb breadcrumb="Quản lý Nhân Viên" />
 
-    <div class="mt-2  mx-auto">
+    <div class="mt-2 mx-auto">
       <h2 class="bg-white shadow-lg rounded-lg p-5 mb-2 mt-2 text-2xl font-semibold text-gray-700">
         Quản Lý Nhân Viên
       </h2>
@@ -36,7 +36,7 @@
                 <label class="text-sm font-semibold block mb-2">Trạng thái</label>
                 <select
                   v-model="filterStatus"
-                  @change="fetchNhanVien"
+                  @change="onFilterChange"
                   class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-400 outline-none"
                 >
                   <option value="tat-ca">Tất cả</option>
@@ -90,7 +90,7 @@
 
     <ConfirmModal
       :show="showConfirmModal"
-      :message="'Bạn có chắc chắn muốn xóa khách hàng này không?'"
+      :message="'Bạn có chắc chắn muốn cho nhân viên này nghỉ?'"
       @confirm="deleteNv"
       @cancel="showConfirmModal = false"
     />
@@ -107,8 +107,7 @@
 
 <script setup>
 import ConfirmModal from "@/components/ConfirmModal.vue";
-import EmployeeForm from "@/views/AccountType/EmployeeForm.vue";
-import DynamicTable from "@/components/DynamicTable.vue"; // Import DynamicTable
+import DynamicTable from "@/components/DynamicTable.vue";
 import useEmployeeManagement from "./useEmployeeManagement";
 import Pagination from '@/components/Pagination.vue';
 
@@ -132,9 +131,10 @@ const {
   deleteNv,
   searchNV,
   btnSearch,
-  tableColumns, // Thêm tableColumns từ file JS
-  getNestedValue, // Thêm getNestedValue từ file JS
-  importExcel, // Thêm hàm xử lý import Excel
+  onFilterChange,
+  tableColumns,
+  getNestedValue,
+  importExcel, // Nếu bạn có hàm này trong useEmployeeManagement
 } = useEmployeeManagement();
 </script>
 

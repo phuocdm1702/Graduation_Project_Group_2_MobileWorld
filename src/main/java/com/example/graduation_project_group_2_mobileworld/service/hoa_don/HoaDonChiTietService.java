@@ -28,7 +28,8 @@ public class HoaDonChiTietService {
 
     private HoaDonChiTietDTO toDTO(HoaDonChiTiet hoaDonChiTiet) {
         return new HoaDonChiTietDTO(
-                hoaDonChiTiet.getIdHoaDon(),
+                hoaDonChiTiet.getId(),
+                hoaDonChiTiet.getHoaDon().getId(),
                 hoaDonChiTiet.getIdChiTietSanPham(),
                 hoaDonChiTiet.getIdImelDaBan(),
                 hoaDonChiTiet.getMa(),

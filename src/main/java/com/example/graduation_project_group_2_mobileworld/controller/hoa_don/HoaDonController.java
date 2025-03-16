@@ -11,6 +11,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -28,21 +29,30 @@ public class HoaDonController {
         this.hoaDonService = hoaDonService;
     }
 
-    //
-    @GetMapping("/home")
-    public ResponseEntity<Page<HoaDonDTO>> getAllHoaDon(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
-        return ResponseEntity.ok(hoaDonService.getHoaDonWithPagination(page, size));
-    }
 
 //    @GetMapping("/home")
 //    public ResponseEntity<Page<HoaDonDTO>> getAllHoaDon(
 //            @RequestParam(defaultValue = "0") int page,
 //            @RequestParam(defaultValue = "10") int size) {
-//        Pageable pageable = PageRequest.of(page, size, Sort.by("ngayTao").descending());
-//        Page<HoaDonDTO> hoaDonPage = hoaDonService.getAllData(pageable);
-//        return ResponseEntity.ok(hoaDonPage);
+//        return ResponseEntity.ok(hoaDonService.getHoaDonWithPagination(page, size));
 //    }
+
+    @GetMapping("/home")
+    public ResponseEntity<Page<HoaDonDTO>> getAllHoaDon(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String loaiDon,
+            @RequestParam(required = false) Long minAmount,
+            @RequestParam(required = false) Long maxAmount,
+            @RequestParam(required = false) String startDate,
+            @RequestParam(required = false) String endDate) {
+        return ResponseEntity.ok(hoaDonService.getHoaDonWithFilters(page, size, keyword, loaiDon, minAmount, maxAmount, startDate, endDate));
+    }
+
+    @GetMapping("/detail/{id}")
+    public ResponseEntity<HoaDonDTO> getFullHoaDonDetail(@PathVariable("id") Integer id) {
+        return ResponseEntity.ok(hoaDonService.getFullHoaDonDetails(id));
+    }
 }
 
