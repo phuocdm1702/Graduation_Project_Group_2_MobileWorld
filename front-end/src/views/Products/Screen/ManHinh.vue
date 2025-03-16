@@ -1,260 +1,127 @@
 <template>
-  <div class="container mx-auto p-4 relative">
-    <!-- Toast thông báo -->
+  <div class="mt-2 mx-auto">
+    <h2 class="bg-white shadow-lg rounded-lg p-5 mb-2 mt-2 text-2xl font-semibold text-gray-700">
+      Quản Lý Màn Hình
+    </h2>
     <ToastNotification ref="toastRef" />
-
-    <!-- Tiêu đề và nút mở modal -->
-    <div class="flex justify-between items-center mb-6">
-      <h2 class="text-xl text-gray-600">Quản lý Màn Hình</h2>
-      <button
-        @click="openAddModal"
-        class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition"
-      >
-        Thêm mới
-      </button>
-    </div>
-
-    <!-- Search Section -->
-    <div class="flex gap-3 mb-6">
-      <input
-        v-model.trim="searchKeyword"
-        type="text"
-        placeholder="Tìm kiếm theo mã, kích thước, độ phân giải..."
-        class="flex-1 border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-      />
-      <button
-        @click="searchManHinh"
-        class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition"
-      >
-        Tìm kiếm
-      </button>
-      <button
-        @click="resetSearch"
-        class="bg-gray-400 text-white px-4 py-2 rounded-lg hover:bg-gray-500 transition"
-      >
-        Đặt lại
-      </button>
-    </div>
-
-    <!-- Bulk Delete Button -->
-    <div v-if="selectedManHinh.length" class="mb-6 flex justify-end">
-      <button
-        @click="confirmDeleteSelected"
-        class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition"
-      >
-        Xóa {{ selectedManHinh.length }} Màn hình đã chọn
-      </button>
-    </div>
-
-    <!-- Danh sách Màn hình -->
-    <div class="overflow-x-auto shadow-md rounded-lg max-w-full">
-      <table class="min-w-full text-sm text-gray-500 table-auto">
-        <thead class="bg-blue-100 text-blue-700 uppercase sticky top-0 z-10">
-        <tr>
-          <th class="px-4 py-3 text-center whitespace-nowrap">ID</th>
-          <th class="px-4 py-3 text-center whitespace-nowrap">ID Công nghệ</th>
-          <th class="px-4 py-3 text-center whitespace-nowrap">Mã</th>
-          <th class="px-4 py-3 text-center whitespace-nowrap">Kích thước</th>
-          <th class="px-4 py-3 text-center whitespace-nowrap">Độ phân giải</th>
-          <th class="px-4 py-3 text-center whitespace-nowrap">Độ sáng tối đa</th>
-          <th class="px-4 py-3 text-center whitespace-nowrap">Tần số quét</th>
-          <th class="px-4 py-3 text-center whitespace-nowrap">Kiểu màn hình</th>
-          <th class="px-4 py-3 text-center whitespace-nowrap">Hành động</th>
-          <th class="px-4 py-3 text-center whitespace-nowrap">
-            <input
-              type="checkbox"
-              v-model="selectAll"
-              @change="toggleSelectAll"
-              class="w-4 h-4 rounded"
-            />
-          </th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr
-          v-for="item in manHinhs"
-          :key="item.id"
-          class="bg-white border-b hover:bg-gray-50 transition"
-        >
-          <td class="px-4 py-4 text-center whitespace-nowrap">{{ item.id }}</td>
-          <td class="px-4 py-4 text-center whitespace-nowrap">{{ item.idCongNgheManHinh }}</td>
-          <td class="px-4 py-4 text-center whitespace-nowrap">{{ item.ma }}</td>
-          <td class="px-4 py-4 text-center whitespace-nowrap">{{ item.kichThuoc }}</td>
-          <td class="px-4 py-4 text-center whitespace-nowrap">{{ item.doPhanGiai }}</td>
-          <td class="px-4 py-4 text-center whitespace-nowrap">{{ item.doSangToiDa }}</td>
-          <td class="px-4 py-4 text-center whitespace-nowrap">{{ item.tanSoQuet }}</td>
-          <td class="px-4 py-4 text-center whitespace-nowrap">{{ item.kieuManHinh }}</td>
-          <td class="px-4 py-4 text-center whitespace-nowrap space-x-4">
-            <button
-              @click="openEditModal(item)"
-              class="text-blue-600 hover:text-blue-800 transition"
-            >
-              <i class="fa-solid fa-edit"></i>
-            </button>
-            <button
-              @click="confirmDelete(item.id)"
-              class="text-red-600 hover:text-red-800 transition"
-            >
-              <i class="fa-solid fa-trash"></i>
-            </button>
-          </td>
-          <td class="px-4 py-4 text-center whitespace-nowrap">
-            <input
-              type="checkbox"
-              v-model="selectedManHinh"
-              :value="item.id"
-              class="w-4 h-4 rounded"
-            />
-          </td>
-        </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <!-- Pagination -->
-    <Pagination
-      :current-page="currentPage"
-      :total-pages="totalPages"
-      @page-changed="goToPage"
-      class="mt-6"
-    />
-
-    <!-- Modal Form (Thêm mới và Cập nhật) -->
-    <div v-if="showAddModal || showEditModal" class="fixed inset-0 flex items-center justify-center z-50">
-      <!-- Overlay tối màu -->
-      <div class="fixed inset-0 bg-black bg-opacity-50 z-40" @click="closeModal"></div>
-
-      <!-- Modal -->
-      <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-100 w-full max-w-2xl z-50 max-h-[90vh] overflow-y-auto">
-        <h2 class="text-2xl font-semibold text-gray-800 mb-6 flex items-center">
-          <i :class="`fa-solid ${showEditModal ? 'fa-edit' : 'fa-plus-circle'} ${showEditModal ? 'text-blue-500' : 'text-green-500'} mr-2`"></i>
-          {{ showEditModal ? 'Cập Nhật Màn Hình' : 'Thêm Màn Hình' }}
-        </h2>
-        <form @submit.prevent="handleFormSubmit" class="space-y-4">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">ID Công nghệ màn hình</label>
-              <select
-                v-model="manHinh.idCongNgheManHinh"
-                class="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-[var(--ring-color)] focus:border-transparent transition-all duration-200"
-                required
-              >
-                <option v-for="tech in congNgheManHinhs" :key="tech.id" :value="tech.id">{{ tech.congNgheManHinh }}</option>
-              </select>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Mã</label>
-              <input
-                v-model.trim="manHinh.ma"
-                type="text"
-                placeholder="Nhập mã màn hình"
-                class="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-[var(--ring-color)] focus:border-transparent transition-all duration-200"
-                required
-              />
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Kích thước</label>
-              <input
-                v-model.trim="manHinh.kichThuoc"
-                type="text"
-                placeholder="Nhập kích thước (inch)"
-                class="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-[var(--ring-color)] focus:border-transparent transition-all duration-200"
-                required
-              />
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Độ phân giải</label>
-              <input
-                v-model.trim="manHinh.doPhanGiai"
-                type="text"
-                placeholder="Nhập độ phân giải"
-                class="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-[var(--ring-color)] focus:border-transparent transition-all duration-200"
-                required
-              />
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Độ sáng tối đa</label>
-              <input
-                v-model.trim="manHinh.doSangToiDa"
-                type="text"
-                placeholder="Nhập độ sáng tối đa (nits)"
-                class="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-[var(--ring-color)] focus:border-transparent transition-all duration-200"
-                required
-              />
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Tần số quét</label>
-              <input
-                v-model.trim="manHinh.tanSoQuet"
-                type="text"
-                placeholder="Nhập tần số quét (Hz)"
-                class="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-[var(--ring-color)] focus:border-transparent transition-all duration-200"
-                required
-              />
-            </div>
-            <div class="md:col-span-2">
-              <label class="block text-sm font-medium text-gray-700 mb-1">Kiểu màn hình</label>
-              <input
-                v-model.trim="manHinh.kieuManHinh"
-                type="text"
-                placeholder="Nhập kiểu màn hình"
-                class="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-[var(--ring-color)] focus:border-transparent transition-all duration-200"
-                required
-              />
-            </div>
-          </div>
-          <div class="flex justify-end gap-4">
-            <button
-              type="button"
-              @click="closeModal"
-              class="bg-gray-200 text-gray-700 px-5 py-2 rounded-lg hover:bg-gray-300 transition-all duration-200 font-medium"
-            >
-              Hủy
-            </button>
-            <button
-              type="submit"
-              :class="showEditModal ? 'bg-blue-600 hover:bg-blue-700' : 'bg-green-600 hover:bg-green-700'"
-              class="text-white px-5 py-2 rounded-lg transition-all duration-200 font-medium flex items-center"
-            >
-              <i class="fa-solid fa-save mr-2"></i> {{ showEditModal ? 'Cập nhật' : 'Thêm mới' }}
-            </button>
-          </div>
-        </form>
+    <div class="bg-white shadow-lg rounded-lg p-5 mb-2 mt-2 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-4">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Tìm kiếm</label>
+        <input v-model.trim="searchKeyword" type="text" placeholder="Tìm kiếm theo mã, kích thước, độ phân giải..." class="input-field" />
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Công nghệ màn hình</label>
+        <select v-model="searchIdCongNgheManHinh" class="input-field">
+          <option value="">Tất cả</option>
+          <option v-for="tech in congNgheManHinhs" :key="tech.id" :value="tech.id">{{ tech.congNgheManHinh }}</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Kích thước</label>
+        <select v-model="searchKichThuoc" class="input-field">
+          <option value="">Tất cả</option>
+          <option v-for="kichThuoc in uniqueKichThuocList" :key="kichThuoc" :value="kichThuoc.replace(/\s+/g, '')">{{ kichThuoc }}</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Độ phân giải</label>
+        <select v-model="searchDoPhanGiai" class="input-field">
+          <option value="">Tất cả</option>
+          <option v-for="doPhanGiai in uniqueDoPhanGiaiList" :key="doPhanGiai" :value="doPhanGiai">{{ doPhanGiai }}</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Độ sáng tối đa</label>
+        <select v-model="searchDoSangToiDa" class="input-field">
+          <option value="">Tất cả</option>
+          <option v-for="doSang in uniqueDoSangToiDaList" :key="doSang" :value="doSang.replace(/\s+/g, '')">{{ doSang }}</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Tần số quét</label>
+        <select v-model="searchTanSoQuet" class="input-field">
+          <option value="">Tất cả</option>
+          <option v-for="tanSo in uniqueTanSoQuetList" :key="tanSo" :value="tanSo">{{ tanSo }}</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Kiểu màn hình</label>
+        <select v-model="searchKieuManHinh" class="input-field">
+          <option value="">Tất cả</option>
+          <option v-for="kieu in uniqueKieuManHinhList" :key="kieu" :value="kieu">{{ kieu }}</option>
+        </select>
+      </div>
+      <div class="flex justify-end w-full col-span-full gap-2">
+        <button @click="resetFilters" class="flex items-center gap-2 px-4 py-2 bg-[#f97316] text-white font-semibold rounded-lg shadow-md hover:bg-orange-600 transition">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+          Đặt lại
+        </button>
+        <button @click="navigateToAddPage" class="flex items-center gap-2 px-4 py-2 bg-[#f97316] text-white font-semibold rounded-lg shadow-md hover:bg-orange-600 transition">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-1">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
+          </svg>
+          Thêm mới
+        </button>
       </div>
     </div>
 
-    <!-- Modal Confirm -->
-    <ConfirmModal
-      :show="showConfirmModal"
-      :message="confirmMessage"
-      @confirm="executeConfirmedAction"
-      @cancel="closeConfirmModal"
-    />
+    <div v-if="selectedManHinh.length" class="bg-white shadow-lg rounded-lg p-5 mb-4 mt-4 flex justify-end">
+      <button @click="confirmDeleteSelected" class="flex items-center gap-2 px-4 py-2 bg-red-500 text-white font-semibold rounded-lg shadow-md hover:bg-red-600 transition">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-1">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+        Xóa {{ selectedManHinh.length }} màn hình đã chọn
+      </button>
+    </div>
+
+    <DynamicTable class="dynamic-table" :data="manHinhs" :columns="columns" :get-nested-value="getNestedValue" :selected-products="selectedManHinh" @toggle-select="toggleSelect">
+      <template #header-select>
+        <input type="checkbox" class="w-4 h-4 rounded" :checked="isAllSelected" @change="toggleSelectAll">
+      </template>
+      <template #cell-select="{ item }">
+        <input type="checkbox" class="w-4 h-4 rounded" :checked="selectedManHinh.includes(item.id)" @change="toggleSelect(item.id)">
+      </template>
+    </DynamicTable>
+
+    <footer class="bg-white shadow-lg rounded-lg p-4 flex justify-center items-center mt-2">
+      <Pagination :current-page="currentPage" :total-pages="totalPages" @page-changed="goToPage" />
+    </footer>
+
+    <ConfirmModal :show="showConfirmModal" :message="confirmMessage" @confirm="executeConfirmedAction" @cancel="closeConfirmModal" />
   </div>
 </template>
 
 <script setup>
+import { ref, computed, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 import useManHinh from './useManHinh.js';
 import ToastNotification from '@/components/ToastNotification.vue';
 import Pagination from '@/components/Pagination.vue';
 import ConfirmModal from '@/components/ConfirmModal.vue';
-import { ref, onMounted } from 'vue';
+import DynamicTable from '@/components/DynamicTable.vue';
+import axios from 'axios';
 
+const router = useRouter();
 const toastRef = ref(null);
+
 const {
-  toast,
   manHinhs,
   congNgheManHinhs,
   manHinh,
   searchKeyword,
+  searchKieuManHinh,
+  searchIdCongNgheManHinh,
+  searchKichThuoc,
+  searchDoPhanGiai,
+  searchDoSangToiDa,
+  searchTanSoQuet,
   currentPage,
   pageSize,
   totalItems,
   selectedManHinh,
-  selectAll,
   isSearching,
-  showAddModal,
-  showEditModal,
   showConfirmModal,
   confirmMessage,
   totalPages,
@@ -263,56 +130,155 @@ const {
   goToPage,
   searchManHinh,
   resetSearch,
-  checkDuplicate,
-  saveManHinh,
-  updateManHinh,
   deleteManHinh,
   deleteSelectedManHinh,
-  openAddModal,
-  openEditModal,
-  closeModal,
-  handleFormSubmit,
   confirmDelete,
   confirmDeleteSelected,
   confirmAction,
   executeConfirmedAction,
   closeConfirmModal,
-  toggleSelectAll
+  toggleSelectAll,
 } = useManHinh(toastRef);
 
+// Dữ liệu cứng cho các combobox
+const kichThuocData = [
+  "6.1 inches", "6.1 inches", "6.1 inches", "6.9 inches", "6.2 inches", "6.7 inches", "6.8 inches",
+  "6.1 inches", "6.8 inches", "6.7 inches", "6.7 inches", "6.6 inches", "7.6 inches", "6.3 inches",
+  "6.74 inches", "6.67 inches", "6.67 inches", "6.67 inches", "6.67 inches", "6.43 inches", "6.56 inches",
+  "6.7 inches", "6.7 inches", "6.7 inches", "6.67 inches", "6.59 inches", "7.82 inches", "6.31 inches",
+  "6.31 inches", "6.1 inches", "6.3 inches", "7.6 inches", "6.79 inches", "6.67 inches"
+];
+const doPhanGiaiData = [
+  "1170x2532px", "1179x2556px", "1290x2796px", "1320x2868px", "1080x2340px", "1080x2340px",
+  "1440x3120px", "1080x2340px", "1440x3088px", "1080x2640px", "720x1600px", "1080x2340px",
+  "1856x2160px", "968x2376px", "720x1600px", "1080x2400px", "1220x2712px", "1220x2712px",
+  "1220x2712px", "1080x2400px", "720x1612px", "1080x2412px", "1080x2040px", "1080x2412px",
+  "1080x2040px", "1256x2760px", "2268x2440px", "1116x2484px", "1284x2778px", "1179x2556px",
+  "1206x2622px", "1812x2176px", "1080x2460px", "1080x2400px"
+];
+const doSangToiDaData = [
+  "1200 nits", "2000 nits", "2000 nits", "2000 nits", "2600 nits", "1900 nits", "2600 nits",
+  "1750 nits", "1750 nits", "1750 nits", "1750 nits", "1000 nits", "2600 nits", "2600 nits",
+  "600 nits", "1000 nits", "1200 nits", "4000 nits", "3000 nits", "800 nits", "480 nits",
+  "500 nits", "1200 nits", "1200 nits", "1200 nits", "4500 nits", "2800 nits", "2800 nits",
+  "1200 nits", "2000 nits", "2000 nits", "1200 nits", "550 nits", "1300 nits"
+];
+const tanSoQuetData = [
+  "60Hz", "120Hz", "120Hz", "120Hz", "120Hz", "120Hz", "120Hz", "120Hz", "120Hz", "120Hz",
+  "60Hz", "120Hz", "120Hz", "120Hz", "90Hz", "120Hz", "120Hz", "144Hz", "120Hz", "90Hz",
+  "90Hz", "120Hz", "120Hz", "120Hz", "120Hz", "120Hz", "120Hz", "120Hz", "60Hz", "60Hz",
+  "120Hz", "120Hz", "90Hz", "120Hz"
+];
+const kieuManHinhData = [
+  "tai thỏ", "dynamic island", "dynamic island", "dynamic island", "đục lỗ", "đục lỗ", "đục lỗ", "đục lỗ",
+  "đục lỗ", "đục lỗ", "đục lỗ", "đục lỗ", "đục lỗ", "đục lỗ", "đục lỗ", "đục lỗ", "đục lỗ", "đục lỗ",
+  "đục lỗ", "đục lỗ", "đục lỗ", "đục lỗ", "đục lỗ", "đục lỗ", "đục lỗ", "đục lỗ", "đục lỗ", "tai thỏ",
+  "dynamic island", "dynamic island", "đục lỗ", "đục lỗ", "đục lỗ"
+];
+
+// Loại bỏ giá trị trùng lặp và sắp xếp
+const uniqueKichThuocList = ref([...new Set(kichThuocData)].sort());
+const uniqueDoPhanGiaiList = ref([...new Set(doPhanGiaiData)].sort());
+const uniqueDoSangToiDaList = ref([...new Set(doSangToiDaData)].sort((a, b) => parseInt(a) - parseInt(b)));
+const uniqueTanSoQuetList = ref([...new Set(tanSoQuetData)].sort((a, b) => parseInt(a) - parseInt(b)));
+const uniqueKieuManHinhList = ref([...new Set(kieuManHinhData)].sort());
+
 onMounted(() => {
-  toast.value = toastRef;
-  fetchCongNgheManHinhs(); // Lấy danh sách công nghệ màn hình
-  fetchData(); // Lấy danh sách màn hình
+  fetchCongNgheManHinhs();
+  fetchData();
+  // Không cần fetchKieuManHinhNames nữa vì dùng dữ liệu cứng
 });
+
+const resetFilters = () => {
+  resetSearch();
+};
+
+const navigateToAddPage = () => {
+  router.push('/screen/add');
+};
+
+const getNestedValue = (obj, path) => {
+  return path.split('.').reduce((acc, part) => acc && acc[part], obj);
+};
+
+const isAllSelected = computed(() => {
+  if (manHinhs.value.length === 0) return false;
+  return manHinhs.value.every(item => selectedManHinh.value.includes(item.id));
+});
+
+const toggleSelect = (id) => {
+  if (selectedManHinh.value.includes(id)) {
+    selectedManHinh.value = selectedManHinh.value.filter(selectedId => selectedId !== id);
+  } else {
+    selectedManHinh.value.push(id);
+  }
+};
+
+const getCongNgheManHinhName = (id) => {
+  const congNghe = congNgheManHinhs.value.find(c => c.id === id);
+  return congNghe ? congNghe.congNgheManHinh : 'Không xác định';
+};
+
+const columns = [
+  { key: 'select', label: '' },
+  {
+    key: '#',
+    label: '#',
+    formatter: (value, item, index) => (currentPage.value * pageSize.value) + index + 1,
+  },
+  {
+    key: 'idCongNgheManHinh',
+    label: 'Công nghệ màn hình',
+    formatter: (value) => getCongNgheManHinhName(value),
+  },
+  { key: 'ma', label: 'Mã' },
+  { key: 'kichThuoc', label: 'Kích thước' },
+  { key: 'doPhanGiai', label: 'Độ phân giải' },
+  { key: 'doSangToiDa', label: 'Độ sáng tối đa' },
+  { key: 'tanSoQuet', label: 'Tần số quét' },
+  { key: 'kieuManHinh', label: 'Kiểu màn hình' },
+  {
+    key: 'trangThai',
+    label: 'Trạng Thái',
+    formatter: (value, item) => item.deleted ? '<span class="text-red-600">Hết hàng</span>' : '<span class="text-green-600">Còn hàng</span>',
+  },
+  {
+    key: 'actions',
+    label: 'Hành động',
+    formatter: (value, item) => {
+      const safeItem = JSON.stringify(item);
+      return `
+        <div class="space-x-4">
+          <button class="text-orange-600 hover:text-orange-800 transition" data-item='${safeItem}' onclick="document.dispatchEvent(new CustomEvent('openEditModal', { detail: JSON.parse(this.dataset.item) }))">
+            <i class="fa-solid fa-edit text-orange-500"></i>
+          </button>
+          <button class="text-red-600 hover:text-red-800 transition" data-id="${item.id}" onclick="document.dispatchEvent(new CustomEvent('confirmDelete', { detail: this.dataset.id }))">
+            <i class="fa-solid fa-trash"></i>
+          </button>
+        </div>
+      `;
+    },
+  },
+];
+
+const handleCustomEvents = () => {
+  document.addEventListener('openEditModal', (event) => {
+    router.push(`/screen/edit/${event.detail.id}`);
+  });
+  document.addEventListener('confirmDelete', (event) => {
+    confirmDelete(event.detail);
+  });
+};
+
+handleCustomEvents();
 </script>
 
 <style scoped>
-.fixed.inset-0 {
-  overflow-y: auto;
+.input-field {
+  @apply w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm;
 }
-:root {
-  --ring-color: #10b981; /* Màu xanh lá cho Thêm mới */
-}
-div[z-50] {
-  --ring-color: #3b82f6; /* Màu xanh dương cho Cập nhật */
-}
-.min-w-full {
-  min-width: 100%;
-}
-.table-auto {
-  table-layout: auto;
-}
-.whitespace-nowrap {
-  white-space: nowrap;
-}
-.max-w-2xl {
-  max-width: 48rem; /* Tăng kích thước modal */
-}
-.max-h-[90vh] {
-  max-height: 90vh; /* Giới hạn chiều cao modal */
-}
-.overflow-y-auto {
-  overflow-y: auto; /* Thêm thanh cuộn dọc nếu nội dung vượt quá */
+.dynamic-table {
+  border-top-left-radius: 0px;
+  border-top-right-radius: 0px;
 }
 </style>

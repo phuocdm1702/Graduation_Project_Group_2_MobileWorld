@@ -457,10 +457,10 @@ const productCategories = [
   { name: "imel", path: "/imel", route: "imel" },
   { name: "Imel đã bán", path: "/imel-da-ban", route: "Imel đã bán" },
   { name: "Dòng Sản Phẩm", path: "/product-line", route: "product-line" },
-  { name: "Màn Hình", path: "/man-hinh", route: "Màn Hình" },
+  { name: "Màn Hình", path: "/screen", route: "screen" },
   {
     name: "Công Nghệ Màn Hình",
-    path: "/man-hinh/cong-nghe",
+    path: "/cong-nghe-man-hinh",
     route: "Công Nghệ Màn Hình",
   },
   { name: "RAM", path: "/ram", route: "RAM" },

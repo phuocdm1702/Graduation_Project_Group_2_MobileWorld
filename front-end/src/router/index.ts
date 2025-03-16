@@ -36,7 +36,7 @@
   // Màn hình
   import Display from "../views/Products/Screen/ManHinh.vue";
   import DisplayTech from "../views/Products/Screen/CongNgheMH.vue";
-  import Ram from "../views/Products/Screen/RamSanPham.vue";
+  import Ram from "../views/Products/MemorySanPham/RamSanPham.vue";
   
   // Bộ nhớ
   import InternalStorage from "../views/Products/MemorySanPham/BoNhoTrong.vue";
@@ -69,6 +69,11 @@
   import ManufacturerEdit from "@/views/Products/Brand/Manufacturer/ManufacturerEdit.vue";
   import ImelAdd from "@/views/Products/Imel/ImelAdd.vue";
   import ImelEdit from "@/views/Products/Imel/ImelEdit.vue";
+  import ManHinh from "@/views/Products/Screen/ManHinh.vue";
+  import ManHinhAdd from "@/views/Products/Screen/ManHinhAdd.vue";
+  import ManHinhEdit from "@/views/Products/Screen/ManHinhEdit.vue";
+  import AddCongNgheManHinh from "@/views/Products/Screen/AddCongNgheManHinh.vue";
+  import EditCongNgheManHinh from "@/views/Products/Screen/EditCongNgheManHinh.vue";
   
   
   const routes: Array<RouteRecordRaw> = [
@@ -101,8 +106,12 @@
     { path: "/product-line/edit/:id", name: "product-line-edit", component: ProductLineEdit },
   
     // Màn hình
-    { path: "/man-hinh", name: "Màn Hình", component: Display },
-    { path: "/man-hinh/cong-nghe", name: "Công Nghệ Màn Hình", component: DisplayTech },
+    { path: "/screen", name: "screen", component: ManHinh },
+    { path: "/screen/add", name: "screen-add", component: ManHinhAdd },
+    { path: "/screen/edit/:id", name: "screen-edit", component: ManHinhEdit },
+    { path: "/cong-nghe-man-hinh", name: "Công Nghệ Màn Hình", component: DisplayTech },
+    { path: "/cong-nghe-man-hinh/add", name: "Thêm Công Nghệ Màn Hình", component: AddCongNgheManHinh },
+    { path: "/cong-nghe-man-hinh/edit/:id", name: "Sửa Công Nghệ Màn Hình", component: EditCongNgheManHinh },
     { path: "/ram", name: "RAM", component: Ram },
   
     // Bộ nhớ

@@ -39,7 +39,10 @@ public class ManHinhDTO {
     @Size(max = 255, message = "Kiểu màn hình không được vượt quá 255 ký tự.")
     private String kieuManHinh;
 
-    public ManHinhDTO(Integer id, Integer idCongNgheManHinh, String ma, String kichThuoc, String doPhanGiai, String doSangToiDa, String tanSoQuet, String kieuManHinh) {
+    private Boolean deleted;
+
+
+    public ManHinhDTO(Integer id, Integer idCongNgheManHinh, String ma, String kichThuoc, String doPhanGiai, String doSangToiDa, String tanSoQuet, String kieuManHinh, boolean deleted) {
         this.id = id;
         this.idCongNgheManHinh = idCongNgheManHinh;
         this.ma = ma;
@@ -48,5 +51,6 @@ public class ManHinhDTO {
         this.doSangToiDa = doSangToiDa;
         this.tanSoQuet = tanSoQuet;
         this.kieuManHinh = kieuManHinh;
+        this.deleted = deleted;
     }
 }
