@@ -22,5 +22,8 @@ public interface KhachHangRepository extends JpaRepository<KhachHang, Integer> {
     @Query("SELECT MAX(kh.ma) FROM KhachHang kh")
     String findMaxMa();
 
+    @Query("SELECT k FROM KhachHang k WHERE CONCAT(k.ma, k.ten) LIKE %?1% ")
+    List<KhachHang> searchFormAdd(String keyword);
+
 
 }

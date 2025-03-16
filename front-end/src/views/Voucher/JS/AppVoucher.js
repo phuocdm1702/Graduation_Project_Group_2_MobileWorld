@@ -75,6 +75,11 @@ export default function usePhieuGiamGia() {
 
   const columns = ref([
     {
+      key: "stt",
+      label: "#",
+      formatter: (_, __, index) => index + 1 + currentPage.value * pageSize.value // Tính STT dựa trên trang hiện tại và kích thước trang
+    },
+    {
       key: "ma",
       label: "Mã"
     },
