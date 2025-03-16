@@ -1,7 +1,9 @@
 <template>
+  <!-- Thêm PathRouter với background -->
+  <div class="bg-white shadow-lg rounded-lg p-5 mb-4 mt-4">
+    <PathRouter :breadcrumb-items="breadcrumbItems" />
+  </div>
   <div class="show-hoa-don bg-white shadow-lg rounded-lg p-5 mt-2 mx-auto">
-<!--    <h1 class="text-2xl font-semibold text-gray-700 mb-4">Chi Tiết Đơn Hàng #{{ id }}</h1>-->
-
     <!-- Thanh trạng thái -->
     <div class="timeline mb-6">
       <div class="timeline-container flex items-center justify-between relative">
@@ -116,6 +118,9 @@ import useShowHoaDon from "@/views/Bill/ShowHoaDon";
 import DynamicTable from "@/components/DynamicTable.vue";
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale'; // Thêm locale tiếng Việt
+import PathRouter from "@/components/PathRouter.vue";
+import {useRoute} from "vue-router"; // Import PathRouter
+
 const props = defineProps({
   id: {
     type: String,
@@ -132,6 +137,17 @@ const timelineStatuses = computed(() => [
   {name: "Đang Giao", time: null, completed: false},
   {name: "Hoàn Thành", time: null, completed: false},
 ]);
+
+// Lấy route hiện tại
+const route = useRoute();
+
+// Tính toán breadcrumb dựa trên meta của route
+const breadcrumbItems = computed(() => {
+  if (typeof route.meta.breadcrumb === "function") {
+    return route.meta.breadcrumb(route);
+  }
+  return route.meta?.breadcrumb || ["Quản lý hóa đơn"]; // Mặc định nếu không có breadcrumb
+});
 </script>
 
 <style scoped>
