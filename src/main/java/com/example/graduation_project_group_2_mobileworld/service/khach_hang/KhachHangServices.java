@@ -5,6 +5,7 @@ import com.example.graduation_project_group_2_mobileworld.entity.*;
 import com.example.graduation_project_group_2_mobileworld.repository.khach_hang.KhachHangRepository;
 import com.example.graduation_project_group_2_mobileworld.repository.khach_hang.diaChiKhachHangRepo;
 import com.example.graduation_project_group_2_mobileworld.repository.tai_khoan.TaiKhoanRepository;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import java.text.Normalizer;
@@ -29,6 +30,13 @@ public class KhachHangServices {
     public KhachHang findById(Integer id) {
         Optional<KhachHang> khachHang = khachHangRepository.findById(id);
         return khachHang.orElseThrow(() -> new RuntimeException("Không tìm thấy khách hàng với ID: " + id));
+    }
+
+    public List<KhachHang> searchFormAddPgg(String keyword) {
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return khachHangRepository.findAll();
+        }
+        return khachHangRepository.searchFormAdd(keyword);
     }
 
 

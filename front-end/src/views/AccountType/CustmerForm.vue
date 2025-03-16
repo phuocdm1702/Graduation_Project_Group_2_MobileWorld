@@ -200,7 +200,7 @@
     </div>
 
     <div class="flex justify-end space-x-4 mt-4">
-      <router-link to="/backKH">
+      <router-link to="/khach-hang">
         <button @click="$emit('cancel')" class="px-4 py-2 bg-gray-300 rounded-md">Hủy</button>
       </router-link>
       <button

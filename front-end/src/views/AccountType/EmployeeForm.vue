@@ -1,7 +1,5 @@
 <template>
   <div class="bg-white p-6 rounded-lg shadow-lg">
-    <h2 class="text-2xl font-bold mb-4">Thông tin nhân viên</h2>
-
     <!-- Khu vực quét QR -->
     <div v-if="isScanning" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div class="bg-white p-4 rounded-lg">
@@ -42,6 +40,7 @@
           ref="fileInput"
           @change="previewImage"
           class="hidden"
+          accept="image/*"
         >
       </div>
 
@@ -199,6 +198,7 @@ const selectedWard = ref('');
 // Dữ liệu ảnh
 const employeeImage = ref(null);
 const fileInput = ref(null);
+const uploadedImageUrl = ref(null);
 
 // Quét mã QR
 const startScanning = async () => {
@@ -294,29 +294,81 @@ const parseAddress = (address) => {
 
 // Xử lý ảnh
 async function uploadImage(file) {
+  if (!file) return null;
+
+  const maxSize = 5 * 1024 * 1024; // 5MB
+  if (file.size > maxSize) {
+    alert('Kích thước ảnh không được vượt quá 5MB!');
+    return null;
+  }
+
   const formData = new FormData();
   formData.append('file', file);
+
   try {
     const response = await axios.post('http://localhost:8080/img/api/upload', formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
-    return response.data;
+
+    console.log('Response từ server:', response.data);
+
+    const imageUrl = response.data.imageUrl;
+    if (!imageUrl) {
+      throw new Error('Không nhận được URL ảnh từ server. Response: ' + JSON.stringify(response.data));
+    }
+
+    uploadedImageUrl.value = imageUrl;
+    return imageUrl;
   } catch (error) {
-    console.error('Lỗi khi tải lên ảnh:', error);
+    console.error('Lỗi upload ảnh:', error);
+    const errorMessage = error.response
+      ? `Server lỗi: ${error.response.status} - ${error.response.data.message || error.message}`
+      : error.message;
+    alert('Không thể tải ảnh lên: ' + errorMessage);
     return null;
   }
 }
 
+function previewImage(event) {
+  const file = event.target.files[0];
+  if (file) {
+    if (!file.type.startsWith('image/')) {
+      alert('Vui lòng chọn file ảnh hợp lệ!');
+      fileInput.value.value = '';
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      employeeImage.value = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+}
+
+function deleteImage() {
+  employeeImage.value = null;
+  uploadedImageUrl.value = null;
+  fileInput.value.value = '';
+}
+
+function triggerFileInput() {
+  fileInput.value.click();
+}
+
 async function addNhanVien() {
-  let imagePath = null;
-  if (employeeImage.value) {
-    const file = fileInput.value.files[0];
-    if (file) {
-      imagePath = await uploadImage(file);
-      if (!imagePath) {
-        alert('Tải lên ảnh thất bại. Vui lòng thử lại.');
-        return;
-      }
+  // Validate cơ bản
+  if (!employee.value.tenNhanVien || !employee.value.userName || !employee.value.sdt ||
+    !employee.value.cccd || !employee.value.email || !employee.value.diaChicuthe ||
+    !employee.value.ngaySinh || !employee.value.gioiTinh) {
+    alert('Vui lòng điền đầy đủ thông tin bắt buộc!');
+    return;
+  }
+
+  let imagePath = uploadedImageUrl.value;
+  if (fileInput.value?.files[0] && !imagePath) {
+    imagePath = await uploadImage(fileInput.value.files[0]);
+    if (!imagePath) {
+      return;
     }
   }
 
@@ -333,8 +385,8 @@ async function addNhanVien() {
     email: employee.value.email,
     soDienThoai: employee.value.sdt,
     tenDangNhap: employee.value.userName,
-    gioiTinh: employee.value.gioiTinh,
-    createdAt: new Date().toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' })
+    gioiTinh: employee.value.gioiTinh === 'True',
+    createdAt: new Date().toISOString()
   };
 
   console.log('Dữ liệu gửi lên server:', employeeData);
@@ -352,28 +404,8 @@ async function addNhanVien() {
     });
   } catch (error) {
     console.error('Lỗi khi thêm nhân viên:', error.response ? error.response.data : error.message);
-    alert('Thêm nhân viên thất bại: ' + (error.response ? error.response.data : error.message));
+    alert('Thêm nhân viên thất bại: ' + (error.response?.data?.message || error.message));
   }
-}
-
-function triggerFileInput() {
-  fileInput.value.click();
-}
-
-function previewImage(event) {
-  const file = event.target.files[0];
-  if (file) {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      employeeImage.value = e.target.result;
-    };
-    reader.readAsDataURL(file);
-  }
-}
-
-function deleteImage() {
-  employeeImage.value = null;
-  fileInput.value.value = '';
 }
 
 // Tải dữ liệu tỉnh/thành phố

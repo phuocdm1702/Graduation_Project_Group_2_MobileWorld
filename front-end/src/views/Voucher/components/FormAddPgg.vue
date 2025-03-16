@@ -101,6 +101,15 @@
     <!-- Customer Selection -->
     <div class="w-1/3 p-6 bg-white rounded-lg shadow-md">
       <h4 class="text-xl font-semibold mb-4 text-gray-800">Chọn Khách Hàng</h4>
+      <div class="mb-4">
+        <input
+          type="text"
+          v-model="searchQuery"
+          placeholder="Tìm kiếm khách hàng..."
+          class="form-input w-full"
+        />
+      </div>
+      
       <div class="table-container">
         <table class="w-full text-sm">
           <thead>
@@ -123,18 +132,54 @@
           </tbody>
         </table>
       </div>
+
+      <div class="mt-6">
+        <h4 class="text-lg font-semibold mb-2 text-gray-800">Khách Hàng Đã Chọn</h4>
+        <div class="table-container">
+          <table class="w-full text-sm">
+            <thead>
+            <tr class="bg-gray-100">
+              <th class="p-3 text-left font-semibold">Mã KH</th>
+              <th class="p-3 text-left font-semibold">Tên Khách Hàng</th>
+              <th class="p-3 text-left font-semibold">Ngày sinh</th>
+              <th class="p-3 text-left font-semibold">Hành động</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr v-if="selectedCustomerDetails.length === 0">
+              <td colspan="4" class="p-3 text-center text-gray-500">Chưa có khách hàng nào được chọn</td>
+            </tr>
+            <tr v-else v-for="customer in selectedCustomerDetails" :key="customer.id" class="border-b hover:bg-gray-50">
+              <td class="p-3">{{ customer.ma }}</td>
+              <td class="p-3">{{ customer.ten }}</td>
+              <td class="p-3">{{ new Date(customer.ngaySinh).toLocaleDateString('vi-VN') }}</td>
+              <td class="p-3">
+                <button
+                  @click="removeCustomer(customer.id)"
+                  class="px-2 py-1 bg-red-500 text-white rounded-md hover:bg-red-600 transition"
+                >
+                  Xóa
+                </button>
+              </td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import {ref, onMounted} from "vue";
+import {ref, onMounted, computed, watch} from "vue";
 import {useRouter} from "vue-router";
 import axios from "axios";
 
 const customers = ref([]);
 const selectedCustomers = ref([]);
 const router = useRouter();
+
+const searchQuery = ref("");
 
 const ma = ref("");
 const tenPhieuGiamGia = ref("");
@@ -150,6 +195,8 @@ const riengTu = ref(false); // Boolean
 const moTa = ref("");
 const deleted = ref(false); // Mặc định là false
 
+const baseURL = "http://localhost:8080/add-phieu-giam-gia";
+
 const fetchDataKH = async () => {
   try {
     const response = await axios.get("http://localhost:8080/add-phieu-giam-gia/data-kh")
@@ -159,6 +206,40 @@ const fetchDataKH = async () => {
   }
   
 }
+
+const searchKH = async () => {
+  try {
+    let response;
+    if (!searchQuery.value || searchQuery.value.trim() === "") {
+      response = await axios.get(`${baseURL}/data-kh`);
+    } else {
+      response = await axios.get(`${baseURL}/search-kh`, {
+        params: {
+          keyword: searchQuery.value.trim(),
+        },
+      });
+    }
+    customers.value = response.data;
+  } catch (error) {
+    console.error("Lỗi search!", error);
+  }
+};
+
+watch(searchQuery, (newQuery) =>  {
+  if(newQuery.trim().length > 0) {
+    searchKH();
+  }
+});
+
+const selectedCustomerDetails = computed(() => {
+  return customers.value.filter((customer) =>
+    selectedCustomers.value.includes(customer.id)
+  );
+});
+
+const removeCustomer = (customerId) => {
+  selectedCustomers.value = selectedCustomers.value.filter((id) => id !== customerId);
+};
 
 const errors = ref({});
 

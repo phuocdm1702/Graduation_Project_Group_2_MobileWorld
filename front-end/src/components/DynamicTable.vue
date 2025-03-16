@@ -18,21 +18,20 @@
         <td v-for="column in columns" :key="column.key" class="td-cell">
           <template v-if="column.cellSlot === 'actionsSlot'">
             <slot name="actionsSlot" :item="item">
-              <!-- Nút Sửa -->
-              <button
-                @click="editItem(item)"
-                class="px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
-              >
-                Sửa
-              </button>
-              <!-- ToggleSwitch -->
-              <label class="switch ml-2">
+              <div class="flex items-center space-x-2">
+                <!-- Nút Sửa -->
+                <button
+                  @click="editItem(item)"
+                  class="px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
+                >
+                  Sửa
+                </button>
+                <!-- ToggleSwitch -->
                 <ToggleSwitch
-                  class="ml-2"
                   :checked="!item.trangThai"
                   @change="toggleStatus(item)"
                 />
-              </label>
+              </div>
             </slot>
           </template>
           <template v-else-if="column.key === 'trangThai'">
