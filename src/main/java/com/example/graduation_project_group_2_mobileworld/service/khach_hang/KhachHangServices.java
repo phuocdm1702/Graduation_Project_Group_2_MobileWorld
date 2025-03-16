@@ -7,6 +7,7 @@ import com.example.graduation_project_group_2_mobileworld.repository.khach_hang.
 import com.example.graduation_project_group_2_mobileworld.repository.tai_khoan.TaiKhoanRepository;
 import org.springframework.stereotype.Service;
 
+import java.text.Normalizer;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -60,14 +61,34 @@ public class KhachHangServices {
         return String.format("DCKH%05d", nextNumber);
     }
 
-    public String generateMaKH() {
-        String maxMa = khachHangRepository.findMaxMa();
-        if (maxMa == null) {
-            return "KH00001";
+    public String generateMaKH(String tenKH) {
+        String[] parts = tenKH.split("\\s+");
+
+        String lastName = removeAccents(parts[parts.length - 1]).toLowerCase();
+
+        String initials = "";
+        for (int i = 0; i < parts.length - 1; i++) {
+            if (!parts[i].isEmpty()) {
+                initials += removeAccents(parts[i]).toLowerCase().charAt(0);
+            }
         }
-        String numberPart = maxMa.substring(2);
-        int nextNumber = Integer.parseInt(numberPart) + 1; // 2
-        return String.format("KH%05d", nextNumber);
+
+        String baseCode = lastName + initials;
+
+        String finalCode = baseCode;
+        int counter = 1;
+        while (khachHangRepository.existsByMa(finalCode)) {
+            finalCode = baseCode + String.format("%02d", counter);
+            counter++;
+        }
+
+        return finalCode;
+    }
+
+    // Hàm loại bỏ dấu tiếng Việt
+    private String removeAccents(String input) {
+        return Normalizer.normalize(input, Normalizer.Form.NFD)
+                .replaceAll("\\p{M}", "");
     }
 
     public KhachHang addKhachHang(KhachHangDTO khachHangDTO) {
@@ -87,7 +108,7 @@ public class KhachHangServices {
         if (kh.getCreatedAt() == null) {
             kh.setCreatedAt(new Date()); // Tự động thêm nếu không có
         }
-        kh.setMa(generateMaKH());
+        kh.setMa(generateMaKH(khachHangDTO.getTenKH()));
         kh.setIdTaiKhoan(taiKhoan);
         kh.setTen(khachHangDTO.getTenKH());
         kh.setNgaySinh(khachHangDTO.getNgaySinh());

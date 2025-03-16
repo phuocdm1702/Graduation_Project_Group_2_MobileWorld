@@ -10,6 +10,7 @@ import com.example.graduation_project_group_2_mobileworld.repository.tai_khoan.T
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.text.Normalizer;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -24,12 +25,34 @@ public class NhanVienServices {
     }
 
     //MatutangNV
-    public String generateMaNhanVien() {
-        Integer maxMa = nhanVienRepository.findMaxMa(); // Tìm giá trị lớn nhất dạng số nguyên
-        if (maxMa == null) {
-            return "NV000001"; // Nếu chưa có mã nào thì bắt đầu từ NV000001
+    public String generateMaNhanVien(String tenNhanVien) {
+        String[] parts = tenNhanVien.split("\\s+");
+
+        String lastName = removeAccents(parts[parts.length - 1]).toLowerCase();
+
+        String initials = "";
+        for (int i = 0; i < parts.length - 1; i++) {
+            if (!parts[i].isEmpty()) {
+                initials += removeAccents(parts[i]).toLowerCase().charAt(0);
+            }
         }
-        return String.format("NV%06d", maxMa + 1);
+        String baseCode = lastName + initials;
+
+        // Kiểm tra trùng lặp và thêm số thứ tự nếu cần
+        String finalCode = baseCode;
+        int counter = 1;
+        while (nhanVienRepository.existsByMa(finalCode)) {
+            finalCode = baseCode + String.format("%02d", counter);
+            counter++;
+        }
+
+        return finalCode;
+    }
+
+    // Hàm loại bỏ dấu tiếng Việt
+    private String removeAccents(String input) {
+        return Normalizer.normalize(input, Normalizer.Form.NFD)
+                .replaceAll("\\p{M}", "");
     }
     //MatutangTK
     public String MaTaiKhoan() {
@@ -83,7 +106,7 @@ public class NhanVienServices {
         if (nhanVien.getCreatedAt() == null) {
             nhanVien.setCreatedAt(new Date()); // Tự động thêm nếu không có
         }
-        nhanVien.setMa(generateMaNhanVien());
+        nhanVien.setMa(generateMaNhanVien(dto.getTenNhanVien()));
         nhanVien.setIdTaiKhoan(taiKhoan);
         nhanVien.setTenNhanVien(dto.getTenNhanVien());
         nhanVien.setNgaySinh(dto.getNgaySinh());

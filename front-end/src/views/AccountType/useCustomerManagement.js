@@ -1,20 +1,26 @@
 import { ref, onMounted, onUnmounted } from "vue";
 import axios from "axios";
+import { useRouter, useRoute } from "vue-router";
+import { format } from 'date-fns';
+import { vi } from 'date-fns/locale';
 
 export default function useCustomerManagement() {
+  const router = useRouter();
+  const route = useRoute();
+
   // Data
   const dataTable = ref([]);
-  const originalData = ref([]); // Lưu trữ dữ liệu gốc để tìm kiếm
+  const originalData = ref([]);
   const searchKH = ref("");
   const filterStatus = ref("tat-ca");
   const currentPage = ref(1);
-  const totalPages = ref(1); // Mặc định là 1 để tránh lỗi chia cho 0
+  const totalPages = ref(1);
   const visible = ref(false);
   const message = ref("");
   const type = ref("success");
   const showConfirmModal = ref(false);
   const selectedCustomerId = ref(null);
-  const isLoading = ref(false); // Thêm trạng thái loading
+  const isLoading = ref(false);
 
   // Toast notification
   const showToast = (toastType, msg) => {
@@ -36,11 +42,19 @@ export default function useCustomerManagement() {
       };
 
       const res = await axios.get("http://localhost:8080/khach-hang/home", { params });
-      originalData.value = res.data.content || res.data || []; // Lưu trữ dữ liệu gốc
+      originalData.value = res.data.content || res.data || [];
       totalPages.value = res.data.totalPages || 1;
       currentPage.value = page;
 
-      applyFilterAndSearch(); // Áp dụng lọc và tìm kiếm trên dữ liệu gốc
+      // Kiểm tra và thêm khách hàng mới từ query
+      const newCustomer = route.query.newCustomer;
+      if (newCustomer) {
+        const parsedCustomer = JSON.parse(newCustomer);
+        originalData.value.unshift(parsedCustomer); // Thêm khách hàng mới vào đầu danh sách
+        router.replace({ query: null }); // Xóa query sau khi xử lý
+      }
+
+      applyFilterAndSearch();
     } catch (error) {
       console.error("Lỗi khi lấy danh sách khách hàng:", error);
       dataTable.value = [];
@@ -54,14 +68,12 @@ export default function useCustomerManagement() {
   const applyFilterAndSearch = () => {
     let filteredData = [...originalData.value];
 
-    // Lọc theo trạng thái
     if (filterStatus.value === "kich-hoat") {
-      filteredData = filteredData.filter((kh) => !kh.deleted); // Kích hoạt
+      filteredData = filteredData.filter((kh) => !kh.deleted);
     } else if (filterStatus.value === "huy-kich-hoat") {
-      filteredData = filteredData.filter((kh) => kh.deleted); // Hủy kích hoạt
+      filteredData = filteredData.filter((kh) => kh.deleted);
     }
 
-    // Tìm kiếm
     if (searchKH.value.trim()) {
       filteredData = filteredData.filter(
         (khachhang) =>
@@ -144,11 +156,10 @@ export default function useCustomerManagement() {
       label: "Ngày tham gia",
       formatter: (value) => {
         if (!value || isNaN(Date.parse(value))) return "Chưa có dữ liệu";
-        return new Date(value).toLocaleString("vi-VN", {
-          timeZone: "Asia/Ho_Chi_Minh",
-        });
+        return format(new Date(value), 'dd/MM/yyyy HH:mm:ss', { locale: vi });
       },
     },
+    { key: "idDiaChiKH.diaChiCuThe", label: "Địa chỉ" },
     {
       key: "deleted",
       label: "Trạng thái",
@@ -183,13 +194,11 @@ export default function useCustomerManagement() {
     showDeleteConfirm(event.detail);
   };
 
-  // Thêm sự kiện lắng nghe và dọn dẹp
   onMounted(() => {
     document.addEventListener("showDeleteConfirm", handleShowDeleteConfirm);
     fetchCustomers();
   });
 
-  // Dọn dẹp sự kiện khi component bị hủy
   onUnmounted(() => {
     document.removeEventListener("showDeleteConfirm", handleShowDeleteConfirm);
   });
@@ -209,7 +218,7 @@ export default function useCustomerManagement() {
     fetchCustomers,
     btnSearch,
     backSearch,
-    onFilterChange, // Trả về để sử dụng khi filter thay đổi
+    onFilterChange,
     showDeleteConfirm,
     confirmDelete,
     editCustomer,

@@ -21,4 +21,6 @@ public interface KhachHangRepository extends JpaRepository<KhachHang, Integer> {
 
     @Query("SELECT MAX(kh.ma) FROM KhachHang kh")
     String findMaxMa();
+
+
 }
