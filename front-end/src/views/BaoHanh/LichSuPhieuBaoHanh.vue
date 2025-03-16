@@ -1,7 +1,7 @@
 <template>
   <div>
-    <!-- Breadcrumb -->
-    <Breadcrumb breadcrumb="Lịch sử bảo hành"/>
+    <!-- Thay Breadcrumb bằng BreadcrumbWrapper -->
+    <BreadcrumbWrapper :breadcrumb-items="breadcrumbItems" />
 
     <div class="mt-4">
       <h4 class="text-gray-600">Lịch sử bảo hành</h4>
@@ -62,6 +62,26 @@
 </template>
 
 <script setup>
-
+import { computed } from 'vue';
+import { useRoute } from 'vue-router';
 import LichSuBaoHanhTable from "@/views/BaoHanh/LichSuBaoHanhTable.vue";
+import BreadcrumbWrapper from '@/components/BreadcrumbWrapper.vue'; // Import BreadcrumbWrapper
+
+// Dữ liệu giả lập cho phương thức sửa chữa (có thể thay bằng API thực tế)
+const repairMethods = [
+  { id: 1, name: "Sửa tại chỗ" },
+  { id: 2, name: "Gửi bảo hành" },
+  { id: 3, name: "Thay thế linh kiện" },
+];
+
+// Lấy route hiện tại
+const route = useRoute();
+
+// Tính toán breadcrumb dựa trên meta của route
+const breadcrumbItems = computed(() => {
+  if (typeof route.meta.breadcrumb === "function") {
+    return route.meta.breadcrumb(route);
+  }
+  return route.meta?.breadcrumb || ["Lịch sử bảo hành"]; // Mặc định nếu không có breadcrumb
+});
 </script>

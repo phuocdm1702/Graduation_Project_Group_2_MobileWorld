@@ -1,7 +1,7 @@
 <template>
   <div>
-    <!-- Breadcrumb -->
-    <Breadcrumb breadcrumb="Đợt Giảm Giá"/>
+    <!-- Thay Breadcrumb bằng BreadcrumbWrapper -->
+    <BreadcrumbWrapper :breadcrumb-items="breadcrumbItems" />
 
     <div class="mt-2 mx-auto">
       <ToastNotification ref="toast"/>
@@ -114,16 +114,15 @@
           <label for="deleted" class="block text-sm font-medium text-gray-700">Đã kết thúc</label>
         </div>
 
-
         <div class="flex justify-end w-full col-span-full gap-2">
-          <!--Xuat Excel-->
+          <!-- Xuất Excel -->
           <button @click="exportExcel"
                   class="px-4 py-2 bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-600 transition flex items-center gap-2">
             <i class="fa fa-file-excel text-white text-lg"></i>
             Xuất Excel
           </button>
 
-          <!--View Add-->
+          <!-- View Add -->
           <RouterLink to="/ViewAddDotGiamGia">
             <button
               class="flex items-center gap-2 px-4 py-2 bg-[#f97316] text-white font-semibold rounded-lg shadow-md hover:bg-orange-600 transition">
@@ -136,7 +135,6 @@
           </RouterLink>
         </div>
       </div>
-
 
       <!-- Bảng danh sách đợt giảm giá -->
       <DynamicTable
@@ -155,24 +153,36 @@
         />
       </footer>
     </div>
-  </div>
 
-  <ConfirmModal
-    :show="showConfirmModal"
-    :message="confirmMessage"
-    @confirm="executeConfirmedAction"
-    @cancel="closeConfirmModal"
-  />
+    <ConfirmModal
+      :show="showConfirmModal"
+      :message="confirmMessage"
+      @confirm="executeConfirmedAction"
+      @cancel="closeConfirmModal"
+    />
+  </div>
 </template>
 
 <script setup>
-import {useDiscountManagement} from './DotVoucher.js';
+import { useDiscountManagement } from './DotVoucher.js';
 import "@vuepic/vue-datepicker/dist/main.css";
 import DynamicTable from "@/components/DynamicTable.vue";
 import Pagination from '@/components/Pagination.vue';
 import ConfirmModal from '@/components/ConfirmModal.vue';
 import ToastNotification from '@/components/ToastNotification.vue';
+import BreadcrumbWrapper from '@/components/BreadcrumbWrapper.vue'; // Import BreadcrumbWrapper
+import { computed } from 'vue';
+import { useRoute } from 'vue-router';
 
+const route = useRoute();
+
+// Tính toán breadcrumb dựa trên meta của route
+const breadcrumbItems = computed(() => {
+  if (typeof route.meta.breadcrumb === "function") {
+    return route.meta.breadcrumb(route);
+  }
+  return route.meta?.breadcrumb || ["Đợt Giảm Giá"]; // Mặc định nếu không có breadcrumb
+});
 
 const {
   toast,

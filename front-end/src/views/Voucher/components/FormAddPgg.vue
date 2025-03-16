@@ -1,4 +1,6 @@
 <template>
+  <!-- Thay Breadcrumb bằng BreadcrumbWrapper -->
+  <BreadcrumbWrapper :breadcrumb-items="breadcrumbItems" />
   <div class="flex h-screen p-4 bg-gray-100 gap-4">
     <!-- Form Container -->
     <div class="w-2/3 p-6 bg-white rounded-lg shadow-md">
@@ -173,13 +175,23 @@
 
 <script setup>
 import { ref, onMounted, computed, watch } from "vue";
-import { useRouter } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import axios from "axios";
 import { debounce } from "lodash";
+import BreadcrumbWrapper from "@/components/BreadcrumbWrapper.vue";
 
 const customers = ref([]);
 const selectedCustomers = ref([]);
 const router = useRouter();
+const route = useRoute();
+
+// Tính toán breadcrumb dựa trên meta của route
+const breadcrumbItems = computed(() => {
+  if (typeof route.meta.breadcrumb === "function") {
+    return route.meta.breadcrumb(route);
+  }
+  return route.meta?.breadcrumb || ["Phiếu Giảm Giá", "Thêm Phiếu Giảm Giá"]; // Mặc định cho trang thêm phiếu giảm giá
+});
 
 const searchQuery = ref("");
 const filteredCustomers = ref([]);
@@ -326,7 +338,6 @@ onMounted(fetchDataKH);
 .error {
   @apply text-red-500 text-xs mt-1;
 }
-
 
 table {
   @apply w-full border-collapse;

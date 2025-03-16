@@ -1,4 +1,6 @@
 <template>
+  <!-- Thêm BreadcrumbWrapper -->
+  <BreadcrumbWrapper :breadcrumb-items="breadcrumbItems" />
   <div class="min-h-screen bg-gray-100 p-6">
     <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-2xl mx-auto">
       <h3 class="text-2xl font-semibold mb-6 text-gray-800">Chỉnh sửa Phiếu Giảm Giá</h3>
@@ -88,12 +90,21 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from "vue";
+import { onMounted, ref, computed } from "vue";
 import axios from "axios";
 import { useRoute, useRouter } from "vue-router";
+import BreadcrumbWrapper from '@/components/BreadcrumbWrapper.vue'; // Import BreadcrumbWrapper
 
 const route = useRoute();
 const router = useRouter();
+
+// Tính toán breadcrumb dựa trên meta của route
+const breadcrumbItems = computed(() => {
+  if (typeof route.meta.breadcrumb === "function") {
+    return route.meta.breadcrumb(route);
+  }
+  return route.meta?.breadcrumb || ["Phiếu Giảm Giá", "Chỉnh sửa Phiếu Giảm Giá"]; // Mặc định cho trang chỉnh sửa
+});
 
 const baseURL = "http://localhost:8080/phieu-giam-gia";
 

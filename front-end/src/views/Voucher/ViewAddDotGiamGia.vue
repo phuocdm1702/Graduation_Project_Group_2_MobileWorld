@@ -1,7 +1,7 @@
 <template>
   <div>
-    <!-- Breadcrumb -->
-    <Breadcrumb breadcrumb="Đợt Giảm Giá" />
+    <!-- Thay Breadcrumb bằng BreadcrumbWrapper -->
+    <BreadcrumbWrapper :breadcrumb-items="breadcrumbItems" />
 
     <div class="bg-white p-4 rounded-md shadow-md">
       <ToastNotification ref="toast" />
@@ -78,7 +78,7 @@
               </button>
               <router-link to="/dot-giam-gia">
                 <button
-                  class="flex items-center gap-2 px-4 py-2 bg-gray-300 rounded-md hover:bg-gray-400 font-semibold "
+                  class="flex items-center gap-2 px-4 py-2 bg-gray-300 rounded-md hover:bg-gray-400 font-semibold"
                 >
                   Quay Về
                 </button>
@@ -172,10 +172,22 @@
 <script setup>
 import { useDotGiamGia } from './ViewAddDotGiamGia.js';
 import { computed } from "vue";
+import { useRoute } from 'vue-router';
 import DynamicTable from "@/components/DynamicTable.vue";
 import Pagination from '@/components/Pagination.vue';
 import ConfirmModal from '@/components/ConfirmModal.vue';
 import ToastNotification from '@/components/ToastNotification.vue';
+import BreadcrumbWrapper from '@/components/BreadcrumbWrapper.vue'; // Import BreadcrumbWrapper
+
+const route = useRoute();
+
+// Tính toán breadcrumb dựa trên meta của route
+const breadcrumbItems = computed(() => {
+  if (typeof route.meta.breadcrumb === "function") {
+    return route.meta.breadcrumb(route);
+  }
+  return route.meta?.breadcrumb || ["Đợt Giảm Giá", "Thêm Đợt Giảm Giá"]; // Mặc định cho trang thêm
+});
 
 const {
   toast,
