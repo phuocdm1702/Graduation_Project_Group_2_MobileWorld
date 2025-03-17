@@ -71,7 +71,7 @@ export function useDiscountManagement() {
 
       const processedData = res.data.content && res.data.content.length > 0
         ? res.data.content.map(item => {
-          let colorClass = item.deleted
+          let colorClass = item.deleted 
             ? "bg-red-500"
             : item.trangThai
               ? "bg-blue-500"

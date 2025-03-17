@@ -10,6 +10,8 @@ import org.hibernate.annotations.Nationalized;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Date;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -17,111 +19,50 @@ import java.util.Date;
 @Table(name = "chi_tiet_san_pham")
 public class ChiTietSanPham {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Integer id;
 
     @NotNull
     @ManyToOne
-    @JoinColumn(name = "id_imel", referencedColumnName = "id")
+    @JoinColumn(name = "id_imel", nullable = false)
     private Imel idImel;
 
     @NotNull
     @ManyToOne
-    @JoinColumn(name = "id_anh_san_pham", referencedColumnName = "id")
+    @JoinColumn(name = "id_san_pham", nullable = false)
+    private SanPham idSanPham;
+
+    @NotNull
+    @ManyToOne
+    @JoinColumn(name = "id_anh_san_pham", nullable = false)
     private AnhSanPham idAnhSanPham;
 
     @NotNull
     @ManyToOne
-    @JoinColumn(name = "id_nha_san_xuat", referencedColumnName = "id")
-    private NhaSanXuat idNhaSanXuat;
-
-    @NotNull
-    @ManyToOne
-    @JoinColumn(name = "id_dong_san_pham", referencedColumnName = "id")
-    private DongSanPham idDongSanPham;
-
-    @NotNull
-    @ManyToOne
-    @JoinColumn(name = "id_mau_sac", referencedColumnName = "id")
+    @JoinColumn(name = "id_mau_sac", nullable = false)
     private MauSac idMauSac;
 
     @NotNull
     @ManyToOne
-    @JoinColumn(name = "id_pin", referencedColumnName = "id")
-    private Pin idPin;
-
-    @NotNull
-    @ManyToOne
-    @JoinColumn(name = "id_man_hinh", referencedColumnName = "id")
-    private ManHinh idManHinh;
-
-    @NotNull
-    @ManyToOne
-    @JoinColumn(name = "id_ram", referencedColumnName = "id")
+    @JoinColumn(name = "id_ram", nullable = false)
     private Ram idRam;
 
     @NotNull
     @ManyToOne
-    @JoinColumn(name = "id_bo_nho_trong", referencedColumnName = "id")
+    @JoinColumn(name = "id_bo_nho_trong", nullable = false)
     private BoNhoTrong idBoNhoTrong;
 
-    @ManyToOne
-    @JoinColumn(name = "id_ho_tro_bo_nho_ngoai",referencedColumnName = "id")
-    private HoTroBoNhoNgoai idHoTroBoNhoNgoai;
-
     @NotNull
     @ManyToOne
-    @JoinColumn(name = "id_cpu", referencedColumnName = "id")
-    private Cpu idCpu;
-
-    @NotNull
-    @ManyToOne
-    @JoinColumn(name = "id_gpu", referencedColumnName = "id")
-    private Gpu idGpu;
-
-    @NotNull
-    @ManyToOne
-    @JoinColumn(name = "id_cum_camera",referencedColumnName = "id")
-    private CumCamera idCumCamera;
-
-    @NotNull
-    @ManyToOne
-    @JoinColumn(name = "id_he_dieu_hanh", referencedColumnName = "id")
-    private HeDieuHanh idHeDieuHanh;
-
-    @ManyToOne
-    @JoinColumn(name = "id_chi_so_khang_bui_va_nuoc",referencedColumnName = "id")
-    private ChiSoKhangBuiVaNuoc idChiSoKhangBuiVaNuoc;
-
-    @NotNull
-    @ManyToOne
-    @JoinColumn(name = "id_thiet_ke", referencedColumnName = "id")
-    private ThietKe idThietKe;
-
-    @NotNull
-    @ManyToOne
-    @JoinColumn(name = "id_sim", referencedColumnName = "id")
-    private Sim idSim;
-
-    @NotNull
-    @ManyToOne
-    @JoinColumn(name = "id_cong_sac", referencedColumnName = "id")
-    private CongSac idCongSac;
-
-    @NotNull
-    @ManyToOne
-    @JoinColumn(name = "id_ho_tro_cong_nghe_sac", referencedColumnName = "id")
-    private HoTroCongNgheSac idHoTroCongNgheSac;
-
-    @NotNull
-    @ManyToOne
-    @JoinColumn(name = "id_cong_nghe_mang", referencedColumnName = "id")
-    private CongNgheMang idCongNgheMang;
-
-    @NotNull
-    @ManyToOne
-    @JoinColumn(name = "id_loai_tinh_trang", referencedColumnName = "id")
+    @JoinColumn(name = "id_loai_tinh_trang", nullable = false)
     private TinhTrang idLoaiTinhTrang;
+
+    @Size(max = 255)
+    @NotNull
+    @Nationalized
+    @Column(name = "ma", nullable = false)
+    private String ma;
 
     @Size(max = 255)
     @Nationalized
@@ -131,6 +72,11 @@ public class ChiTietSanPham {
     @NotNull
     @Column(name = "gia_ban", nullable = false, precision = 18, scale = 2)
     private BigDecimal giaBan;
+
+    @Size(max = 255)
+    @Nationalized
+    @Column(name = "ghi_chu")
+    private String ghiChu;
 
     @NotNull
     @Column(name = "deleted", nullable = false)
