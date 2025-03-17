@@ -2,11 +2,8 @@
 <template>
   <div class="mt-2 mx-auto">
     <ToastNotification ref="toast"/>
-
-    <!-- Thêm PathRouter với background -->
-    <div class="bg-white shadow-lg rounded-lg p-5 mb-4 mt-4">
-      <PathRouter :breadcrumb-items="breadcrumbItems" />
-    </div>
+    <!-- Sử dụng BreadcrumbWrapper thay vì PathRouter trực tiếp -->
+    <BreadcrumbWrapper :breadcrumb-items="breadcrumbItems" />
 
     <section>
       <!-- Form lọc -->
@@ -162,7 +159,7 @@ import Pagination from "@/components/Pagination.vue";
 import StatusBar from "@/components/statusBar.vue";
 import ToastNotification from '@/components/ToastNotification.vue';
 import ConfirmModal from '@/components/ConfirmModal.vue';
-import PathRouter from "@/components/PathRouter.vue"; // Import PathRouter
+import BreadcrumbWrapper from '@/components/BreadcrumbWrapper.vue'; // Import BreadcrumbWrapper
 
 const {
   toast,

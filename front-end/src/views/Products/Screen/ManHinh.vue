@@ -1,109 +1,116 @@
 <template>
-  <div class="mt-2 mx-auto">
-    <h2 class="bg-white shadow-lg rounded-lg p-5 mb-2 mt-2 text-2xl font-semibold text-gray-700">
-      Quản Lý Màn Hình
-    </h2>
-    <ToastNotification ref="toastRef" />
-    <div class="bg-white shadow-lg rounded-lg p-5 mb-2 mt-2 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-4">
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Tìm kiếm</label>
-        <input v-model.trim="searchKeyword" type="text" placeholder="Tìm kiếm theo mã, kích thước, độ phân giải..." class="input-field" />
+  <div>
+    <!-- Thêm BreadcrumbWrapper -->
+    <BreadcrumbWrapper :breadcrumb-items="breadcrumbItems" />
+
+    <div class="mt-2 mx-auto">
+<!--      <h2 class="bg-white shadow-lg rounded-lg p-5 mb-2 mt-2 text-2xl font-semibold text-gray-700">-->
+<!--        Quản Lý Màn Hình-->
+<!--      </h2>-->
+      <ToastNotification ref="toastRef" />
+      <div class="bg-white shadow-lg rounded-lg p-5 mb-2 mt-2 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Tìm kiếm</label>
+          <input v-model.trim="searchKeyword" type="text" placeholder="Tìm kiếm theo mã, kích thước, độ phân giải..." class="input-field" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Công nghệ màn hình</label>
+          <select v-model="searchIdCongNgheManHinh" class="input-field">
+            <option value="">Tất cả</option>
+            <option v-for="tech in congNgheManHinhs" :key="tech.id" :value="tech.id">{{ tech.congNgheManHinh }}</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Kích thước</label>
+          <select v-model="searchKichThuoc" class="input-field">
+            <option value="">Tất cả</option>
+            <option v-for="kichThuoc in uniqueKichThuocList" :key="kichThuoc" :value="kichThuoc.replace(/\s+/g, '')">{{ kichThuoc }}</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Độ phân giải</label>
+          <select v-model="searchDoPhanGiai" class="input-field">
+            <option value="">Tất cả</option>
+            <option v-for="doPhanGiai in uniqueDoPhanGiaiList" :key="doPhanGiai" :value="doPhanGiai">{{ doPhanGiai }}</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Độ sáng tối đa</label>
+          <select v-model="searchDoSangToiDa" class="input-field">
+            <option value="">Tất cả</option>
+            <option v-for="doSang in uniqueDoSangToiDaList" :key="doSang" :value="doSang.replace(/\s+/g, '')">{{ doSang }}</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Tần số quét</label>
+          <select v-model="searchTanSoQuet" class="input-field">
+            <option value="">Tất cả</option>
+            <option v-for="tanSo in uniqueTanSoQuetList" :key="tanSo" :value="tanSo">{{ tanSo }}</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Kiểu màn hình</label>
+          <select v-model="searchKieuManHinh" class="input-field">
+            <option value="">Tất cả</option>
+            <option v-for="kieu in uniqueKieuManHinhList" :key="kieu" :value="kieu">{{ kieu }}</option>
+          </select>
+        </div>
+        <div class="flex justify-end w-full col-span-full gap-2">
+          <button @click="resetFilters" class="flex items-center gap-2 px-4 py-2 bg-[#f97316] text-white font-semibold rounded-lg shadow-md hover:bg-orange-600 transition">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            Đặt lại
+          </button>
+          <button @click="navigateToAddPage" class="flex items-center gap-2 px-4 py-2 bg-[#f97316] text-white font-semibold rounded-lg shadow-md hover:bg-orange-600 transition">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-1">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
+            </svg>
+            Thêm mới
+          </button>
+        </div>
       </div>
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Công nghệ màn hình</label>
-        <select v-model="searchIdCongNgheManHinh" class="input-field">
-          <option value="">Tất cả</option>
-          <option v-for="tech in congNgheManHinhs" :key="tech.id" :value="tech.id">{{ tech.congNgheManHinh }}</option>
-        </select>
-      </div>
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Kích thước</label>
-        <select v-model="searchKichThuoc" class="input-field">
-          <option value="">Tất cả</option>
-          <option v-for="kichThuoc in uniqueKichThuocList" :key="kichThuoc" :value="kichThuoc.replace(/\s+/g, '')">{{ kichThuoc }}</option>
-        </select>
-      </div>
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Độ phân giải</label>
-        <select v-model="searchDoPhanGiai" class="input-field">
-          <option value="">Tất cả</option>
-          <option v-for="doPhanGiai in uniqueDoPhanGiaiList" :key="doPhanGiai" :value="doPhanGiai">{{ doPhanGiai }}</option>
-        </select>
-      </div>
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Độ sáng tối đa</label>
-        <select v-model="searchDoSangToiDa" class="input-field">
-          <option value="">Tất cả</option>
-          <option v-for="doSang in uniqueDoSangToiDaList" :key="doSang" :value="doSang.replace(/\s+/g, '')">{{ doSang }}</option>
-        </select>
-      </div>
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Tần số quét</label>
-        <select v-model="searchTanSoQuet" class="input-field">
-          <option value="">Tất cả</option>
-          <option v-for="tanSo in uniqueTanSoQuetList" :key="tanSo" :value="tanSo">{{ tanSo }}</option>
-        </select>
-      </div>
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Kiểu màn hình</label>
-        <select v-model="searchKieuManHinh" class="input-field">
-          <option value="">Tất cả</option>
-          <option v-for="kieu in uniqueKieuManHinhList" :key="kieu" :value="kieu">{{ kieu }}</option>
-        </select>
-      </div>
-      <div class="flex justify-end w-full col-span-full gap-2">
-        <button @click="resetFilters" class="flex items-center gap-2 px-4 py-2 bg-[#f97316] text-white font-semibold rounded-lg shadow-md hover:bg-orange-600 transition">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-          </svg>
-          Đặt lại
-        </button>
-        <button @click="navigateToAddPage" class="flex items-center gap-2 px-4 py-2 bg-[#f97316] text-white font-semibold rounded-lg shadow-md hover:bg-orange-600 transition">
+
+      <div v-if="selectedManHinh.length" class="bg-white shadow-lg rounded-lg p-5 mb-4 mt-4 flex justify-end">
+        <button @click="confirmDeleteSelected" class="flex items-center gap-2 px-4 py-2 bg-red-500 text-white font-semibold rounded-lg shadow-md hover:bg-red-600 transition">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-1">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
           </svg>
-          Thêm mới
+          Xóa {{ selectedManHinh.length }} màn hình đã chọn
         </button>
       </div>
+
+      <DynamicTable class="dynamic-table" :data="manHinhs" :columns="columns" :get-nested-value="getNestedValue" :selected-products="selectedManHinh" @toggle-select="toggleSelect">
+        <template #header-select>
+          <input type="checkbox" class="w-4 h-4 rounded" :checked="isAllSelected" @change="toggleSelectAll">
+        </template>
+        <template #cell-select="{ item }">
+          <input type="checkbox" class="w-4 h-4 rounded" :checked="selectedManHinh.includes(item.id)" @change="toggleSelect(item.id)">
+        </template>
+      </DynamicTable>
+
+      <footer class="bg-white shadow-lg rounded-lg p-4 flex justify-center items-center mt-2">
+        <Pagination :current-page="currentPage" :total-pages="totalPages" @page-changed="goToPage" />
+      </footer>
+
+      <ConfirmModal :show="showConfirmModal" :message="confirmMessage" @confirm="executeConfirmedAction" @cancel="closeConfirmModal" />
     </div>
-
-    <div v-if="selectedManHinh.length" class="bg-white shadow-lg rounded-lg p-5 mb-4 mt-4 flex justify-end">
-      <button @click="confirmDeleteSelected" class="flex items-center gap-2 px-4 py-2 bg-red-500 text-white font-semibold rounded-lg shadow-md hover:bg-red-600 transition">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-1">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
-        </svg>
-        Xóa {{ selectedManHinh.length }} màn hình đã chọn
-      </button>
-    </div>
-
-    <DynamicTable class="dynamic-table" :data="manHinhs" :columns="columns" :get-nested-value="getNestedValue" :selected-products="selectedManHinh" @toggle-select="toggleSelect">
-      <template #header-select>
-        <input type="checkbox" class="w-4 h-4 rounded" :checked="isAllSelected" @change="toggleSelectAll">
-      </template>
-      <template #cell-select="{ item }">
-        <input type="checkbox" class="w-4 h-4 rounded" :checked="selectedManHinh.includes(item.id)" @change="toggleSelect(item.id)">
-      </template>
-    </DynamicTable>
-
-    <footer class="bg-white shadow-lg rounded-lg p-4 flex justify-center items-center mt-2">
-      <Pagination :current-page="currentPage" :total-pages="totalPages" @page-changed="goToPage" />
-    </footer>
-
-    <ConfirmModal :show="showConfirmModal" :message="confirmMessage" @confirm="executeConfirmedAction" @cancel="closeConfirmModal" />
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import useManHinh from './useManHinh.js';
 import ToastNotification from '@/components/ToastNotification.vue';
 import Pagination from '@/components/Pagination.vue';
 import ConfirmModal from '@/components/ConfirmModal.vue';
 import DynamicTable from '@/components/DynamicTable.vue';
+import BreadcrumbWrapper from '@/components/BreadcrumbWrapper.vue'; // Import BreadcrumbWrapper
 import axios from 'axios';
 
 const router = useRouter();
+const route = useRoute();
 const toastRef = ref(null);
 
 const {
@@ -182,6 +189,14 @@ const uniqueDoPhanGiaiList = ref([...new Set(doPhanGiaiData)].sort());
 const uniqueDoSangToiDaList = ref([...new Set(doSangToiDaData)].sort((a, b) => parseInt(a) - parseInt(b)));
 const uniqueTanSoQuetList = ref([...new Set(tanSoQuetData)].sort((a, b) => parseInt(a) - parseInt(b)));
 const uniqueKieuManHinhList = ref([...new Set(kieuManHinhData)].sort());
+
+// Tính toán breadcrumb dựa trên meta của route
+const breadcrumbItems = computed(() => {
+  if (typeof route.meta.breadcrumb === "function") {
+    return route.meta.breadcrumb(route);
+  }
+  return route.meta?.breadcrumb || ["Quản Lý Màn Hình"]; // Mặc định nếu không có breadcrumb
+});
 
 onMounted(() => {
   fetchCongNgheManHinhs();

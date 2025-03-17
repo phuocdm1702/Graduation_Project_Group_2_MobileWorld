@@ -1,13 +1,12 @@
 <template>
+  <!-- Thay Breadcrumb bằng BreadcrumbWrapper -->
+  <BreadcrumbWrapper :breadcrumb-items="breadcrumbItems" />
   <div v-if="visible" :class="`toast ${type}`">
     <span v-if="type === 'success'" class="checkmark">✔</span>
     <span v-if="type === 'error'" class="crossmark">✖</span>
     {{ message }}
   </div>
   <div>
-    <!-- Breadcrumb -->
-    <Breadcrumb breadcrumb="Quản lý Khách Hàng" />
-
     <div class="mt-2 mx-auto">
       <!-- Phần form (search và trạng thái) -->
       <div class="mt-2 bg-white border rounded-md shadow-md">
@@ -87,7 +86,7 @@
         <DynamicTable
           :data="dataTable"
           :columns="tableColumns"
-          :getNestedValue="getNestedValue"
+          :get-nested-value="getNestedValue"
         />
       </div>
     </div>
@@ -112,9 +111,12 @@
 
 <script setup>
 import { onMounted } from "vue";
+import { computed } from "vue";
+import { useRoute } from "vue-router";
 import ConfirmModal from "@/components/ConfirmModal.vue";
-import DynamicTable from "@/components/DynamicTable.vue"; // Import DynamicTable
+import DynamicTable from "@/components/DynamicTable.vue";
 import Pagination from "@/components/Pagination.vue";
+import BreadcrumbWrapper from "@/components/BreadcrumbWrapper.vue"; // Import BreadcrumbWrapper
 import useCustomerManagement from "./useCustomerManagement"; // Import logic
 
 // Use logic from useCustomerManagement.js
@@ -141,6 +143,17 @@ const {
   tableColumns,
   getNestedValue,
 } = useCustomerManagement();
+
+// Lấy route hiện tại
+const route = useRoute();
+
+// Tính toán breadcrumb dựa trên meta của route
+const breadcrumbItems = computed(() => {
+  if (typeof route.meta.breadcrumb === "function") {
+    return route.meta.breadcrumb(route);
+  }
+  return route.meta?.breadcrumb || ["Quản lý Khách Hàng"]; // Mặc định nếu không có breadcrumb
+});
 
 // Gọi fetchCustomers khi component được mounted để hiển thị dữ liệu ban đầu
 onMounted(() => {

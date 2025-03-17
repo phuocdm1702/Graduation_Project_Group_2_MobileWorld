@@ -1,13 +1,13 @@
 <template>
   <div>
-    <!-- Breadcrumb -->
-    <Breadcrumb breadcrumb="Phiếu Giảm Giá" />
+    <!-- Thay Breadcrumb bằng BreadcrumbWrapper -->
+    <BreadcrumbWrapper :breadcrumb-items="breadcrumbItems" />
 
     <div class="mt-2 mx-auto">
-      <h2 class="bg-white shadow-lg rounded-lg p-5 mb-2 mt-2 text-2xl font-semibold text-gray-700">
-        Quản Lý Phiếu Giảm Giá
-      </h2>
-      
+<!--      <h2 class="bg-white shadow-lg rounded-lg p-5 mb-2 mt-2 text-2xl font-semibold text-gray-700">-->
+<!--        Quản Lý Phiếu Giảm Giá-->
+<!--      </h2>-->
+
       <!-- Form lọc -->
       <div
         class="bg-white shadow-lg rounded-lg p-5 mb-2 mt-2 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
@@ -138,7 +138,6 @@
         />
       </footer>
     </div>
-    
   </div>
 </template>
 
@@ -212,17 +211,19 @@
 </style>
 
 <script setup>
-import { onMounted,watch, ref } from "vue";
-import AppVoucher from "@/views/Voucher/JS/AppVoucher"
+import { onMounted, watch, ref, computed } from "vue";
+import { useRoute } from "vue-router";
+import AppVoucher from "@/views/Voucher/JS/AppVoucher";
 import DynamicTable from "@/components/DynamicTable.vue";
 import Pagination from '@/components/Pagination.vue';
+import BreadcrumbWrapper from '@/components/BreadcrumbWrapper.vue'; // Import BreadcrumbWrapper
 
-const { 
-  vouchers, 
+const {
+  vouchers,
   columns,
   getNestedValue,
-  searchQuery, 
-  filterType, 
+  searchQuery,
+  filterType,
   filterStatus,
   startDate,
   endDate,
@@ -234,22 +235,27 @@ const {
   toggleStatusPGG,
   filterPGG,
   searchPGG,
-  fetchDataPGG 
+  fetchDataPGG
 } = AppVoucher();
 
+// Theo dõi thay đổi ô tìm kiếm
 watch(searchQuery, (newQuery) =>  {
-  if(newQuery.trim().length > 0) {
+  if (newQuery.trim().length > 0) {
     searchPGG();
   }
 });
 
+// Lấy route hiện tại
+const route = useRoute();
+
+// Tính toán breadcrumb dựa trên meta của route
+const breadcrumbItems = computed(() => {
+  if (typeof route.meta.breadcrumb === "function") {
+    return route.meta.breadcrumb(route);
+  }
+  return route.meta?.breadcrumb || ["Phiếu Giảm Giá"]; // Mặc định nếu không có breadcrumb
+});
+
+// Tải dữ liệu khi mounted
 onMounted(fetchDataPGG);
-
-
-
 </script>
-
-
-
-
-

@@ -1,8 +1,6 @@
 <template>
-  <!-- Thêm PathRouter với background -->
-  <div class="bg-white shadow-lg rounded-lg p-5 mb-4 mt-4">
-    <PathRouter :breadcrumb-items="breadcrumbItems" />
-  </div>
+  <!-- Sử dụng BreadcrumbWrapper thay vì PathRouter trực tiếp -->
+  <BreadcrumbWrapper :breadcrumb-items="breadcrumbItems" />
   <div class="show-hoa-don bg-white shadow-lg rounded-lg p-5 mt-2 mx-auto">
     <!-- Thanh trạng thái -->
     <div class="timeline mb-6">
@@ -118,8 +116,8 @@ import useShowHoaDon from "@/views/Bill/ShowHoaDon";
 import DynamicTable from "@/components/DynamicTable.vue";
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale'; // Thêm locale tiếng Việt
-import PathRouter from "@/components/PathRouter.vue";
 import {useRoute} from "vue-router"; // Import PathRouter
+import BreadcrumbWrapper from '@/components/BreadcrumbWrapper.vue'; // Import BreadcrumbWrapper
 
 const props = defineProps({
   id: {

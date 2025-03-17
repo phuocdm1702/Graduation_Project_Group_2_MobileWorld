@@ -1,178 +1,186 @@
 <template>
-  <div class="bg-white p-6 rounded-lg shadow-lg">
-    <!-- Khu vực quét QR -->
-    <div v-if="isScanning" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div class="bg-white p-4 rounded-lg">
-        <div id="qr-reader" class="w-64 h-64"></div>
-        <button
-          @click="stopScanning"
-          class="mt-4 bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600"
-        >
-          Dừng quét
-        </button>
-      </div>
-    </div>
+  <div>
+    <!-- Thêm BreadcrumbWrapper -->
+    <BreadcrumbWrapper :breadcrumb-items="breadcrumbItems" />
 
-    <div class="grid grid-cols-2 gap-4">
-      <div class="flex flex-col items-center gap-2">
-        <div
-          class="w-32 h-32 rounded-full border-4 border-gray-400 flex items-center justify-center cursor-pointer"
-          @click="triggerFileInput"
-        >
-          <img
-            v-if="employeeImage"
-            :src="employeeImage"
-            alt="Ảnh nhân viên"
-            class="w-full h-full object-cover rounded-full"
-          >
-          <span v-else class="text-gray-400">Chọn ảnh</span>
-        </div>
-        <button
-          v-if="employeeImage"
-          @click="deleteImage"
-          class="bg-red-500 text-white w-8 h-8 flex items-center justify-center rounded-full hover:bg-red-600 shadow-md"
-          title="Xóa ảnh"
-        >
-          ✖
-        </button>
-        <input
-          type="file"
-          ref="fileInput"
-          @change="previewImage"
-          class="hidden"
-          accept="image/*"
-        >
-      </div>
-
-      <div class="w-full mt-4">
-        <label class="block mb-2">Tên Nhân Viên</label>
-        <input
-          type="text"
-          v-model="employee.tenNhanVien"
-          class="w-full px-3 py-2 border rounded-md"
-          placeholder="Nhập tên nhân viên"
-        >
-      </div>
-
-      <div>
-        <label class="block mb-2">UserName</label>
-        <input type="text" v-model="employee.userName" class="w-full px-3 py-2 border rounded-md" placeholder="Nhập UserName">
-      </div>
-
-      <div>
-        <label class="block mb-2">SDT</label>
-        <input type="text" v-model="employee.sdt" class="w-full px-3 py-2 border rounded-md" placeholder="Nhập SDT">
-      </div>
-
-      <div>
-        <label class="block mb-2">CCCD</label>
-        <div class="flex items-center gap-2">
-          <input
-            type="text"
-            v-model="employee.cccd"
-            class="flex-1 px-3 py-2 border rounded-md"
-            placeholder="Nhập CCCD"
-          >
+    <div class="bg-white p-6 rounded-lg shadow-lg">
+      <!-- Khu vực quét QR -->
+      <div v-if="isScanning" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white p-4 rounded-lg">
+          <div id="qr-reader" class="w-64 h-64"></div>
           <button
-            @click="startScanning"
-            class="bg-orange-500 text-white px-3 py-2 rounded-md hover:bg-orange-600 flex items-center justify-center"
-            title="Quét mã QR"
+            @click="stopScanning"
+            class="mt-4 bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M3 3h4v4H3z"></path>
-              <path d="M17 3h4v4h-4z"></path>
-              <path d="M3 17h4v4H3z"></path>
-              <path d="M17 17h4v4h-4z"></path>
-              <path d="M7 7h4v4H7z"></path>
-              <path d="M7 17h4"></path>
-              <path d="M7 13h8v8"></path>
-              <path d="M17 7h-4v4"></path>
-            </svg>
+            Dừng quét
           </button>
         </div>
       </div>
 
-      <div>
-        <label class="block mb-2">Email</label>
-        <input type="text" v-model="employee.email" class="w-full px-3 py-2 border rounded-md" placeholder="Nhập Email">
-      </div>
+      <div class="grid grid-cols-2 gap-4">
+        <div class="flex flex-col items-center gap-2">
+          <div
+            class="w-32 h-32 rounded-full border-4 border-gray-400 flex items-center justify-center cursor-pointer"
+            @click="triggerFileInput"
+          >
+            <img
+              v-if="employeeImage"
+              :src="employeeImage"
+              alt="Ảnh nhân viên"
+              class="w-full h-full object-cover rounded-full"
+            >
+            <span v-else class="text-gray-400">Chọn ảnh</span>
+          </div>
+          <button
+            v-if="employeeImage"
+            @click="deleteImage"
+            class="bg-red-500 text-white w-8 h-8 flex items-center justify-center rounded-full hover:bg-red-600 shadow-md"
+            title="Xóa ảnh"
+          >
+            ✖
+          </button>
+          <input
+            type="file"
+            ref="fileInput"
+            @change="previewImage"
+            class="hidden"
+            accept="image/*"
+          >
+        </div>
 
-      <div class="col-span-2 grid grid-cols-3 gap-4">
-        <div>
-          <label class="block mb-2">Địa chỉ cụ thể</label>
-          <input type="text" v-model="employee.diaChicuthe" class="w-full px-3 py-2 border rounded-md" placeholder="Nhập địa chỉ cụ thể">
+        <div class="w-full mt-4">
+          <label class="block mb-2">Tên Nhân Viên</label>
+          <input
+            type="text"
+            v-model="employee.tenNhanVien"
+            class="w-full px-3 py-2 border rounded-md"
+            placeholder="Nhập tên nhân viên"
+          >
         </div>
 
         <div>
-          <label class="block mb-2">Ngày sinh</label>
-          <input type="date" v-model="employee.ngaySinh" class="w-full px-3 py-2 border rounded-md">
+          <label class="block mb-2">UserName</label>
+          <input type="text" v-model="employee.userName" class="w-full px-3 py-2 border rounded-md" placeholder="Nhập UserName">
         </div>
 
         <div>
-          <label class="block mb-2">Giới Tính</label>
-          <select v-model="employee.gioiTinh" class="w-full px-3 py-2 border rounded-md">
-            <option value="">---Chọn Giới Tính---</option>
-            <option value="False">Nam</option>
-            <option value="True">Nữ</option>
-          </select>
+          <label class="block mb-2">SDT</label>
+          <input type="text" v-model="employee.sdt" class="w-full px-3 py-2 border rounded-md" placeholder="Nhập SDT">
+        </div>
+
+        <div>
+          <label class="block mb-2">CCCD</label>
+          <div class="flex items-center gap-2">
+            <input
+              type="text"
+              v-model="employee.cccd"
+              class="flex-1 px-3 py-2 border rounded-md"
+              placeholder="Nhập CCCD"
+            >
+            <button
+              @click="startScanning"
+              class="bg-orange-500 text-white px-3 py-2 rounded-md hover:bg-orange-600 flex items-center justify-center"
+              title="Quét mã QR"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 3h4v4H3z"></path>
+                <path d="M17 3h4v4h-4z"></path>
+                <path d="M3 17h4v4H3z"></path>
+                <path d="M17 17h4v4h-4z"></path>
+                <path d="M7 7h4v4H7z"></path>
+                <path d="M7 17h4"></path>
+                <path d="M7 13h8v8"></path>
+                <path d="M17 7h-4v4"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <label class="block mb-2">Email</label>
+          <input type="text" v-model="employee.email" class="w-full px-3 py-2 border rounded-md" placeholder="Nhập Email">
+        </div>
+
+        <div class="col-span-2 grid grid-cols-3 gap-4">
+          <div>
+            <label class="block mb-2">Địa chỉ cụ thể</label>
+            <input type="text" v-model="employee.diaChicuthe" class="w-full px-3 py-2 border rounded-md" placeholder="Nhập địa chỉ cụ thể">
+          </div>
+
+          <div>
+            <label class="block mb-2">Ngày sinh</label>
+            <input type="date" v-model="employee.ngaySinh" class="w-full px-3 py-2 border rounded-md">
+          </div>
+
+          <div>
+            <label class="block mb-2">Giới Tính</label>
+            <select v-model="employee.gioiTinh" class="w-full px-3 py-2 border rounded-md">
+              <option value="">---Chọn Giới Tính---</option>
+              <option value="False">Nam</option>
+              <option value="True">Nữ</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="flex gap-4 col-span-2">
+          <div class="w-1/3">
+            <label class="block mb-2">Tỉnh/Thành phố</label>
+            <select v-model="selectedProvince" @change="handleProvinceChange" class="w-full px-3 py-2 border rounded-md">
+              <option value="" disabled>Chọn tỉnh/thành phố</option>
+              <option v-for="province in provinces" :key="province.code">{{ province.name }}</option>
+            </select>
+          </div>
+
+          <div class="w-1/3">
+            <label class="block mb-2">Quận/Huyện</label>
+            <select v-model="selectedDistrict" @change="handleDistrictChange" class="w-full px-3 py-2 border rounded-md">
+              <option value="" disabled>Chọn quận/huyện</option>
+              <option v-for="district in districts" :key="district.code">{{ district.name }}</option>
+            </select>
+          </div>
+
+          <div class="w-1/3">
+            <label class="block mb-2">Xã/Phường</label>
+            <select v-model="selectedWard" class="w-full px-3 py-2 border rounded-md">
+              <option value="" disabled>Chọn xã/phường</option>
+              <option v-for="ward in wards" :key="ward.code">{{ ward.name }}</option>
+            </select>
+          </div>
         </div>
       </div>
 
-      <div class="flex gap-4 col-span-2">
-        <div class="w-1/3">
-          <label class="block mb-2">Tỉnh/Thành phố</label>
-          <select v-model="selectedProvince" @change="handleProvinceChange" class="w-full px-3 py-2 border rounded-md">
-            <option value="" disabled>Chọn tỉnh/thành phố</option>
-            <option v-for="province in provinces" :key="province.code">{{ province.name }}</option>
-          </select>
-        </div>
+      <div class="flex justify-end space-x-4 mt-6">
+        <router-link to="/nhan-vien">
+          <button @click="$emit('cancel')" class="px-4 py-2 bg-gray-300 rounded-md hover:bg-gray-400 transition-colors">
+            Hủy
+          </button>
+        </router-link>
 
-        <div class="w-1/3">
-          <label class="block mb-2">Quận/Huyện</label>
-          <select v-model="selectedDistrict" @change="handleDistrictChange" class="w-full px-3 py-2 border rounded-md">
-            <option value="" disabled>Chọn quận/huyện</option>
-            <option v-for="district in districts" :key="district.code">{{ district.name }}</option>
-          </select>
-        </div>
-
-        <div class="w-1/3">
-          <label class="block mb-2">Xã/Phường</label>
-          <select v-model="selectedWard" class="w-full px-3 py-2 border rounded-md">
-            <option value="" disabled>Chọn xã/phường</option>
-            <option v-for="ward in wards" :key="ward.code">{{ ward.name }}</option>
-          </select>
-        </div>
-      </div>
-    </div>
-
-    <div class="flex justify-end space-x-4 mt-6">
-      <router-link to="/nhan-vien">
-        <button @click="$emit('cancel')" class="px-4 py-2 bg-gray-300 rounded-md hover:bg-gray-400 transition-colors">
-          Hủy
+        <button
+          type="submit"
+          @click="addNhanVien"
+          class="px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 transition-colors flex items-center"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
+          </svg>
+          <span class="font-bold">Thêm nhân viên</span>
         </button>
-      </router-link>
-
-      <button
-        type="submit"
-        @click="addNhanVien"
-        class="px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 transition-colors flex items-center"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
-        </svg>
-        <span class="font-bold">Thêm nhân viên</span>
-      </button>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
 import { onMounted, ref, nextTick } from 'vue';
+import { computed } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import axios from 'axios';
 import { Html5Qrcode } from 'html5-qrcode';
-import { useRouter } from 'vue-router';
+import BreadcrumbWrapper from '@/components/BreadcrumbWrapper.vue'; // Import BreadcrumbWrapper
 
 const router = useRouter();
+const route = useRoute();
 const qrReader = ref(null);
 const isScanning = ref(false);
 
@@ -199,6 +207,14 @@ const selectedWard = ref('');
 const employeeImage = ref(null);
 const fileInput = ref(null);
 const uploadedImageUrl = ref(null);
+
+// Tính toán breadcrumb
+const breadcrumbItems = computed(() => {
+  if (typeof route.meta.breadcrumb === "function") {
+    return route.meta.breadcrumb(route);
+  }
+  return route.meta?.breadcrumb || ["Nhân viên", "Thêm nhân viên"]; // Mặc định cho trang thêm nhân viên
+});
 
 // Quét mã QR
 const startScanning = async () => {

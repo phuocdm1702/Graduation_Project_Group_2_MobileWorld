@@ -448,53 +448,76 @@ function scrollToSection() {
 }
 
 const productCategories = [
-  {
-    name: "Chi Tiết Sản Phẩm",
-    path: "/san-pham-chi-tiet",
-    route: "Chi Tiết Sản Phẩm",
-  },
+  { name: "Chi Tiết Sản Phẩm", path: "/san-pham-chi-tiet", route: "ChiTietSanPham" },
   { name: "Nhà Sản Xuất", path: "/manufacturer", route: "manufacturer" },
-  { name: "imel", path: "/imel", route: "imel" },
-  { name: "Imel đã bán", path: "/imel-da-ban", route: "Imel đã bán" },
+  { name: "Imel", path: "/imel", route: "imel" },
+  { name: "Imel đã bán", path: "/imel-da-ban", route: "ImelDaBan" },
   { name: "Dòng Sản Phẩm", path: "/product-line", route: "product-line" },
   { name: "Màn Hình", path: "/screen", route: "screen" },
-  {
-    name: "Công Nghệ Màn Hình",
-    path: "/cong-nghe-man-hinh",
-    route: "Công Nghệ Màn Hình",
-  },
+  { name: "Công Nghệ Màn Hình", path: "/man-hinh/cong-nghe", route: "CongNgheManHinh" },
   { name: "RAM", path: "/ram", route: "RAM" },
-  { name: "Bộ Nhớ Trong", path: "/bo-nho-trong", route: "Bộ Nhớ Trong" },
+  { name: "Bộ Nhớ Trong", path: "/bo-nho-trong", route: "BoNhoTrong" },
   { name: "CPU", path: "/cpu", route: "CPU" },
   { name: "GPU", path: "/gpu", route: "GPU" },
-  {
-    name: "Thông Số Camera Trước",
-    path: "/camera-truoc",
-    route: "Thông Số Camera Trước",
-  },
-  {
-    name: "Thông Số Camera Sau",
-    path: "/camera-sau",
-    route: "Thông Số Camera Sau",
-  },
-  {
-    name: "Chi Tiết Camera Trước",
-    path: "/chi-tiet-camera-truoc",
-    route: "Chi Tiết Camera Trước",
-  },
-  {
-    name: "Chi Tiết Camera Sau",
-    path: "/chi-tiet-camera-sau",
-    route: "Chi Tiết Camera Sau",
-  },
-  { name: "Cụm Camera", path: "/cum-camera", route: "Cụm Camera" },
-  { name: "Công Nghệ Sạc", path: "/sac/cong-nghe", route: "Công Nghệ Sạc" },
-  {
-    name: "Hỗ Trợ Công Nghệ Sạc",
-    path: "/sac/ho-tro-cong-nghe",
-    route: "Hỗ Trợ Công Nghệ Sạc",
-  },
-  { name: "Hỗ Trợ Sạc", path: "/sac/ho-tro", route: "Hỗ Trợ Sạc" },
-  { name: "Cổng Sạc", path: "/sac/cong-sac", route: "Cổng Sạc" },
+  { name: "Thông Số Camera Trước", path: "/camera-truoc", route: "CameraTruoc" },
+  { name: "Thông Số Camera Sau", path: "/camera-sau", route: "CameraSau" },
+  { name: "Chi Tiết Camera Trước", path: "/chi-tiet-camera-truoc", route: "ChiTietCameraTruoc" },
+  { name: "Chi Tiết Camera Sau", path: "/chi-tiet-camera-sau", route: "ChiTietCameraSau" },
+  { name: "Cụm Camera", path: "/cum-camera", route: "CumCamera" },
+  { name: "Công Nghệ Sạc", path: "/sac/cong-nghe", route: "CongNgheSac" },
+  { name: "Hỗ Trợ Công Nghệ Sạc", path: "/sac/ho-tro-cong-nghe", route: "HoTroCongNgheSac" },
+  { name: "Hỗ Trợ Sạc", path: "/sac/ho-tro", route: "HoTroSac" },
+  { name: "Cổng Sạc", path: "/sac/cong-sac", route: "CongSac" },
 ];
+
+// const productCategories = [
+//   {
+//     name: "Chi Tiết Sản Phẩm",
+//     path: "/san-pham-chi-tiet",
+//     route: "Chi Tiết Sản Phẩm",
+//   },
+//   { name: "Nhà Sản Xuất", path: "/manufacturer", route: "manufacturer" },
+//   { name: "imel", path: "/imel", route: "imel" },
+//   { name: "Imel đã bán", path: "/imel-da-ban", route: "Imel đã bán" },
+//   { name: "Dòng Sản Phẩm", path: "/product-line", route: "product-line" },
+//   { name: "Màn Hình", path: "/screen", route: "screen" },
+//   {
+//     name: "Công Nghệ Màn Hình",
+//     path: "/cong-nghe-man-hinh",
+//     route: "Công Nghệ Màn Hình",
+//   },
+//   { name: "RAM", path: "/ram", route: "RAM" },
+//   { name: "Bộ Nhớ Trong", path: "/bo-nho-trong", route: "Bộ Nhớ Trong" },
+//   { name: "CPU", path: "/cpu", route: "CPU" },
+//   { name: "GPU", path: "/gpu", route: "GPU" },
+//   {
+//     name: "Thông Số Camera Trước",
+//     path: "/camera-truoc",
+//     route: "Thông Số Camera Trước",
+//   },
+//   {
+//     name: "Thông Số Camera Sau",
+//     path: "/camera-sau",
+//     route: "Thông Số Camera Sau",
+//   },
+//   {
+//     name: "Chi Tiết Camera Trước",
+//     path: "/chi-tiet-camera-truoc",
+//     route: "Chi Tiết Camera Trước",
+//   },
+//   {
+//     name: "Chi Tiết Camera Sau",
+//     path: "/chi-tiet-camera-sau",
+//     route: "Chi Tiết Camera Sau",
+//   },
+//   { name: "Cụm Camera", path: "/cum-camera", route: "Cụm Camera" },
+//   { name: "Công Nghệ Sạc", path: "/sac/cong-nghe", route: "Công Nghệ Sạc" },
+//   {
+//     name: "Hỗ Trợ Công Nghệ Sạc",
+//     path: "/sac/ho-tro-cong-nghe",
+//     route: "Hỗ Trợ Công Nghệ Sạc",
+//   },
+//   { name: "Hỗ Trợ Sạc", path: "/sac/ho-tro", route: "Hỗ Trợ Sạc" },
+//   { name: "Cổng Sạc", path: "/sac/cong-sac", route: "Cổng Sạc" },
+// ];
 </script>

@@ -8,7 +8,7 @@ export default function useCongNgheManHinh(toastRef) {
   const searchKeyword = ref('');
   const searchCongNgheManHinh = ref(''); // Biến lọc theo tên công nghệ
   const searchChuanManHinh = ref('');   // Biến lọc theo chuẩn màn hình
-  const currentPage = ref(1);
+  const currentPage = ref(0);
   const pageSize = ref(5);
   const totalItems = ref(0);
   const selectedCongNgheManHinh = ref([]);
@@ -41,7 +41,7 @@ export default function useCongNgheManHinh(toastRef) {
   const fetchData = async () => {
     try {
       const { data } = await axios.get('http://localhost:8080/api/cong-nghe-man-hinh', {
-        params: { page: currentPage.value - 1, size: pageSize.value },
+        params: { page: currentPage.value, size: pageSize.value },
       });
       console.log('Fetch data:', data);
       congNgheManHinhs.value = data.content;
@@ -82,7 +82,7 @@ export default function useCongNgheManHinh(toastRef) {
           keyword: keyword || undefined,
           congNgheManHinh: congNgheManHinhFilter || undefined,
           chuanManHinh: chuanManHinhFilter || undefined,
-          page: currentPage.value - 1,
+          page: currentPage.value,
           size: pageSize.value,
         },
       });

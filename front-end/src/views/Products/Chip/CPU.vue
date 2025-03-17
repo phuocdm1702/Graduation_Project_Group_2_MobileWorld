@@ -1,11 +1,9 @@
 <template>
   <div>
-    <!-- Breadcrumb -->
-    <Breadcrumb breadcrumb="CPU" />
+    <!-- Thay Breadcrumb bằng BreadcrumbWrapper -->
+    <BreadcrumbWrapper :breadcrumb-items="breadcrumbItems" />
 
     <div class="mt-4">
-      <h4 class="text-gray-600">CPU</h4>
-
       <div class="mt-4 flex">
         <div class="w-full max-w-4xl overflow-hidden bg-white border rounded-md shadow-md">
           <form>
@@ -51,25 +49,25 @@
       <div class="mt-4">
         <table class="w-full bg-white rounded-md shadow-md">
           <thead>
-            <tr class="bg-gray-200 text-gray-700">
-              <th class="px-4 py-2">ID</th>
-              <th class="px-4 py-2">Mã</th>
-              <th class="px-4 py-2">Tên CPU</th>
-              <th class="px-4 py-2">Số nhân</th>
-              <th class="px-4 py-2">Hành động</th>
-            </tr>
+          <tr class="bg-gray-200 text-gray-700">
+            <th class="px-4 py-2">ID</th>
+            <th class="px-4 py-2">Mã</th>
+            <th class="px-4 py-2">Tên CPU</th>
+            <th class="px-4 py-2">Số nhân</th>
+            <th class="px-4 py-2">Hành động</th>
+          </tr>
           </thead>
           <tbody>
-            <tr class="border-t text-center" v-for="cpu in cpus" :key="cpu.id">
-              <td class="px-4 py-2">{{ cpu.id }}</td>
-              <td class="px-4 py-2">{{ cpu.code }}</td>
-              <td class="px-4 py-2">{{ cpu.name }}</td>
-              <td class="px-4 py-2">{{ cpu.cores }}</td>
-              <td class="px-4 py-2">
-                <button class="text-blue-600 hover:underline mr-2">Sửa</button>
-                <button class="text-red-600 hover:underline">Xóa</button>
-              </td>
-            </tr>
+          <tr class="border-t text-center" v-for="cpu in cpus" :key="cpu.id">
+            <td class="px-4 py-2">{{ cpu.id }}</td>
+            <td class="px-4 py-2">{{ cpu.code }}</td>
+            <td class="px-4 py-2">{{ cpu.name }}</td>
+            <td class="px-4 py-2">{{ cpu.cores }}</td>
+            <td class="px-4 py-2">
+              <button class="text-blue-600 hover:underline mr-2">Sửa</button>
+              <button class="text-red-600 hover:underline">Xóa</button>
+            </td>
+          </tr>
           </tbody>
         </table>
       </div>
@@ -78,7 +76,19 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, computed } from "vue";
+import { useRoute } from 'vue-router';
+import BreadcrumbWrapper from '@/components/BreadcrumbWrapper.vue'; // Import BreadcrumbWrapper
+
+const route = useRoute();
+
+// Tính toán breadcrumb dựa trên meta của route
+const breadcrumbItems = computed(() => {
+  if (typeof route.meta.breadcrumb === "function") {
+    return route.meta.breadcrumb(route);
+  }
+  return route.meta?.breadcrumb || ["CPU"]; // Mặc định nếu không có breadcrumb
+});
 
 const cpus = ref([
   { id: "CPU001", code: "CPU001", name: "Intel Core i7", cores: "8" },

@@ -1,15 +1,13 @@
 <template>
+  <!-- Thay Breadcrumb bằng BreadcrumbWrapper -->
+  <BreadcrumbWrapper :breadcrumb-items="breadcrumbItems" />
   <div v-if="visible" :class="`toast ${type}`">
     <span v-if="type === 'success'" class="checkmark">✔</span>
     <span v-if="type === 'error'" class="crossmark">✖</span>
     {{ message }}
   </div>
   <div>
-    <!-- Breadcrumb -->
-    <Breadcrumb breadcrumb="Quản lý Nhân Viên" />
-
     <div class="mt-2 mx-auto">
-      
       <!-- Phần form (search và trạng thái) -->
       <div class="mt-2 w-full bg-white border rounded-md shadow-md">
         <form @submit.prevent>
@@ -79,7 +77,7 @@
         <DynamicTable
           :data="dataTable"
           :columns="tableColumns"
-          :getNestedValue="getNestedValue"
+          :get-nested-value="getNestedValue"
         />
       </div>
     </div>
@@ -103,10 +101,13 @@
 </template>
 
 <script setup>
+import { computed } from 'vue';
+import { useRoute } from 'vue-router';
 import ConfirmModal from "@/components/ConfirmModal.vue";
 import DynamicTable from "@/components/DynamicTable.vue";
-import useEmployeeManagement from "./useEmployeeManagement";
 import Pagination from '@/components/Pagination.vue';
+import BreadcrumbWrapper from '@/components/BreadcrumbWrapper.vue'; // Import BreadcrumbWrapper
+import useEmployeeManagement from "./useEmployeeManagement";
 
 // Sử dụng logic từ file JS
 const {
@@ -131,8 +132,19 @@ const {
   onFilterChange,
   tableColumns,
   getNestedValue,
-  importExcel, // Nếu bạn có hàm này trong useEmployeeManagement
+  importExcel,
 } = useEmployeeManagement();
+
+// Lấy route hiện tại
+const route = useRoute();
+
+// Tính toán breadcrumb dựa trên meta của route
+const breadcrumbItems = computed(() => {
+  if (typeof route.meta.breadcrumb === "function") {
+    return route.meta.breadcrumb(route);
+  }
+  return route.meta?.breadcrumb || ["Quản lý Nhân Viên"]; // Mặc định nếu không có breadcrumb
+});
 </script>
 
 <style scoped>

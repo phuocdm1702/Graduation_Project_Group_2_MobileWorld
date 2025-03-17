@@ -1,7 +1,7 @@
 <template>
   <div>
-    <!-- Breadcrumb -->
-    <Breadcrumb breadcrumb="Cổng sạc" />
+    <!-- Thay Breadcrumb bằng BreadcrumbWrapper -->
+    <BreadcrumbWrapper :breadcrumb-items="breadcrumbItems" />
 
     <div class="mt-4">
       <h4 class="text-gray-600">Cổng sạc</h4>
@@ -35,7 +35,7 @@
 
             <div class="px-5 py-3 flex justify-between">
               <button class="px-3 py-1 text-sm text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300">Hủy</button>
-              <button class="px-3 py-1 text-sm text-white bg-indigo-600 rounded-md hover:bg-indigo-500">Lưu</button>
+                <button class="px-3 py-1 text-sm text-white bg-indigo-600 rounded-md hover:bg-indigo-500">Lưu</button>
             </div>
           </form>
         </div>
@@ -47,23 +47,23 @@
       <div class="mt-4">
         <table class="w-full bg-white rounded-md shadow-md">
           <thead>
-            <tr class="bg-gray-200 text-gray-700">
-              <th class="px-4 py-2">ID</th>
-              <th class="px-4 py-2">Mã</th>
-              <th class="px-4 py-2">Cổng sạc</th>
-              <th class="px-4 py-2">Hành động</th>
-            </tr>
+          <tr class="bg-gray-200 text-gray-700">
+            <th class="px-4 py-2">ID</th>
+            <th class="px-4 py-2">Mã</th>
+            <th class="px-4 py-2">Cổng sạc</th>
+            <th class="px-4 py-2">Hành động</th>
+          </tr>
           </thead>
           <tbody>
-            <tr class="border-t text-center" v-for="chargingPort in chargingPorts" :key="chargingPort.id">
-              <td class="px-4 py-2">{{ chargingPort.id }}</td>
-              <td class="px-4 py-2">{{ chargingPort.code }}</td>
-              <td class="px-4 py-2">{{ chargingPort.name }}</td>
-              <td class="px-4 py-2">
-                <button class="text-blue-600 hover:underline mr-2">Sửa</button>
-                <button class="text-red-600 hover:underline">Xóa</button>
-              </td>
-            </tr>
+          <tr class="border-t text-center" v-for="chargingPort in chargingPorts" :key="chargingPort.id">
+            <td class="px-4 py-2">{{ chargingPort.id }}</td>
+            <td class="px-4 py-2">{{ chargingPort.code }}</td>
+            <td class="px-4 py-2">{{ chargingPort.name }}</td>
+            <td class="px-4 py-2">
+              <button class="text-blue-600 hover:underline mr-2">Sửa</button>
+              <button class="text-red-600 hover:underline">Xóa</button>
+            </td>
+          </tr>
           </tbody>
         </table>
       </div>
@@ -72,7 +72,19 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, computed } from "vue";
+import { useRoute } from 'vue-router';
+import BreadcrumbWrapper from '@/components/BreadcrumbWrapper.vue'; // Import BreadcrumbWrapper
+
+const route = useRoute();
+
+// Tính toán breadcrumb dựa trên meta của route
+const breadcrumbItems = computed(() => {
+  if (typeof route.meta.breadcrumb === "function") {
+    return route.meta.breadcrumb(route);
+  }
+  return route.meta?.breadcrumb || ["Cổng sạc"]; // Mặc định nếu không có breadcrumb
+});
 
 const chargingPorts = ref([
   { id: "CP001", code: "PORT001", name: "USB-C" },

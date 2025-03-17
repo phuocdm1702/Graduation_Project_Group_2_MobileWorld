@@ -1,8 +1,7 @@
 <template>
   <div>
-
-    <!-- Breadcrumb -->
-    <Breadcrumb breadcrumb="Phiếu Bảo Hành" />
+    <!-- Thay Breadcrumb bằng BreadcrumbWrapper -->
+    <BreadcrumbWrapper :breadcrumb-items="breadcrumbItems" />
 
     <div class="mt-4">
       <h4 class="text-gray-600">Phiếu Bảo Hành</h4>
@@ -59,10 +58,24 @@
 </template>
 
 <script setup>
+import { computed } from 'vue';
+import { useRoute } from 'vue-router';
 import PhieuBaoHanhTable from "@/views/BaoHanh/PhieuBaoHanhTable.vue";
 import usePhieuBaoHanhLineList from "@/views/BaoHanh/PhieuBaoHanh";
+import BreadcrumbWrapper from '@/components/BreadcrumbWrapper.vue'; // Import BreadcrumbWrapper
 
 const {
   dataCBO
 } = usePhieuBaoHanhLineList();
+
+// Lấy route hiện tại
+const route = useRoute();
+
+// Tính toán breadcrumb dựa trên meta của route
+const breadcrumbItems = computed(() => {
+  if (typeof route.meta.breadcrumb === "function") {
+    return route.meta.breadcrumb(route);
+  }
+  return route.meta?.breadcrumb || ["Phiếu Bảo Hành"]; // Mặc định nếu không có breadcrumb
+});
 </script>

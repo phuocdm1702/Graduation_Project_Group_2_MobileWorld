@@ -1,4 +1,6 @@
 <template>
+  <!-- Thêm BreadcrumbWrapper -->
+  <BreadcrumbWrapper :breadcrumb-items="breadcrumbItems" />
   <div class="bg-gray-100 min-h-screen w-full flex items-start justify-center p-0">
     <div class="bg-white w-full h-full grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
       <!-- Bên trái -->
@@ -344,9 +346,18 @@
 import { onMounted, ref, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import axios from "axios";
+import BreadcrumbWrapper from '@/components/BreadcrumbWrapper.vue'; // Import BreadcrumbWrapper
 
 const route = useRoute();
 const router = useRouter();
+
+// Tính toán breadcrumb
+const breadcrumbItems = computed(() => {
+  if (typeof route.meta.breadcrumb === "function") {
+    return route.meta.breadcrumb(route);
+  }
+  return route.meta?.breadcrumb || ["Khách hàng", "Cập nhật khách hàng"]; // Mặc định cho trang cập nhật khách hàng
+});
 
 const custmerData = ref({
   id: "",
@@ -843,30 +854,30 @@ onMounted(async () => {
 .slider:before {
   position: absolute;
   content: "✕";
-  height: 24px; 
+  height: 24px;
   width: 24px;
   left: 3px;
   bottom: 3px;
-  background-color: #ffffff; 
-  transition: 0.4s ease; 
+  background-color: #ffffff;
+  transition: 0.4s ease;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 14px; 
-  color: #6b7280; 
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); 
+  font-size: 14px;
+  color: #6b7280;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 input:checked + .slider {
   background-color: #f97316;
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.15); 
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.15);
 }
 
 input:checked + .slider:before {
-  transform: translateX(30px); 
+  transform: translateX(30px);
   content: "✔";
-  color: #ffffff; 
+  color: #ffffff;
   font-weight: bold;
 }
 
@@ -880,10 +891,10 @@ input:checked + .slider:before {
 
 /* Hiệu ứng hover */
 .switch:hover .slider {
-  background-color: #e5e7eb; 
+  background-color: #e5e7eb;
 }
 
 input:checked + .slider:hover {
-  background-color: #fb923c; 
+  background-color: #fb923c;
 }
 </style>

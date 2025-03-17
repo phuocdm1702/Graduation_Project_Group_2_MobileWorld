@@ -1,67 +1,70 @@
 <template>
-  <div class="mt-2 mx-auto">
-    <h2 class="bg-white shadow-lg rounded-lg p-5 mb-2 mt-2 text-2xl font-semibold text-gray-700">
-      Chỉnh Sửa Imel
-    </h2>
-    <ToastNotification ref="toast" />
+  <div>
+    <!-- Thêm BreadcrumbWrapper -->
+    <BreadcrumbWrapper :breadcrumb-items="breadcrumbItems" />
 
-    <!-- Form chỉnh sửa -->
-    <div class="bg-white shadow-lg rounded-lg p-5 mb-4 mt-4">
-      <div class="grid grid-cols-1 gap-6">
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Mã Imel</label>
-          <input
-            v-model.trim="imel.ma"
-            type="text"
-            placeholder="Nhập mã Imel"
-            class="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-[var(--ring-color)] focus:border-transparent transition-all duration-200"
-            required
-          />
+    <div class="mt-2 mx-auto">
+      <ToastNotification ref="toast" />
+
+      <!-- Form chỉnh sửa -->
+      <div class="bg-white shadow-lg rounded-lg p-5 mb-4 mt-4">
+        <div class="grid grid-cols-1 gap-6">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Mã Imel</label>
+            <input
+              v-model.trim="imel.ma"
+              type="text"
+              placeholder="Nhập mã Imel"
+              class="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-[var(--ring-color)] focus:border-transparent transition-all duration-200"
+              required
+            />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Tên Imel</label>
+            <input
+              v-model.trim="imel.imel"
+              type="text"
+              placeholder="Nhập tên Imel"
+              class="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-[var(--ring-color)] focus:border-transparent transition-all duration-200"
+              required
+            />
+          </div>
         </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Tên Imel</label>
-          <input
-            v-model.trim="imel.imel"
-            type="text"
-            placeholder="Nhập tên Imel"
-            class="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-[var(--ring-color)] focus:border-transparent transition-all duration-200"
-            required
-          />
+
+        <!-- Nút chức năng -->
+        <div class="flex justify-end gap-2 mt-6">
+          <button
+            @click="goBack"
+            class="px-4 py-2 bg-gray-500 text-white font-semibold rounded-lg shadow-md hover:bg-gray-600 transition"
+          >
+            Hủy
+          </button>
+          <button
+            @click="handleSubmit"
+            class="px-4 py-2 bg-[#f97316] text-white font-semibold rounded-lg shadow-md hover:bg-orange-600 transition"
+          >
+            Lưu
+          </button>
         </div>
       </div>
 
-      <!-- Nút chức năng -->
-      <div class="flex justify-end gap-2 mt-6">
-        <button
-          @click="goBack"
-          class="px-4 py-2 bg-gray-500 text-white font-semibold rounded-lg shadow-md hover:bg-gray-600 transition"
-        >
-          Hủy
-        </button>
-        <button
-          @click="handleSubmit"
-          class="px-4 py-2 bg-[#f97316] text-white font-semibold rounded-lg shadow-md hover:bg-orange-600 transition"
-        >
-          Lưu
-        </button>
-      </div>
+      <!-- Modal xác nhận -->
+      <ConfirmModal
+        :show="showConfirmModal"
+        :message="confirmMessage"
+        @confirm="executeConfirmedAction"
+        @cancel="closeConfirmModal"
+      />
     </div>
-
-    <!-- Modal xác nhận -->
-    <ConfirmModal
-      :show="showConfirmModal"
-      :message="confirmMessage"
-      @confirm="executeConfirmedAction"
-      @cancel="closeConfirmModal"
-    />
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import ToastNotification from '@/components/ToastNotification.vue';
 import ConfirmModal from '@/components/ConfirmModal.vue';
+import BreadcrumbWrapper from '@/components/BreadcrumbWrapper.vue'; // Import BreadcrumbWrapper
 import useImel from '@/views/Products/Imel/Imel.js';
 import axios from 'axios';
 
@@ -69,6 +72,14 @@ const router = useRouter();
 const route = useRoute();
 const toast = ref(null);
 const originalMa = ref('');
+
+// Tính toán breadcrumb dựa trên meta của route
+const breadcrumbItems = computed(() => {
+  if (typeof route.meta.breadcrumb === "function") {
+    return route.meta.breadcrumb(route);
+  }
+  return route.meta?.breadcrumb || ["Quản Lý Imel", "Chỉnh Sửa Imel"]; // Mặc định cho trang chỉnh sửa
+});
 
 const {
   imel,

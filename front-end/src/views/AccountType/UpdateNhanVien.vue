@@ -1,5 +1,6 @@
-
 <template>
+  <!-- Thêm BreadcrumbWrapper -->
+  <BreadcrumbWrapper :breadcrumb-items="breadcrumbItems" />
   <div class="bg-gray-100 min-h-screen w-full flex items-start justify-center p-0">
     <div class="bg-white w-full h-full grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
       <!-- Bên trái -->
@@ -152,7 +153,7 @@
               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
             >
               <option value="" disabled>Chọn tỉnh/thành phố</option>
-              <option v-for="province in provinces" :key="province.code">{{ province.name }}</option>
+              <option v-for="province in provinces" :key="province.code" :value="province.name">{{ province.name }}</option>
             </select>
           </div>
 
@@ -164,7 +165,7 @@
               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
             >
               <option value="" disabled>Chọn quận/huyện</option>
-              <option v-for="district in districts" :key="district.code">{{ district.name }}</option>
+              <option v-for="district in districts" :key="district.code" :value="district.name">{{ district.name }}</option>
             </select>
           </div>
 
@@ -175,7 +176,7 @@
               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
             >
               <option value="" disabled>Chọn xã/phường</option>
-              <option v-for="ward in wards" :key="ward.code">{{ ward.name }}</option>
+              <option v-for="ward in wards" :key="ward.code" :value="ward.name">{{ ward.name }}</option>
             </select>
           </div>
         </div>
@@ -193,16 +194,22 @@
   </div>
 </template>
 
-
-
-
 <script setup>
-import { onMounted, ref } from "vue";
-import {useRoute, useRouter} from "vue-router";
-const router = useRouter(); // 
+import { onMounted, ref, computed } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import axios from "axios";
+import BreadcrumbWrapper from '@/components/BreadcrumbWrapper.vue'; // Import BreadcrumbWrapper
 
 const route = useRoute();
+const router = useRouter();
+
+// Tính toán breadcrumb
+const breadcrumbItems = computed(() => {
+  if (typeof route.meta.breadcrumb === "function") {
+    return route.meta.breadcrumb(route);
+  }
+  return route.meta?.breadcrumb || ["Quản lý Nhân Viên", "Cập nhật Nhân Viên"]; // Mặc định cho trang cập nhật nhân viên
+});
 
 // Dữ liệu nhân viên
 const employeeData = ref({
@@ -272,7 +279,8 @@ const fetchEmployeeData = async () => {
       cccd: data.cccd || "",
       soDienThoai: data.idTaiKhoan?.soDienThoai || "",
       ngaySinh: data.ngaySinh ? new Date(data.ngaySinh).toISOString().split("T")[0] : "",
-      gioiTinh: data.idTaiKhoan?.deleted !== undefined ? (data.idTaiKhoan.deleted ? "true" : "false") : "",      tenNhanVien: data.tenNhanVien || "",
+      gioiTinh: data.idTaiKhoan?.deleted !== undefined ? (data.idTaiKhoan.deleted ? "true" : "false") : "",
+      tenNhanVien: data.tenNhanVien || "",
       diaChiCuThe: data.diaChiCuThe || "",
       thanhPho: data.thanhPho || "", // Khớp với API
       quan: data.quan || "",         // Khớp với API
@@ -369,8 +377,8 @@ const handleDistrictChange = () => {
   }
   selectedWard.value = ""; // Reset xã/phường
 };
-
 </script>
-<style>
 
+<style>
+/* Style hiện tại được giữ nguyên */
 </style>
