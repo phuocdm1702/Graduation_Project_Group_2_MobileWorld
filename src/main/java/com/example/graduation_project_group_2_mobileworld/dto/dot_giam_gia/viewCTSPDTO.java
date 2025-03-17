@@ -5,7 +5,7 @@ import com.example.graduation_project_group_2_mobileworld.entity.*;
 import java.math.BigDecimal;
 
 public class viewCTSPDTO {
-    DongSanPham dsp;
+    SanPham sp;
     ChiTietSanPham ctsp;
     AnhSanPham anh;
     ChiTietDotGiamGia ctgg;
@@ -16,20 +16,21 @@ public class viewCTSPDTO {
     public viewCTSPDTO() {
     }
 
-    public viewCTSPDTO(DongSanPham dsp, ChiTietSanPham ctsp, AnhSanPham anh, BoNhoTrong bnt) {
-        this.dsp = dsp;
+    public viewCTSPDTO(SanPham sp, ChiTietSanPham ctsp, AnhSanPham anh, ChiTietDotGiamGia ctgg, BoNhoTrong bnt, BigDecimal giaSauKhiGiam) {
+        this.sp = sp;
         this.ctsp = ctsp;
-        this.ctgg = ctgg;
         this.anh = anh;
+        this.ctgg = ctgg;
         this.bnt = bnt;
+        this.giaSauKhiGiam = giaSauKhiGiam;
     }
 
-    public DongSanPham getDsp() {
-        return dsp;
+    public SanPham getSp() {
+        return sp;
     }
 
-    public void setDsp(DongSanPham dsp) {
-        this.dsp = dsp;
+    public void setSp(SanPham sp) {
+        this.sp = sp;
     }
 
     public ChiTietSanPham getCtsp() {

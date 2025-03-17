@@ -1,12 +1,12 @@
 package com.example.graduation_project_group_2_mobileworld.controller.dot_giam_gia_controller;
 
 import com.example.graduation_project_group_2_mobileworld.dto.dot_giam_gia.viewCTSPDTO;
-import com.example.graduation_project_group_2_mobileworld.entity.DongSanPham;
+import com.example.graduation_project_group_2_mobileworld.entity.SanPham;
 
 import java.util.List;
 
 public class CombinedResponse {
-    private List<DongSanPham> dspList;
+    private List<SanPham> spList;
     private List<viewCTSPDTO> ctspList;
     private int totalPagesDSP; // Đổi từ totalPages thành totalPagesDSP
     private int currentPage;
@@ -15,8 +15,8 @@ public class CombinedResponse {
     private int currentPageCTSP;
     private long totalElementsCTSP;
 
-    public CombinedResponse(List<DongSanPham> dspList, List<viewCTSPDTO> ctspList, int totalPagesDSP, int currentPage, long totalElements, int totalPagesCTSP, int currentPageCTSP, long totalElementsCTSP) {
-        this.dspList = dspList;
+    public CombinedResponse(List<SanPham> dspList, List<viewCTSPDTO> ctspList, int totalPagesDSP, int currentPage, long totalElements, int totalPagesCTSP, int currentPageCTSP, long totalElementsCTSP) {
+        this.spList = dspList;
         this.ctspList = ctspList;
         this.totalPagesDSP = totalPagesDSP;
         this.currentPage = currentPage;
@@ -26,12 +26,12 @@ public class CombinedResponse {
         this.totalElementsCTSP = totalElementsCTSP;
     }
 
-    public List<DongSanPham> getDspList() {
-        return dspList;
+    public List<SanPham> getSpList() {
+        return spList;
     }
 
-    public void setDspList(List<DongSanPham> dspList) {
-        this.dspList = dspList;
+    public void setSpList(List<SanPham> spList) {
+        this.spList = spList;
     }
 
     public List<viewCTSPDTO> getCtspList() {

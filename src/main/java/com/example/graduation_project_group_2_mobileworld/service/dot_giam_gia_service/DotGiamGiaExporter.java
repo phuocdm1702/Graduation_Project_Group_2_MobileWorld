@@ -5,7 +5,6 @@ import com.example.graduation_project_group_2_mobileworld.entity.DotGiamGia;
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.RichTextString;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -65,27 +64,27 @@ public class DotGiamGiaExporter {
         }
     }
 
-    private void writeDataRow2() {
-        int rowNum=1;
-
-        for(ChiTietDotGiamGia ct:listCT){
-            Row row=sheet2.createRow(rowNum++);
-            row.createCell(0).setCellValue(ct.getId());
-            row.createCell(1).setCellValue(ct.getDotGiamGia().getId());
-            row.createCell(2).setCellValue(ct.getIdDongSanPham().getDongSanPham());
-            row.createCell(3).setCellValue(ct.getMa());
-            row.createCell(4).setCellValue(ct.getGiaBanDau().doubleValue());
-            row.createCell(5).setCellValue(ct.getGiaSauKhiGiam().doubleValue());
-            row.createCell(6).setCellValue(ct.getDeleted());
-        }
-    }
+//    private void writeDataRow2() {
+//        int rowNum=1;
+//
+//        for(ChiTietDotGiamGia ct:listCT){
+//            Row row=sheet2.createRow(rowNum++);
+//            row.createCell(0).setCellValue(ct.getId());
+//            row.createCell(1).setCellValue(ct.getDotGiamGia().getId());
+//            row.createCell(2).setCellValue(ct.getIdDongSanPham().getDongSanPham());
+//            row.createCell(3).setCellValue(ct.getMa());
+//            row.createCell(4).setCellValue(ct.getGiaBanDau().doubleValue());
+//            row.createCell(5).setCellValue(ct.getGiaSauKhiGiam().doubleValue());
+//            row.createCell(6).setCellValue(ct.getDeleted());
+//        }
+//    }
 
     public void export(HttpServletResponse response) throws IOException {
         writeHeaderRow1();
         writeDataRow();
 
         writeHeaderRow2();
-        writeDataRow2();
+//        writeDataRow2();
 
         ServletOutputStream outputStream= response.getOutputStream();
         workbook.write(outputStream);
