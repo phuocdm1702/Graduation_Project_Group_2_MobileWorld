@@ -10,7 +10,7 @@ export default function useHoaDonLineList() {
   const dataTable = ref([]);
   const originalData = ref([]); // Lưu dữ liệu gốc
   const currentPage = ref(0);
-  const pageSize = ref(5);
+  const pageSize = ref(10);
   const totalElements = ref(0);
   const orderTypes = ref([]);
 
