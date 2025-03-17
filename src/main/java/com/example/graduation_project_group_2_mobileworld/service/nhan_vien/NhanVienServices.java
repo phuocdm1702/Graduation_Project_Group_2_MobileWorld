@@ -20,9 +20,11 @@ import java.util.stream.Collectors;
 public class NhanVienServices {
     private final NhanVienRepository nhanVienRepository;
     private final TaiKhoanRepository taiKhoanRepository;
-    public NhanVienServices(NhanVienRepository nhanVienRepository, TaiKhoanRepository taiKhoanRepository) {
+    private final EmailServices emailServices;
+    public NhanVienServices(NhanVienRepository nhanVienRepository, TaiKhoanRepository taiKhoanRepository, EmailServices emailServices) {
         this.nhanVienRepository = nhanVienRepository;
         this.taiKhoanRepository = taiKhoanRepository;
+        this.emailServices = emailServices;
     }
 
     //MatutangNV
@@ -101,6 +103,10 @@ public class NhanVienServices {
         taiKhoan.setIdQuyenHan(quyenHan);
         taiKhoan.setDeleted(dto.getGioiTinh());
         taiKhoan.setTenDangNhap(dto.getTenDangNhap());
+
+        String randomPassword = emailServices.generateRandomPassword(8);
+        taiKhoan.setMatKhau(randomPassword);
+
         taiKhoan = taiKhoanRepository.save(taiKhoan);
 
         NhanVien nhanVien = new NhanVien();
@@ -118,6 +124,18 @@ public class NhanVienServices {
         nhanVien.setCccd(dto.getCccd());
         nhanVien.setAnhNhanVien(dto.getAnhNhanVien());
         nhanVien.setDeleted(false);
+
+        try {
+            emailServices.sendWelcomeEmail(
+                    dto.getEmail(),
+                    dto.getTenNhanVien(),
+                    dto.getEmail(),
+                    randomPassword
+            );
+        } catch (Exception e) {
+            // Log lỗi nếu cần, nhưng không làm ảnh hưởng quá trình thêm nhân viên
+            System.err.println("Lỗi gửi email: " + e.getMessage());
+        }
 
         return nhanVienRepository.save(nhanVien);
     }

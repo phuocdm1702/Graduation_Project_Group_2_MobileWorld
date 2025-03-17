@@ -148,6 +148,28 @@ export default function useEmployeeManagement() {
       },
     },
     {
+      key: "diaChiCuThe",
+      label: "Địa chỉ",
+      formatter: (value) => `
+        <div style="
+          min-width: 150px;
+          max-width: 150px;
+          text-align: center;
+          white-space: normal;
+          word-wrap: break-word;
+          min-height: 60px;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+          padding: 8px;
+          line-height: 1.5;
+        ">
+          ${value || "Chưa có dữ liệu"}
+        </div>
+      `,
+    },
+    {
       key: "deleted",
       label: "Trạng thái",
       formatter: (value) =>
@@ -170,6 +192,52 @@ export default function useEmployeeManagement() {
       `,
     },
   ];
+//css cho Table
+  function injectCSS() {
+    const styleTag = document.createElement("style");
+    styleTag.type = "text/css";
+    styleTag.innerHTML = `
+      table {
+        table-layout: fixed; /* Cố định chiều rộng cột */
+        width: 100%; /* Bảng chiếm toàn bộ chiều rộng */
+        font-family: Arial, sans-serif; /* Font dễ nhìn */
+      }
+      td {
+        color: #444; /* Màu chữ nội dung */
+      }
+      /* Cụ thể cho cột "Địa chỉ" */
+      th:nth-child(7), /* Cột "Địa chỉ" là cột thứ 7 */
+      td:nth-child(7) {
+        min-width: 150px !important;
+        max-width: 150px !important;
+        white-space: normal !important;
+        word-wrap: break-word !important;
+        min-height: 60px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: center !important;
+        align-items: center !important;
+        padding: 8px !important;
+        line-height: 1.5 !important;
+      }
+      td {
+        color: #444; /* Màu chữ nội dung */
+      }
+      /* Định nghĩa chiều rộng cho từng cột */
+      th:nth-child(1), td:nth-child(1) { min-width: 50px; max-width: 50px; } /* # */
+      th:nth-child(2), td:nth-child(2) { min-width: 100px; max-width: 100px; } /* Mã */
+      th:nth-child(3), td:nth-child(3) { min-width: 150px; max-width: 150px; } /* Tên */
+      th:nth-child(4), td:nth-child(4) { min-width: 200px; max-width: 200px; } /* Email */
+      th:nth-child(5), td:nth-child(5) { min-width: 120px; max-width: 120px; } /* SDT */
+      th:nth-child(6), td:nth-child(6) { min-width: 150px; max-width: 150px; } /* Ngày tham gia */
+      th:nth-child(7), td:nth-child(7) { min-width: 150px; max-width: 150px; } /* Địa chỉ */
+      th:nth-child(8), td:nth-child(8) { min-width: 120px; max-width: 120px; } /* Trạng thái */
+      th:nth-child(9), td:nth-child(9) { min-width: 120px; max-width: 120px; } /* Thao Tác */
+    \`;
+      
+    `;
+    document.head.appendChild(styleTag);
+  }
 
   const getNestedValue = (obj, path) => {
     return path.split(".").reduce((acc, part) => acc && acc[part], obj) || "";
@@ -183,6 +251,7 @@ export default function useEmployeeManagement() {
   onMounted(() => {
     document.addEventListener("showDeleteConfirm", handleShowDeleteConfirm);
     fetchNhanVien();
+    injectCSS();
   });
 
   onUnmounted(() => {
