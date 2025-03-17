@@ -46,6 +46,7 @@ public class NhanVienController {
         }
         return ResponseEntity.badRequest().body("nv không tồn tại");
     }
+
     @GetMapping("/detail/{id}")
     public ResponseEntity<?> getNhanVienDetail(@PathVariable Integer id) {
         Optional<NhanVien> nhanVien = nhanVienServices.findById(id);
@@ -54,6 +55,7 @@ public class NhanVienController {
         }
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Nhân viên không tồn tại");
     }
+
     @PutMapping("/update/{id}")
     public ResponseEntity<?> updateNhanVien(@PathVariable Integer id, @RequestBody NhanVienDTO nhanVienDTO) {
         try {
@@ -63,6 +65,7 @@ public class NhanVienController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
     }
+
     @GetMapping("/search")
     public ResponseEntity<List<NhanVien>> searchNhanVien(
             @RequestParam(value = "keyword", required = false) String keyword,
@@ -72,6 +75,33 @@ public class NhanVienController {
             return ResponseEntity.ok(nhanViens);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PutMapping("/toggle-status/{id}")
+    public ResponseEntity<?> toggleStatus(@PathVariable Integer id) {
+        try {
+            NhanVien updateNhanVien = nhanVienServices.toggleStatus(id);
+            String message = updateNhanVien.isDeleted() ? "Đã cho nghỉ làm!" : "Đã cho đi làm lại!";
+            return ResponseEntity.ok(new ResponseMessage(message));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(new ResponseMessage(e.getMessage()));
+        }
+    }
+
+    class ResponseMessage {
+        private String message;
+
+        public ResponseMessage(String message) {
+            this.message = message;
+        }
+
+        public String getMessage() {
+            return message;
+        }
+
+        public void setMessage(String message) {
+            this.message = message;
         }
     }
 }

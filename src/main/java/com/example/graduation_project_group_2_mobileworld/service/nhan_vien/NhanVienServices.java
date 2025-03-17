@@ -151,7 +151,9 @@ public class NhanVienServices {
                     existingNhanVien.setThanhPho(nhanVienDTO.getThanhPho());
                     existingNhanVien.setQuan(nhanVienDTO.getQuan());
                     existingNhanVien.setPhuong(nhanVienDTO.getPhuong());
+                    existingNhanVien.setAnhNhanVien(nhanVienDTO.getAnhNhanVien());
                     existingNhanVien.setDiaChiCuThe(nhanVienDTO.getDiaChiCuThe());
+                    existingNhanVien.setCccd(nhanVienDTO.getCccd());
 
                     // Lấy thông tin tài khoản qua idTaiKhoan
                     if (existingNhanVien.getIdTaiKhoan() != null) {
@@ -179,7 +181,7 @@ public class NhanVienServices {
         if (status != null && !status.isEmpty()) {
             boolean isDeleted = status.equals("da-nghi");
             allNhanViens = allNhanViens.stream()
-                    .filter(nv -> nv.getDeleted() == isDeleted)
+                    .filter(nv -> nv.isDeleted())
                     .collect(Collectors.toList());
         }
 
@@ -198,5 +200,15 @@ public class NhanVienServices {
                                 (nv.getIdTaiKhoan() != null && nv.getIdTaiKhoan().getSoDienThoai() != null && nv.getIdTaiKhoan().getSoDienThoai().toLowerCase().contains(keywordLower))
                 )
                 .collect(Collectors.toList());
+    }
+
+    public NhanVien toggleStatus(Integer id) {
+        Optional<NhanVien> optionalNhanVien = nhanVienRepository.findById(id);
+        if (!optionalNhanVien.isPresent()) {
+            throw new RuntimeException("Không tìm thấy khách hàng với ID: " + id);
+        }
+        NhanVien nv = optionalNhanVien.get();
+        nv.setDeleted(!nv.isDeleted()); // Toggle trạng thái
+        return nhanVienRepository.save(nv);
     }
 }
