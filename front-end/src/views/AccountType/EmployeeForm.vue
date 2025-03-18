@@ -19,7 +19,7 @@
 
       <!-- Phần ảnh được căn giữa -->
       <div class="flex justify-center mb-6">
-        <div class="employee-image-container">
+        <div class="employee-image-container relative">
           <div
             class="w-36 h-36 rounded-full border-4 border-gray-300 flex items-center justify-center cursor-pointer hover:border-gray-400 transition-colors"
             @click="triggerFileInput"
@@ -35,7 +35,7 @@
           <button
             v-if="employeeImage"
             @click="deleteImage"
-            class="bg-red-500 text-white w-10 h-10 flex items-center justify-center rounded-full hover:bg-red-600 transition-colors mt-2"
+            class="absolute top-0 right-0 bg-red-500 text-white w-6 h-6 flex items-center justify-center rounded-full hover:bg-red-600 transition-colors transform translate-x-2 -translate-y-2"
           >
             ✕
           </button>
