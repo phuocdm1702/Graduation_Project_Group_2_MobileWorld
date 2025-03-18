@@ -62,17 +62,7 @@
             required
           >
         </div>
-
-        <div>
-          <label class="block mb-2">UserName</label>
-          <input
-            v-model="custmer.userName"
-            type="text"
-            class="w-full px-3 py-2 border rounded-md"
-            placeholder="Nhập UserName"
-            required
-          >
-        </div>
+        
 
         <div>
           <label class="block mb-2">SDT</label>
@@ -84,36 +74,7 @@
             required
           >
         </div>
-
-        <div>
-          <label class="block mb-2">CCCD</label>
-          <div class="flex items-center gap-2">
-            <input
-              v-model="custmer.cccd"
-              type="text"
-              class="flex-1 px-3 py-2 border rounded-md"
-              placeholder="Nhập CCCD (12 số)"
-              maxlength="12"
-              required
-            >
-            <button
-              @click="startScanning"
-              class="bg-orange-500 text-white px-3 py-2 rounded-md hover:bg-orange-600 flex items-center justify-center"
-              title="Quét mã QR"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M3 3h4v4H3z"></path>
-                <path d="M17 3h4v4h-4z"></path>
-                <path d="M3 17h4v4H3z"></path>
-                <path d="M17 17h4v4h-4z"></path>
-                <path d="M7 7h4v4H7z"></path>
-                <path d="M7 17h4"></path>
-                <path d="M7 13h8v8"></path>
-                <path d="M17 7h-4v4"></path>
-              </svg>
-            </button>
-          </div>
-        </div>
+        
 
         <div>
           <label class="block mb-2">Email</label>
@@ -147,20 +108,32 @@
               required
             >
           </div>
-
           <div>
-            <label class="block mb-2">Giới Tính</label>
-            <select
-              v-model="custmer.gioiTinh"
-              class="w-full px-3 py-2 border rounded-md"
-              required
-            >
-              <option value="" disabled>Chọn giới tính</option>
-              <option value="false">Nam</option>
-              <option value="true">Nữ</option>
-            </select>
+            <label class="block mb-2 text-sm font-medium text-gray-700">Giới tính</label>
+            <div class="flex items-center gap-6">
+              <label class="flex items-center space-x-2 cursor-pointer">
+                <input
+                  v-model="custmer.gioiTinh"
+                  value="false"
+                  type="radio"
+                  class="form-radio h-5 w-5 text-orange-500 focus:ring-2 focus:ring-orange-500 focus:ring-opacity-50 transition duration-150 ease-in-out"
+                >
+                <span class="text-sm text-gray-700">Nam</span>
+              </label>
+              <label class="flex items-center space-x-2 cursor-pointer">
+                <input
+                  v-model="custmer.gioiTinh"
+                  value="true"
+                  type="radio"
+                  class="form-radio h-5 w-5 text-orange-500 focus:ring-2 focus:ring-orange-500 focus:ring-opacity-50 transition duration-150 ease-in-out"
+                >
+                <span class="text-sm text-gray-700">Nữ</span>
+              </label>
+            </div>
           </div>
+          
         </div>
+        
 
         <div class="flex gap-4 col-span-2">
           <div class="w-1/3">
@@ -257,7 +230,6 @@ const selectedWard = ref('');
 const employeeImage = ref(null);
 const fileInput = ref(null);
 
-// Tính toán breadcrumb
 const breadcrumbItems = computed(() => {
   if (typeof route.meta.breadcrumb === "function") {
     return route.meta.breadcrumb(route);
@@ -265,97 +237,7 @@ const breadcrumbItems = computed(() => {
   return route.meta?.breadcrumb || ["Khách hàng", "Thêm khách hàng"]; // Mặc định cho trang thêm khách hàng
 });
 
-// Quét mã QR
-const startScanning = async () => {
-  isScanning.value = true;
-  await nextTick();
-  qrReader.value = new Html5Qrcode('qr-reader');
 
-  qrReader.value
-    .start(
-      { facingMode: 'environment' },
-      {
-        fps: 15,
-        qrbox: 250,
-      },
-      (decodedText) => {
-        handleQRData(decodedText);
-        stopScanning();
-      },
-    )
-    .catch((err) => {
-      console.error('Lỗi khởi động quét QR:', err);
-    });
-};
-
-const stopScanning = () => {
-  if (qrReader.value) {
-    qrReader.value
-      .stop()
-      .then(() => {
-        qrReader.value = null;
-        isScanning.value = false;
-      })
-      .catch((err) => {
-        console.error('Lỗi dừng quét:', err);
-      });
-  }
-};
-
-const handleQRData = (data) => {
-  console.log('Dữ liệu QR thô:', data);
-  const fields = data.split('|');
-  console.log('Các trường phân tích:', fields);
-
-  if (fields.length >= 6) {
-    custmer.value = {
-      ...custmer.value,
-      cccd: fields[0].trim() || '',
-      ten: fields[2].trim() || 'Không xác định',
-      ngaySinh: isValidDateFormat(fields[3].trim()) ? formatDate(fields[3].trim()) : '',
-      gioiTinh: fields[4].trim() === 'Nam' ? 'false' : fields[4].trim() === 'Nữ' ? 'true' : '',
-      diaChicuthe: fields[5].trim() || '',
-    };
-    parseAddress(fields[5].trim());
-  } else {
-    custmer.value = {
-      ...custmer.value,
-      cccd: data.trim() || '',
-    };
-  }
-};
-
-const isValidDateFormat = (dateStr) => {
-  if (dateStr.length !== 8 || !/^\d{8}$/.test(dateStr)) return false;
-  const day = parseInt(dateStr.slice(0, 2));
-  const month = parseInt(dateStr.slice(2, 4));
-  const year = parseInt(dateStr.slice(4, 8));
-  const date = new Date(year, month - 1, day);
-  return date.getDate() === day && date.getMonth() + 1 === month && date.getFullYear() === year;
-};
-
-const formatDate = (dateStr) => {
-  if (dateStr.length === 8) {
-    const day = dateStr.slice(0, 2);
-    const month = dateStr.slice(2, 4);
-    const year = dateStr.slice(4, 8);
-    return `${year}-${month}-${day}`;
-  }
-  return '';
-};
-
-const parseAddress = (address) => {
-  const parts = address.split(',').map(part => part.trim()).reverse();
-  if (parts.length >= 3) {
-    selectedProvince.value = parts[0] || '';
-    handleProvinceChange();
-    selectedDistrict.value = parts[1] || '';
-    handleDistrictChange();
-    selectedWard.value = parts[2] || '';
-  }
-};
-
-// Xử lý ảnh
 async function uploadImage(file) {
   const formData = new FormData();
   formData.append('file', file);
@@ -375,9 +257,7 @@ async function uploadImage(file) {
 async function addKhachHang() {
   if (
     !custmer.value.ten ||
-    !custmer.value.userName ||
     !custmer.value.sdt ||
-    !custmer.value.cccd ||
     !custmer.value.email ||
     !custmer.value.diaChicuthe ||
     !custmer.value.ngaySinh ||
@@ -389,11 +269,7 @@ async function addKhachHang() {
     alert('Vui lòng điền đầy đủ tất cả các trường bắt buộc!');
     return;
   }
-
-  if (custmer.value.cccd.length !== 12) {
-    alert('CCCD phải có đúng 12 chữ số!');
-    return;
-  }
+        
 
   const today = new Date();
   const ngaySinhDate = new Date(custmer.value.ngaySinh);

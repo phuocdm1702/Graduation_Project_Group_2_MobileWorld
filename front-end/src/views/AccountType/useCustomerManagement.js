@@ -43,6 +43,19 @@ export default function useCustomerManagement() {
       totalPages.value = res.data.totalPages || 1;
       currentPage.value = page;
 
+      // Đồng bộ địa chỉ mặc định từ danh sách địa chỉ
+      for (const customer of originalData.value) {
+        const addressRes = await axios.get(`http://localhost:8080/dia-chi/getByKhachHang/${customer.id}`);
+        const addresses = addressRes.data || [];
+        const defaultAddress = addresses.find(addr => addr.macDinh) || addresses[0] || {};
+        customer.idDiaChiKH = {
+          diaChiCuThe: defaultAddress.diaChiCuThe || "Chưa có dữ liệu",
+          thanhPho: defaultAddress.thanhPho || "",
+          quan: defaultAddress.quan || "",
+          phuong: defaultAddress.phuong || "",
+        };
+      }
+
       const newCustomer = route.query.newCustomer;
       if (newCustomer) {
         const parsedCustomer = JSON.parse(newCustomer);
@@ -162,7 +175,7 @@ export default function useCustomerManagement() {
     {
       key: "idDiaChiKH.diaChiCuThe",
       label: "Địa chỉ",
-      formatter: (value) => `
+      formatter: (value, item) => `
         <div style="
           min-width: 150px;
           max-width: 150px;
@@ -177,7 +190,10 @@ export default function useCustomerManagement() {
           padding: 8px;
           line-height: 1.5;
         ">
-          ${value || "Chưa có dữ liệu"}
+          ${item.idDiaChiKH ? `${item.idDiaChiKH.diaChiCuThe}
+          , ${item.idDiaChiKH.phuong},
+           ${item.idDiaChiKH.quan}
+          , ${item.idDiaChiKH.thanhPho}` : "Chưa có dữ liệu"}
         </div>
       `,
     },
@@ -278,6 +294,10 @@ export default function useCustomerManagement() {
       input:checked + .slider:before {
         transform: translateX(20px);
       }
+      input:checked + .slider {
+      background-color: #f97316;
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.15);
+      }
     `;
     document.head.appendChild(styleTag);
   }
@@ -290,9 +310,35 @@ export default function useCustomerManagement() {
     showDeleteConfirm(event.detail);
   };
 
+  const handleDefaultAddressChanged = (event) => {
+    const { id, diaChiCuThe, thanhPho, quan, phuong } = event.detail;
+    const customerIndex = dataTable.value.findIndex(customer => customer.id === id);
+    if (customerIndex !== -1) {
+      dataTable.value[customerIndex].idDiaChiKH = {
+        ...dataTable.value[customerIndex].idDiaChiKH,
+        diaChiCuThe,
+        thanhPho,
+        quan,
+        phuong,
+      };
+      // Cập nhật originalData để giữ đồng bộ
+      const originalIndex = originalData.value.findIndex(customer => customer.id === id);
+      if (originalIndex !== -1) {
+        originalData.value[originalIndex].idDiaChiKH = {
+          ...originalData.value[originalIndex].idDiaChiKH,
+          diaChiCuThe,
+          thanhPho,
+          quan,
+          phuong,
+        };
+      }
+    }
+  };
+
   onMounted(async () => {
     document.addEventListener("showDeleteConfirm", handleShowDeleteConfirm);
     document.addEventListener("toggleStatus", (event) => toggleStatus(event.detail));
+    document.addEventListener("defaultAddressChanged", handleDefaultAddressChanged);
     await fetchCustomers();
     injectCSS();
   });
@@ -300,6 +346,7 @@ export default function useCustomerManagement() {
   onUnmounted(() => {
     document.removeEventListener("showDeleteConfirm", handleShowDeleteConfirm);
     document.removeEventListener("toggleStatus", (event) => toggleStatus(event.detail));
+    document.removeEventListener("defaultAddressChanged", handleDefaultAddressChanged);
   });
 
   return {

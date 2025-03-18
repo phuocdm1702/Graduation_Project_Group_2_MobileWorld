@@ -167,7 +167,7 @@ export default function useEmployeeManagement() {
     {
       key: "diaChiCuThe",
       label: "Địa chỉ",
-      formatter: (value) => `
+      formatter: (value,item) => `
         <div style="
           min-width: 150px;
           max-width: 150px;
@@ -182,7 +182,10 @@ export default function useEmployeeManagement() {
           padding: 8px;
           line-height: 1.5;
         ">
-          ${value || "Chưa có dữ liệu"}
+          ${value || "Chưa có dữ liệu"},
+${item.thanhPho},
+${item.quan},
+${item.phuong},
         </div>
       `,
     },
@@ -282,6 +285,10 @@ export default function useEmployeeManagement() {
       }
       input:checked + .slider:before {
         transform: translateX(20px);
+      }
+      input:checked + .slider {
+      background-color: #f97316;
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.15);
       }
     `;
     document.head.appendChild(styleTag);

@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Random;
 @Service
-public class EmailServices {
+public class    EmailServices {
     private final JavaMailSender mailSender;
 
     public EmailServices(JavaMailSender mailSender) {
@@ -26,6 +26,29 @@ public class EmailServices {
     }
 
     public void sendWelcomeEmail(String to, String employeeName, String email, String password) throws MessagingException {
+        MimeMessage message = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+        helper.setTo(to);
+        helper.setSubject("Chúc mừng bạn đã trở thành nô lệ của tôi bạn sẽ phải phục vụ chúng tôi đến hết đời");
+        helper.setFrom("lequangphuc2872006@gmail.com");
+
+        String htmlContent = "<h3>Chúc mừng " + employeeName + "!</h3>" +
+                "<p>Bạn đã được nhận vào làm nô lệ của MobileWorld.</p>" +
+                "<p>Thông tin tài khoản của bạn:</p>" +
+                "<ul>" +
+                "<li>Tên đăng nhập: " + email + "</li>" +
+                "<li>Mật khẩu: " + password + "</li>" +
+                "</ul>" +
+                "<p>Vui lòng đăng nhập xác nhận tài khoản có vấn đề gì hãy liên hệ lại với chúng tôi hoặc gửi lại email để giải đáp</p>" +
+                "<p>Trân trọng,<br>Đội ngũ MobileWorld</p>";
+
+        helper.setText(htmlContent, true);
+        mailSender.send(message);
+    }
+
+
+    public void EmailKH(String to, String employeeName, String email, String password) throws MessagingException {
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
