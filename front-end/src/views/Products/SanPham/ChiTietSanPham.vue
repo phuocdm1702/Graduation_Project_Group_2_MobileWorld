@@ -188,7 +188,7 @@ import DynamicTable from '@/components/DynamicTable.vue';
 import BreadcrumbWrapper from '@/components/BreadcrumbWrapper.vue'; // Import BreadcrumbWrapper
 
 export default defineComponent({
-  name: 'ChiTietSanPham',
+  name: 'SanPham',
   components: {
     ToastNotification,
     Pagination,
@@ -205,7 +205,7 @@ export default defineComponent({
       if (typeof route.meta.breadcrumb === "function") {
         return route.meta.breadcrumb(route);
       }
-      return route.meta?.breadcrumb || ["Quản Lý Chi Tiết Sản Phẩm"]; // Mặc định nếu không có breadcrumb
+      return route.meta?.breadcrumb || ["Sản Phẩm"]; // Mặc định nếu không có breadcrumb
     });
 
     // Truyền toast vào productDetailList

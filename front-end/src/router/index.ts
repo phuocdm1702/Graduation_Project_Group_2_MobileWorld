@@ -100,44 +100,44 @@ const routes: Array<RouteRecordRaw> = [
     path: "/phieu-giam-gia",
     name: "Voucher",
     component: Voucher,
-    meta: { breadcrumb: ["Quản Lý Phiếu Giảm Giá", "Phiếu giảm giá"] },
+    meta: { breadcrumb: ["Phiếu Giảm Giá", "Phiếu giảm giá"] },
   },
   {
     path: "/phieu-bao-hanh",
     name: "PhieuBaoHanh",
     component: PhieuBaoHanh,
-    meta: { breadcrumb: ["Bảo hành", "Quản lý Phiếu bảo hành"] },
+    meta: { breadcrumb: ["Bảo hành", "Phiếu bảo hành"] },
   },
   {
     path: "/lich-su-bao-hanh",
     name: "LichSuPhieuBaoHanh",
     component: LichSuPhieuBaoHanh,
-    meta: { breadcrumb: ["Bảo hành", "Quản lý Lịch sử phiếu bảo hành"] },
+    meta: { breadcrumb: ["Bảo hành", "Lịch sử phiếu bảo hành"] },
   },
   {
     path: "/dot-giam-gia",
     name: "DotVoucher",
     component: DotVoucher,
-    meta: { breadcrumb: ["Quản Lý Phiếu Giảm Giá", "Đợt giảm giá"] },
+    meta: { breadcrumb: ["Phiếu Giảm Giá", "Đợt giảm giá"] },
   },
   {
     path: "/add-phieu-giam-gia",
     name: "FormAddPgg",
     component: FormAddPgg,
-    meta: { breadcrumb: ["Quản Lý Phiếu Giảm Giá", "Phiếu giảm giá", "Thêm phiếu giảm giá"] },
+    meta: { breadcrumb: ["Phiếu Giảm Giá", "Phiếu giảm giá", "Thêm phiếu giảm giá"] },
   },
   {
     path: "/update-phieu-giam-gia/:id",
     name: "FormUpdatePgg",
     component: FormUpdatePgg,
     props: true,
-    meta: { breadcrumb: (route: any) => ["Quản Lý Phiếu Giảm Giá", "Phiếu giảm giá", `Cập nhật phiếu giảm giá #${route.params.id}`] },
+    meta: { breadcrumb: (route: any) => ["Phiếu Giảm Giá", "Phiếu giảm giá", `Cập nhật phiếu giảm giá #${route.params.id}`] },
   },
   {
     path: "/ViewAddDotGiamGia",
     name: "ViewAddDotGiamGia",
     component: () => import("@/views/Voucher/ViewAddDotGiamGia.vue"),
-    meta: { breadcrumb: ["Quản Lý Phiếu Giảm Giá", "Đợt giảm giá", "Thêm đợt giảm giá"] },
+    meta: { breadcrumb: ["Phiếu Giảm Giá", "Đợt giảm giá", "Thêm đợt giảm giá"] },
   },
 
   // Đơn hàng
@@ -145,14 +145,14 @@ const routes: Array<RouteRecordRaw> = [
     path: "/hoa-don",
     name: "HoaDon",
     component: HoaDon,
-    meta: { breadcrumb: ["Quản lý hóa đơn"] },
+    meta: { breadcrumb: ["Hóa đơn"] },
   },
   {
     path: "/show-hoa-don/:id",
     name: "ShowHoaDon",
     component: ShowHoaDon,
     props: true,
-    meta: { breadcrumb: (route: any) => ["Quản lý hóa đơn", `Chi tiết hóa đơn #${route.params.id}`] },
+    meta: { breadcrumb: (route: any) => ["Hóa đơn", `Chi tiết hóa đơn #${route.params.id}`] },
   },
   {
     path: "/lich-su-hoa-don",
@@ -164,7 +164,7 @@ const routes: Array<RouteRecordRaw> = [
     path: "/hoa-don-chi-tiet",
     name: "HDCT",
     component: HoaDonChiTiet,
-    meta: { breadcrumb: ["Quản lý hóa đơn", "Hóa đơn chi tiết"] },
+    meta: { breadcrumb: ["Hóa đơn", "Hóa đơn chi tiết"] },
   },
 
   // Tài khoản
@@ -172,251 +172,246 @@ const routes: Array<RouteRecordRaw> = [
     path: "/nhan-vien",
     name: "NhanVien",
     component: NhanVien,
-    meta: { breadcrumb: ["Quản lý tài khoản", "Nhân viên"] },
+    meta: { breadcrumb: ["Tài khoản", "Nhân viên"] },
   },
   {
     path: "/them-nhan-vien",
     name: "ThemNhanVien",
     component: EmployeeForm,
-    meta: { breadcrumb: ["Quản lý tài khoản", "Nhân viên", "Thêm nhân viên"] },
+    meta: { breadcrumb: ["Tài khoản", "Nhân viên", "Thêm nhân viên"] },
   },
   {
     path: "/update-nhan-vien",
     name: "UpdateNhanVien",
     component: UpdateNhanVien,
-    meta: { breadcrumb: ["Quản lý tài khoản", "Nhân viên", "Cập nhật nhân viên"] },
+    meta: { breadcrumb: ["Tài khoản", "Nhân viên", "Cập nhật nhân viên"] },
   },
   {
     path: "/khach-hang",
     name: "KhachHang",
     component: KhachHang,
-    meta: { breadcrumb: ["Quản lý tài khoản", "Khách hàng"] },
+    meta: { breadcrumb: ["Tài khoản", "Khách hàng"] },
   },
   {
     path: "/them-khach-hang",
     name: "ThemKhachHang",
     component: CustmerForm,
-    meta: { breadcrumb: ["Quản lý tài khoản", "Khách hàng", "Thêm khách hàng"] },
+    meta: { breadcrumb: ["Tài khoản", "Khách hàng", "Thêm khách hàng"] },
   },
   {
     path: "/update-khach-hang",
     name: "UpdateKhachHang",
     component: UpdateCustmer,
-    meta: { breadcrumb: ["Quản lý tài khoản", "Khách hàng", "Cập nhật khách hàng"] },
+    meta: { breadcrumb: ["Tài khoản", "Khách hàng", "Cập nhật khách hàng"] },
   },
 
   // Sản phẩm
   {
-    path: "/san-pham-chi-tiet",
-    name: "ChiTietSanPham",
+    path: "/products",
+    name: "SanPham",
     component: ProductDetails,
-    meta: { breadcrumb: ["Sản phẩm", "Chi tiết sản phẩm"] },
-  },
-  {
-    path: "/product-detail/add",
-    name: "ThemChiTietSanPham",
-    component: ProductDetailAdd,
-    meta: { breadcrumb: ["Sản phẩm", "Quản lý Chi tiết sản phẩm", "Thêm chi tiết sản phẩm"] },
-  },
-  {
-    path: "/add-product",
-    name: "AddProduct",
-    component: ProductDetailAdd,
-    meta: { breadcrumb: ["Quản Lý Chi Tiết Sản Phẩm", "Thêm Sản Phẩm"] },
+    meta: { breadcrumb: ["Sản phẩm"] },
   },
 
-  // Thương hiệu
+  {
+    path: "/products/add",
+    name: "AddProduct",
+    component: ProductDetailAdd,
+    meta: { breadcrumb: ["sản Phẩm", "Thêm Sản Phẩm"] },
+  },
+
+// Thương hiệu
   {
     path: "/manufacturer",
     name: "manufacturer",
     component: Manufacturer,
-    meta: { breadcrumb: ["Sản phẩm", "Quản Lý Nhà Sản Xuất"] },
+    meta: { breadcrumb: ["Sản phẩm", "Nhà Sản Xuất"] },
   },
   {
     path: "/manufacturer/add",
     name: "manufacturer-add",
     component: ManufacturerAdd,
-    meta: { breadcrumb: ["Sản phẩm", "Quản Lý Nhà Sản Xuất", "Thêm nhà sản xuất"] },
+    meta: { breadcrumb: ["Sản phẩm", "Nhà Sản Xuất", "Thêm nhà sản xuất"] },
   },
   {
     path: "/manufacturer/edit/:id",
     name: "manufacturer-edit",
     component: ManufacturerEdit,
-    meta: { breadcrumb: (route: any) => ["Sản phẩm", "Quản Lý Nhà Sản Xuất", `Cập nhật Nhà Sản Xuất #${route.params.id}`] },
+    meta: { breadcrumb: (route: any) => ["Sản phẩm", "Nhà Sản Xuất", `Cập nhật Nhà Sản Xuất #${route.params.id}`] },
   },
   {
-    path: "/product-line",
-    name: "product-line",
+    path: "/productLines",
+    name: "productLines",
     component: ProductLine,
-    meta: { breadcrumb: ["Sản phẩm", "Quản lý Dòng sản phẩm"] },
+    meta: { breadcrumb: ["Sản phẩm", "Dòng sản phẩm"] },
   },
   {
-    path: "/product-line/add",
-    name: "product-line-add",
+    path: "/productLines/add",
+    name: "productLines-add",
     component: ProductLineAdd,
-    meta: { breadcrumb: ["Sản phẩm", "Quản lý Dòng sản phẩm", "Thêm dòng sản phẩm"] },
+    meta: { breadcrumb: ["Sản phẩm", "Dòng sản phẩm", "Thêm dòng sản phẩm"] },
   },
   {
-    path: "/product-line/edit/:id",
-    name: "product-line-edit",
+    path: "/productLines/edit/:id",
+    name: "productLines-edit",
     component: ProductLineEdit,
-    meta: { breadcrumb: (route: any) => ["Sản phẩm", "Quản lý Dòng sản phẩm", `Cập nhật dòng sản phẩm #${route.params.id}`] },
+    meta: { breadcrumb: (route: any) => ["Sản phẩm", "Dòng sản phẩm", `Cập nhật dòng sản phẩm #${route.params.id}`] },
   },
 
-  // Màn hình
+// Màn hình
   {
-    path: "/screen",
+    path: "/screens",
     name: "screen",
     component: Display,
-    meta: { breadcrumb: ["Sản phẩm", "Quản lý Màn hình"] },
+    meta: { breadcrumb: ["Sản phẩm", "Màn hình"] },
   },
   {
-    path: "/screen/add",
+    path: "/screens/add",
     name: "screen-add",
     component: ManHinhAdd,
-    meta: { breadcrumb: ["Sản phẩm", "Quản lý Màn hình", "Thêm màn hình"] },
+    meta: { breadcrumb: ["Sản phẩm", "Màn hình", "Thêm màn hình"] },
   },
   {
-    path: "/screen/edit/:id",
+    path: "/screens/edit/:id",
     name: "screen-edit",
     component: ManHinhEdit,
-    meta: { breadcrumb: (route: any) => ["Sản phẩm", "Quản lý Màn hình", `Cập nhật màn hình #${route.params.id}`] },
+    meta: { breadcrumb: (route: any) => ["Sản phẩm", "Màn hình", `Cập nhật màn hình #${route.params.id}`] },
   },
   {
-    path: "/man-hinh/cong-nghe",
+    path: "/screens/technology",
     name: "CongNgheManHinh",
     component: CongNgheMH,
-    meta: { breadcrumb: ["Sản phẩm", "Quản lý Công nghệ màn hình"] },
+    meta: { breadcrumb: ["Sản phẩm", "Công nghệ màn hình"] },
   },
   {
-    path: "/man-hinh/cong-nghe/add",
+    path: "/screens/technology/add",
     name: "ThemCongNgheManHinh",
     component: AddCongNgheManHinh,
-    meta: { breadcrumb: ["Sản phẩm", "Quản lý Công nghệ màn hình", "Thêm công nghệ màn hình"] },
+    meta: { breadcrumb: ["Sản phẩm", "Công nghệ màn hình", "Thêm công nghệ màn hình"] },
   },
   {
-    path: "/man-hinh/cong-nghe/edit/:id",
+    path: "/screens/technology/edit/:id",
     name: "SuaCongNgheManHinh",
     component: EditCongNgheManHinh,
-    meta: { breadcrumb: (route: any) => ["Sản phẩm", "Quản lý Công nghệ màn hình", `Cập nhật công nghệ màn hình #${route.params.id}`] },
+    meta: { breadcrumb: (route: any) => ["Sản phẩm", "Công nghệ màn hình", `Cập nhật công nghệ màn hình #${route.params.id}`] },
   },
   {
     path: "/ram",
     name: "RAM",
     component: Ram,
-    meta: { breadcrumb: ["Sản phẩm", "Quản lý RAM"] },
+    meta: { breadcrumb: ["Sản phẩm", "RAM"] },
   },
 
-  // Bộ nhớ
+// Bộ nhớ
   {
-    path: "/bo-nho-trong",
+    path: "/internal-storage",
     name: "BoNhoTrong",
     component: InternalStorage,
-    meta: { breadcrumb: ["Sản phẩm", "Quản lý Bộ nhớ trong"] },
+    meta: { breadcrumb: ["Sản phẩm", "Bộ nhớ trong"] },
   },
   {
-    path: "/bo-nho-ngoai",
+    path: "/external-storage",
     name: "BoNhoNgoai",
     component: ExternalStorage,
-    meta: { breadcrumb: ["Sản phẩm", "Quản lý Bộ nhớ ngoài"] },
+    meta: { breadcrumb: ["Sản phẩm", "Bộ nhớ ngoài"] },
   },
 
-  // CPU & GPU
+// CPU & GPU
   {
     path: "/cpu",
     name: "CPU",
     component: CPU,
-    meta: { breadcrumb: ["Sản phẩm", "Quản lý CPU"] },
+    meta: { breadcrumb: ["Sản phẩm", "CPU"] },
   },
   {
     path: "/gpu",
     name: "GPU",
     component: GPU,
-    meta: { breadcrumb: ["Sản phẩm", "Quản lý GPU"] },
+    meta: { breadcrumb: ["Sản phẩm", "GPU"] },
   },
 
-  // Camera
+// Camera
   {
-    path: "/camera-truoc",
+    path: "/front-camera-specs",
     name: "CameraTruoc",
     component: FrontCameraSpec,
-    meta: { breadcrumb: ["Sản phẩm", "Quản lý Thông số camera trước"] },
+    meta: { breadcrumb: ["Sản phẩm", "Thông số camera trước"] },
   },
   {
-    path: "/camera-sau",
+    path: "/rear-camera-specs",
     name: "CameraSau",
     component: RearCameraSpec,
-    meta: { breadcrumb: ["Sản phẩm", "Quản lý Thông số camera sau"] },
+    meta: { breadcrumb: ["Sản phẩm", "Thông số camera sau"] },
   },
   {
-    path: "/chi-tiet-camera-truoc",
+    path: "/front-camera-details",
     name: "ChiTietCameraTruoc",
     component: FrontCameraDetail,
-    meta: { breadcrumb: ["Sản phẩm", "Quản lý Chi tiết camera trước"] },
+    meta: { breadcrumb: ["Sản phẩm", "Chi tiết camera trước"] },
   },
   {
-    path: "/chi-tiet-camera-sau",
+    path: "/rear-camera-details",
     name: "ChiTietCameraSau",
     component: RearCameraDetail,
-    meta: { breadcrumb: ["Sản phẩm", "Quản lý Chi tiết camera sau"] },
+    meta: { breadcrumb: ["Sản phẩm", "Chi tiết camera sau"] },
   },
   {
-    path: "/cum-camera",
+    path: "/camera-module",
     name: "CumCamera",
     component: CameraModule,
-    meta: { breadcrumb: ["Sản phẩm", "Quản lý Cụm camera"] },
+    meta: { breadcrumb: ["Sản phẩm", "Cụm camera"] },
   },
 
-  // Sạc
+// Sạc
   {
-    path: "/sac/cong-nghe",
+    path: "/charging/technology",
     name: "CongNgheSac",
     component: ChargingTech,
-    meta: { breadcrumb: ["Sản phẩm", "Quản lý Công nghệ sạc"] },
+    meta: { breadcrumb: ["Sản phẩm", "Công nghệ sạc"] },
   },
   {
-    path: "/sac/ho-tro-cong-nghe",
+    path: "/charging/tech-support",
     name: "HoTroCongNgheSac",
     component: ChargingSupport,
-    meta: { breadcrumb: ["Sản phẩm", "Quản lý Hỗ trợ công nghệ sạc"] },
+    meta: { breadcrumb: ["Sản phẩm", "Hỗ trợ công nghệ sạc"] },
   },
   {
-    path: "/sac/ho-tro",
+    path: "/charging/support",
     name: "HoTroSac",
     component: Charging,
-    meta: { breadcrumb: ["Sản phẩm", "Quản lý Hỗ trợ sạc"] },
+    meta: { breadcrumb: ["Sản phẩm", "Hỗ trợ sạc"] },
   },
   {
-    path: "/sac/cong-sac",
+    path: "/charging/port",
     name: "CongSac",
     component: ChargingPort,
-    meta: { breadcrumb: ["Sản phẩm", "Quản lý Cổng sạc"] },
+    meta: { breadcrumb: ["Sản phẩm", "Cổng sạc"] },
   },
 
-  // Imel
+// Imel
   {
     path: "/imel",
     name: "imel",
     component: Imel,
-    meta: { breadcrumb: ["Sản phẩm", "Quản lý Imel"] },
+    meta: { breadcrumb: ["Sản phẩm", "Imel"] },
   },
   {
     path: "/imel/add",
     name: "imel-add",
     component: ImelAdd,
-    meta: { breadcrumb: ["Sản phẩm", "Quản lý Imel", "Thêm Imel"] },
+    meta: { breadcrumb: ["Sản phẩm", "Imel", "Thêm Imel"] },
   },
   {
     path: "/imel/edit/:id",
     name: "imel-edit",
     component: ImelEdit,
-    meta: { breadcrumb: (route: any) => ["Sản phẩm", "Quản lý Imel", `Cập nhật Imel #${route.params.id}`] },
+    meta: { breadcrumb: (route: any) => ["Sản phẩm", "Imel", `Cập nhật Imel #${route.params.id}`] },
   },
   {
-    path: "/imel-da-ban",
+    path: "/imel-sold",
     name: "ImelDaBan",
     component: ImelDaBan,
-    meta: { breadcrumb: ["Sản phẩm", "Quản lý Imel đã bán"] },
+    meta: { breadcrumb: ["Sản phẩm", "Imel đã bán"] },
   },
 
   // 404 Not Found

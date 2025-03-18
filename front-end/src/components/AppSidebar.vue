@@ -147,7 +147,7 @@
               d="M3 4.5a.5.5 0 0 1 .5-.5h6a.5.5 0 1 1 0 1h-6a.5.5 0 0 1-.5-.5m0 2a.5.5 0 0 1 .5-.5h6a.5.5 0 1 1 0 1h-6a.5.5 0 0 1-.5-.5m0 2a.5.5 0 0 1 .5-.5h6a.5.5 0 1 1 0 1h-6a.5.5 0 0 1-.5-.5m0 2a.5.5 0 0 1 .5-.5h6a.5.5 0 0 1 0 1h-6a.5.5 0 0 1-.5-.5m8-6a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 0 1h-1a.5.5 0 0 1-.5-.5m0 2a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 0 1h-1a.5.5 0 0 1-.5-.5m0 2a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 0 1h-1a.5.5 0 0 1-.5-.5m0 2a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 0 1h-1a.5.5 0 0 1-.5-.5"
             />
           </svg>
-          <span class="mx-4">Quản lý hóa đơn</span>
+          <span class="mx-4">Hóa đơn</span>
         </router-link>
 
         <div>
@@ -291,7 +291,7 @@
                   d="M6 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6m-5 6s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1zM11 3.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 0 1h-4a.5.5 0 0 1-.5-.5m.5 2.5a.5.5 0 0 0 0 1h4a.5.5 0 0 0 0-1zm2 3a.5.5 0 0 0 0 1h2a.5.5 0 0 0 0-1zm0 3a.5.5 0 0 0 0 1h2a.5.5 0 0 0 0-1z"
                 />
               </svg>
-              <span class="mx-4">Quản lý tài khoản</span>
+              <span class="mx-4">Tài khoản</span>
               <svg
                 class="w-4 h-4 ml-auto transform transition-transform"
                 :class="{ 'rotate-180': openDropdown === 'dropdown4' }"
@@ -448,76 +448,26 @@ function scrollToSection() {
 }
 
 const productCategories = [
-  { name: "Chi Tiết Sản Phẩm", path: "/san-pham-chi-tiet", route: "ChiTietSanPham" },
+  { name: "Sản Phẩm", path: "/products", route: "products" },
   { name: "Nhà Sản Xuất", path: "/manufacturer", route: "manufacturer" },
   { name: "Imel", path: "/imel", route: "imel" },
-  { name: "Imel đã bán", path: "/imel-da-ban", route: "ImelDaBan" },
-  { name: "Dòng Sản Phẩm", path: "/product-line", route: "product-line" },
-  { name: "Màn Hình", path: "/screen", route: "screen" },
-  { name: "Công Nghệ Màn Hình", path: "/man-hinh/cong-nghe", route: "CongNgheManHinh" },
-  { name: "RAM", path: "/ram", route: "RAM" },
-  { name: "Bộ Nhớ Trong", path: "/bo-nho-trong", route: "BoNhoTrong" },
-  { name: "CPU", path: "/cpu", route: "CPU" },
-  { name: "GPU", path: "/gpu", route: "GPU" },
-  { name: "Thông Số Camera Trước", path: "/camera-truoc", route: "CameraTruoc" },
-  { name: "Thông Số Camera Sau", path: "/camera-sau", route: "CameraSau" },
-  { name: "Chi Tiết Camera Trước", path: "/chi-tiet-camera-truoc", route: "ChiTietCameraTruoc" },
-  { name: "Chi Tiết Camera Sau", path: "/chi-tiet-camera-sau", route: "ChiTietCameraSau" },
-  { name: "Cụm Camera", path: "/cum-camera", route: "CumCamera" },
-  { name: "Công Nghệ Sạc", path: "/sac/cong-nghe", route: "CongNgheSac" },
-  { name: "Hỗ Trợ Công Nghệ Sạc", path: "/sac/ho-tro-cong-nghe", route: "HoTroCongNgheSac" },
-  { name: "Hỗ Trợ Sạc", path: "/sac/ho-tro", route: "HoTroSac" },
-  { name: "Cổng Sạc", path: "/sac/cong-sac", route: "CongSac" },
+  { name: "Imel Đã bán", path: "/imel-sold", route: "imelSold" },
+  { name: "Dòng Sản Phẩm", path: "/productLines", route: "productLines" },
+  { name: "Màn Hình", path: "/screens", route: "screens" },
+  { name: "Công Nghệ Màn Hình", path: "/screens/technology", route: "screenTechnology" },
+  { name: "RAM", path: "/ram", route: "ram" },
+  { name: "Bộ Nhớ Trong", path: "/internal-storage", route: "internalStorage" },
+  { name: "CPU", path: "/cpu", route: "cpu" },
+  { name: "GPU", path: "/gpu", route: "gpu" },
+  { name: "Thông Số Camera Trước", path: "/front-camera-specs", route: "frontCameraSpecs" },
+  { name: "Thông Số Camera Sau", path: "/rear-camera-specs", route: "rearCameraSpecs" },
+  { name: "Chi Tiết Camera Trước", path: "/front-camera-details", route: "frontCameraDetails" },
+  { name: "Chi Tiết Camera Sau", path: "/rear-camera-details", route: "rearCameraDetails" },
+  { name: "Cụm Camera", path: "/camera-module", route: "cameraModule" },
+  { name: "Công Nghệ Sạc", path: "/charging/technology", route: "chargingTechnology" },
+  { name: "Hỗ Trợ Công Nghệ Sạc", path: "/charging/tech-support", route: "chargingTechSupport" },
+  { name: "Hỗ Trợ Sạc", path: "/charging/support", route: "chargingSupport" },
+  { name: "Cổng Sạc", path: "/charging/port", route: "chargingPort" },
 ];
 
-// const productCategories = [
-//   {
-//     name: "Chi Tiết Sản Phẩm",
-//     path: "/san-pham-chi-tiet",
-//     route: "Chi Tiết Sản Phẩm",
-//   },
-//   { name: "Nhà Sản Xuất", path: "/manufacturer", route: "manufacturer" },
-//   { name: "imel", path: "/imel", route: "imel" },
-//   { name: "Imel đã bán", path: "/imel-da-ban", route: "Imel đã bán" },
-//   { name: "Dòng Sản Phẩm", path: "/product-line", route: "product-line" },
-//   { name: "Màn Hình", path: "/screen", route: "screen" },
-//   {
-//     name: "Công Nghệ Màn Hình",
-//     path: "/cong-nghe-man-hinh",
-//     route: "Công Nghệ Màn Hình",
-//   },
-//   { name: "RAM", path: "/ram", route: "RAM" },
-//   { name: "Bộ Nhớ Trong", path: "/bo-nho-trong", route: "Bộ Nhớ Trong" },
-//   { name: "CPU", path: "/cpu", route: "CPU" },
-//   { name: "GPU", path: "/gpu", route: "GPU" },
-//   {
-//     name: "Thông Số Camera Trước",
-//     path: "/camera-truoc",
-//     route: "Thông Số Camera Trước",
-//   },
-//   {
-//     name: "Thông Số Camera Sau",
-//     path: "/camera-sau",
-//     route: "Thông Số Camera Sau",
-//   },
-//   {
-//     name: "Chi Tiết Camera Trước",
-//     path: "/chi-tiet-camera-truoc",
-//     route: "Chi Tiết Camera Trước",
-//   },
-//   {
-//     name: "Chi Tiết Camera Sau",
-//     path: "/chi-tiet-camera-sau",
-//     route: "Chi Tiết Camera Sau",
-//   },
-//   { name: "Cụm Camera", path: "/cum-camera", route: "Cụm Camera" },
-//   { name: "Công Nghệ Sạc", path: "/sac/cong-nghe", route: "Công Nghệ Sạc" },
-//   {
-//     name: "Hỗ Trợ Công Nghệ Sạc",
-//     path: "/sac/ho-tro-cong-nghe",
-//     route: "Hỗ Trợ Công Nghệ Sạc",
-//   },
-//   { name: "Hỗ Trợ Sạc", path: "/sac/ho-tro", route: "Hỗ Trợ Sạc" },
-//   { name: "Cổng Sạc", path: "/sac/cong-sac", route: "Cổng Sạc" },
-// ];
 </script>
