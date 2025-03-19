@@ -16,7 +16,7 @@
             type="text"
             placeholder="Tìm theo mã hoặc tên đợt giảm giá..."
             class="input-field"
-            @input="currentPage = 1; fetchData()"
+            @input="currentPage = 0; fetchData()"
           />
         </div>
 
@@ -27,7 +27,7 @@
             v-model="filterType"
             id="filterType"
             class="input-field"
-            @change="currentPage = 1; fetchData()"
+            @change="currentPage = 0; fetchData()"
           >
             <option value="">Tất cả loại phiếu</option>
             <option value="Phần trăm">Phần trăm</option>
@@ -42,7 +42,7 @@
             v-model="filterStatus"
             id="filterStatus"
             class="input-field"
-            @change="currentPage = 1; fetchData()"
+            @change="currentPage = 0; fetchData()"
           >
             <option value="">Tất cả trạng thái hoạt động</option>
             <option value="0">Đang diễn ra</option>

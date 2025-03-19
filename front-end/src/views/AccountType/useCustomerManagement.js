@@ -8,7 +8,6 @@ export default function useCustomerManagement() {
   const router = useRouter();
   const route = useRoute();
 
-  // Data
   const dataTable = ref([]);
   const originalData = ref([]);
   const searchKH = ref("");
@@ -31,12 +30,11 @@ export default function useCustomerManagement() {
     }, 3000);
   };
 
-  // Fetch customers
   const fetchCustomers = async (page = 1, size = 10) => {
     isLoading.value = true;
     try {
       const params = {
-        page: page - 1, // Backend uses 0-based paging
+        page: page - 1,
         size,
       };
 
@@ -45,12 +43,24 @@ export default function useCustomerManagement() {
       totalPages.value = res.data.totalPages || 1;
       currentPage.value = page;
 
-      // Kiểm tra và thêm khách hàng mới từ query
+      // Đồng bộ địa chỉ mặc định từ danh sách địa chỉ
+      for (const customer of originalData.value) {
+        const addressRes = await axios.get(`http://localhost:8080/dia-chi/getByKhachHang/${customer.id}`);
+        const addresses = addressRes.data || [];
+        const defaultAddress = addresses.find(addr => addr.macDinh) || addresses[0] || {};
+        customer.idDiaChiKH = {
+          diaChiCuThe: defaultAddress.diaChiCuThe || "Chưa có dữ liệu",
+          thanhPho: defaultAddress.thanhPho || "",
+          quan: defaultAddress.quan || "",
+          phuong: defaultAddress.phuong || "",
+        };
+      }
+
       const newCustomer = route.query.newCustomer;
       if (newCustomer) {
         const parsedCustomer = JSON.parse(newCustomer);
-        originalData.value.unshift(parsedCustomer); // Thêm khách hàng mới vào đầu danh sách
-        router.replace({ query: null }); // Xóa query sau khi xử lý
+        originalData.value.unshift(parsedCustomer);
+        router.replace({ query: null });
       }
 
       applyFilterAndSearch();
@@ -63,7 +73,6 @@ export default function useCustomerManagement() {
     }
   };
 
-  // Apply filter and search logic
   const applyFilterAndSearch = () => {
     let filteredData = [...originalData.value];
 
@@ -85,24 +94,34 @@ export default function useCustomerManagement() {
     dataTable.value = filteredData;
   };
 
-  // Search handler
   const btnSearch = () => {
     applyFilterAndSearch();
   };
 
-  // Filter handler
   const onFilterChange = () => {
     applyFilterAndSearch();
   };
 
-  // Reset search and filter
   const backSearch = () => {
     searchKH.value = "";
     filterStatus.value = "tat-ca";
     applyFilterAndSearch();
   };
 
-  // Delete customer
+  const toggleStatus = async (id) => {
+    try {
+      isLoading.value = true;
+      const response = await axios.put(`http://localhost:8080/khach-hang/toggle-status/${id}`);
+      await fetchCustomers(currentPage.value);
+      showToast("success", response.data.message || "Đã thay đổi trạng thái thành công!");
+    } catch (error) {
+      console.error("Lỗi khi thay đổi trạng thái:", error);
+      showToast("error", "Không thể thay đổi trạng thái: " + (error.response?.data?.message || error.message));
+    } finally {
+      isLoading.value = false;
+    }
+  };
+
   const showDeleteConfirm = (id) => {
     selectedCustomerId.value = id;
     showConfirmModal.value = true;
@@ -114,7 +133,7 @@ export default function useCustomerManagement() {
     try {
       await axios.put(`http://localhost:8080/khach-hang/delete/${selectedCustomerId.value}`);
       showToast("success", "Hủy kích hoạt khách hàng thành công!");
-      await fetchCustomers(currentPage.value); // Cập nhật lại dữ liệu sau khi xóa
+      await fetchCustomers(currentPage.value);
     } catch (error) {
       console.error("Lỗi khi xóa khách hàng:", error);
       showToast("error", "Không thể xóa khách hàng!");
@@ -124,26 +143,21 @@ export default function useCustomerManagement() {
     }
   };
 
-  // Edit customer
   const editCustomer = (customer) => {
     console.log("Editing customer:", customer);
-    // Logic to open edit form or modal
   };
 
-  // Pagination
   const goToPage = (page) => {
     if (page >= 1 && page <= totalPages.value) {
       fetchCustomers(page);
     }
   };
 
-  // Import Excel (placeholder)
   const importExcel = () => {
     console.log("Import Excel functionality not implemented yet.");
     showToast("info", "Chức năng nhập bằng Excel đang được phát triển!");
   };
 
-  // Table columns definition for DynamicTable
   const tableColumns = [
     { key: "index", label: "#", formatter: (value, item, index) => index + 1 },
     { key: "ma", label: "Mã" },
@@ -161,7 +175,7 @@ export default function useCustomerManagement() {
     {
       key: "idDiaChiKH.diaChiCuThe",
       label: "Địa chỉ",
-      formatter: (value) => `
+      formatter: (value, item) => `
         <div style="
           min-width: 150px;
           max-width: 150px;
@@ -176,7 +190,10 @@ export default function useCustomerManagement() {
           padding: 8px;
           line-height: 1.5;
         ">
-          ${value || "Chưa có dữ liệu"}
+          ${item.idDiaChiKH ? `${item.idDiaChiKH.diaChiCuThe}
+          , ${item.idDiaChiKH.phuong},
+           ${item.idDiaChiKH.quan}
+          , ${item.idDiaChiKH.thanhPho}` : "Chưa có dữ liệu"}
         </div>
       `,
     },
@@ -196,9 +213,10 @@ export default function useCustomerManagement() {
           <a href="/update-khach-hang?id=${item.id}" class="text-orange-500 hover:text-orange-500 transition">
             <i class="fas fa-pen-to-square"></i>
           </a>
-          <button class="text-red-600 hover:text-red-800 transition ml-4" onclick="document.dispatchEvent(new CustomEvent('showDeleteConfirm', { detail: '${item.id}' }))">
-            <i class="fas fa-trash"></i>
-          </button>
+          <label class="switch ml-4">
+            <input type="checkbox" ${item.deleted ? '' : 'checked'} onchange="document.dispatchEvent(new CustomEvent('toggleStatus', { detail: '${item.id}' }))">
+            <span class="slider round"></span>
+          </label>
         </td>
       `,
     },
@@ -209,15 +227,14 @@ export default function useCustomerManagement() {
     styleTag.type = "text/css";
     styleTag.innerHTML = `
       table {
-        table-layout: fixed; /* Cố định chiều rộng cột */
-        width: 100%; /* Bảng chiếm toàn bộ chiều rộng */
-        font-family: Arial, sans-serif; /* Font dễ nhìn */
+        table-layout: fixed;
+        width: 100%;
+        font-family: Arial, sans-serif;
       }
       td {
-        color: #444; /* Màu chữ nội dung */
+        color: #444;
       }
-      /* Cụ thể cho cột "Địa chỉ" */
-      th:nth-child(7), /* Cột "Địa chỉ" là cột thứ 7 */
+      th:nth-child(7),
       td:nth-child(7) {
         min-width: 150px !important;
         max-width: 150px !important;
@@ -231,43 +248,105 @@ export default function useCustomerManagement() {
         padding: 8px !important;
         line-height: 1.5 !important;
       }
-      td {
-        color: #444; /* Màu chữ nội dung */
+      th:nth-child(1), td:nth-child(1) { min-width: 50px; max-width: 50px; }
+      th:nth-child(2), td:nth-child(2) { min-width: 100px; max-width: 100px; }
+      th:nth-child(3), td:nth-child(3) { min-width: 150px; max-width: 150px; }
+      th:nth-child(4), td:nth-child(4) { min-width: 200px; max-width: 200px; }
+      th:nth-child(5), td:nth-child(5) { min-width: 120px; max-width: 120px; }
+      th:nth-child(6), td:nth-child(6) { min-width: 150px; max-width: 150px; }
+      th:nth-child(7), td:nth-child(7) { min-width: 150px; max-width: 150px; }
+      th:nth-child(8), td:nth-child(8) { min-width: 120px; max-width: 120px; }
+      th:nth-child(9), td:nth-child(9) { min-width: 120px; max-width: 120px; }
+
+      .switch {
+        position: relative;
+        display: inline-block;
+        width: 40px;
+        height: 20px;
       }
-      /* Định nghĩa chiều rộng cho từng cột */
-      th:nth-child(1), td:nth-child(1) { min-width: 50px; max-width: 50px; } /* # */
-      th:nth-child(2), td:nth-child(2) { min-width: 100px; max-width: 100px; } /* Mã */
-      th:nth-child(3), td:nth-child(3) { min-width: 150px; max-width: 150px; } /* Tên */
-      th:nth-child(4), td:nth-child(4) { min-width: 200px; max-width: 200px; } /* Email */
-      th:nth-child(5), td:nth-child(5) { min-width: 120px; max-width: 120px; } /* SDT */
-      th:nth-child(6), td:nth-child(6) { min-width: 150px; max-width: 150px; } /* Ngày tham gia */
-      th:nth-child(7), td:nth-child(7) { min-width: 150px; max-width: 150px; } /* Địa chỉ */
-      th:nth-child(8), td:nth-child(8) { min-width: 120px; max-width: 120px; } /* Trạng thái */
-      th:nth-child(9), td:nth-child(9) { min-width: 120px; max-width: 120px; } /* Thao Tác */
-    \`;
-      
+      .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+      .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        transition: .4s;
+        border-radius: 20px;
+      }
+      .slider:before {
+        position: absolute;
+        content: "";
+        height: 16px;
+        width: 16px;
+        left: 2px;
+        bottom: 2px;
+        background-color: white;
+        transition: .4s;
+        border-radius: 50%;
+      }
+      input:checked + .slider:before {
+        transform: translateX(20px);
+      }
+      input:checked + .slider {
+      background-color: #f97316;
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.15);
+      }
     `;
     document.head.appendChild(styleTag);
   }
 
-  // Utility to get nested value (used by DynamicTable)
   const getNestedValue = (obj, path) => {
     return path.split(".").reduce((acc, part) => (acc && acc[part] !== undefined ? acc[part] : ""), obj) || "";
   };
 
-  // Xử lý sự kiện showDeleteConfirm từ DynamicTable
   const handleShowDeleteConfirm = (event) => {
     showDeleteConfirm(event.detail);
   };
 
-  onMounted(() => {
+  const handleDefaultAddressChanged = (event) => {
+    const { id, diaChiCuThe, thanhPho, quan, phuong } = event.detail;
+    const customerIndex = dataTable.value.findIndex(customer => customer.id === id);
+    if (customerIndex !== -1) {
+      dataTable.value[customerIndex].idDiaChiKH = {
+        ...dataTable.value[customerIndex].idDiaChiKH,
+        diaChiCuThe,
+        thanhPho,
+        quan,
+        phuong,
+      };
+      // Cập nhật originalData để giữ đồng bộ
+      const originalIndex = originalData.value.findIndex(customer => customer.id === id);
+      if (originalIndex !== -1) {
+        originalData.value[originalIndex].idDiaChiKH = {
+          ...originalData.value[originalIndex].idDiaChiKH,
+          diaChiCuThe,
+          thanhPho,
+          quan,
+          phuong,
+        };
+      }
+    }
+  };
+
+  onMounted(async () => {
     document.addEventListener("showDeleteConfirm", handleShowDeleteConfirm);
-    fetchCustomers();
+    document.addEventListener("toggleStatus", (event) => toggleStatus(event.detail));
+    document.addEventListener("defaultAddressChanged", handleDefaultAddressChanged);
+    await fetchCustomers();
     injectCSS();
   });
 
   onUnmounted(() => {
     document.removeEventListener("showDeleteConfirm", handleShowDeleteConfirm);
+    document.removeEventListener("toggleStatus", (event) => toggleStatus(event.detail));
+    document.removeEventListener("defaultAddressChanged", handleDefaultAddressChanged);
   });
 
   return {

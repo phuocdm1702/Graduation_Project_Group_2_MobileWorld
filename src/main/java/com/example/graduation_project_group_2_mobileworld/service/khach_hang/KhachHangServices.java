@@ -5,6 +5,7 @@ import com.example.graduation_project_group_2_mobileworld.entity.*;
 import com.example.graduation_project_group_2_mobileworld.repository.khach_hang.KhachHangRepository;
 import com.example.graduation_project_group_2_mobileworld.repository.khach_hang.diaChiKhachHangRepo;
 import com.example.graduation_project_group_2_mobileworld.repository.tai_khoan.TaiKhoanRepository;
+import com.example.graduation_project_group_2_mobileworld.service.nhan_vien.EmailServices;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
@@ -18,10 +19,12 @@ public class KhachHangServices {
     private final KhachHangRepository khachHangRepository;
     private final TaiKhoanRepository taiKhoanRepository;
     private final diaChiKhachHangRepo diaChiKhachHangRepo;
-    public KhachHangServices(KhachHangRepository khachHangRepository, TaiKhoanRepository taiKhoanRepository, com.example.graduation_project_group_2_mobileworld.repository.khach_hang.diaChiKhachHangRepo diaChiKhachHangRepo) {
+    private final EmailServices emailServices;
+    public KhachHangServices(KhachHangRepository khachHangRepository, TaiKhoanRepository taiKhoanRepository, com.example.graduation_project_group_2_mobileworld.repository.khach_hang.diaChiKhachHangRepo diaChiKhachHangRepo, EmailServices emailServices) {
         this.khachHangRepository = khachHangRepository;
         this.taiKhoanRepository = taiKhoanRepository;
         this.diaChiKhachHangRepo = diaChiKhachHangRepo;
+        this.emailServices = emailServices;
     }
 
     public List<KhachHang> getAllCustomers() {
@@ -109,7 +112,11 @@ public class KhachHangServices {
         taiKhoan.setSoDienThoai(khachHangDTO.getSoDienThoai());
         taiKhoan.setTenDangNhap(khachHangDTO.getUserName());
         taiKhoan.setIdQuyenHan(quyenHan);
-        taiKhoan.setDeleted(false);
+        taiKhoan.setDeleted(khachHangDTO.getGioiTinh());
+
+        String randomPassword = emailServices.generateRandomPassword(8);
+        taiKhoan.setMatKhau(randomPassword);
+
         taiKhoan = taiKhoanRepository.save(taiKhoan);
 
         KhachHang kh = new KhachHang();
@@ -122,6 +129,7 @@ public class KhachHangServices {
         kh.setNgaySinh(khachHangDTO.getNgaySinh());
         kh.setCccd(khachHangDTO.getCccd());
         kh.setDeleted(false);
+        kh.setAnhKhachHang(khachHangDTO.getAnhKhachHang());
         kh.setGioiTinh(khachHangDTO.getGioiTinh() != null && khachHangDTO.getGioiTinh() ? (short) 1 : (short) 0);
         kh = khachHangRepository.save(kh); // Lưu trước để có ID
 
@@ -131,10 +139,22 @@ public class KhachHangServices {
         dchi.setQuan(khachHangDTO.getQuan());
         dchi.setPhuong(khachHangDTO.getPhuong());
         dchi.setDiaChiCuThe(khachHangDTO.getDiaChiCuThe());
+        dchi.setMacDinh(true);
         dchi.setIdKhachHang(kh);
         diaChiKhachHangRepo.save(dchi);
 
         kh.setIdDiaChiKH(dchi); // Gán lại địa chỉ khách hàng vào khachHang
+        try {
+            emailServices.sendWelcomeEmail(
+                    khachHangDTO.getEmail(),
+                    khachHangDTO.getTenKH(),
+                    khachHangDTO.getEmail(),
+                    randomPassword
+            );
+        } catch (Exception e) {
+            // Log lỗi nếu cần, nhưng không làm ảnh hưởng quá trình thêm nhân viên
+            System.err.println("Lỗi gửi email: " + e.getMessage());
+        }
         return khachHangRepository.save(kh);
     }
 
@@ -148,6 +168,7 @@ public class KhachHangServices {
                 .map(existingNhanVien -> {
                     existingNhanVien.setCccd(khachHangDTO.getCccd());
                     existingNhanVien.setNgaySinh(khachHangDTO.getNgaySinh());
+                    existingNhanVien.setTen(khachHangDTO.getTenKH());
                     // Lấy thông tin tài khoản qua idTaiKhoan
                     if (existingNhanVien.getIdTaiKhoan() != null) {
                         TaiKhoan taiKhoan = taiKhoanRepository.findById(existingNhanVien.getIdTaiKhoan().getId())
@@ -181,6 +202,13 @@ public class KhachHangServices {
     }
 
 
-
-
+    public KhachHang toggleStatus(Integer id) {
+        Optional<KhachHang> optionalKhachHang = khachHangRepository.findById(id);
+        if (!optionalKhachHang.isPresent()) {
+            throw new RuntimeException("Không tìm thấy khách hàng với ID: " + id);
+        }
+        KhachHang khachHang = optionalKhachHang.get();
+        khachHang.setDeleted(!khachHang.isDeleted()); // Toggle trạng thái
+        return khachHangRepository.save(khachHang);
+    }
 }

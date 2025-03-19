@@ -85,7 +85,34 @@ public class KhachHangController {
         return ResponseEntity.badRequest().body("Khách hàng không tồn tại");
     }
 
+    @PutMapping("/toggle-status/{id}")
+    public ResponseEntity<?> toggleStatus(@PathVariable Integer id) {
+        try {
+            KhachHang updatedKhachHang = khachHangServices.toggleStatus(id);
+            String message = updatedKhachHang.isDeleted() ? "Đã hủy kích hoạt khách hàng!" : "Đã kích hoạt khách hàng!";
+            return ResponseEntity.ok(new ResponseMessage(message));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(new ResponseMessage(e.getMessage()));
+        }
+    }
 
+    // Các endpoint khác như /home, /delete/{id}, v.v.
+}
+
+class ResponseMessage {
+    private String message;
+
+    public ResponseMessage(String message) {
+        this.message = message;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
 
 
 

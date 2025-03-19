@@ -20,7 +20,7 @@ export default function useEmployeeManagement() {
   const originalData = ref([]); // Lưu trữ dữ liệu gốc để tìm kiếm
 
   const currentPage = ref(0);
-  const itemsPerPage = 10;
+  const itemsPerPage = 5  ;
   const totalPages = ref(0);
 
   const showConfirmModal = ref(false);
@@ -29,6 +29,9 @@ export default function useEmployeeManagement() {
   const filterStatus = ref("tat-ca");
   const searchNV = ref("");
 
+
+  const isLoading = ref(false);
+  
   // Preview image
   function previewImage(event) {
     const file = event.target.files[0];
@@ -133,6 +136,20 @@ export default function useEmployeeManagement() {
     }
   };
 
+  const toggleStatus = async (id) => {
+    try {
+      isLoading.value = true;
+      const response = await axios.put(`http://localhost:8080/nhan-vien/toggle-status/${id}`);
+      await fetchNhanVien(currentPage.value);
+      showToast("success", response.data.message || "Đã thay đổi trạng thái thành công!");
+    } catch (error) {
+      console.error("Lỗi khi thay đổi trạng thái:", error);
+      showToast("error", "Không thể thay đổi trạng thái: " + (error.response?.data?.message || error.message));
+    } finally {
+      isLoading.value = false;
+    }
+  };
+
   const tableColumns = [
     { key: "index", label: "#", formatter: (value, item, index) => currentPage.value * itemsPerPage + index + 1 },
     { key: "ma", label: "Mã" },
@@ -146,6 +163,31 @@ export default function useEmployeeManagement() {
         if (!value || isNaN(Date.parse(value))) return "Chưa có dữ liệu";
         return format(new Date(value), 'dd/MM/yyyy HH:mm:ss', { locale: vi });
       },
+    },
+    {
+      key: "diaChiCuThe",
+      label: "Địa chỉ",
+      formatter: (value,item) => `
+        <div style="
+          min-width: 150px;
+          max-width: 150px;
+          text-align: center;
+          white-space: normal;
+          word-wrap: break-word;
+          min-height: 60px;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+          padding: 8px;
+          line-height: 1.5;
+        ">
+          ${value || "Chưa có dữ liệu"},
+${item.thanhPho},
+${item.quan},
+${item.phuong},
+        </div>
+      `,
     },
     {
       key: "deleted",
@@ -163,13 +205,94 @@ export default function useEmployeeManagement() {
           <a href="/update-nhan-vien?id=${item.id}" class="text-orange-500 hover:text-orange-500 transition">
             <i class="fas fa-pen-to-square"></i>
           </a>
-          <button class="text-red-600 hover:text-red-800 transition ml-4" onclick="document.dispatchEvent(new CustomEvent('showDeleteConfirm', { detail: '${item.id}' }))">
-            <i class="fas fa-trash"></i>
-          </button>
+          <label class="switch ml-4">
+            <input type="checkbox" ${item.deleted ? '' : 'checked'} onchange="document.dispatchEvent(new CustomEvent('toggleStatus', { detail: '${item.id}' }))">
+            <span class="slider round"></span>
+          </label>
         </td>
       `,
     },
   ];
+//css cho Table
+  function injectCSS() {
+    const styleTag = document.createElement("style");
+    styleTag.type = "text/css";
+    styleTag.innerHTML = `
+      table {
+        table-layout: fixed;
+        width: 100%;
+        font-family: Arial, sans-serif;
+      }
+      td {
+        color: #444;
+      }
+      th:nth-child(7),
+      td:nth-child(7) {
+        min-width: 150px !important;
+        max-width: 150px !important;
+        white-space: normal !important;
+        word-wrap: break-word !important;
+        min-height: 60px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: center !important;
+        align-items: center !important;
+        padding: 8px !important;
+        line-height: 1.5 !important;
+      }
+      th:nth-child(1), td:nth-child(1) { min-width: 50px; max-width: 50px; }
+      th:nth-child(2), td:nth-child(2) { min-width: 100px; max-width: 100px; }
+      th:nth-child(3), td:nth-child(3) { min-width: 150px; max-width: 150px; }
+      th:nth-child(4), td:nth-child(4) { min-width: 200px; max-width: 200px; }
+      th:nth-child(5), td:nth-child(5) { min-width: 120px; max-width: 120px; }
+      th:nth-child(6), td:nth-child(6) { min-width: 150px; max-width: 150px; }
+      th:nth-child(7), td:nth-child(7) { min-width: 150px; max-width: 150px; }
+      th:nth-child(8), td:nth-child(8) { min-width: 120px; max-width: 120px; }
+      th:nth-child(9), td:nth-child(9) { min-width: 120px; max-width: 120px; }
+
+      .switch {
+        position: relative;
+        display: inline-block;
+        width: 40px;
+        height: 20px;
+      }
+      .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+      .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        transition: .4s;
+        border-radius: 20px;
+      }
+      .slider:before {
+        position: absolute;
+        content: "";
+        height: 16px;
+        width: 16px;
+        left: 2px;
+        bottom: 2px;
+        background-color: white;
+        transition: .4s;
+        border-radius: 50%;
+      }
+      input:checked + .slider:before {
+        transform: translateX(20px);
+      }
+      input:checked + .slider {
+      background-color: #f97316;
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.15);
+      }
+    `;
+    document.head.appendChild(styleTag);
+  }
 
   const getNestedValue = (obj, path) => {
     return path.split(".").reduce((acc, part) => acc && acc[part], obj) || "";
@@ -180,13 +303,16 @@ export default function useEmployeeManagement() {
     showDeleteConfirm(event.detail);
   };
 
-  onMounted(() => {
+  onMounted(async () => {
     document.addEventListener("showDeleteConfirm", handleShowDeleteConfirm);
-    fetchNhanVien();
+    document.addEventListener("toggleStatus", (event) => toggleStatus(event.detail));
+    await fetchNhanVien();
+    injectCSS();
   });
 
   onUnmounted(() => {
     document.removeEventListener("showDeleteConfirm", handleShowDeleteConfirm);
+    document.removeEventListener("toggleStatus", (event) => toggleStatus(event.detail));    
   });
 
   return {

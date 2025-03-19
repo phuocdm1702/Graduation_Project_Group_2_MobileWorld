@@ -1,26 +1,27 @@
 <template>
-  <div>
-    <!-- Thêm BreadcrumbWrapper -->
+  <div class="container mx-auto px-4 py-6">
+    <!-- BreadcrumbWrapper -->
     <BreadcrumbWrapper :breadcrumb-items="breadcrumbItems" />
 
     <div class="bg-white p-6 rounded-lg shadow-lg">
       <!-- Khu vực quét QR -->
       <div v-if="isScanning" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div class="bg-white p-4 rounded-lg">
-          <div id="qr-reader" class="w-64 h-64"></div>
+        <div class="bg-white p-6 rounded-lg shadow-md">
+          <div id="qr-reader" class="w-72 h-72 mx-auto"></div>
           <button
             @click="stopScanning"
-            class="mt-4 bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600"
+            class="mt-4 bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 w-full"
           >
             Dừng quét
           </button>
         </div>
       </div>
 
-      <div class="grid grid-cols-2 gap-4">
-        <div class="flex flex-col items-center gap-2">
+      <!-- Phần ảnh được căn giữa -->
+      <div class="flex justify-center mb-6">
+        <div class="employee-image-container relative">
           <div
-            class="w-32 h-32 rounded-full border-4 border-gray-400 flex items-center justify-center cursor-pointer"
+            class="w-36 h-36 rounded-full border-4 border-gray-300 flex items-center justify-center cursor-pointer hover:border-gray-400 transition-colors"
             @click="triggerFileInput"
           >
             <img
@@ -29,15 +30,14 @@
               alt="Ảnh nhân viên"
               class="w-full h-full object-cover rounded-full"
             >
-            <span v-else class="text-gray-400">Chọn ảnh</span>
+            <span v-else class="text-gray-500 font-medium">Chọn ảnh</span>
           </div>
           <button
             v-if="employeeImage"
             @click="deleteImage"
-            class="bg-red-500 text-white w-8 h-8 flex items-center justify-center rounded-full hover:bg-red-600 shadow-md"
-            title="Xóa ảnh"
+            class="absolute top-0 right-0 bg-red-500 text-white w-6 h-6 flex items-center justify-center rounded-full hover:bg-red-600 transition-colors transform translate-x-2 -translate-y-2"
           >
-            ✖
+            ✕
           </button>
           <input
             type="file"
@@ -47,137 +47,217 @@
             accept="image/*"
           >
         </div>
+      </div>
 
-        <div class="w-full mt-4">
-          <label class="block mb-2">Tên Nhân Viên</label>
+      <!-- Cột thông tin chính -->
+      <div class="md:col-span-2 space-y-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block mb-1 text-sm font-medium">Tên nhân viên</label>
+            <input
+              type="text"
+              v-model="employee.tenNhanVien"
+              class="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+              placeholder="Nhập tên nhân viên"
+            >
+          </div>
+          <div>
+            <label class="block mb-1 text-sm font-medium">Số điện thoại</label>
+            <input
+              type="text"
+              v-model="employee.sdt"
+              class="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+              placeholder="Nhập SDT"
+            >
+          </div>
+          <div>
+            <label class="block mb-1 text-sm font-medium">CCCD</label>
+            <div class="flex gap-2">
+              <input
+                type="text"
+                v-model="employee.cccd"
+                class="flex-1 px-3 py-2 border rounded-md focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                placeholder="Nhập CCCD"
+              >
+              <button
+                @click="startScanning"
+                class="bg-orange-500 text-white p-2 rounded-md hover:bg-orange-600 transition-colors"
+                title="Quét mã QR"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M3 3h4v4H3zM17 3h4v4h-4zM3 17h4v4H3zM17 17h4v4h-4zM7 7h4v4H7zM7 17h4M7 13h8v8M17 7h-4v4"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <div>
+            <label class="block mb-1 text-sm font-medium">Email</label>
+            <input
+              type="text"
+              v-model="employee.email"
+              class="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+              placeholder="Nhập Email"
+            >
+          </div>
+        </div>
+
+        <!-- Địa chỉ -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label class="block mb-1 text-sm font-medium">Tỉnh/Thành phố</label>
+            <select
+              v-model="selectedProvince"
+              @change="handleProvinceChange"
+              class="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+            >
+              <option value="" disabled>Chọn tỉnh/thành phố</option>
+              <option v-for="province in provinces" :key="province.code" :value="province.name">{{ province.name }}</option>
+            </select>
+          </div>
+          <div>
+            <label class="block mb-1 text-sm font-medium">Quận/Huyện</label>
+            <select
+              v-model="selectedDistrict"
+              @change="handleDistrictChange"
+              class="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+            >
+              <option value="" disabled>Chọn quận/huyện</option>
+              <option v-for="district in districts" :key="district.code" :value="district.name">{{ district.name }}</option>
+            </select>
+          </div>
+          <div>
+            <label class="block mb-1 text-sm font-medium">Xã/Phường</label>
+            <select
+              v-model="selectedWard"
+              class="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+            >
+              <option value="" disabled>Chọn xã/phường</option>
+              <option v-for="ward in wards" :key="ward.code" :value="ward.name">{{ ward.name }}</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block mb-1 text-sm font-medium">Địa chỉ cụ thể</label>
           <input
             type="text"
-            v-model="employee.tenNhanVien"
-            class="w-full px-3 py-2 border rounded-md"
-            placeholder="Nhập tên nhân viên"
+            v-model="employee.diaChicuthe"
+            class="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+            placeholder="Nhập địa chỉ cụ thể"
           >
         </div>
 
-        <div>
-          <label class="block mb-2">UserName</label>
-          <input type="text" v-model="employee.userName" class="w-full px-3 py-2 border rounded-md" placeholder="Nhập UserName">
-        </div>
-
-        <div>
-          <label class="block mb-2">SDT</label>
-          <input type="text" v-model="employee.sdt" class="w-full px-3 py-2 border rounded-md" placeholder="Nhập SDT">
-        </div>
-
-        <div>
-          <label class="block mb-2">CCCD</label>
-          <div class="flex items-center gap-2">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block mb-1 text-sm font-medium">Ngày sinh</label>
             <input
-              type="text"
-              v-model="employee.cccd"
-              class="flex-1 px-3 py-2 border rounded-md"
-              placeholder="Nhập CCCD"
+              type="date"
+              v-model="employee.ngaySinh"
+              class="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-orange-500 focus:border-transparent"
             >
-            <button
-              @click="startScanning"
-              class="bg-orange-500 text-white px-3 py-2 rounded-md hover:bg-orange-600 flex items-center justify-center"
-              title="Quét mã QR"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M3 3h4v4H3z"></path>
-                <path d="M17 3h4v4h-4z"></path>
-                <path d="M3 17h4v4H3z"></path>
-                <path d="M17 17h4v4h-4z"></path>
-                <path d="M7 7h4v4H7z"></path>
-                <path d="M7 17h4"></path>
-                <path d="M7 13h8v8"></path>
-                <path d="M17 7h-4v4"></path>
-              </svg>
-            </button>
           </div>
-        </div>
-
-        <div>
-          <label class="block mb-2">Email</label>
-          <input type="text" v-model="employee.email" class="w-full px-3 py-2 border rounded-md" placeholder="Nhập Email">
-        </div>
-
-        <div class="col-span-2 grid grid-cols-3 gap-4">
           <div>
-            <label class="block mb-2">Địa chỉ cụ thể</label>
-            <input type="text" v-model="employee.diaChicuthe" class="w-full px-3 py-2 border rounded-md" placeholder="Nhập địa chỉ cụ thể">
-          </div>
-
-          <div>
-            <label class="block mb-2">Ngày sinh</label>
-            <input type="date" v-model="employee.ngaySinh" class="w-full px-3 py-2 border rounded-md">
-          </div>
-
-          <div>
-            <label class="block mb-2">Giới Tính</label>
-            <select v-model="employee.gioiTinh" class="w-full px-3 py-2 border rounded-md">
-              <option value="">---Chọn Giới Tính---</option>
-              <option value="False">Nam</option>
-              <option value="True">Nữ</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="flex gap-4 col-span-2">
-          <div class="w-1/3">
-            <label class="block mb-2">Tỉnh/Thành phố</label>
-            <select v-model="selectedProvince" @change="handleProvinceChange" class="w-full px-3 py-2 border rounded-md">
-              <option value="" disabled>Chọn tỉnh/thành phố</option>
-              <option v-for="province in provinces" :key="province.code">{{ province.name }}</option>
-            </select>
-          </div>
-
-          <div class="w-1/3">
-            <label class="block mb-2">Quận/Huyện</label>
-            <select v-model="selectedDistrict" @change="handleDistrictChange" class="w-full px-3 py-2 border rounded-md">
-              <option value="" disabled>Chọn quận/huyện</option>
-              <option v-for="district in districts" :key="district.code">{{ district.name }}</option>
-            </select>
-          </div>
-
-          <div class="w-1/3">
-            <label class="block mb-2">Xã/Phường</label>
-            <select v-model="selectedWard" class="w-full px-3 py-2 border rounded-md">
-              <option value="" disabled>Chọn xã/phường</option>
-              <option v-for="ward in wards" :key="ward.code">{{ ward.name }}</option>
-            </select>
+            <label class="block mb-2 text-sm font-medium text-gray-700">Giới tính</label>
+            <div class="flex items-center gap-6">
+              <label class="flex items-center space-x-2 cursor-pointer">
+                <input
+                  v-model="employee.gioiTinh"
+                  value="False"
+                  type="radio"
+                  name="gender"
+                  id="male"
+                  class="form-radio h-5 w-5 text-orange-500 focus:ring-2 focus:ring-orange-500 focus:ring-opacity-50 transition duration-150 ease-in-out"
+                >
+                <span class="text-sm text-gray-700">Nam</span>
+              </label>
+              <label class="flex items-center space-x-2 cursor-pointer">
+                <input
+                  v-model="employee.gioiTinh"
+                  value="True"
+                  type="radio"
+                  name="gender"
+                  id="female"
+                  class="form-radio h-5 w-5 text-orange-500 focus:ring-2 focus:ring-orange-500 focus:ring-opacity-50 transition duration-150 ease-in-out"
+                >
+                <span class="text-sm text-gray-700">Nữ</span>
+              </label>
+            </div>
           </div>
         </div>
       </div>
 
-      <div class="flex justify-end space-x-4 mt-6">
+      <!-- Nút điều khiển -->
+      <div class="flex justify-end gap-4 mt-6">
         <router-link to="/nhan-vien">
-          <button @click="$emit('cancel')" class="px-4 py-2 bg-gray-300 rounded-md hover:bg-gray-400 transition-colors">
+          <button
+            class="px-6 py-2 bg-gray-300 rounded-md hover:bg-gray-400 transition-colors"
+          >
             Hủy
           </button>
         </router-link>
-
         <button
-          type="submit"
           @click="addNhanVien"
-          class="px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 transition-colors flex items-center"
+          class="px-6 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 transition-colors flex items-center font-bold"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
           </svg>
-          <span class="font-bold">Thêm nhân viên</span>
+          Thêm nhân viên
         </button>
       </div>
     </div>
   </div>
 </template>
 
+<style scoped>
+.employee-image-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.form-radio {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  border: 2px solid #d1d5db;
+  border-radius: 50%;
+  outline: none;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+/* Khi được chọn */
+.form-radio:checked {
+  background-color: #f97316; /* Màu cam tương ứng với theme */
+  border-color: #f97316;
+}
+
+/* Hiệu ứng hover */
+.form-radio:hover {
+  border-color: #f59e0b;
+}
+
+/* Focus ring */
+.form-radio:focus {
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.3);
+}
+
+/* Đảm bảo text và radio thẳng hàng */
+label {
+  display: flex;
+  align-items: center;
+}
+</style>
+
 <script setup>
-import { onMounted, ref, nextTick } from 'vue';
-import { computed } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import {onMounted, ref, nextTick} from 'vue';
+import {computed} from 'vue';
+import {useRoute, useRouter} from 'vue-router';
 import axios from 'axios';
-import { Html5Qrcode } from 'html5-qrcode';
-import BreadcrumbWrapper from '@/components/BreadcrumbWrapper.vue'; // Import BreadcrumbWrapper
+import {Html5Qrcode} from 'html5-qrcode';
+import BreadcrumbWrapper from '@/components/BreadcrumbWrapper.vue';
 
 const router = useRouter();
 const route = useRoute();
@@ -213,7 +293,7 @@ const breadcrumbItems = computed(() => {
   if (typeof route.meta.breadcrumb === "function") {
     return route.meta.breadcrumb(route);
   }
-  return route.meta?.breadcrumb || ["Nhân viên", "Thêm nhân viên"]; // Mặc định cho trang thêm nhân viên
+  return route.meta?.breadcrumb || ["Nhân viên", "Thêm nhân viên"];
 });
 
 // Quét mã QR
@@ -224,7 +304,7 @@ const startScanning = async () => {
 
   qrReader.value
     .start(
-      { facingMode: 'environment' },
+      {facingMode: 'environment'},
       {
         fps: 15,
         qrbox: 250,
@@ -253,7 +333,7 @@ const stopScanning = () => {
   }
 };
 
-const handleQRData = (data) => {
+const handleQRData = async (data) => {
   console.log('Dữ liệu QR thô:', data);
   const fields = data.split('|');
   console.log('Các trường phân tích:', fields);
@@ -267,7 +347,7 @@ const handleQRData = (data) => {
       gioiTinh: fields[4].trim() === 'Nam' ? 'False' : 'True',
       diaChicuthe: fields[5].trim(),
     };
-    parseAddress(fields[5].trim());
+    await parseAddress(fields[5].trim());
   } else {
     employee.value = {
       ...employee.value,
@@ -297,18 +377,99 @@ const formatDate = (dateStr) => {
   return '';
 };
 
-const parseAddress = (address) => {
-  const parts = address.split(', ').reverse();
+// Ánh xạ tên tỉnh từ QR sang tên trong API
+const provinceMapping = {
+  'Hà Nội': 'Thành phố Hà Nội',
+  'TP. Hồ Chí Minh': 'Thành phố Hồ Chí Minh',
+  // Thêm các ánh xạ khác nếu cần
+};
+
+// Ánh xạ tên phường/xã (nếu cần)
+const wardMapping = {
+  'Trà Quý': 'Thị trấn Trâu Quỳ', // Ánh xạ "Trà Quý" thành "Thị trấn Trâu Quỳ"
+  // Thêm các ánh xạ khác nếu cần
+};
+
+const normalizeProvinceName = (provinceName) => {
+  return provinceMapping[provinceName] || provinceName;
+};
+
+// Chuẩn hóa tên phường/xã từ QR sang tên trong API
+const normalizeWardName = (wardName) => {
+  return wardMapping[wardName] || wardName;
+};
+
+// Chuẩn hóa tên quận/huyện và phường/xã, bỏ tiền tố "Huyện", "Quận", "Phường", "Xã", "Thị trấn"
+const normalizeName = (name) => {
+  return name
+    .replace(/^(Huyện|Quận|Phường|Xã|Thị trấn)\s+/i, '') // Bỏ tiền tố
+    .trim();
+};
+
+const parseAddress = async (address) => {
+  console.log('Địa chỉ thô:', address);
+  const parts = address.split(', ').reverse(); // Đảo ngược để lấy từ tỉnh -> phường
+  console.log('Các phần địa chỉ:', parts);
+
   if (parts.length >= 3) {
-    selectedProvince.value = parts[0].trim();
+    // Xử lý trường hợp có địa chỉ cụ thể (ví dụ: "Tdp Kiến Thành")
+    let provinceName = parts[0].trim();
+    let districtName = parts[1].trim();
+    let wardName = parts[2].trim();
+
+    // Nếu có phần địa chỉ cụ thể (phần thứ 4), gán vào diaChicuthe
+    if (parts.length > 3) {
+      employee.value.diaChicuthe = parts.slice(3).reverse().join(', ').trim();
+    }
+
+    // Chuẩn hóa tên tỉnh
+    provinceName = normalizeProvinceName(provinceName);
+    console.log('Tỉnh chuẩn hóa:', provinceName);
+
+    // Gán tỉnh/thành phố
+    const province = provinces.value.find((prov) => prov.name === provinceName);
+    if (!province) {
+      console.error('Không tìm thấy tỉnh:', provinceName);
+      alert('Không tìm thấy tỉnh/thành phố trong dữ liệu: ' + provinceName);
+      return;
+    }
+    selectedProvince.value = province.name;
     handleProvinceChange();
-    selectedDistrict.value = parts[1].trim();
+
+    // Đợi danh sách quận/huyện được cập nhật
+    await nextTick();
+    console.log('Danh sách quận/huyện:', districts.value.map(d => d.name));
+    const district = districts.value.find((dist) => normalizeName(dist.name) === normalizeName(districtName));
+    if (!district) {
+      console.error('Không tìm thấy quận/huyện:', districtName);
+      alert('Không tìm thấy quận/huyện trong dữ liệu: ' + districtName);
+      return;
+    }
+    selectedDistrict.value = district.name;
     handleDistrictChange();
-    selectedWard.value = parts[2].trim();
+
+    // Đợi danh sách phường/xã được cập nhật
+    await nextTick();
+    console.log('Danh sách phường/xã:', wards.value.map(w => w.name));
+
+    // Chuẩn hóa tên phường/xã từ QR
+    wardName = normalizeWardName(wardName);
+    console.log('Phường/xã chuẩn hóa:', wardName);
+
+    const ward = wards.value.find((w) => normalizeName(w.name) === normalizeName(wardName));
+    if (!ward) {
+      console.error('Không tìm thấy phường/xã:', wardName);
+      alert('Không tìm thấy phường/xã trong dữ liệu: ' + wardName);
+      return;
+    }
+    selectedWard.value = ward.name; // Gán tên đầy đủ (bao gồm "Thị trấn")
+  } else {
+    console.error('Địa chỉ không đủ thông tin:', address);
+    alert('Địa chỉ từ QR không đủ thông tin để phân tích: ' + address);
   }
 };
 
-// Xử lý ảnh
+
 async function uploadImage(file) {
   if (!file) return null;
 
@@ -323,7 +484,7 @@ async function uploadImage(file) {
 
   try {
     const response = await axios.post('http://localhost:8080/img/api/upload', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
+      headers: {'Content-Type': 'multipart/form-data'},
     });
 
     console.log('Response từ server:', response.data);
@@ -372,8 +533,7 @@ function triggerFileInput() {
 }
 
 async function addNhanVien() {
-  // Validate cơ bản
-  if (!employee.value.tenNhanVien || !employee.value.userName || !employee.value.sdt ||
+  if (!employee.value.tenNhanVien || !employee.value.sdt ||
     !employee.value.cccd || !employee.value.email || !employee.value.diaChicuthe ||
     !employee.value.ngaySinh || !employee.value.gioiTinh) {
     alert('Vui lòng điền đầy đủ thông tin bắt buộc!');
@@ -409,14 +569,14 @@ async function addNhanVien() {
 
   try {
     const response = await axios.post('http://localhost:8080/nhan-vien/add', employeeData, {
-      headers: { 'Content-Type': 'application/json' },
+      headers: {'Content-Type': 'application/json'},
     });
     console.log('Phản hồi từ server:', response.data);
     alert('Thêm nhân viên thành công!');
 
     router.push({
       path: '/nhan-vien',
-      query: { newEmployee: JSON.stringify(response.data) }
+      query: {newEmployee: JSON.stringify(response.data)}
     });
   } catch (error) {
     console.error('Lỗi khi thêm nhân viên:', error.response ? error.response.data : error.message);
@@ -439,6 +599,7 @@ const handleProvinceChange = () => {
   districts.value = province ? province.districts : [];
   selectedDistrict.value = '';
   selectedWard.value = '';
+  wards.value = [];
 };
 
 const handleDistrictChange = () => {

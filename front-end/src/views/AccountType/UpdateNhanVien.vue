@@ -1,5 +1,4 @@
 <template>
-  <!-- Thêm BreadcrumbWrapper -->
   <BreadcrumbWrapper :breadcrumb-items="breadcrumbItems" />
   <div class="bg-gray-100 min-h-screen w-full flex items-start justify-center p-0">
     <div class="bg-white w-full h-full grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
@@ -15,20 +14,10 @@
               :src="employeeImage"
               alt="Ảnh nhân viên"
               class="w-full h-full object-cover"
+              @error="handleImageError"
             >
-            <span v-else class="flex items-center justify-center h-full text-gray-500 text-sm font-medium">Chọn ảnh</span>
           </div>
-
-          <button
-            v-if="employeeImage"
-            @click="deleteImage"
-            class="bg-red-500 text-white w-8 h-8 rounded-full flex items-center justify-center hover:bg-red-600 transition-all duration-300 shadow-sm"
-            title="Xóa ảnh"
-          >
-            ✕
-          </button>
-
-          <input type="file" ref="fileInput" @change="previewImage" class="hidden">
+          <input type="file" ref="fileInput" @change="previewImage" class="hidden" accept="image/*">
         </div>
 
         <div class="space-y-4">
@@ -75,17 +64,32 @@
             >
           </div>
 
-          <div class="space-y-1">
-            <label class="block text-sm font-medium text-gray-700">Giới tính</label>
-            <select
-              v-model="employeeData.gioiTinh"
-              ref="gioiTinhSelect"
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
-            >
-              <option value="" disabled selected>--- Chọn giới tính ---</option>
-              <option value="false">Nam</option>
-              <option value="true">Nữ</option>
-            </select>
+          <div>
+            <label class="block mb-2 text-sm font-medium text-gray-700">Giới tính</label>
+            <div class="flex items-center gap-6">
+              <label class="flex items-center space-x-2 cursor-pointer">
+                <input
+                  v-model="employeeData.gioiTinh"
+                  value="false"
+                  type="radio"
+                  name="gender"
+                  id="male"
+                  class="form-radio h-5 w-5 text-orange-500 focus:ring-2 focus:ring-orange-500 focus:ring-opacity-50 transition duration-150 ease-in-out"
+                >
+                <span class="text-sm text-gray-700">Nam</span>
+              </label>
+              <label class="flex items-center space-x-2 cursor-pointer">
+                <input
+                  v-model="employeeData.gioiTinh"
+                  value="true"
+                  type="radio"
+                  name="gender"
+                  id="female"
+                  class="form-radio h-5 w-5 text-orange-500 focus:ring-2 focus:ring-orange-500 focus:ring-opacity-50 transition duration-150 ease-in-out"
+                >
+                <span class="text-sm text-gray-700">Nữ</span>
+              </label>
+            </div>
           </div>
         </div>
 
@@ -124,17 +128,6 @@
           </div>
 
           <div class="space-y-1">
-            <label class="block text-sm font-medium text-gray-700">Số điện thoại</label>
-            <input
-              v-model="employeeData.soDienThoai"
-              type="text"
-              ref="sdt2Input"
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
-              placeholder="Nhập SDT"
-            >
-          </div>
-
-          <div class="space-y-1">
             <label class="block text-sm font-medium text-gray-700">Địa chỉ cụ thể</label>
             <input
               v-model="employeeData.diaChiCuThe"
@@ -145,39 +138,41 @@
             >
           </div>
 
-          <div class="space-y-1">
-            <label class="block text-sm font-medium text-gray-700">Tỉnh/Thành phố</label>
-            <select
-              v-model="selectedProvince"
-              @change="handleProvinceChange"
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
-            >
-              <option value="" disabled>Chọn tỉnh/thành phố</option>
-              <option v-for="province in provinces" :key="province.code" :value="province.name">{{ province.name }}</option>
-            </select>
-          </div>
+          <div class="grid grid-cols-3 gap-4">
+            <div class="space-y-1">
+              <label class="block text-sm font-medium text-gray-700">Tỉnh/Thành phố</label>
+              <select
+                v-model="selectedProvince"
+                @change="handleProvinceChange"
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+              >
+                <option value="" disabled>Chọn tỉnh/thành phố</option>
+                <option v-for="province in provinces" :key="province.code" :value="province.name">{{ province.name }}</option>
+              </select>
+            </div>
 
-          <div class="space-y-1">
-            <label class="block text-sm font-medium text-gray-700">Quận/Huyện</label>
-            <select
-              v-model="selectedDistrict"
-              @change="handleDistrictChange"
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
-            >
-              <option value="" disabled>Chọn quận/huyện</option>
-              <option v-for="district in districts" :key="district.code" :value="district.name">{{ district.name }}</option>
-            </select>
-          </div>
+            <div class="space-y-1">
+              <label class="block text-sm font-medium text-gray-700">Quận/Huyện</label>
+              <select
+                v-model="selectedDistrict"
+                @change="handleDistrictChange"
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+              >
+                <option value="" disabled>Chọn quận/huyện</option>
+                <option v-for="district in districts" :key="district.code" :value="district.name">{{ district.name }}</option>
+              </select>
+            </div>
 
-          <div class="space-y-1">
-            <label class="block text-sm font-medium text-gray-700">Xã/Phường</label>
-            <select
-              v-model="selectedWard"
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
-            >
-              <option value="" disabled>Chọn xã/phường</option>
-              <option v-for="ward in wards" :key="ward.code" :value="ward.name">{{ ward.name }}</option>
-            </select>
+            <div class="space-y-1">
+              <label class="block text-sm font-medium text-gray-700">Xã/Phường</label>
+              <select
+                v-model="selectedWard"
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+              >
+                <option value="" disabled>Chọn xã/phường</option>
+                <option v-for="ward in wards" :key="ward.code" :value="ward.name">{{ ward.name }}</option>
+              </select>
+            </div>
           </div>
         </div>
 
@@ -198,20 +193,18 @@
 import { onMounted, ref, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import axios from "axios";
-import BreadcrumbWrapper from '@/components/BreadcrumbWrapper.vue'; // Import BreadcrumbWrapper
+import BreadcrumbWrapper from '@/components/BreadcrumbWrapper.vue';
 
 const route = useRoute();
 const router = useRouter();
 
-// Tính toán breadcrumb
 const breadcrumbItems = computed(() => {
   if (typeof route.meta.breadcrumb === "function") {
     return route.meta.breadcrumb(route);
   }
-  return route.meta?.breadcrumb || ["Quản lý Nhân Viên", "Cập nhật Nhân Viên"]; // Mặc định cho trang cập nhật nhân viên
+  return route.meta?.breadcrumb || ["Quản lý Nhân Viên", "Cập nhật Nhân Viên"];
 });
 
-// Dữ liệu nhân viên
 const employeeData = ref({
   id: "",
   email: "",
@@ -221,15 +214,15 @@ const employeeData = ref({
   gioiTinh: "",
   tenNhanVien: "",
   diaChiCuThe: "",
-  thanhPho: "", // Tỉnh/Thành phố (khớp với API)
-  quan: "",     // Quận/Huyện (khớp với API)
-  phuong: "",   // Xã/Phường (khớp với API)
+  thanhPho: "",
+  quan: "",
+  phuong: "",
   anhNhanVien: "",
 });
 
-// Xử lý ảnh
 const employeeImage = ref(null);
 const fileInput = ref(null);
+const hasNewImage = ref(false);
 
 const triggerFileInput = () => {
   fileInput.value.click();
@@ -240,8 +233,9 @@ const previewImage = (event) => {
   if (file) {
     const reader = new FileReader();
     reader.onload = (e) => {
-      employeeImage.value = e.target.result;
+      employeeImage.value = e.target.result; // Chuỗi Base64
       employeeData.value.anhNhanVien = e.target.result;
+      hasNewImage.value = true;
     };
     reader.readAsDataURL(file);
   }
@@ -250,6 +244,14 @@ const previewImage = (event) => {
 const deleteImage = () => {
   employeeImage.value = null;
   employeeData.value.anhNhanVien = "";
+  hasNewImage.value = false;
+  fileInput.value.value = "";
+};
+
+// Xử lý lỗi khi ảnh không tải được
+const handleImageError = () => {
+  console.error("Không thể tải ảnh nhân viên!");
+  employeeImage.value = null; // Reset ảnh nếu lỗi
 };
 
 // Dữ liệu địa chỉ
@@ -270,8 +272,6 @@ const fetchEmployeeData = async () => {
 
   try {
     const res = await axios.get(`http://localhost:8080/nhan-vien/detail/${id}`);
-    console.log("Dữ liệu nhân viên nhận được:", res.data);
-
     const data = res.data;
     employeeData.value = {
       id: data.id || "",
@@ -279,32 +279,42 @@ const fetchEmployeeData = async () => {
       cccd: data.cccd || "",
       soDienThoai: data.idTaiKhoan?.soDienThoai || "",
       ngaySinh: data.ngaySinh ? new Date(data.ngaySinh).toISOString().split("T")[0] : "",
-      gioiTinh: data.idTaiKhoan?.deleted !== undefined ? (data.idTaiKhoan.deleted ? "true" : "false") : "",
+      gioiTinh: data.idTaiKhoan?.deleted !== undefined ? String(!data.idTaiKhoan.deleted) : "",
       tenNhanVien: data.tenNhanVien || "",
       diaChiCuThe: data.diaChiCuThe || "",
-      thanhPho: data.thanhPho || "", // Khớp với API
-      quan: data.quan || "",         // Khớp với API
-      phuong: data.phuong || "",     // Khớp với API
+      thanhPho: data.thanhPho || "",
+      quan: data.quan || "",
+      phuong: data.phuong || "",
       anhNhanVien: data.anhNhanVien || "",
     };
 
-    // Gán ảnh nếu có
+    // Xử lý ảnh từ API
     if (data.anhNhanVien) {
-      employeeImage.value = data.anhNhanVien;
+      if (data.anhNhanVien.startsWith("data:")) {
+        // Nếu là chuỗi Base64
+        employeeImage.value = data.anhNhanVien;
+      } else {
+        // Nếu là đường dẫn tương đối, nối với base URL
+        employeeImage.value = `http://localhost:8080${data.anhNhanVien}`;
+      }
+    } else {
+      employeeImage.value = null;
     }
 
-    // Đồng bộ dữ liệu địa chỉ
-    selectedProvince.value = data.thanhPho || "";
-    if (selectedProvince.value) {
-      await handleProvinceChange(); // Cập nhật danh sách quận/huyện
-      selectedDistrict.value = data.quan || "";
-      if (selectedDistrict.value) {
-        await handleDistrictChange(); // Cập nhật danh sách xã/phường
-        selectedWard.value = data.phuong || "";
-      }
-    }
+    console.log("Ảnh nhân viên từ API:", employeeImage.value); // Debug giá trị ảnh
   } catch (error) {
     console.error("Lỗi khi lấy dữ liệu nhân viên:", error);
+  }
+
+  // Đồng bộ dữ liệu địa chỉ
+  selectedProvince.value = employeeData.value.thanhPho || "";
+  if (selectedProvince.value) {
+    await handleProvinceChange();
+    selectedDistrict.value = employeeData.value.quan || "";
+    if (selectedDistrict.value) {
+      await handleDistrictChange();
+      selectedWard.value = employeeData.value.phuong || "";
+    }
   }
 };
 
@@ -312,34 +322,59 @@ const fetchEmployeeData = async () => {
 const updateNhanVien = async () => {
   try {
     const updatedData = {
-      ...employeeData.value,
-      thanhPho: selectedProvince.value, // Khớp với API
-      quan: selectedDistrict.value,     // Khớp với API
-      phuong: selectedWard.value,       // Khớp với API
+      email: employeeData.value.email,
+      cccd: employeeData.value.cccd,
+      soDienThoai: employeeData.value.soDienThoai,
+      ngaySinh: employeeData.value.ngaySinh,
+      gioiTinh: employeeData.value.gioiTinh === "true",
+      tenNhanVien: employeeData.value.tenNhanVien,
+      diaChiCuThe: employeeData.value.diaChiCuThe,
+      thanhPho: selectedProvince.value,
+      quan: selectedDistrict.value,
+      phuong: selectedWard.value,
+      anhNhanVien: hasNewImage.value ? employeeData.value.anhNhanVien : employeeData.value.anhNhanVien || "",
     };
-    await axios.put(`http://localhost:8080/nhan-vien/update/${route.query.id}`, updatedData);
+
+    const response = await axios.put(
+      `http://localhost:8080/nhan-vien/update/${route.query.id}`,
+      updatedData,
+      { headers: { "Content-Type": "application/json" } }
+    );
     alert("Cập nhật thành công!");
-    // router.push({ path: '/nhan-vien'});
+    router.push({ path: "/nhan-vien" });
   } catch (error) {
-    console.error("Lỗi khi cập nhật nhân viên:", error);
-    alert("Có lỗi xảy ra khi cập nhật.");
+    console.error("Lỗi khi cập nhật nhân viên:", error.response ? error.response.data : error.message);
+    alert("Có lỗi xảy ra khi cập nhật: " + (error.response ? error.response.data : error.message));
   }
 };
 
+// Cập nhật địa chỉ
 const updatediaChi = async () => {
   try {
     const updatedData = {
-      ...employeeData.value,
-      thanhPho: selectedProvince.value, // Khớp với API
-      quan: selectedDistrict.value,     // Khớp với API
-      phuong: selectedWard.value,       // Khớp với API
+      email: employeeData.value.email,
+      cccd: employeeData.value.cccd,
+      soDienThoai: employeeData.value.soDienThoai,
+      ngaySinh: employeeData.value.ngaySinh,
+      gioiTinh: employeeData.value.gioiTinh === "true",
+      tenNhanVien: employeeData.value.tenNhanVien,
+      diaChiCuThe: employeeData.value.diaChiCuThe,
+      thanhPho: selectedProvince.value,
+      quan: selectedDistrict.value,
+      phuong: selectedWard.value,
+      anhNhanVien: hasNewImage.value ? employeeData.value.anhNhanVien : employeeData.value.anhNhanVien || "",
     };
-    await axios.put(`http://localhost:8080/nhan-vien/update/${route.query.id}`, updatedData);
-    alert("Cập nhật thành công!");
-    router.push({ path: '/nhan-vien'});
+
+    const response = await axios.put(
+      `http://localhost:8080/nhan-vien/update/${route.query.id}`,
+      updatedData,
+      { headers: { "Content-Type": "application/json" } }
+    );
+    alert("Cập nhật địa chỉ thành công!");
+    router.push({ path: "/nhan-vien" });
   } catch (error) {
-    console.error("Lỗi khi cập nhật nhân viên:", error);
-    alert("Có lỗi xảy ra khi cập nhật.");
+    console.error("Lỗi khi cập nhật địa chỉ:", error.response ? error.response.data : error.message);
+    alert("Có lỗi xảy ra khi cập nhật địa chỉ: " + (error.response ? error.response.data : error.message));
   }
 };
 
@@ -348,37 +383,72 @@ onMounted(async () => {
   try {
     const response = await axios.get("https://provinces.open-api.vn/api/?depth=3");
     provinces.value = response.data;
-    await fetchEmployeeData(); // Lấy dữ liệu nhân viên sau khi có danh sách tỉnh
+
+    const imageFromQuery = route.query.image;
+    if (imageFromQuery) {
+      employeeImage.value = imageFromQuery;
+      employeeData.value.anhNhanVien = imageFromQuery;
+    } else {
+      await fetchEmployeeData();
+    }
   } catch (error) {
     console.error("Lỗi khi tải dữ liệu địa chỉ:", error);
+    await fetchEmployeeData();
   }
 });
 
 // Xử lý thay đổi tỉnh/thành phố
-const handleProvinceChange = () => {
+const handleProvinceChange = async () => {
   const province = provinces.value.find((prov) => prov.name === selectedProvince.value);
   if (province) {
     districts.value = province.districts;
   } else {
     districts.value = [];
   }
-  selectedDistrict.value = ""; // Reset quận/huyện
-  wards.value = []; // Reset xã/phường
+  selectedDistrict.value = "";
+  wards.value = [];
   selectedWard.value = "";
 };
 
 // Xử lý thay đổi quận/huyện
-const handleDistrictChange = () => {
+const handleDistrictChange = async () => {
   const district = districts.value.find((dist) => dist.name === selectedDistrict.value);
   if (district) {
     wards.value = district.wards;
   } else {
     wards.value = [];
   }
-  selectedWard.value = ""; // Reset xã/phường
+  selectedWard.value = "";
 };
 </script>
 
-<style>
-/* Style hiện tại được giữ nguyên */
+<style scoped>
+.form-radio {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  border: 2px solid #d1d5db;
+  border-radius: 50%;
+  outline: none;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.form-radio:checked {
+  background-color: #f97316;
+  border-color: #f97316;
+}
+
+.form-radio:hover {
+  border-color: #f59e0b;
+}
+
+.form-radio:focus {
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.3);
+}
+
+label {
+  display: flex;
+  align-items: center;
+}
 </style>

@@ -1,5 +1,4 @@
 <template>
-  <!-- Thêm BreadcrumbWrapper -->
   <BreadcrumbWrapper :breadcrumb-items="breadcrumbItems" />
   <div class="bg-gray-100 min-h-screen w-full flex items-start justify-center p-0">
     <div class="bg-white w-full h-full grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
@@ -11,24 +10,35 @@
             @click="triggerFileInput"
           >
             <img
-              v-if="employeeImage"
-              :src="employeeImage"
-              alt="Ảnh nhân viên"
+              v-if="customerImage"
+              :src="customerImage"
+              alt="Ảnh khách hàng"
               class="w-full h-full object-cover"
+              @error="handleImageError"
             >
-            <span v-else class="flex items-center justify-center h-full text-gray-500 text-sm font-medium">Chọn ảnh</span>
+            <!-- Hiển thị placeholder nếu không có ảnh -->
+            <div
+              v-else
+              class="w-full h-full flex items-center justify-center bg-gray-200 text-gray-500 font-medium"
+            >
+              Chọn ảnh
+            </div>
           </div>
-
           <button
-            v-if="employeeImage"
+            v-if="customerImage"
             @click="deleteImage"
             class="bg-red-500 text-white w-8 h-8 rounded-full flex items-center justify-center hover:bg-red-600 transition-all duration-300 shadow-sm"
             title="Xóa ảnh"
           >
             ✕
           </button>
-
-          <input type="file" ref="fileInput" @change="previewImage" class="hidden">
+          <input
+            type="file"
+            ref="fileInput"
+            @change="previewImage"
+            class="hidden"
+            accept="image/*"
+          >
         </div>
 
         <div class="space-y-4">
@@ -42,18 +52,15 @@
               placeholder="Nhập Email"
             >
           </div>
-
           <div class="space-y-1">
-            <label class="block text-sm font-medium text-gray-700">CCCD</label>
+            <label class="block text-sm font-medium text-gray-700">Tên khách hàng</label>
             <input
-              v-model="custmerData.cccd"
+              v-model="custmerData.ten"
               type="text"
-              ref="cccdInput"
               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
-              placeholder="Nhập CCCD"
+              placeholder="Nhập tên khách hàng"
             >
           </div>
-
           <div class="space-y-1">
             <label class="block text-sm font-medium text-gray-700">Số điện thoại</label>
             <input
@@ -64,7 +71,6 @@
               placeholder="Nhập SDT"
             >
           </div>
-
           <div class="space-y-1">
             <label class="block text-sm font-medium text-gray-700">Ngày sinh</label>
             <input
@@ -74,32 +80,37 @@
               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
             >
           </div>
-
-          <div class="space-y-1">
-            <label class="block text-sm font-medium text-gray-700">Giới tính</label>
-            <select
-              v-model="custmerData.gioiTinh"
-              ref="gioiTinhSelect"
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
-            >
-              <option value="" disabled selected>--- Chọn giới tính ---</option>
-              <option value="false">Nam</option>
-              <option value="true">Nữ</option>
-            </select>
+          <div class="flex items-center gap-6">
+            <label class="flex items-center space-x-2 cursor-pointer">
+              <input
+                v-model="custmerData.gioiTinh"
+                value="false"
+                type="radio"
+                class="form-radio h-5 w-5 text-orange-500 focus:ring-2 focus:ring-orange-500 focus:ring-opacity-50 transition duration-150 ease-in-out"
+              >
+              <span class="text-sm text-gray-700">Nam</span>
+            </label>
+            <label class="flex items-center space-x-2 cursor-pointer">
+              <input
+                v-model="custmerData.gioiTinh"
+                value="true"
+                type="radio"
+                class="form-radio h-5 w-5 text-orange-500 focus:ring-2 focus:ring-orange-500 focus:ring-opacity-50 transition duration-150 ease-in-out"
+              >
+              <span class="text-sm text-gray-700">Nữ</span>
+            </label>
           </div>
         </div>
-
         <div class="flex justify-end gap-4 mt-6">
           <router-link to="/khach-hang">
             <button
-              @click="$emit('cancel')"
               class="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-all duration-300"
             >
               Hủy
             </button>
           </router-link>
           <button
-            @click="updateNhanVien"
+            @click="updateKhachHang"
             class="px-6 py-2 bg-orange-500 text-white rounded-lg transition-all duration-300 flex items-center gap-2"
           >
             <i class="fas fa-pen-to-square"></i> Cập nhật
@@ -128,7 +139,6 @@
           <div v-if="showAddAddress" class="border border-gray-300 p-4 rounded-lg mt-4 bg-white shadow-md">
             <h2 class="text-lg font-medium text-gray-700 mb-4">Thêm địa chỉ mới</h2>
             <div class="space-y-4">
-              <!-- Địa chỉ cụ thể -->
               <div class="space-y-1">
                 <label class="block text-sm font-medium text-gray-700">Địa chỉ cụ thể</label>
                 <input
@@ -139,8 +149,6 @@
                   required
                 >
               </div>
-
-              <!-- Tỉnh/Thành phố, Quận/Huyện, Xã/Phường -->
               <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div class="space-y-1">
                   <label class="block text-sm font-medium text-gray-700">Tỉnh/Thành phố</label>
@@ -160,6 +168,7 @@
                     v-model="newAddress.quan"
                     @change="handleNewDistrictChange"
                     class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                    :disabled="!newDistricts.length"
                     required
                   >
                     <option value="" disabled>Chọn quận/huyện</option>
@@ -171,6 +180,7 @@
                   <select
                     v-model="newAddress.phuong"
                     class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                    :disabled="!newWards.length"
                     required
                   >
                     <option value="" disabled>Chọn xã/phường</option>
@@ -178,8 +188,6 @@
                   </select>
                 </div>
               </div>
-
-              <!-- Nút thêm và hủy trong form -->
               <div class="flex justify-end gap-4">
                 <button
                   @click="addNewAddress"
@@ -207,26 +215,6 @@
             <div v-for="(address, index) in paginatedAddresses" :key="address.id" class="border border-gray-300 rounded-lg p-4 bg-white shadow-sm">
               <div class="flex items-center mb-4">
                 <label class="text-sm font-medium text-gray-700 mr-2">Địa chỉ {{ getAddressNumber(index) }}</label>
-              </div>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="space-y-1">
-                  <label class="block text-sm font-medium text-gray-700">Tên</label>
-                  <input
-                    v-model="address.ten"
-                    type="text"
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
-                    readonly
-                  >
-                </div>
-                <div class="space-y-1">
-                  <label class="block text-sm font-medium text-gray-700">Số điện thoại</label>
-                  <input
-                    v-model="address.soDienThoai"
-                    type="text"
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
-                    readonly
-                  >
-                </div>
               </div>
               <div class="space-y-1 mt-4">
                 <label class="block text-sm font-medium text-gray-700">Địa chỉ cụ thể</label>
@@ -256,7 +244,7 @@
                     v-model="address.quan"
                     @change="updateWards(address)"
                     class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
-                    :disabled="!address.isEditing"
+                    :disabled="!address.isEditing || !address.availableDistricts.length"
                   >
                     <option value="" disabled>Chọn quận/huyện</option>
                     <option v-for="district in address.availableDistricts" :key="district.code" :value="district.name">{{ district.name }}</option>
@@ -267,18 +255,16 @@
                   <select
                     v-model="address.phuong"
                     class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
-                    :disabled="!address.isEditing"
+                    :disabled="!address.isEditing || !address.availableWards.length"
                   >
                     <option value="" disabled>Chọn xã/phường</option>
                     <option v-for="ward in address.availableWards" :key="ward.code" :value="ward.name">{{ ward.name }}</option>
-                    <!-- Hiển thị giá trị từ SQL nếu không có trong API -->
                     <option v-if="address.phuong && !address.availableWards.some(w => w.name === address.phuong)" :value="address.phuong">
                       {{ address.phuong }} (từ dữ liệu cũ)
                     </option>
                   </select>
                 </div>
               </div>
-              <!-- Di chuyển toggle switch xuống dưới bên trái -->
               <div class="mt-4 flex items-center">
                 <label class="text-sm font-medium text-gray-700 mr-2">Địa chỉ mặc định</label>
                 <label class="switch">
@@ -289,7 +275,6 @@
                   >
                   <span class="slider round"></span>
                 </label>
-
                 <div class="flex space-x-2 ml-auto">
                   <button
                     @click="deleteAddress(address.id)"
@@ -317,7 +302,6 @@
             <div v-if="!addresses.length" class="text-center text-sm text-gray-600">
               Không có địa chỉ nào
             </div>
-            <!-- Phân trang -->
             <div class="flex justify-center mt-4" v-if="addresses.length > itemsPerPage">
               <button
                 @click="currentPage--"
@@ -343,26 +327,24 @@
 </template>
 
 <script setup>
-import { onMounted, ref, computed } from "vue";
+import { onMounted, ref, computed, nextTick } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import axios from "axios";
-import BreadcrumbWrapper from '@/components/BreadcrumbWrapper.vue'; // Import BreadcrumbWrapper
+import BreadcrumbWrapper from '@/components/BreadcrumbWrapper.vue';
 
 const route = useRoute();
 const router = useRouter();
 
-// Tính toán breadcrumb
 const breadcrumbItems = computed(() => {
   if (typeof route.meta.breadcrumb === "function") {
     return route.meta.breadcrumb(route);
   }
-  return route.meta?.breadcrumb || ["Khách hàng", "Cập nhật khách hàng"]; // Mặc định cho trang cập nhật khách hàng
+  return route.meta?.breadcrumb || ["Khách hàng", "Cập nhật khách hàng"];
 });
 
 const custmerData = ref({
   id: "",
   email: "",
-  cccd: "",
   soDienThoai: "",
   ngaySinh: "",
   gioiTinh: "",
@@ -371,24 +353,19 @@ const custmerData = ref({
   quan: "",
   phuong: "",
   diaChiCuThe: "",
-  anhNhanVien: "",
+  anhKhachHang: "", // Đổi thành anhKhachHang để khớp với backend
 });
 
 const addresses = ref([]);
-const employeeImage = ref(null);
+const customerImage = ref(null); // Đổi từ employeeImage thành customerImage
 const fileInput = ref(null);
+const hasNewImage = ref(false); // Theo dõi ảnh mới
 const provinces = ref([]);
-const districts = ref([]);
-const wards = ref([]);
-const selectedProvince = ref("");
-const selectedDistrict = ref("");
-const selectedWard = ref("");
+const newDistricts = ref([]);
+const newWards = ref([]);
+const currentPage = ref(1);
+const itemsPerPage = ref(1);
 
-// Phân trang
-const currentPage = ref(1); // Đảm bảo giá trị mặc định là 1
-const itemsPerPage = ref(1); // Đảm bảo giá trị mặc định là 1
-
-// Dữ liệu cho địa chỉ mới
 const showAddAddress = ref(false);
 const newAddress = ref({
   diaChiCuThe: "",
@@ -396,10 +373,7 @@ const newAddress = ref({
   quan: "",
   phuong: "",
 });
-const newDistricts = ref([]);
-const newWards = ref([]);
 
-// Computed property cho danh sách địa chỉ phân trang
 const paginatedAddresses = computed(() => {
   const start = (currentPage.value - 1) * itemsPerPage.value;
   const end = start + itemsPerPage.value;
@@ -408,10 +382,9 @@ const paginatedAddresses = computed(() => {
 
 const totalPages = computed(() => Math.ceil(addresses.value.length / itemsPerPage.value));
 
-// Hàm tính số thứ tự địa chỉ
 const getAddressNumber = (index) => {
   const baseIndex = (currentPage.value - 1) * itemsPerPage.value + index + 1;
-  return isNaN(baseIndex) ? 1 : baseIndex; // Trả về 1 nếu là NaN
+  return isNaN(baseIndex) ? 1 : baseIndex;
 };
 
 const triggerFileInput = () => fileInput.value.click();
@@ -419,21 +392,34 @@ const triggerFileInput = () => fileInput.value.click();
 const previewImage = (event) => {
   const file = event.target.files[0];
   if (file) {
+    if (!file.type.startsWith('image/')) {
+      alert('Vui lòng chọn file ảnh hợp lệ!');
+      fileInput.value.value = '';
+      return;
+    }
     const reader = new FileReader();
     reader.onload = (e) => {
-      employeeImage.value = e.target.result;
-      custmerData.value.anhNhanVien = e.target.result;
+      customerImage.value = e.target.result;
+      custmerData.value.anhKhachHang = e.target.result; // Lưu base64
+      hasNewImage.value = true;
     };
     reader.readAsDataURL(file);
   }
 };
 
 const deleteImage = () => {
-  employeeImage.value = null;
-  custmerData.value.anhNhanVien = "";
+  customerImage.value = null;
+  custmerData.value.anhKhachHang = "";
+  hasNewImage.value = false;
+  fileInput.value.value = "";
 };
 
-const fetchEmployeeData = async () => {
+const handleImageError = () => {
+  console.error("Không thể tải ảnh khách hàng!");
+  customerImage.value = null; // Reset ảnh nếu lỗi
+};
+
+const fetchCustomerData = async () => {
   const id = route.query.id;
   if (!id) {
     console.error("Không tìm thấy ID trong URL");
@@ -443,99 +429,82 @@ const fetchEmployeeData = async () => {
   try {
     const res = await axios.get(`http://localhost:8080/khach-hang/detail/${id}`);
     const data = res.data;
-    console.log("Dữ liệu thô từ API sau fetch:", data);
+    console.log("Dữ liệu thô từ API:", data);
 
-    custmerData.value = {
-      id: data.id || "",
-      email: data.idTaiKhoan?.email || "",
-      cccd: data.cccd || "",
-      soDienThoai: data.idTaiKhoan?.soDienThoai || "",
-      ngaySinh: data.ngaySinh ? new Date(data.ngaySinh).toISOString().split("T")[0] : "",
-      gioiTinh: data.idTaiKhoan?.deleted !== undefined ? (data.idTaiKhoan.deleted ? "true" : "false") : "",
-      ten: data.ten || "",
-      diaChiCuThe: data.idDiaChiKH.diaChiCuThe || "",
-      thanhPho: data.idDiaChiKH.thanhPho || "",
-      quan: data.idDiaChiKH.quan || "",
-      phuong: data.idDiaChiKH.phuong || "",
-      anhNhanVien: data.anhNhanVien || "",
-    };
-
-    if (data.anhNhanVien) employeeImage.value = data.anhNhanVien;
-
+    // Tìm địa chỉ mặc định trong danh sách địa chỉ
     const addressRes = await axios.get(`http://localhost:8080/dia-chi/getByKhachHang/${id}`);
     addresses.value = addressRes.data.map(address => ({
       ...address,
-      ten: data.ten || "",
-      soDienThoai: data.idTaiKhoan?.soDienThoai || "",
       isEditing: false,
       availableDistricts: [],
       availableWards: [],
     })) || [];
 
-    // Đồng bộ selectedProvince, selectedDistrict, selectedWard với custmerData
-    selectedProvince.value = custmerData.value.thanhPho;
-    await handleProvinceChange();
-    selectedDistrict.value = custmerData.value.quan;
-    await handleDistrictChange();
-    selectedWard.value = custmerData.value.phuong;
+    const defaultAddress = addresses.value.find(addr => addr.macDinh) || addresses.value[0] || {};
 
-    // Cập nhật lại availableDistricts và availableWards cho các địa chỉ
-    addresses.value.forEach(address => {
-      updateDistricts(address);
-      updateWards(address);
-    });
+    // Gán dữ liệu khách hàng
+    custmerData.value = {
+      id: data.id || "",
+      email: data.idTaiKhoan?.email || "",
+      soDienThoai: data.idTaiKhoan?.soDienThoai || "",
+      ngaySinh: data.ngaySinh ? new Date(data.ngaySinh).toISOString().split("T")[0] : "",
+      gioiTinh: data.gioiTinh !== undefined ? String(data.idTaiKhoan.deleted) : "",
+      ten: data.ten || "",
+      diaChiCuThe: defaultAddress.diaChiCuThe || "",
+      thanhPho: defaultAddress.thanhPho || "",
+      quan: defaultAddress.quan || "",
+      phuong: defaultAddress.phuong || "",
+      anhKhachHang: data.anhKhachHang || "",
+    };
+
+    // Xử lý ảnh từ API
+    if (data.anhKhachHang) {
+      if (data.anhKhachHang.startsWith("data:")) {
+        customerImage.value = data.anhKhachHang;
+      } else {
+        customerImage.value = `http://localhost:8080${data.anhKhachHang}`;
+      }
+    } else {
+      customerImage.value = null;
+    }
+
+    console.log("Ảnh khách hàng từ API:", customerImage.value);
+
+    // Cập nhật danh sách quận/huyện và xã/phường cho từng địa chỉ
+    for (const address of addresses.value) {
+      await updateDistricts(address);
+      await updateWards(address);
+    }
   } catch (error) {
-    console.error("Lỗi khi lấy dữ liệu nhân viên:", error);
+    console.error("Lỗi khi lấy dữ liệu khách hàng:", error);
     alert("Không thể tải dữ liệu khách hàng: " + (error.response?.data?.error || error.message));
   }
 };
 
-const updateNhanVien = async () => {
+const updateKhachHang = async () => {
   try {
     if (!custmerData.value.email || !custmerData.value.soDienThoai) {
       throw new Error("Email và số điện thoại không được để trống!");
     }
 
-    const updatedData = { ...custmerData.value };
-    const response = await axios.put(`http://localhost:8080/khach-hang/update/${route.query.id}`, updatedData);
-
-    alert("Cập nhật thông tin khách hàng thành công!");
-    await fetchEmployeeData(); // Làm mới dữ liệu
-    router.push({ path: "/khach-hang" });
-  } catch (error) {
-    console.error("Lỗi khi cập nhật thông tin khách hàng:", error);
-    const errorMessage = error.response?.data?.error || error.message;
-    alert("Có lỗi xảy ra khi cập nhật thông tin khách hàng: " + errorMessage);
-  }
-};
-
-const updateDchi = async () => {
-  try {
-    if (!selectedProvince.value || !selectedDistrict.value || !selectedWard.value) {
-      throw new Error("Vui lòng chọn đầy đủ Tỉnh/Thành phố, Quận/Huyện và Xã/Phường!");
-    }
-    if (!custmerData.value.diaChiCuThe || !custmerData.value.ten) {
-      throw new Error("Tên và địa chỉ cụ thể không được để trống!");
-    }
-
     const updatedData = {
+      email: custmerData.value.email,
+      soDienThoai: custmerData.value.soDienThoai,
+      ngaySinh: custmerData.value.ngaySinh,
+      gioiTinh: custmerData.value.gioiTinh === "true",
       tenKH: custmerData.value.ten,
-      diaChiCuThe: custmerData.value.diaChiCuThe,
-      phuong: selectedWard.value,
-      thanhPho: selectedProvince.value,
-      quan: selectedDistrict.value,
+      anhKH: hasNewImage.value ? custmerData.value.anhKhachHang : custmerData.value.anhKhachHang || "", // Gửi ảnh mới hoặc giữ nguyên
     };
 
-    console.log("Dữ liệu gửi đi cho updateDchi:", updatedData); // Debug
-    const response = await axios.put(`http://localhost:8080/khach-hang/updateDchi/${route.query.id}`, updatedData);
-    console.log("Phản hồi từ server sau updateDchi:", response.data);
-
-    alert("Cập nhật địa chỉ mặc định thành công!");
-    await fetchEmployeeData(); // Làm mới dữ liệu
+    await axios.put(`http://localhost:8080/khach-hang/update/${route.query.id}`, updatedData, {
+      headers: { "Content-Type": "application/json" }
+    });
+    alert("Cập nhật thông tin khách hàng thành công!");
+    hasNewImage.value = false; // Reset sau khi cập nhật thành công
+    await fetchCustomerData();
   } catch (error) {
-    console.error("Lỗi khi cập nhật địa chỉ mặc định:", error);
-    const errorMessage = error.response?.data?.error || error.message;
-    alert("Có lỗi xảy ra khi cập nhật địa chỉ mặc định: " + errorMessage);
+    console.error("Lỗi khi cập nhật thông tin khách hàng:", error);
+    alert("Có lỗi xảy ra khi cập nhật thông tin khách hàng: " + (error.response?.data?.error || error.message));
   }
 };
 
@@ -548,50 +517,31 @@ const toggleAddAddress = () => {
   }
 };
 
-const handleNewProvinceChange = () => {
-  if (!provinces.value.length) {
-    console.warn("Provinces data is empty! Check API loading in onMounted.");
-    newDistricts.value = [];
-    newWards.value = [];
-    newAddress.value.quan = "";
-    newAddress.value.phuong = "";
-    return;
-  }
-  const province = provinces.value.find((prov) => prov.name === newAddress.value.thanhPho);
-  if (province) {
-    newDistricts.value = province.districts || [];
-    console.log("New Districts for", newAddress.value.thanhPho, ":", newDistricts.value);
-    if (!newDistricts.value.length) {
-      console.warn("No districts available for province:", newAddress.value.thanhPho);
-    }
-  } else {
-    newDistricts.value = [];
-    console.warn("Province not found:", newAddress.value.thanhPho);
-  }
-  newAddress.value.quan = "";
+const handleNewProvinceChange = async () => {
+  newDistricts.value = [];
   newWards.value = [];
+  newAddress.value.quan = "";
   newAddress.value.phuong = "";
+
+  if (!newAddress.value.thanhPho) return;
+
+  const province = provinces.value.find(prov => prov.name === newAddress.value.thanhPho);
+  if (province && province.districts) {
+    newDistricts.value = province.districts;
+  }
 };
 
-const handleNewDistrictChange = () => {
-  if (!newDistricts.value.length) {
-    console.warn("newDistricts is empty! Check handleNewProvinceChange.");
-    newWards.value = [];
-    newAddress.value.phuong = "";
-    return;
-  }
-  const district = newDistricts.value.find((dist) => dist.name === newAddress.value.quan);
-  if (district) {
-    newWards.value = district.wards || [];
-    console.log("New Wards for", newAddress.value.quan, ":", newWards.value);
-    if (!newWards.value.length) {
-      console.warn("No wards available for district:", newAddress.value.quan);
-    }
-  } else {
-    newWards.value = [];
-    console.warn("District not found or no wards for:", newAddress.value.quan, "in", newDistricts.value);
-  }
+const handleNewDistrictChange = async () => {
+  newWards.value = [];
   newAddress.value.phuong = "";
+
+  if (!newAddress.value.quan) return;
+
+  const district = newDistricts.value.find(dist => dist.name === newAddress.value.quan);
+  if (district && district.wards) {
+    newWards.value = district.wards;
+  }
+  await nextTick();
 };
 
 const addNewAddress = async () => {
@@ -614,138 +564,78 @@ const addNewAddress = async () => {
       deleted: false,
     };
 
-    const response = await axios.post(`http://localhost:8080/dia-chi/addDchi`, newData);
-    console.log("Phản hồi từ server sau addNewAddress:", response.data);
-
+    await axios.post(`http://localhost:8080/dia-chi/addDchi`, newData);
     alert("Thêm địa chỉ thành công!");
     toggleAddAddress();
-    await fetchEmployeeData();
+    await fetchCustomerData();
     currentPage.value = totalPages.value;
   } catch (error) {
     console.error("Lỗi khi thêm địa chỉ:", error);
-    const errorMessage = error.response?.data?.error || error.message;
-    alert("Có lỗi xảy ra khi thêm địa chỉ: " + errorMessage);
+    alert("Có lỗi xảy ra khi thêm địa chỉ: " + (error.response?.data?.error || error.message));
   }
 };
 
-const handleProvinceChange = async () => {
-  if (!provinces.value.length) {
-    console.warn("Provinces data is empty! Check API loading in onMounted.");
-    districts.value = [];
-    wards.value = [];
-    selectedDistrict.value = "";
-    selectedWard.value = "";
-    return;
-  }
-  const province = provinces.value.find((prov) => prov.name === selectedProvince.value);
-  if (province) {
-    districts.value = province.districts || [];
-    console.log("Districts for", selectedProvince.value, ":", districts.value);
-    if (!districts.value.length) {
-      console.warn("No districts available for province:", selectedProvince.value);
-    }
-  } else {
-    districts.value = [];
-    console.warn("Province not found:", selectedProvince.value);
-  }
-  selectedDistrict.value = "";
-  wards.value = [];
-  selectedWard.value = "";
-};
-
-const handleDistrictChange = async () => {
-  if (!districts.value.length) {
-    console.warn("Districts is empty! Check handleProvinceChange.");
-    wards.value = [];
-    selectedWard.value = "";
-    return;
-  }
-  const district = districts.value.find((dist) => dist.name === selectedDistrict.value);
-  if (district) {
-    wards.value = district.wards || [];
-    console.log("Wards for", selectedDistrict.value, ":", wards.value);
-    if (!wards.value.length) {
-      console.warn("No wards available for district:", selectedDistrict.value);
-    }
-  } else {
-    wards.value = [];
-    console.warn("District not found or no wards for:", selectedDistrict.value, "in", districts.value);
-  }
-  selectedWard.value = "";
-};
-
-const updateDistricts = (address) => {
-  if (!provinces.value.length) {
-    console.warn("Provinces data is empty! Check API loading in onMounted.");
-    address.availableDistricts = [];
-    address.availableWards = [];
-    address.quan = "";
-    address.phuong = "";
-    return;
-  }
-  const province = provinces.value.find((prov) => prov.name === address.thanhPho);
-  if (province) {
-    address.availableDistricts = province.districts || [];
-    console.log("Available Districts for", address.thanhPho, ":", address.availableDistricts);
-    if (!address.availableDistricts.length) {
-      console.warn("No districts available for province:", address.thanhPho);
-    }
-  } else {
-    address.availableDistricts = [];
-    console.warn("Province not found for address:", address.thanhPho);
-  }
-  address.quan = address.availableDistricts.some(d => d.name === address.quan) ? address.quan : "";
+const updateDistricts = async (address) => {
+  address.availableDistricts = [];
   address.availableWards = [];
-  address.phuong = "";
+  address.quan = address.quan || "";
+  address.phuong = address.phuong || "";
+
+  if (!address.thanhPho) return;
+
+  const province = provinces.value.find(prov => prov.name === address.thanhPho);
+  if (province && province.districts) {
+    address.availableDistricts = province.districts;
+  }
 };
 
-const updateWards = (address) => {
-  if (!address.availableDistricts.length) {
-    console.warn("availableDistricts is empty for address! Check updateDistricts.");
-    address.availableWards = [];
-    address.phuong = "";
-    return;
+const updateWards = async (address) => {
+  address.availableWards = [];
+  address.phuong = address.phuong || "";
+
+  if (!address.quan) return;
+
+  const district = address.availableDistricts.find(dist => dist.name === address.quan);
+  if (district && district.wards) {
+    address.availableWards = district.wards;
   }
-  const district = address.availableDistricts.find((dist) => dist.name === address.quan);
-  if (district) {
-    address.availableWards = district.wards || [];
-    console.log("Available Wards for", address.quan, ":", address.availableWards);
-    if (!address.availableWards.length) {
-      console.warn("No wards available for district:", address.quan, "in", address.availableDistricts);
-    }
-  } else {
-    address.availableWards = [];
-    console.warn("District not found or no wards for:", address.quan, "in", address.availableDistricts);
-  }
-  address.phuong = address.availableWards.some(w => w.name === address.phuong) ? address.phuong : "";
+  await nextTick();
 };
 
 const setDefaultAddress = async (selectedAddress) => {
   try {
-    // Đặt tất cả các địa chỉ khác thành false trước khi đặt địa chỉ mới thành true
     addresses.value.forEach(address => {
       if (address.id !== selectedAddress.id) {
         address.macDinh = false;
       }
     });
 
-    // Đảm bảo địa chỉ được chọn là true
     selectedAddress.macDinh = true;
 
-    // Gửi yêu cầu cập nhật đến API cho tất cả các địa chỉ
+    custmerData.value.diaChiCuThe = selectedAddress.diaChiCuThe;
+    custmerData.value.thanhPho = selectedAddress.thanhPho;
+    custmerData.value.quan = selectedAddress.quan;
+    custmerData.value.phuong = selectedAddress.phuong;
+
     for (const address of addresses.value) {
       await axios.put(`http://localhost:8080/dia-chi/setDefault/${address.id}`, { macDinh: address.macDinh });
     }
 
-    console.log("Phản hồi từ server sau setDefault:", addresses.value);
-
     alert("Cập nhật địa chỉ mặc định thành công!");
-    await fetchEmployeeData(); // Làm mới dữ liệu từ server để đồng bộ
+    await fetchCustomerData();
+
+    document.dispatchEvent(new CustomEvent('defaultAddressChanged', {
+      detail: {
+        id: custmerData.value.id,
+        diaChiCuThe: selectedAddress.diaChiCuThe,
+        thanhPho: selectedAddress.thanhPho,
+        quan: selectedAddress.quan,
+        phuong: selectedAddress.phuong,
+      }
+    }));
   } catch (error) {
     console.error("Lỗi khi cập nhật địa chỉ mặc định:", error);
-    const errorMessage = error.response?.data?.error || error.message;
-    alert("Có lỗi xảy ra khi cập nhật địa chỉ mặc định: " + errorMessage);
-    // Hoàn nguyên nếu có lỗi
+    alert("Có lỗi xảy ra khi cập nhật địa chỉ mặc định: " + (error.response?.data?.error || error.message));
     selectedAddress.macDinh = !selectedAddress.macDinh;
   }
 };
@@ -768,35 +658,28 @@ const saveAddress = async (address) => {
       macDinh: address.macDinh,
     };
 
-    console.log("Dữ liệu gửi đi cho saveAddress:", updatedData); // Debug
-    const response = await axios.put(`http://localhost:8080/dia-chi/updateDchi/${address.id}`, updatedData);
-    console.log("Phản hồi từ server sau saveAddress:", response.data);
-
+    await axios.put(`http://localhost:8080/dia-chi/updateDchi/${address.id}`, updatedData);
     address.isEditing = false;
     alert("Cập nhật địa chỉ thành công!");
-    await fetchEmployeeData(); // Làm mới dữ liệu
+    await fetchCustomerData();
   } catch (error) {
     console.error("Lỗi khi cập nhật địa chỉ:", error);
-    const errorMessage = error.response?.data?.error || error.message;
-    alert("Có lỗi xảy ra khi cập nhật địa chỉ: " + errorMessage);
+    alert("Có lỗi xảy ra khi cập nhật địa chỉ: " + (error.response?.data?.error || error.message));
   }
 };
 
 const deleteAddress = async (id) => {
   if (confirm("Bạn có chắc chắn muốn xóa địa chỉ này?")) {
     try {
-      const response = await axios.delete(`http://localhost:8080/dia-chi/delete/${id}`);
-      console.log("Phản hồi từ server sau deleteAddress:", response.data);
-
+      await axios.delete(`http://localhost:8080/dia-chi/delete/${id}`);
       alert("Xóa địa chỉ thành công!");
-      await fetchEmployeeData();
+      await fetchCustomerData();
       if (paginatedAddresses.value.length === 0 && currentPage.value > 1) {
         currentPage.value--;
       }
     } catch (error) {
       console.error("Lỗi khi xóa địa chỉ:", error);
-      const errorMessage = error.response?.data?.error || error.message;
-      alert("Có lỗi xảy ra khi xóa địa chỉ: " + errorMessage);
+      alert("Có lỗi xảy ra khi xóa địa chỉ: " + (error.response?.data?.error || error.message));
     }
   }
 };
@@ -805,17 +688,8 @@ onMounted(async () => {
   try {
     const response = await axios.get("https://provinces.open-api.vn/api/?depth=3");
     provinces.value = response.data;
-    console.log("Provinces data loaded:", provinces.value);
-    // Kiểm tra dữ liệu API chi tiết
-    if (provinces.value.length) {
-      console.log("Sample province with districts and wards:", provinces.value[0]);
-      if (!provinces.value[0]?.districts?.[0]?.wards) {
-        console.warn("API data missing wards! Xã/Phường may not display correctly.");
-      }
-    } else {
-      console.warn("No provinces data loaded from API!");
-    }
-    await fetchEmployeeData();
+    console.log("Dữ liệu tỉnh/thành phố đã tải:", provinces.value);
+    await fetchCustomerData();
   } catch (error) {
     console.error("Lỗi khi tải dữ liệu địa chỉ:", error);
     alert("Không thể tải dữ liệu địa chỉ: " + (error.response?.data?.error || error.message));
@@ -823,13 +697,12 @@ onMounted(async () => {
 });
 </script>
 
-<style>
-/* Tùy chỉnh style cho toggle switch */
+<style scoped>
 .switch {
   position: relative;
   display: inline-block;
-  width: 60px; /* Tăng chiều rộng */
-  height: 30px; /* Tăng chiều cao */
+  width: 60px;
+  height: 30px;
 }
 
 .switch input {
@@ -845,10 +718,10 @@ onMounted(async () => {
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: #d1d5db; /* Màu xám nhạt hiện đại hơn */
-  transition: 0.4s ease; /* Hiệu ứng mượt mà */
-  border-radius: 30px; /* Bo góc lớn hơn */
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1); /* Thêm bóng đổ nhẹ */
+  background-color: #d1d5db;
+  transition: 0.4s ease;
+  border-radius: 30px;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .slider:before {
@@ -889,12 +762,35 @@ input:checked + .slider:before {
   border-radius: 50%;
 }
 
-/* Hiệu ứng hover */
 .switch:hover .slider {
   background-color: #e5e7eb;
 }
 
 input:checked + .slider:hover {
   background-color: #fb923c;
+}
+
+.form-radio {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  border: 2px solid #d1d5db;
+  border-radius: 50%;
+  outline: none;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.form-radio:checked {
+  background-color: #f97316;
+  border-color: #f97316;
+}
+
+.form-radio:hover {
+  border-color: #f59e0b;
+}
+
+.form-radio:focus {
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.3);
 }
 </style>

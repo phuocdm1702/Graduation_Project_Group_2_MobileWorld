@@ -197,7 +197,7 @@ export const useDotGiamGia = () => {
     },
     {key: "index", label: "#", formatter: (_, __, index) => (currentPageDSP.value * pageSizeDSP.value) + index + 1},
     {key: "ma", label: "Mã"},
-    {key: "dongSanPham", label: "Dòng sản phẩm"},
+    {key: "dongSanPham", label: "Tên sản phẩm"},
   ]);
 
   const getNestedValue = (obj, key) => (key === "index" ? null : obj[key]);

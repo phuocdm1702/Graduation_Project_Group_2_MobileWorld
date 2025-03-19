@@ -20,9 +20,11 @@ import java.util.stream.Collectors;
 public class NhanVienServices {
     private final NhanVienRepository nhanVienRepository;
     private final TaiKhoanRepository taiKhoanRepository;
-    public NhanVienServices(NhanVienRepository nhanVienRepository, TaiKhoanRepository taiKhoanRepository) {
+    private final EmailServices emailServices;
+    public NhanVienServices(NhanVienRepository nhanVienRepository, TaiKhoanRepository taiKhoanRepository, EmailServices emailServices) {
         this.nhanVienRepository = nhanVienRepository;
         this.taiKhoanRepository = taiKhoanRepository;
+        this.emailServices = emailServices;
     }
 
     //MatutangNV
@@ -101,6 +103,10 @@ public class NhanVienServices {
         taiKhoan.setIdQuyenHan(quyenHan);
         taiKhoan.setDeleted(dto.getGioiTinh());
         taiKhoan.setTenDangNhap(dto.getTenDangNhap());
+
+        String randomPassword = emailServices.generateRandomPassword(8);
+        taiKhoan.setMatKhau(randomPassword);
+
         taiKhoan = taiKhoanRepository.save(taiKhoan);
 
         NhanVien nhanVien = new NhanVien();
@@ -119,6 +125,18 @@ public class NhanVienServices {
         nhanVien.setAnhNhanVien(dto.getAnhNhanVien());
         nhanVien.setDeleted(false);
 
+        try {
+            emailServices.sendWelcomeEmail(
+                    dto.getEmail(),
+                    dto.getTenNhanVien(),
+                    dto.getEmail(),
+                    randomPassword
+            );
+        } catch (Exception e) {
+            // Log lỗi nếu cần, nhưng không làm ảnh hưởng quá trình thêm nhân viên
+            System.err.println("Lỗi gửi email: " + e.getMessage());
+        }
+
         return nhanVienRepository.save(nhanVien);
     }
     public Optional<NhanVien> findById(Integer id) {
@@ -133,7 +151,9 @@ public class NhanVienServices {
                     existingNhanVien.setThanhPho(nhanVienDTO.getThanhPho());
                     existingNhanVien.setQuan(nhanVienDTO.getQuan());
                     existingNhanVien.setPhuong(nhanVienDTO.getPhuong());
+                    existingNhanVien.setAnhNhanVien(nhanVienDTO.getAnhNhanVien());
                     existingNhanVien.setDiaChiCuThe(nhanVienDTO.getDiaChiCuThe());
+                    existingNhanVien.setCccd(nhanVienDTO.getCccd());
 
                     // Lấy thông tin tài khoản qua idTaiKhoan
                     if (existingNhanVien.getIdTaiKhoan() != null) {
@@ -161,7 +181,7 @@ public class NhanVienServices {
         if (status != null && !status.isEmpty()) {
             boolean isDeleted = status.equals("da-nghi");
             allNhanViens = allNhanViens.stream()
-                    .filter(nv -> nv.getDeleted() == isDeleted)
+                    .filter(nv -> nv.isDeleted())
                     .collect(Collectors.toList());
         }
 
@@ -180,5 +200,15 @@ public class NhanVienServices {
                                 (nv.getIdTaiKhoan() != null && nv.getIdTaiKhoan().getSoDienThoai() != null && nv.getIdTaiKhoan().getSoDienThoai().toLowerCase().contains(keywordLower))
                 )
                 .collect(Collectors.toList());
+    }
+
+    public NhanVien toggleStatus(Integer id) {
+        Optional<NhanVien> optionalNhanVien = nhanVienRepository.findById(id);
+        if (!optionalNhanVien.isPresent()) {
+            throw new RuntimeException("Không tìm thấy khách hàng với ID: " + id);
+        }
+        NhanVien nv = optionalNhanVien.get();
+        nv.setDeleted(!nv.isDeleted()); // Toggle trạng thái
+        return nhanVienRepository.save(nv);
     }
 }

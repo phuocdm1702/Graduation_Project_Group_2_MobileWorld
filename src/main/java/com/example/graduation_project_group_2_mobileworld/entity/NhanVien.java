@@ -72,7 +72,7 @@ public class NhanVien {
     private String cccd;
 
     @Column(name = "deleted")
-    private Boolean deleted;
+    private boolean deleted;
 
     @Column(name = "created_at")
     private Date createdAt;

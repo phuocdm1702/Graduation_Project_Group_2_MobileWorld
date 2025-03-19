@@ -28,90 +28,90 @@ public class ChiTietSanPhamController {
         this.chiTietSanPhamService = chiTietSanPhamService;
     }
 
-    @GetMapping
-    public ResponseEntity<Page<ChiTietSanPhamDTO>> getAllChiTietSanPham(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "5") int size) {
-        Page<ChiTietSanPhamDTO> result = chiTietSanPhamService.getAllChiTietSanPham(page, size);
-        return ResponseEntity.ok(result);
-    }
+//    @GetMapping
+//    public ResponseEntity<Page<ChiTietSanPhamDTO>> getAllChiTietSanPham(
+//            @RequestParam(defaultValue = "0") int page,
+//            @RequestParam(defaultValue = "5") int size) {
+//        Page<ChiTietSanPhamDTO> result = chiTietSanPhamService.getAllChiTietSanPham(page, size);
+//        return ResponseEntity.ok(result);
+//    }
 
     // Tìm kiếm và lọc
-    @GetMapping("/search")
-    public ResponseEntity<Page<ChiTietSanPhamDTO>> searchAndFilterChiTietSanPham(
-            @RequestParam(required = false) String keyword,
-            @RequestParam(required = false) Integer idNhaSanXuat,
-            @RequestParam(required = false) Integer idMauSac,
-            @RequestParam(required = false) Integer idPin,
-            @RequestParam(required = false) Integer idManHinh,
-            @RequestParam(required = false) Integer idRam,
-            @RequestParam(required = false) Integer idBoNhoTrong,
-            @RequestParam(required = false) Integer idCpu,
-            @RequestParam(required = false) Integer idGpu,
-            @RequestParam(required = false) Integer idCumCamera,
-            @RequestParam(required = false) Integer idHeDieuHanh,
-            @RequestParam(required = false) Integer idThietKe,
-            @RequestParam(required = false) Integer idSim,
-            @RequestParam(required = false) Integer idCongSac,
-            @RequestParam(required = false) Integer idHoTroCongNgheSac,
-            @RequestParam(required = false) Integer idCongNgheMang,
-            @RequestParam(required = false) Integer idLoaiTinhTrang,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "5") int size
-    ) {
-        ChiTietSanPhamFilterDTO filterDTO = new ChiTietSanPhamFilterDTO();
-        filterDTO.setKeyword(keyword);
-        filterDTO.setIdNhaSanXuat(idNhaSanXuat);
-        filterDTO.setIdMauSac(idMauSac);
-        filterDTO.setIdPin(idPin);
-        filterDTO.setIdManHinh(idManHinh);
-        filterDTO.setIdRam(idRam);
-        filterDTO.setIdBoNhoTrong(idBoNhoTrong);
-        filterDTO.setIdCpu(idCpu);
-        filterDTO.setIdGpu(idGpu);
-        filterDTO.setIdCumCamera(idCumCamera);
-        filterDTO.setIdHeDieuHanh(idHeDieuHanh);
-        filterDTO.setIdThietKe(idThietKe);
-        filterDTO.setIdSim(idSim);
-        filterDTO.setIdCongSac(idCongSac);
-        filterDTO.setIdHoTroCongNgheSac(idHoTroCongNgheSac);
-        filterDTO.setIdCongNgheMang(idCongNgheMang);
-        filterDTO.setIdLoaiTinhTrang(idLoaiTinhTrang);
-        filterDTO.setPage(page);
-        filterDTO.setSize(size);
-
-        Page<ChiTietSanPhamDTO> result = chiTietSanPhamService.searchAndFilterChiTietSanPham(filterDTO);
-        return ResponseEntity.ok(result);
-    }
+//    @GetMapping("/search")
+//    public ResponseEntity<Page<ChiTietSanPhamDTO>> searchAndFilterChiTietSanPham(
+//            @RequestParam(required = false) String keyword,
+//            @RequestParam(required = false) Integer idNhaSanXuat,
+//            @RequestParam(required = false) Integer idMauSac,
+//            @RequestParam(required = false) Integer idPin,
+//            @RequestParam(required = false) Integer idManHinh,
+//            @RequestParam(required = false) Integer idRam,
+//            @RequestParam(required = false) Integer idBoNhoTrong,
+//            @RequestParam(required = false) Integer idCpu,
+//            @RequestParam(required = false) Integer idGpu,
+//            @RequestParam(required = false) Integer idCumCamera,
+//            @RequestParam(required = false) Integer idHeDieuHanh,
+//            @RequestParam(required = false) Integer idThietKe,
+//            @RequestParam(required = false) Integer idSim,
+//            @RequestParam(required = false) Integer idCongSac,
+//            @RequestParam(required = false) Integer idHoTroCongNgheSac,
+//            @RequestParam(required = false) Integer idCongNgheMang,
+//            @RequestParam(required = false) Integer idLoaiTinhTrang,
+//            @RequestParam(defaultValue = "0") int page,
+//            @RequestParam(defaultValue = "5") int size
+//    ) {
+//        ChiTietSanPhamFilterDTO filterDTO = new ChiTietSanPhamFilterDTO();
+//        filterDTO.setKeyword(keyword);
+//        filterDTO.setIdNhaSanXuat(idNhaSanXuat);
+//        filterDTO.setIdMauSac(idMauSac);
+//        filterDTO.setIdPin(idPin);
+//        filterDTO.setIdManHinh(idManHinh);
+//        filterDTO.setIdRam(idRam);
+//        filterDTO.setIdBoNhoTrong(idBoNhoTrong);
+//        filterDTO.setIdCpu(idCpu);
+//        filterDTO.setIdGpu(idGpu);
+//        filterDTO.setIdCumCamera(idCumCamera);
+//        filterDTO.setIdHeDieuHanh(idHeDieuHanh);
+//        filterDTO.setIdThietKe(idThietKe);
+//        filterDTO.setIdSim(idSim);
+//        filterDTO.setIdCongSac(idCongSac);
+//        filterDTO.setIdHoTroCongNgheSac(idHoTroCongNgheSac);
+//        filterDTO.setIdCongNgheMang(idCongNgheMang);
+//        filterDTO.setIdLoaiTinhTrang(idLoaiTinhTrang);
+//        filterDTO.setPage(page);
+//        filterDTO.setSize(size);
+//
+//        Page<ChiTietSanPhamDTO> result = chiTietSanPhamService.searchAndFilterChiTietSanPham(filterDTO);
+//        return ResponseEntity.ok(result);
+//    }
 
     // Lấy chi tiết sản phẩm theo ID
-    @GetMapping("/{id}")
-    public ResponseEntity<ChiTietSanPhamDTO> getChiTietSanPhamById(@PathVariable Integer id) {
-        ChiTietSanPhamDTO result = chiTietSanPhamService.getChiTietSanPhamById(id);
-        if (result != null) {
-            return ResponseEntity.ok(result);
-        }
-        return ResponseEntity.notFound().build();
-    }
-
-    // Thêm mới sản phẩm chi tiết
-    @PostMapping
-    public ResponseEntity<ChiTietSanPhamDTO> createChiTietSanPham(@RequestBody ChiTietSanPhamDTO dto) {
-        ChiTietSanPhamDTO result = chiTietSanPhamService.createChiTietSanPham(dto);
-        return ResponseEntity.ok(result);
-    }
+//    @GetMapping("/{id}")
+//    public ResponseEntity<ChiTietSanPhamDTO> getChiTietSanPhamById(@PathVariable Integer id) {
+//        ChiTietSanPhamDTO result = chiTietSanPhamService.getChiTietSanPhamById(id);
+//        if (result != null) {
+//            return ResponseEntity.ok(result);
+//        }
+//        return ResponseEntity.notFound().build();
+//    }
+//
+//    // Thêm mới sản phẩm chi tiết
+//    @PostMapping
+//    public ResponseEntity<ChiTietSanPhamDTO> createChiTietSanPham(@RequestBody ChiTietSanPhamDTO dto) {
+//        ChiTietSanPhamDTO result = chiTietSanPhamService.createChiTietSanPham(dto);
+//        return ResponseEntity.ok(result);
+//    }
 
     // Cập nhật sản phẩm chi tiết
-    @PutMapping("/{id}")
-    public ResponseEntity<ChiTietSanPhamDTO> updateChiTietSanPham(
-            @PathVariable Integer id,
-            @RequestBody ChiTietSanPhamDTO dto) {
-        ChiTietSanPhamDTO result = chiTietSanPhamService.updateChiTietSanPham(id, dto);
-        if (result != null) {
-            return ResponseEntity.ok(result);
-        }
-        return ResponseEntity.notFound().build();
-    }
+//    @PutMapping("/{id}")
+//    public ResponseEntity<ChiTietSanPhamDTO> updateChiTietSanPham(
+//            @PathVariable Integer id,
+//            @RequestBody ChiTietSanPhamDTO dto) {
+//        ChiTietSanPhamDTO result = chiTietSanPhamService.updateChiTietSanPham(id, dto);
+//        if (result != null) {
+//            return ResponseEntity.ok(result);
+//        }
+//        return ResponseEntity.notFound().build();
+//    }
 
     // Xóa mềm sản phẩm chi tiết
     @DeleteMapping("/{id}")
@@ -129,10 +129,10 @@ public class ChiTietSanPhamController {
         return ResponseEntity.ok(chiTietSanPhamService.getAllNhaSanXuat());
     }
 
-    @GetMapping("/dong-san-phams")
-    public ResponseEntity<List<DongSanPham>> getAllDongSanPham() {
-        return ResponseEntity.ok(chiTietSanPhamService.getAllDongSanPham());
-    }
+//    @GetMapping("/dong-san-phams")
+//    public ResponseEntity<List<DongSanPham>> getAllDongSanPham() {
+//        return ResponseEntity.ok(chiTietSanPhamService.getAllDongSanPham());
+//    }
 
     @GetMapping("/mau-sacs")
     public ResponseEntity<List<MauSac>> getAllMauSac() {

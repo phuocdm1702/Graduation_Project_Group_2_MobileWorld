@@ -8,7 +8,7 @@ public class KhachHangDTO {
     private String ma;
     private String tenKH;
     private Date ngaySinh;
-    private String anhKH;
+    private String anhKhachHang;
     private String thanhPho;
     private String quan;
     private String phuong;
@@ -69,6 +69,14 @@ public class KhachHangDTO {
         return tenKH;
     }
 
+    public String getAnhKhachHang() {
+        return anhKhachHang;
+    }
+
+    public void setAnhKhachHang(String anhKhachHang) {
+        this.anhKhachHang = anhKhachHang;
+    }
+
     public void setTenKH(String tenKH) {
         this.tenKH = tenKH;
     }
@@ -81,13 +89,7 @@ public class KhachHangDTO {
         this.ngaySinh = ngaySinh;
     }
 
-    public String getAnhKH() {
-        return anhKH;
-    }
 
-    public void setAnhKH(String anhKH) {
-        this.anhKH = anhKH;
-    }
 
     public String getThanhPho() {
         return thanhPho;

@@ -2,8 +2,10 @@ package com.example.graduation_project_group_2_mobileworld.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.Nationalized;
 
 import java.math.BigDecimal;
 
@@ -14,20 +16,17 @@ import java.math.BigDecimal;
 public class ChiTietDotGiamGia {
     @Id
     @Column(name = "id", nullable = false)
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @ManyToOne
-    @JoinColumn(name = "id_dot_giam_gia", referencedColumnName = "id")
-    private DotGiamGia dotGiamGia;
-
     @NotNull
     @ManyToOne
-    @JoinColumn(name = "id_dong_san_pham", referencedColumnName = "id")
-    private DongSanPham idDongSanPham;
+    @JoinColumn(name = "id_chi_tiet_san_pham", nullable = false)
+    private ChiTietSanPham idChiTietSanPham;
 
+    @Size(max = 255)
     @NotNull
-    @Column(name="ma", nullable = false)
+    @Nationalized
+    @Column(name = "ma", nullable = false)
     private String ma;
 
     @NotNull
@@ -41,6 +40,5 @@ public class ChiTietDotGiamGia {
     @NotNull
     @Column(name = "deleted", nullable = false)
     private Boolean deleted = false;
-
 
 }
