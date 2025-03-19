@@ -16,7 +16,6 @@
               class="w-full h-full object-cover"
               @error="handleImageError"
             >
-            <span v-else class="flex items-center justify-center h-full text-gray-500 text-sm font-medium">Chọn ảnh</span>
           </div>
           <input type="file" ref="fileInput" @change="previewImage" class="hidden" accept="image/*">
         </div>

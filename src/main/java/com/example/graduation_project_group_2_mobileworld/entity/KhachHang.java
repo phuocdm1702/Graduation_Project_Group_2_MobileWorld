@@ -50,6 +50,9 @@ public class KhachHang {
     @Column(name = "ngay_sinh")
     private Date ngaySinh;
 
+    @Column(name = "anhKhachHang")
+    private String anhKhachHang;
+
     @Column(name = "deleted")
     private Boolean deleted;
 

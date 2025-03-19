@@ -10,22 +10,35 @@
             @click="triggerFileInput"
           >
             <img
-              v-if="employeeImage"
-              :src="employeeImage"
-              alt="Ảnh nhân viên"
+              v-if="customerImage"
+              :src="customerImage"
+              alt="Ảnh khách hàng"
               class="w-full h-full object-cover"
+              @error="handleImageError"
             >
-            <span v-else class="flex items-center justify-center h-full text-gray-500 text-sm font-medium">Chọn ảnh</span>
+            <!-- Hiển thị placeholder nếu không có ảnh -->
+            <div
+              v-else
+              class="w-full h-full flex items-center justify-center bg-gray-200 text-gray-500 font-medium"
+            >
+              Chọn ảnh
+            </div>
           </div>
           <button
-            v-if="employeeImage"
+            v-if="customerImage"
             @click="deleteImage"
             class="bg-red-500 text-white w-8 h-8 rounded-full flex items-center justify-center hover:bg-red-600 transition-all duration-300 shadow-sm"
             title="Xóa ảnh"
           >
             ✕
           </button>
-          <input type="file" ref="fileInput" @change="previewImage" class="hidden">
+          <input
+            type="file"
+            ref="fileInput"
+            @change="previewImage"
+            class="hidden"
+            accept="image/*"
+          >
         </div>
 
         <div class="space-y-4">
@@ -40,21 +53,12 @@
             >
           </div>
           <div class="space-y-1">
-            <label class="block text-sm font-medium text-gray-700">Tên</label>
+            <label class="block text-sm font-medium text-gray-700">Tên khách hàng</label>
             <input
               v-model="custmerData.ten"
               type="text"
               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
-            >
-          </div>
-          <div class="space-y-1">
-            <label class="block text-sm font-medium text-gray-700">CCCD</label>
-            <input
-              v-model="custmerData.cccd"
-              type="text"
-              ref="cccdInput"
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
-              placeholder="Nhập CCCD"
+              placeholder="Nhập tên khách hàng"
             >
           </div>
           <div class="space-y-1">
@@ -106,7 +110,7 @@
             </button>
           </router-link>
           <button
-            @click="updateNhanVien"
+            @click="updateKhachHang"
             class="px-6 py-2 bg-orange-500 text-white rounded-lg transition-all duration-300 flex items-center gap-2"
           >
             <i class="fas fa-pen-to-square"></i> Cập nhật
@@ -341,7 +345,6 @@ const breadcrumbItems = computed(() => {
 const custmerData = ref({
   id: "",
   email: "",
-  cccd: "",
   soDienThoai: "",
   ngaySinh: "",
   gioiTinh: "",
@@ -350,12 +353,13 @@ const custmerData = ref({
   quan: "",
   phuong: "",
   diaChiCuThe: "",
-  anhNhanVien: "",
+  anhKhachHang: "", // Đổi thành anhKhachHang để khớp với backend
 });
 
 const addresses = ref([]);
-const employeeImage = ref(null);
+const customerImage = ref(null); // Đổi từ employeeImage thành customerImage
 const fileInput = ref(null);
+const hasNewImage = ref(false); // Theo dõi ảnh mới
 const provinces = ref([]);
 const newDistricts = ref([]);
 const newWards = ref([]);
@@ -388,21 +392,34 @@ const triggerFileInput = () => fileInput.value.click();
 const previewImage = (event) => {
   const file = event.target.files[0];
   if (file) {
+    if (!file.type.startsWith('image/')) {
+      alert('Vui lòng chọn file ảnh hợp lệ!');
+      fileInput.value.value = '';
+      return;
+    }
     const reader = new FileReader();
     reader.onload = (e) => {
-      employeeImage.value = e.target.result;
-      custmerData.value.anhNhanVien = e.target.result;
+      customerImage.value = e.target.result;
+      custmerData.value.anhKhachHang = e.target.result; // Lưu base64
+      hasNewImage.value = true;
     };
     reader.readAsDataURL(file);
   }
 };
 
 const deleteImage = () => {
-  employeeImage.value = null;
-  custmerData.value.anhNhanVien = "";
+  customerImage.value = null;
+  custmerData.value.anhKhachHang = "";
+  hasNewImage.value = false;
+  fileInput.value.value = "";
 };
 
-const fetchEmployeeData = async () => {
+const handleImageError = () => {
+  console.error("Không thể tải ảnh khách hàng!");
+  customerImage.value = null; // Reset ảnh nếu lỗi
+};
+
+const fetchCustomerData = async () => {
   const id = route.query.id;
   if (!id) {
     console.error("Không tìm thấy ID trong URL");
@@ -425,23 +442,33 @@ const fetchEmployeeData = async () => {
 
     const defaultAddress = addresses.value.find(addr => addr.macDinh) || addresses.value[0] || {};
 
-    // Gán dữ liệu địa chỉ mặc định vào custmerData
+    // Gán dữ liệu khách hàng
     custmerData.value = {
       id: data.id || "",
       email: data.idTaiKhoan?.email || "",
-      cccd: data.cccd || "",
       soDienThoai: data.idTaiKhoan?.soDienThoai || "",
       ngaySinh: data.ngaySinh ? new Date(data.ngaySinh).toISOString().split("T")[0] : "",
-      gioiTinh: data.idTaiKhoan?.deleted !== undefined ? (data.idTaiKhoan.deleted ? "true" : "false") : "",
+      gioiTinh: data.gioiTinh !== undefined ? String(data.idTaiKhoan.deleted) : "",
       ten: data.ten || "",
       diaChiCuThe: defaultAddress.diaChiCuThe || "",
       thanhPho: defaultAddress.thanhPho || "",
       quan: defaultAddress.quan || "",
       phuong: defaultAddress.phuong || "",
-      anhNhanVien: data.anhNhanVien || "",
+      anhKhachHang: data.anhKhachHang || "",
     };
 
-    if (data.anhNhanVien) employeeImage.value = data.anhNhanVien;
+    // Xử lý ảnh từ API
+    if (data.anhKhachHang) {
+      if (data.anhKhachHang.startsWith("data:")) {
+        customerImage.value = data.anhKhachHang;
+      } else {
+        customerImage.value = `http://localhost:8080${data.anhKhachHang}`;
+      }
+    } else {
+      customerImage.value = null;
+    }
+
+    console.log("Ảnh khách hàng từ API:", customerImage.value);
 
     // Cập nhật danh sách quận/huyện và xã/phường cho từng địa chỉ
     for (const address of addresses.value) {
@@ -454,7 +481,7 @@ const fetchEmployeeData = async () => {
   }
 };
 
-const updateNhanVien = async () => {
+const updateKhachHang = async () => {
   try {
     if (!custmerData.value.email || !custmerData.value.soDienThoai) {
       throw new Error("Email và số điện thoại không được để trống!");
@@ -463,14 +490,18 @@ const updateNhanVien = async () => {
     const updatedData = {
       email: custmerData.value.email,
       soDienThoai: custmerData.value.soDienThoai,
-      cccd: custmerData.value.cccd,
       ngaySinh: custmerData.value.ngaySinh,
-      gioiTinh: custmerData.value.gioiTinh,
-      tenKH: custmerData.value.ten
+      gioiTinh: custmerData.value.gioiTinh === "true",
+      tenKH: custmerData.value.ten,
+      anhKH: hasNewImage.value ? custmerData.value.anhKhachHang : custmerData.value.anhKhachHang || "", // Gửi ảnh mới hoặc giữ nguyên
     };
-    await axios.put(`http://localhost:8080/khach-hang/update/${route.query.id}`, updatedData);
+
+    await axios.put(`http://localhost:8080/khach-hang/update/${route.query.id}`, updatedData, {
+      headers: { "Content-Type": "application/json" }
+    });
     alert("Cập nhật thông tin khách hàng thành công!");
-    await fetchEmployeeData();
+    hasNewImage.value = false; // Reset sau khi cập nhật thành công
+    await fetchCustomerData();
   } catch (error) {
     console.error("Lỗi khi cập nhật thông tin khách hàng:", error);
     alert("Có lỗi xảy ra khi cập nhật thông tin khách hàng: " + (error.response?.data?.error || error.message));
@@ -497,9 +528,6 @@ const handleNewProvinceChange = async () => {
   const province = provinces.value.find(prov => prov.name === newAddress.value.thanhPho);
   if (province && province.districts) {
     newDistricts.value = province.districts;
-    console.log("Danh sách quận/huyện mới:", newDistricts.value);
-  } else {
-    console.warn("Không tìm thấy quận/huyện cho tỉnh:", newAddress.value.thanhPho);
   }
 };
 
@@ -512,10 +540,6 @@ const handleNewDistrictChange = async () => {
   const district = newDistricts.value.find(dist => dist.name === newAddress.value.quan);
   if (district && district.wards) {
     newWards.value = district.wards;
-    console.log("Danh sách xã/phường mới:", newWards.value);
-  } else {
-    console.warn("Không tìm thấy xã/phường cho quận/huyện:", newAddress.value.quan);
-    newWards.value = [{ name: "Không có xã/phường", code: "N/A" }];
   }
   await nextTick();
 };
@@ -540,12 +564,10 @@ const addNewAddress = async () => {
       deleted: false,
     };
 
-    const response = await axios.post(`http://localhost:8080/dia-chi/addDchi`, newData);
-    console.log("Phản hồi từ server sau addNewAddress:", response.data);
-
+    await axios.post(`http://localhost:8080/dia-chi/addDchi`, newData);
     alert("Thêm địa chỉ thành công!");
     toggleAddAddress();
-    await fetchEmployeeData();
+    await fetchCustomerData();
     currentPage.value = totalPages.value;
   } catch (error) {
     console.error("Lỗi khi thêm địa chỉ:", error);
@@ -564,9 +586,6 @@ const updateDistricts = async (address) => {
   const province = provinces.value.find(prov => prov.name === address.thanhPho);
   if (province && province.districts) {
     address.availableDistricts = province.districts;
-    console.log("Danh sách quận/huyện cho địa chỉ:", address.availableDistricts);
-  } else {
-    console.warn("Không tìm thấy quận/huyện cho tỉnh:", address.thanhPho);
   }
 };
 
@@ -579,10 +598,6 @@ const updateWards = async (address) => {
   const district = address.availableDistricts.find(dist => dist.name === address.quan);
   if (district && district.wards) {
     address.availableWards = district.wards;
-    console.log("Danh sách xã/phường cho địa chỉ:", address.availableWards);
-  } else {
-    console.warn("Không tìm thấy xã/phường cho quận/huyện:", address.quan);
-    address.availableWards = [{ name: "Không có xã/phường", code: "N/A" }];
   }
   await nextTick();
 };
@@ -597,21 +612,18 @@ const setDefaultAddress = async (selectedAddress) => {
 
     selectedAddress.macDinh = true;
 
-    // Cập nhật địa chỉ mặc định vào custmerData
     custmerData.value.diaChiCuThe = selectedAddress.diaChiCuThe;
     custmerData.value.thanhPho = selectedAddress.thanhPho;
     custmerData.value.quan = selectedAddress.quan;
     custmerData.value.phuong = selectedAddress.phuong;
 
-    // Gửi yêu cầu cập nhật lên server
     for (const address of addresses.value) {
       await axios.put(`http://localhost:8080/dia-chi/setDefault/${address.id}`, { macDinh: address.macDinh });
     }
 
     alert("Cập nhật địa chỉ mặc định thành công!");
-    await fetchEmployeeData();
+    await fetchCustomerData();
 
-    // Gửi sự kiện để đồng bộ với table
     document.dispatchEvent(new CustomEvent('defaultAddressChanged', {
       detail: {
         id: custmerData.value.id,
@@ -649,7 +661,7 @@ const saveAddress = async (address) => {
     await axios.put(`http://localhost:8080/dia-chi/updateDchi/${address.id}`, updatedData);
     address.isEditing = false;
     alert("Cập nhật địa chỉ thành công!");
-    await fetchEmployeeData();
+    await fetchCustomerData();
   } catch (error) {
     console.error("Lỗi khi cập nhật địa chỉ:", error);
     alert("Có lỗi xảy ra khi cập nhật địa chỉ: " + (error.response?.data?.error || error.message));
@@ -661,7 +673,7 @@ const deleteAddress = async (id) => {
     try {
       await axios.delete(`http://localhost:8080/dia-chi/delete/${id}`);
       alert("Xóa địa chỉ thành công!");
-      await fetchEmployeeData();
+      await fetchCustomerData();
       if (paginatedAddresses.value.length === 0 && currentPage.value > 1) {
         currentPage.value--;
       }
@@ -677,7 +689,7 @@ onMounted(async () => {
     const response = await axios.get("https://provinces.open-api.vn/api/?depth=3");
     provinces.value = response.data;
     console.log("Dữ liệu tỉnh/thành phố đã tải:", provinces.value);
-    await fetchEmployeeData();
+    await fetchCustomerData();
   } catch (error) {
     console.error("Lỗi khi tải dữ liệu địa chỉ:", error);
     alert("Không thể tải dữ liệu địa chỉ: " + (error.response?.data?.error || error.message));
@@ -756,5 +768,29 @@ input:checked + .slider:before {
 
 input:checked + .slider:hover {
   background-color: #fb923c;
+}
+
+.form-radio {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  border: 2px solid #d1d5db;
+  border-radius: 50%;
+  outline: none;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.form-radio:checked {
+  background-color: #f97316;
+  border-color: #f97316;
+}
+
+.form-radio:hover {
+  border-color: #f59e0b;
+}
+
+.form-radio:focus {
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.3);
 }
 </style>

@@ -129,6 +129,7 @@ public class KhachHangServices {
         kh.setNgaySinh(khachHangDTO.getNgaySinh());
         kh.setCccd(khachHangDTO.getCccd());
         kh.setDeleted(false);
+        kh.setAnhKhachHang(khachHangDTO.getAnhKhachHang());
         kh.setGioiTinh(khachHangDTO.getGioiTinh() != null && khachHangDTO.getGioiTinh() ? (short) 1 : (short) 0);
         kh = khachHangRepository.save(kh); // Lưu trước để có ID
 
