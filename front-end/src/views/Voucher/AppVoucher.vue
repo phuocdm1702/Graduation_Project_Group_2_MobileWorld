@@ -245,6 +245,10 @@ watch(searchQuery, (newQuery) =>  {
   }
 });
 
+watch([filterType, filterStatus, startDate, endDate, minOrder, valueFilter], () => {
+  goToPage(0);
+});
+
 // Lấy route hiện tại
 const route = useRoute();
 

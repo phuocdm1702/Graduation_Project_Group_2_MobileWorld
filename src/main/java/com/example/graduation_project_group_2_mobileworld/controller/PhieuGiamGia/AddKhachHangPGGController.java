@@ -42,7 +42,7 @@ public class AddKhachHangPGGController {
     }
 
     @PostMapping("/addPhieuGiamGia")
-    public ResponseEntity<String> addPGG(@RequestBody PhieuGiamGiaDTO dtoPGG) {
+    public ResponseEntity<PhieuGiamGia> addPGG(@RequestBody PhieuGiamGiaDTO dtoPGG) {
         PhieuGiamGia pgg = new PhieuGiamGia();
         pgg.setMa(dtoPGG.getMa());
         pgg.setTenPhieuGiamGia(dtoPGG.getTenPhieuGiamGia());
@@ -57,6 +57,8 @@ public class AddKhachHangPGGController {
         pgg.setRiengTu(dtoPGG.getRiengTu() != null ? dtoPGG.getRiengTu() == 1 : false);
         pgg.setMoTa(dtoPGG.getMoTa());
         pgg.setDeleted(false);
+
+        PhieuGiamGia savePgg = phieuGiamGiaService.addPGG(pgg);
 
         phieuGiamGiaService.addPGG(pgg);
         if(dtoPGG.getRiengTu() == 1  && dtoPGG.getCustomerIds() != null) {
@@ -77,7 +79,7 @@ public class AddKhachHangPGGController {
             }
         }
 
-        return ResponseEntity.ok("Thêm thành công !");
+        return ResponseEntity.ok(savePgg);
     }
 
 }

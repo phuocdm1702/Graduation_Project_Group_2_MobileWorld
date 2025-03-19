@@ -88,6 +88,8 @@ public class PhieuGiamGiaService {
             Pageable pageable) {
 
         String loaiPhieu = loaiPhieuGiamGia;
+
+
         if (loaiPhieu != null && ("Tất cả loại phiếu".equals(loaiPhieu) || loaiPhieu.isEmpty())) {
             loaiPhieu = null;
         }
@@ -104,7 +106,7 @@ public class PhieuGiamGiaService {
         // Nếu không có filter nào được chọn, trả về tất cả
         if (loaiPhieu == null && trangThaiBoolean == null && ngayBatDau == null &&
                 ngayKetThuc == null && minOrder == null && valueFilter == null) {
-            return (Page<PhieuGiamGia>) phieuGiamGiaRepository.findAll();
+            return phieuGiamGiaRepository.findAll(pageable);
         }
 
         if (ngayBatDau != null && ngayKetThuc != null && ngayBatDau.after(ngayKetThuc)) {
@@ -118,6 +120,8 @@ public class PhieuGiamGiaService {
         if (valueFilter != null && valueFilter < 0) {
             throw new IllegalArgumentException("Giá trị phiếu không thể nhỏ hơn 0");
         }
+
+
 
         // Gọi query từ Repository
         return phieuGiamGiaRepository.filterPhieuGiamGia(
