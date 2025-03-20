@@ -1,5 +1,7 @@
 <template>
   <div class="container mx-auto px-4 py-6">
+
+    <ToastNotification ref="toastRef" />
     <!-- BreadcrumbWrapper -->
     <BreadcrumbWrapper :breadcrumb-items="breadcrumbItems" />
 
@@ -258,12 +260,12 @@ import {useRoute, useRouter} from 'vue-router';
 import axios from 'axios';
 import {Html5Qrcode} from 'html5-qrcode';
 import BreadcrumbWrapper from '@/components/BreadcrumbWrapper.vue';
-
+import ToastNotification from "@/components/ToastNotification.vue";
 const router = useRouter();
 const route = useRoute();
 const qrReader = ref(null);
 const isScanning = ref(false);
-
+const toastRef = ref(null);
 // Dữ liệu nhân viên
 const employee = ref({
   tenNhanVien: '',
@@ -386,7 +388,7 @@ const provinceMapping = {
 
 // Ánh xạ tên phường/xã (nếu cần)
 const wardMapping = {
-  'Trà Quý': 'Thị trấn Trâu Quỳ', // Ánh xạ "Trà Quý" thành "Thị trấn Trâu Quỳ"
+  'Trâu Quỳ': 'Thị trấn Trâu Quỳ', // Ánh xạ "Trà Quý" thành "Thị trấn Trâu Quỳ"
   // Thêm các ánh xạ khác nếu cần
 };
 
@@ -459,13 +461,13 @@ const parseAddress = async (address) => {
     const ward = wards.value.find((w) => normalizeName(w.name) === normalizeName(wardName));
     if (!ward) {
       console.error('Không tìm thấy phường/xã:', wardName);
-      alert('Không tìm thấy phường/xã trong dữ liệu: ' + wardName);
+      toastRef.value.kshowToast('error', 'Không tìm thấy phường/xã trong dữ liệu: ' + wardName);
       return;
     }
     selectedWard.value = ward.name; // Gán tên đầy đủ (bao gồm "Thị trấn")
   } else {
     console.error('Địa chỉ không đủ thông tin:', address);
-    alert('Địa chỉ từ QR không đủ thông tin để phân tích: ' + address);
+    toastRef.value.kshowToast('error','Địa chỉ từ QR không đủ thông tin để phân tích: ' + address);
   }
 };
 
@@ -475,7 +477,7 @@ async function uploadImage(file) {
 
   const maxSize = 5 * 1024 * 1024; // 5MB
   if (file.size > maxSize) {
-    alert('Kích thước ảnh không được vượt quá 5MB!');
+    toastRef.value.kshowToast('Kích thước ảnh không được vượt quá 5MB!');
     return null;
   }
 
@@ -501,7 +503,7 @@ async function uploadImage(file) {
     const errorMessage = error.response
       ? `Server lỗi: ${error.response.status} - ${error.response.data.message || error.message}`
       : error.message;
-    alert('Không thể tải ảnh lên: ' + errorMessage);
+    toastRef.value.kshowToast('error','Không thể tải ảnh lên: ' + errorMessage);
     return null;
   }
 }
@@ -536,7 +538,7 @@ async function addNhanVien() {
   if (!employee.value.tenNhanVien || !employee.value.sdt ||
     !employee.value.cccd || !employee.value.email || !employee.value.diaChicuthe ||
     !employee.value.ngaySinh || !employee.value.gioiTinh) {
-    alert('Vui lòng điền đầy đủ thông tin bắt buộc!');
+    toastRef.value.kshowToast('error', 'Nhập đủ các trường!');
     return;
   }
 
@@ -607,4 +609,6 @@ const handleDistrictChange = () => {
   wards.value = district ? district.wards : [];
   selectedWard.value = '';
 };
+
+
 </script>
