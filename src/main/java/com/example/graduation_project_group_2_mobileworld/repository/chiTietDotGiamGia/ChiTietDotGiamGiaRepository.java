@@ -1,40 +1,67 @@
 package com.example.graduation_project_group_2_mobileworld.repository.chiTietDotGiamGia;
 
 import com.example.graduation_project_group_2_mobileworld.entity.ChiTietDotGiamGia;
+import com.example.graduation_project_group_2_mobileworld.entity.ChiTietSanPham;
 import com.example.graduation_project_group_2_mobileworld.entity.DotGiamGia;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 public interface ChiTietDotGiamGiaRepository extends JpaRepository<ChiTietDotGiamGia, Integer> {
     @Query("Select ctdgg From ChiTietDotGiamGia ctdgg")
     List<ChiTietDotGiamGia> xuatExcel();
 
-//    @Query("SELECT c FROM ChiTietDotGiamGia c WHERE c.idDongSanPham = :idDongSanPham AND c.dotGiamGia = :dotGiamGia AND c.deleted = false")
-//    List<ChiTietDotGiamGia> findByIdDongSanPhamAndDotGiamGia(@Param("idDongSanPham") DongSanPham idDongSanPham,
-//                                                       @Param("dotGiamGia") DotGiamGia dotGiamGia);
-//
-//    @Query("SELECT c FROM ChiTietDotGiamGia c WHERE c.dotGiamGia = :dotGiamGia AND c.deleted = false")
-//    List<ChiTietDotGiamGia> findByDotGiamGia(@Param("dotGiamGia") DotGiamGia dotGiamGia);
-
     @Query("SELECT MAX(c.ma) FROM ChiTietDotGiamGia c")
     String findMaxMa();
 
-//    @Query("SELECT c FROM ChiTietDotGiamGia c WHERE c.idDongSanPham = :dongSanPham AND c.giaBanDau = :giaBanDau AND c.deleted = false")
-//    List<ChiTietDotGiamGia> findByIdDongSanPhamAndGiaBanDau(@Param("dongSanPham") DongSanPham dongSanPham, @Param("giaBanDau") BigDecimal giaBanDau);
-//
-//    @Query("SELECT c FROM ChiTietDotGiamGia c " +
-//            "WHERE c.dotGiamGia = :dotGiamGia " +
-//            "AND c.idDongSanPham = :idDongSanPham " +
-//            "AND c.giaBanDau = :giaBanDau " +
-//            "AND c.deleted = :deleted")
-//    List<ChiTietDotGiamGia> findByDotGiamGiaAndIdDongSanPhamAndGiaBanDauAndDeleted(
-//            @Param("dotGiamGia") DotGiamGia dotGiamGia,
-//            @Param("idDongSanPham") DongSanPham idDongSanPham,
-//            @Param("giaBanDau") BigDecimal giaBanDau,
-//            @Param("deleted") boolean deleted);
+    @Query("SELECT c FROM ChiTietDotGiamGia c WHERE c.idChiTietSanPham = :chiTietSanPham AND c.giaBanDau = :giaBanDau AND c.deleted = false")
+    List<ChiTietDotGiamGia> findByIdChiTietSanPhamAndGiaBanDau(@Param("chiTietSanPham") ChiTietSanPham chiTietSanPham, @Param("giaBanDau") BigDecimal giaBanDau);
+
+    @Query("SELECT d FROM DotGiamGia d WHERE d.ngayKetThuc < :today AND d.trangThai = true")
+    List<DotGiamGia> findByNgayKetThucBeforeAndTrangThaiTrue(@Param("today") LocalDate today);
+
+    @Query("SELECT ctsp FROM ChiTietSanPham ctsp " +
+            "JOIN ChiTietDotGiamGia ctdgg ON ctdgg.idChiTietSanPham.id = ctsp.id " +
+            "WHERE ctdgg.idDotGiamGia.id = :id AND ctdgg.deleted = false")
+    List<ChiTietSanPham> getChiTietSanPhamByDotGiamGia(@Param("id") Integer id);
+
+    @Query("SELECT c FROM ChiTietDotGiamGia c " +
+            "WHERE c.idDotGiamGia = :dotGiamGia " +
+            "AND c.idChiTietSanPham = :idChiTietSanPham " +
+            "AND c.giaBanDau = :giaBanDau " +
+            "AND c.deleted = :deleted")
+    List<ChiTietDotGiamGia> findByDotGiamGiaAndIdChiTietSanPhamAndGiaBanDauAndDeleted(
+            @Param("dotGiamGia") DotGiamGia dotGiamGia,
+            @Param("idChiTietSanPham") ChiTietSanPham idChiTietSanPham,
+            @Param("giaBanDau") BigDecimal giaBanDau,
+            @Param("deleted") boolean deleted);
+
+    @Query("SELECT c FROM ChiTietDotGiamGia c WHERE c.idDotGiamGia = :idDotGiamGia AND c.deleted = :deleted")
+    List<ChiTietDotGiamGia> findByIdDotGiamGiaAndDeleted(
+            @Param("idDotGiamGia") DotGiamGia idDotGiamGia,
+            @Param("deleted") boolean deleted);
+
+    // Tìm ChiTietDotGiamGia theo idChiTietSanPham và deleted
+    @Query("SELECT c FROM ChiTietDotGiamGia c WHERE c.idChiTietSanPham = :idChiTietSanPham AND c.deleted = :deleted")
+    List<ChiTietDotGiamGia> findByIdChiTietSanPhamAndDeleted(
+            @Param("idChiTietSanPham") ChiTietSanPham idChiTietSanPham,
+            @Param("deleted") boolean deleted);
+
+    @Query("SELECT c FROM ChiTietDotGiamGia c WHERE c.idDotGiamGia = :dotGiamGia")
+    List<ChiTietDotGiamGia> findByIdDotGiamGia(@Param("dotGiamGia") DotGiamGia dotGiamGia);
+
+    @Query("SELECT ct FROM ChiTietDotGiamGia ct WHERE ct.idDotGiamGia.id = :id AND ct.deleted = :deleted")
+    List<ChiTietDotGiamGia> findByIdDotGiamGiaIdAndDeleted(@Param("id") Integer id, @Param("deleted") boolean deleted);
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE ChiTietDotGiamGia ct SET ct.deleted = true WHERE ct.idDotGiamGia.id = :id")
+    public void updateChiTietDotGiamGiaDeleted(@Param("id") Integer id);
 
 }

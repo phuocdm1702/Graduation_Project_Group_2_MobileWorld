@@ -6,6 +6,7 @@ public class RequestDTO {
     private String keyword;
     private List<Integer> idDSPs;
     private List<Integer> idBoNhoTrongs;
+    private List<Integer> mauSac;
 
     public String getKeyword() {
         return keyword;
@@ -29,5 +30,13 @@ public class RequestDTO {
 
     public void setIdBoNhoTrongs(List<Integer> idBoNhoTrongs) {
         this.idBoNhoTrongs = idBoNhoTrongs;
+    }
+
+    public List<Integer> getMauSac() {
+        return mauSac;
+    }
+
+    public void setMauSac(List<Integer> mauSac) {
+        this.mauSac = mauSac;
     }
 }

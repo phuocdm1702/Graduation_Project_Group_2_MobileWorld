@@ -15,8 +15,14 @@ import java.math.BigDecimal;
 @Table(name = "chi_tiet_dot_giam_gia")
 public class ChiTietDotGiamGia {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Integer id;
+
+    @NotNull
+    @ManyToOne
+    @JoinColumn(name = "id_dot_giam_gia", nullable = false)
+    private DotGiamGia idDotGiamGia;
 
     @NotNull
     @ManyToOne

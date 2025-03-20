@@ -1,11 +1,23 @@
 import axios from "axios";
-import {onMounted, ref, watch, computed} from "vue";
-import {useRoute} from "vue-router";
+import { onMounted, ref, watch, computed } from "vue";
+import { useRoute } from "vue-router";
 
 // Định nghĩa hàm toàn cục để gọi từ formatter
 window.handleCheckboxChange = function (id) {
-  const {fetchCTSPData} = useDotGiamGiaInstance;
+  const { fetchCTSPData } = useDotGiamGiaInstance;
   if (fetchCTSPData) fetchCTSPData(id);
+};
+
+window.handleCheckboxChangeCTSP = function (id, isChecked) {
+  const { ctspList } = useDotGiamGiaInstance;
+  if (ctspList) {
+    ctspList.value = ctspList.value.map(item => {
+      if (item.ctsp.id === id) {
+        return { ...item, selected: isChecked };
+      }
+      return item;
+    });
+  }
 };
 
 let useDotGiamGiaInstance = null;
@@ -17,19 +29,21 @@ export const useDotGiamGia = () => {
   const idDSPs = ref([]);
   const selectedDongSanPham = ref(null);
   const selectedBoNhoTrong = ref(null);
+  const selectedMauSac = ref(null);
+  
   const currentPageDSP = ref(0);
   const pageSizeDSP = ref(12);
   const totalPagesDSP = ref(0);
   const currentPageCTSP = ref(0);
   const pageSizeCTSP = ref(10);
   const totalPagesCTSP = ref(0);
+  const ctspIdsInDotGiamGia = ref([]);
 
-  //Toast
+  // Toast và Confirm Modal
   const toast = ref(null);
   const showConfirmModal = ref(false);
   const confirmMessage = ref('');
   const confirmedAction = ref(null);
-
 
   const confirmActionToast = (message, action) => {
     confirmMessage.value = message;
@@ -48,7 +62,6 @@ export const useDotGiamGia = () => {
     showConfirmModal.value = false;
     confirmedAction.value = null;
   };
-
 
   const dotGiamGia = ref({
     id: null,
@@ -105,7 +118,7 @@ export const useDotGiamGia = () => {
     let start = Math.max(1, currentPageDSP.value + 1 - half);
     let end = Math.min(totalPagesDSP.value, start + maxPagesToShow - 1);
     start = Math.max(1, end - maxPagesToShow + 1);
-    return Array.from({length: end - start + 1}, (_, i) => start + i);
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
   });
 
   const displayedPagesCTSP = computed(() => {
@@ -114,7 +127,7 @@ export const useDotGiamGia = () => {
     let start = Math.max(1, currentPageCTSP.value + 1 - half);
     let end = Math.min(totalPagesCTSP.value, start + maxPagesToShow - 1);
     start = Math.max(1, end - maxPagesToShow + 1);
-    return Array.from({length: end - start + 1}, (_, i) => start + i);
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
   });
 
   const fetchData = async () => {
@@ -136,25 +149,26 @@ export const useDotGiamGia = () => {
         }
       );
 
-      // Gán danh sách DSP
-      dspList.value = res.data.dspList || [];
-
-      // Xử lý danh sách CTSP để loại bỏ trùng lặp
+      dspList.value = res.data.spList || [];
       const uniqueCtspList = [];
       const seenIds = new Set();
+
+      // Lưu trạng thái selected hiện tại trước khi cập nhật
+      const selectedIds = new Set(ctspList.value.filter(item => item.selected).map(item => item.ctsp.id));
+
       (res.data.ctspList || []).forEach(item => {
         if (!seenIds.has(item.ctsp.id)) {
           seenIds.add(item.ctsp.id);
-          uniqueCtspList.push(item);
+          // Giữ trạng thái selected nếu đã tick trước đó, nếu không thì dùng giá trị từ ctspIdsInDotGiamGia
+          const isSelected = selectedIds.has(item.ctsp.id) || ctspIdsInDotGiamGia.value.includes(item.ctsp.id);
+          uniqueCtspList.push({ ...item, selected: isSelected });
         }
       });
       ctspList.value = uniqueCtspList;
 
-      // Cập nhật tổng số trang
       totalPagesDSP.value = res.data.totalPages || Math.ceil((res.data.totalElements || dspList.value.length) / pageSizeDSP.value) || 0;
       totalPagesCTSP.value = res.data.totalPagesCTSP || 0;
 
-      // Điều chỉnh trang hiện tại nếu vượt quá tổng số trang
       if (currentPageDSP.value >= totalPagesDSP.value && totalPagesDSP.value > 0) {
         currentPageDSP.value = totalPagesDSP.value - 1;
         fetchData();
@@ -173,11 +187,42 @@ export const useDotGiamGia = () => {
   const fetchCTSPData = (id) => {
     if (idDSPs.value.includes(id)) {
       idDSPs.value = idDSPs.value.filter(dspId => dspId !== id);
+      ctspList.value = ctspList.value.map(item => {
+        if (item.sp?.id === id) {
+          return { ...item, selected: false };
+        }
+        return item;
+      });
     } else {
       idDSPs.value.push(id);
+      ctspList.value = ctspList.value.map(item => {
+        if (item.sp?.id === id) {
+          return { ...item, selected: true };
+        }
+        return item;
+      });
     }
     currentPageCTSP.value = 0;
     fetchData();
+  };
+
+  // Hàm chọn tất cả ChiTietSanPham
+  const selectAllCTSP = () => {
+    ctspList.value = ctspList.value.map(item => {
+      if (idDSPs.value.includes(item.sp?.id)) {
+        return { ...item, selected: true };
+      }
+      return item;
+    });
+  };
+
+  const deselectAllCTSP = () => {
+    ctspList.value = ctspList.value.map(item => {
+      if (idDSPs.value.includes(item.sp?.id)) {
+        return { ...item, selected: false };
+      }
+      return item;
+    });
   };
 
   const columns = ref([
@@ -195,14 +240,33 @@ export const useDotGiamGia = () => {
         `;
       },
     },
-    {key: "index", label: "#", formatter: (_, __, index) => (currentPageDSP.value * pageSizeDSP.value) + index + 1},
-    {key: "ma", label: "Mã"},
-    {key: "dongSanPham", label: "Tên sản phẩm"},
+    { key: "index", label: "#", formatter: (_, __, index) => (currentPageDSP.value * pageSizeDSP.value) + index + 1 },
+    { key: "ma", label: "Mã" },
+    { key: "tenSanPham", label: "Tên sản phẩm" },
+    {
+      key: "idNhaSanXuat",
+      label: "Hãng",
+      formatter: (value, item) => item.idNhaSanXuat?.nhaSanXuat || "Không xác định",
+    },
   ]);
 
   const getNestedValue = (obj, key) => (key === "index" ? null : obj[key]);
 
   const columns2 = ref([
+    {
+      key: "select",
+      label: "",
+      formatter: (value, item) => {
+        return `
+          <input
+            type="checkbox"
+            value="${item.ctsp.id}"
+            ${item.selected ? "checked" : ""}
+            onchange="handleCheckboxChangeCTSP(${item.ctsp.id}, this.checked)"
+          />
+        `;
+      },
+    },
     {
       key: "index",
       label: "#",
@@ -214,13 +278,17 @@ export const useDotGiamGia = () => {
       formatter: (value) => value ? `<img src="${value}" alt="Ảnh" class="w-10 h-10 object-cover">` : "N/A",
     },
     {
-      key: "dsp.dongSanPham",
-      label: "Tên sản phẩm",
-      formatter: (value) => value ?? "Chưa có dữ liệu",
+      key: "sp.tenSanPham_va_MauSac",
+      label: "Tên sản phẩm & Màu sắc",
+      formatter: (value, item) => {
+        const tenSanPham = item.sp?.tenSanPham ?? "Chưa có dữ liệu";
+        const mauSac = item.ctsp?.idMauSac?.mauSac ?? "Chưa có dữ liệu";
+        return `${tenSanPham} - ${mauSac}`;
+      }
     },
     {
       key: "bnt.dungLuongBoNhoTrong",
-      label: "Dung lượng bộ nhớ trong",
+      label: "Dung lượng bộ nhớ",
       formatter: (value) => value ?? "Chưa có dữ liệu",
     },
     {
@@ -239,9 +307,9 @@ export const useDotGiamGia = () => {
 
         if (loaiGiamGia === "Phần trăm") {
           const soTienGiamThucTe = giaBanDau * (giaTriGiam / 100);
-          return Math.min(soTienGiamThucTe, soTienGiamToiDa).toLocaleString(); // Hiển thị số tiền giảm thực tế hoặc tối đa
+          return Math.min(soTienGiamThucTe, soTienGiamToiDa).toLocaleString();
         }
-        return soTienGiamToiDa.toLocaleString(); // Mặc định cho "Tiền mặt" hoặc khi không có loại giảm giá
+        return soTienGiamToiDa.toLocaleString();
       },
     },
     {
@@ -257,7 +325,7 @@ export const useDotGiamGia = () => {
   };
 
   const uniqueDongSanPhams = computed(() => {
-    const unique = new Set(ctspList.value.map(ctsp => ctsp.dsp.dongSanPham));
+    const unique = new Set(ctspList.value.map(ctsp => ctsp.sp.tenSanPham));
     return Array.from(unique);
   });
 
@@ -266,26 +334,38 @@ export const useDotGiamGia = () => {
     return [...new Set(allBoNhoTrong)];
   });
 
-  // Sửa filteredCTSPList để hiển thị dựa trên idDSPs
+  const filteredMauSac = computed(() => {
+    const allMauSac = ctspList.value.map(ctsp => ctsp.ctsp?.idMauSac?.mauSac).filter(Boolean);
+    return [...new Set(allMauSac)];
+  });
+
   const filteredCTSPList = computed(() => {
     if (idDSPs.value.length === 0) return [];
     return ctspList.value.filter(ctsp => {
-      const dspId = ctsp.dsp.id;
-      const matchDSP = idDSPs.value.includes(dspId);
+      const dspId = ctsp.sp?.id;
+      const matchDSP = dspId ? idDSPs.value.includes(dspId) : false;
       const matchDongSanPham = selectedDongSanPham.value
-        ? ctsp.dsp.dongSanPham === selectedDongSanPham.value
+        ? ctsp.sp?.tenSanPham === selectedDongSanPham.value
         : true;
       const matchBoNhoTrong = selectedBoNhoTrong.value
-        ? ctsp.bnt.dungLuongBoNhoTrong === selectedBoNhoTrong.value
+        ? ctsp.bnt?.dungLuongBoNhoTrong === selectedBoNhoTrong.value
         : true;
-      return matchDSP && matchDongSanPham && matchBoNhoTrong;
+      const matchMauSac = selectedMauSac.value
+        ? ctsp.ctsp?.idMauSac?.mauSac === selectedMauSac.value
+        : true;
+      return matchDSP && matchDongSanPham && matchBoNhoTrong && matchMauSac;
     });
+  });
+
+  watch([selectedDongSanPham, selectedBoNhoTrong, selectedMauSac], () => {
+    currentPageCTSP.value = 0;
+    fetchData(); 
   });
 
   const checkDuplicate = async (field, value, excludeId = null) => {
     try {
-      const {data} = await axios.get(`http://localhost:8080/dot_giam_gia/ViewAddDotGiamGia/exists/${field}`, {
-        params: {[field]: value, excludeId},
+      const { data } = await axios.get(`http://localhost:8080/dot_giam_gia/ViewAddDotGiamGia/exists/${field}`, {
+        params: { [field]: value, excludeId },
       });
       return data;
     } catch (error) {
@@ -350,12 +430,13 @@ export const useDotGiamGia = () => {
   const fetchDongSanPham = async () => {
     try {
       const response = await axios.get(`http://localhost:8080/dot_giam_gia/viewUpdate?id=${dotGiamGia.value.id}`);
-      idDSPs.value = response.data.map(dsp => dsp.id);
+      idDSPs.value = response.data.dspList.map(dsp => dsp.id);
+      ctspIdsInDotGiamGia.value = response.data.ctspIds || [];
+      fetchData();
     } catch (error) {
       console.error("Lỗi khi lấy danh sách dòng sản phẩm:", error);
     }
   };
-
 
   const confirmAction = async () => {
     const message = edit.value ? "Có muốn cập nhật dữ liệu không?" : "Có muốn thêm dữ liệu không?";
@@ -363,7 +444,6 @@ export const useDotGiamGia = () => {
       await addData();
     });
   };
-
 
   const resetForm = () => {
     dotGiamGia.value = {
@@ -394,20 +474,18 @@ export const useDotGiamGia = () => {
     if (isValid) {
       try {
         if (edit.value) {
-          console.log("Dữ liệu gửi đi:", requestData);
           const response = await axios.put(
             `http://localhost:8080/dot_giam_gia/AddDotGiamGia/${dotGiamGia.value.id}`,
             requestData,
-            {headers: {"Content-Type": "application/json"}}
+            { headers: { "Content-Type": "application/json" } }
           );
-          toast.value?.kshowToast("success", "Sửa thành công")
+          toast.value?.kshowToast("success", "Sửa thành công");
           resetForm();
         } else {
-          console.log("Dữ liệu gửi đi:", requestData);
           const response = await axios.post(
             "http://localhost:8080/dot_giam_gia/AddDotGiamGia",
             requestData,
-            {headers: {"Content-Type": "application/json"}}
+            { headers: { "Content-Type": "application/json" } }
           );
           toast.value?.kshowToast("success", "Thêm thành công");
           resetForm();
@@ -436,7 +514,7 @@ export const useDotGiamGia = () => {
     () => {
       capNhatGiaSauKhiGiam();
     },
-    {deep: true}
+    { deep: true }
   );
 
   watch(
@@ -455,11 +533,10 @@ export const useDotGiamGia = () => {
           ngayKetThuc: newQuery.ngayKetThuc ? formatDateLocal(newQuery.ngayKetThuc) : "",
           trangThai: newQuery.trangThai || "",
         };
-        console.log("Updated dotGiamGia:", dotGiamGia.value);
         fetchDongSanPham();
       }
     },
-    {immediate: true}
+    { immediate: true }
   );
 
   watch(selectedDongSanPham, () => {
@@ -488,7 +565,6 @@ export const useDotGiamGia = () => {
 
   onMounted(fetchData);
 
-  // Lưu instance để dùng trong hàm toàn cục
   useDotGiamGiaInstance = {
     toast,
     currentPageDSP,
@@ -505,11 +581,13 @@ export const useDotGiamGia = () => {
     idDSPs,
     selectedDongSanPham,
     selectedBoNhoTrong,
+    selectedMauSac,
     dotGiamGia,
     edit,
     uniqueDongSanPhams,
     filteredBoNhoTrong,
     filteredCTSPList,
+    filteredMauSac,
     addData,
     resetForm,
     confirmAction,
@@ -526,6 +604,10 @@ export const useDotGiamGia = () => {
     confirmActionToast,
     executeConfirmedAction,
     closeConfirmModal,
+    ctspIdsInDotGiamGia,
+    fetchDongSanPham,
+    selectAllCTSP,
+    deselectAllCTSP
   };
 
   return useDotGiamGiaInstance;
