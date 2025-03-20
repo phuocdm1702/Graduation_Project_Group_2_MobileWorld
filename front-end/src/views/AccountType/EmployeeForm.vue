@@ -209,6 +209,13 @@
       </div>
     </div>
   </div>
+
+  <ConfirmModal
+    :show="showConfirmModal"
+    :message="'Bạn có chắc chắn muốn thêm nhân viên không?'"
+    @confirm="addNhanVien"
+    @cancel="showConfirmModal = false"
+  />
 </template>
 
 <style scoped>
@@ -261,6 +268,9 @@ import axios from 'axios';
 import {Html5Qrcode} from 'html5-qrcode';
 import BreadcrumbWrapper from '@/components/BreadcrumbWrapper.vue';
 import ToastNotification from "@/components/ToastNotification.vue";
+import ConfirmModal from "@/components/ConfirmModal.vue";
+import useEmployeeManagement from "@/views/AccountType/useEmployeeManagement";
+const showConfirmModal = ref(false); 
 const router = useRouter();
 const route = useRoute();
 const qrReader = ref(null);
@@ -534,14 +544,34 @@ function triggerFileInput() {
   fileInput.value.click();
 }
 
+
+function dieukienADD() {
+  const OnlyNumbers = /^\d+$/;
+  
+  if (!employee.value.tenNhanVien?.trim()){
+    toastRef.value.kshowToast('error','Vui lòng điền tên nhân viên!');
+   return false;
+  }
+  else if (!employee.value.diaChicuthe?.trim()){
+    toastRef.value.kshowToast('error','Vui lòng điền diaChi!');
+    return false;
+  }
+  else if (!employee.value.cccd?.trim()){
+    toastRef.value.kshowToast('error','Vui lòng điền tên nhân viên!');
+    return false;
+  }
+  else if (!OnlyNumbers(employee.value.cccd?.trim())){
+    toastRef.value.kshowToast('error','Vui lòng điền!');
+    return false;
+  }
+  return true;
+}
+
 async function addNhanVien() {
-  if (!employee.value.tenNhanVien || !employee.value.sdt ||
-    !employee.value.cccd || !employee.value.email || !employee.value.diaChicuthe ||
-    !employee.value.ngaySinh || !employee.value.gioiTinh) {
-    toastRef.value.kshowToast('error', 'Nhập đủ các trường!');
+  if (!dieukienADD()){
     return;
   }
-
+  
   let imagePath = uploadedImageUrl.value;
   if (fileInput.value?.files[0] && !imagePath) {
     imagePath = await uploadImage(fileInput.value.files[0]);
@@ -573,16 +603,16 @@ async function addNhanVien() {
     const response = await axios.post('http://localhost:8080/nhan-vien/add', employeeData, {
       headers: {'Content-Type': 'application/json'},
     });
+    showConfirmModal.value = false;
     console.log('Phản hồi từ server:', response.data);
-    alert('Thêm nhân viên thành công!');
 
     router.push({
       path: '/nhan-vien',
-      query: {newEmployee: JSON.stringify(response.data)}
+      query: {newEmployee: JSON.stringify(response.data)},
     });
   } catch (error) {
     console.error('Lỗi khi thêm nhân viên:', error.response ? error.response.data : error.message);
-    alert('Thêm nhân viên thất bại: ' + (error.response?.data?.message || error.message));
+    toastRef.value.kshowToast('error','Thêm nhân viên thất bại: ' + (error.response?.data?.message || error.message));
   }
 }
 
@@ -592,7 +622,7 @@ onMounted(async () => {
     const response = await axios.get('https://provinces.open-api.vn/api/?depth=3');
     provinces.value = response.data;
   } catch (error) {
-    console.error('Lỗi khi tải dữ liệu:', error);
+    toastRef.value.kshowToast('error','Lỗi khi tải dữ liệu:', error);
   }
 });
 
@@ -610,5 +640,25 @@ const handleDistrictChange = () => {
   selectedWard.value = '';
 };
 
-
+const {
+  visible,
+  message,
+  type,
+  currentPage,
+  goToPage,
+  totalPages,
+  dataTable,
+  selectedNVId,
+  showDeleteConfirm,
+  showToast,
+  filterStatus,
+  fetchNhanVien,
+  deleteNv,
+  searchNV,
+  btnSearch,
+  onFilterChange,
+  tableColumns,
+  getNestedValue,
+  importExcel,
+} = useEmployeeManagement();
 </script>
