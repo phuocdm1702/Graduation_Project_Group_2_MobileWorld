@@ -5,8 +5,7 @@
     <div class="mt-2 mx-auto">
       <ToastNotification ref="toast"/>
       <!-- Form lọc -->
-      <div
-        class="bg-white shadow-lg rounded-lg p-5 mb-2 mt-2 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+      <div class="bg-white shadow-lg rounded-lg p-5 mb-2 mt-2 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
         <!-- Ô tìm kiếm -->
         <div>
           <label for="searchQuery" class="block text-sm font-medium text-gray-700 mb-1">Tìm kiếm đợt giảm giá</label>
@@ -44,9 +43,10 @@
             class="input-field"
             @change="currentPage = 0; fetchData()"
           >
-            <option value="">Tất cả trạng thái hoạt động</option>
+            <option value="">Tất cả trạng thái</option>
             <option value="0">Đang diễn ra</option>
             <option value="1">Sắp diễn ra</option>
+            <option value="deleted">Đã kết thúc</option>
           </select>
         </div>
 
@@ -101,16 +101,16 @@
         </div>
 
         <!-- Checkbox Đã kết thúc -->
-        <div class="flex items-center space-x-2">
-          <input
-            type="checkbox"
-            v-model="deleted"
-            id="deleted"
-            @change="currentPage = 1; fetchData()"
-            class="w-5 h-5 rounded focus:ring-2 focus:ring-blue-400"
-          />
-          <label for="deleted" class="block text-sm font-medium text-gray-700">Đã kết thúc</label>
-        </div>
+<!--        <div class="flex items-center space-x-2">-->
+<!--          <input-->
+<!--            type="checkbox"-->
+<!--            v-model="deleted"-->
+<!--            id="deleted"-->
+<!--            @change="currentPage = 1; fetchData()"-->
+<!--            class="w-5 h-5 rounded focus:ring-2 focus:ring-blue-400"-->
+<!--          />-->
+<!--          <label for="deleted" class="block text-sm font-medium text-gray-700">Đã kết thúc</label>-->
+<!--        </div>-->
 
         <div class="flex justify-end w-full col-span-full gap-2">
           <!-- Xuất Excel -->
