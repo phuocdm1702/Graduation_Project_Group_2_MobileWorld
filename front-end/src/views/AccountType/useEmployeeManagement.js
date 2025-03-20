@@ -1,38 +1,29 @@
 import { ref, onMounted, onUnmounted } from "vue";
 import axios from "axios";
-import { useRouter, useRoute } from "vue-router"; // Thêm useRoute để lấy query
-import { format } from 'date-fns';
-import { vi } from 'date-fns/locale';
+import { useRouter, useRoute } from "vue-router";
+import { format } from "date-fns";
+import { vi } from "date-fns/locale";
 
-export default function useEmployeeManagement() {
+export default function useEmployeeManagement(toastRef) { // Nhận toastRef từ component cha
   const router = useRouter();
-  const route = useRoute(); // Thêm route để đọc query
+  const route = useRoute();
 
-  // Toast notification
   const visible = ref(false);
   const message = ref("");
   const type = ref("success");
 
-  // Employee image
   const employeeImage = ref(null);
-
   const dataTable = ref([]);
-  const originalData = ref([]); // Lưu trữ dữ liệu gốc để tìm kiếm
-
+  const originalData = ref([]);
   const currentPage = ref(0);
-  const itemsPerPage = 5  ;
+  const itemsPerPage = 5;
   const totalPages = ref(0);
-
   const showConfirmModal = ref(false);
   const selectedNVId = ref(null);
-
   const filterStatus = ref("tat-ca");
   const searchNV = ref("");
-
-
   const isLoading = ref(false);
-  
-  // Preview image
+
   function previewImage(event) {
     const file = event.target.files[0];
     if (file) {
@@ -44,18 +35,17 @@ export default function useEmployeeManagement() {
     }
   }
 
-  // Fetch employees
   const fetchNhanVien = async () => {
     try {
       const res = await axios.get("http://localhost:8080/nhan-vien/home");
       originalData.value = res.data || [];
 
-      // Kiểm tra nếu có nhân viên mới từ query
       const newEmployee = route.query.newEmployee;
       if (newEmployee) {
         const parsedEmployee = JSON.parse(newEmployee);
-        originalData.value.unshift(parsedEmployee); // Thêm nhân viên mới vào đầu danh sách
-        router.replace({ query: null }); // Xóa query sau khi xử lý
+        originalData.value.unshift(parsedEmployee);
+        router.replace({ query: null });
+        currentPage.value = 0; // Đặt lại trang đầu để hiển thị nhân viên mới
       }
 
       applyFilterAndSearch();
@@ -84,7 +74,6 @@ export default function useEmployeeManagement() {
     }
 
     totalPages.value = Math.ceil(filteredData.length / itemsPerPage);
-
     const start = currentPage.value * itemsPerPage;
     const end = start + itemsPerPage;
     dataTable.value = filteredData.slice(start, end);
@@ -106,12 +95,16 @@ export default function useEmployeeManagement() {
   };
 
   const showToast = (toastType, msg) => {
-    message.value = msg;
-    type.value = toastType;
-    visible.value = true;
-    setTimeout(() => {
-      visible.value = false;
-    }, 3000);
+    if (toastRef?.value) {
+      toastRef.value.kshowToast(toastType, msg); // Sử dụng toastRef từ component cha
+    } else {
+      message.value = msg;
+      type.value = toastType;
+      visible.value = true;
+      setTimeout(() => {
+        visible.value = false;
+      }, 3000);
+    }
   };
 
   const showDeleteConfirm = (id) => {
@@ -119,7 +112,6 @@ export default function useEmployeeManagement() {
     showConfirmModal.value = true;
   };
 
-  // Delete employee
   const deleteNv = async () => {
     if (!selectedNVId.value) return;
 
@@ -140,7 +132,7 @@ export default function useEmployeeManagement() {
     try {
       isLoading.value = true;
       const response = await axios.put(`http://localhost:8080/nhan-vien/toggle-status/${id}`);
-      await fetchNhanVien(currentPage.value);
+      await fetchNhanVien();
       showToast("success", response.data.message || "Đã thay đổi trạng thái thành công!");
     } catch (error) {
       console.error("Lỗi khi thay đổi trạng thái:", error);
@@ -148,6 +140,11 @@ export default function useEmployeeManagement() {
     } finally {
       isLoading.value = false;
     }
+  };
+
+  const importExcel = () => {
+    console.log("Chức năng nhập Excel chưa được triển khai!");
+    showToast("info", "Chức năng nhập Excel chưa được triển khai!");
   };
 
   const tableColumns = [
@@ -161,13 +158,13 @@ export default function useEmployeeManagement() {
       label: "Ngày tham gia",
       formatter: (value) => {
         if (!value || isNaN(Date.parse(value))) return "Chưa có dữ liệu";
-        return format(new Date(value), 'dd/MM/yyyy HH:mm:ss', { locale: vi });
+        return format(new Date(value), "dd/MM/yyyy HH:mm:ss", { locale: vi });
       },
     },
     {
       key: "diaChiCuThe",
       label: "Địa chỉ",
-      formatter: (value,item) => `
+      formatter: (value, item) => `
         <div style="
           min-width: 150px;
           max-width: 150px;
@@ -182,10 +179,7 @@ export default function useEmployeeManagement() {
           padding: 8px;
           line-height: 1.5;
         ">
-          ${value || "Chưa có dữ liệu"},
-${item.thanhPho},
-${item.quan},
-${item.phuong},
+          ${value || "Chưa có dữ liệu"}, ${item.thanhPho}, ${item.quan}, ${item.phuong}
         </div>
       `,
     },
@@ -206,14 +200,14 @@ ${item.phuong},
             <i class="fas fa-pen-to-square"></i>
           </a>
           <label class="switch ml-4">
-            <input type="checkbox" ${item.deleted ? '' : 'checked'} onchange="document.dispatchEvent(new CustomEvent('toggleStatus', { detail: '${item.id}' }))">
+            <input type="checkbox" ${item.deleted ? "" : "checked"} onchange="document.dispatchEvent(new CustomEvent('toggleStatus', { detail: '${item.id}' }))">
             <span class="slider round"></span>
           </label>
         </td>
       `,
     },
   ];
-//css cho Table
+
   function injectCSS() {
     const styleTag = document.createElement("style");
     styleTag.type = "text/css";
@@ -287,8 +281,8 @@ ${item.phuong},
         transform: translateX(20px);
       }
       input:checked + .slider {
-      background-color: #f97316;
-      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.15);
+        background-color: #f97316;
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.15);
       }
     `;
     document.head.appendChild(styleTag);
@@ -298,7 +292,6 @@ ${item.phuong},
     return path.split(".").reduce((acc, part) => acc && acc[part], obj) || "";
   };
 
-  // Xử lý sự kiện showDeleteConfirm từ DynamicTable
   const handleShowDeleteConfirm = (event) => {
     showDeleteConfirm(event.detail);
   };
@@ -312,7 +305,7 @@ ${item.phuong},
 
   onUnmounted(() => {
     document.removeEventListener("showDeleteConfirm", handleShowDeleteConfirm);
-    document.removeEventListener("toggleStatus", (event) => toggleStatus(event.detail));    
+    document.removeEventListener("toggleStatus", (event) => toggleStatus(event.detail));
   });
 
   return {
@@ -337,5 +330,6 @@ ${item.phuong},
     currentPage,
     totalPages,
     goToPage,
+    importExcel,
   };
 }

@@ -154,7 +154,6 @@ public class NhanVienServices {
                     existingNhanVien.setAnhNhanVien(nhanVienDTO.getAnhNhanVien());
                     existingNhanVien.setDiaChiCuThe(nhanVienDTO.getDiaChiCuThe());
                     existingNhanVien.setCccd(nhanVienDTO.getCccd());
-
                     // Lấy thông tin tài khoản qua idTaiKhoan
                     if (existingNhanVien.getIdTaiKhoan() != null) {
                         TaiKhoan taiKhoan = taiKhoanRepository.findById(existingNhanVien.getIdTaiKhoan().getId())
