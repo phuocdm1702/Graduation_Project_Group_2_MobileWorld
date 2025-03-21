@@ -1,38 +1,59 @@
 package com.example.graduation_project_group_2_mobileworld.controller.dot_giam_gia_controller;
 
 import com.example.graduation_project_group_2_mobileworld.dto.dot_giam_gia.viewCTSPDTO;
+import com.example.graduation_project_group_2_mobileworld.dto.dot_giam_gia.viewSanPhamDTO;
 import com.example.graduation_project_group_2_mobileworld.entity.SanPham;
 
 import java.util.List;
 
 public class CombinedResponse {
-    private List<SanPham> spList;
+    private List<viewSanPhamDTO> spList;
     private List<viewCTSPDTO> ctspList;
-    private int totalPagesDSP; // Đổi từ totalPages thành totalPagesDSP
-    private int currentPage;
+    private int totalPages;
+    private int currentPageDSP;
     private long totalElements;
     private int totalPagesCTSP;
     private int currentPageCTSP;
     private long totalElementsCTSP;
 
-    public CombinedResponse(List<SanPham> dspList, List<viewCTSPDTO> ctspList, int totalPagesDSP, int currentPage, long totalElements, int totalPagesCTSP, int currentPageCTSP, long totalElementsCTSP) {
-        this.spList = dspList;
+    public CombinedResponse() {
+    }
+
+    public CombinedResponse(List<viewSanPhamDTO> spList, List<viewCTSPDTO> ctspList, int totalPages, int currentPageDSP, long totalElements, int totalPagesCTSP, int currentPageCTSP, long totalElementsCTSP) {
+        this.spList = spList;
         this.ctspList = ctspList;
-        this.totalPagesDSP = totalPagesDSP;
-        this.currentPage = currentPage;
+        this.totalPages = totalPages;
+        this.currentPageDSP = currentPageDSP;
         this.totalElements = totalElements;
         this.totalPagesCTSP = totalPagesCTSP;
         this.currentPageCTSP = currentPageCTSP;
         this.totalElementsCTSP = totalElementsCTSP;
     }
 
-    public List<SanPham> getSpList() {
+    public int getTotalPages() {
+        return totalPages;
+    }
+
+    public void setTotalPages(int totalPages) {
+        this.totalPages = totalPages;
+    }
+
+    public int getCurrentPageDSP() {
+        return currentPageDSP;
+    }
+
+    public void setCurrentPageDSP(int currentPageDSP) {
+        this.currentPageDSP = currentPageDSP;
+    }
+
+    public List<viewSanPhamDTO> getSpList() {
         return spList;
     }
 
-    public void setSpList(List<SanPham> spList) {
+    public void setSpList(List<viewSanPhamDTO> spList) {
         this.spList = spList;
     }
+
 
     public List<viewCTSPDTO> getCtspList() {
         return ctspList;
@@ -43,19 +64,11 @@ public class CombinedResponse {
     }
 
     public int getTotalPagesDSP() {
-        return totalPagesDSP;
+        return totalPages;
     }
 
     public void setTotalPagesDSP(int totalPagesDSP) {
-        this.totalPagesDSP = totalPagesDSP;
-    }
-
-    public int getCurrentPage() {
-        return currentPage;
-    }
-
-    public void setCurrentPage(int currentPage) {
-        this.currentPage = currentPage;
+        this.totalPages = totalPagesDSP;
     }
 
     public long getTotalElements() {

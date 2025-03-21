@@ -2,10 +2,8 @@ package com.example.graduation_project_group_2_mobileworld.service.dot_giam_gia_
 
 import com.example.graduation_project_group_2_mobileworld.dto.dot_giam_gia.dot_giam_gia_DTO;
 import com.example.graduation_project_group_2_mobileworld.dto.dot_giam_gia.viewCTSPDTO;
-import com.example.graduation_project_group_2_mobileworld.entity.ChiTietDotGiamGia;
-import com.example.graduation_project_group_2_mobileworld.entity.ChiTietSanPham;
-import com.example.graduation_project_group_2_mobileworld.entity.DotGiamGia;
-import com.example.graduation_project_group_2_mobileworld.entity.SanPham;
+import com.example.graduation_project_group_2_mobileworld.dto.dot_giam_gia.viewSanPhamDTO;
+import com.example.graduation_project_group_2_mobileworld.entity.*;
 import com.example.graduation_project_group_2_mobileworld.repository.chiTietDotGiamGia.CTSPForCTDGG;
 import com.example.graduation_project_group_2_mobileworld.repository.chiTietDotGiamGia.ChiTietDotGiamGiaRepository;
 import com.example.graduation_project_group_2_mobileworld.repository.dot_giam_gia_repo.dot_giam_gia_repository;
@@ -64,8 +62,15 @@ public class dot_giam_gia_service {
         return repository.hienThiFinish(pageable);
     }
 
-    public Page<SanPham> getDSP(String timKiem, Pageable pageable) {
-        return repository.getAllSanPham(timKiem, pageable);
+    public Page<viewSanPhamDTO> getDSP(String timKiem, List<Integer> idHeDieuHanh, List<Integer> idNhaSanXuat, Pageable pageable) {
+        return repository.getAllSanPham(timKiem, idHeDieuHanh, idNhaSanXuat, pageable);
+    }
+    public List<HeDieuHanh> getAllHeDieuHanh() {
+        return repository.findAllHeDieuHanh();
+    }
+
+    public List<NhaSanXuat> getAllNhaSanXuat() {
+        return repository.findAllNhaSanXuat();
     }
 
     public Page<viewCTSPDTO> getAllCTSP(List<Integer> ids, List<Integer> idBoNhoTrongs, List<Integer> mauSac, Pageable pageable) {

@@ -102,6 +102,32 @@
             placeholder="Tìm kiếm theo tên, mã..."
             class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none transition mb-4"
           />
+          <div class="grid grid-cols-1 gap-4 mb-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div >
+              <label class="block text-sm font-medium text-gray-700 mb-1">Hệ điều hành</label>
+              <select
+                v-model="selectedHeDieuHanh"
+                class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none transition"
+              >
+                <option value="">Tất cả</option>
+                <option v-for="hdh in uniqueHeDieuHanh" :key="hdh.id" :value="hdh.id">
+                  {{ hdh.heDieuHanh }} {{ hdh.phienBan }}
+                </option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Nhà sản xuất</label>
+              <select
+                v-model="selectedNhaSanXuat"
+                class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none transition"
+              >
+                <option value="">Tất cả</option>
+                <option v-for="nsx in uniqueNhaSanXuat" :key="nsx.id" :value="nsx.id">
+                  {{ nsx.nhaSanXuat }}
+                </option>
+              </select>
+            </div>
+          </div>
           <div class="max-h-[500px] overflow-y-auto rounded-md border border-gray-200">
             <DynamicTable
               :data="dspList"
@@ -119,6 +145,8 @@
             />
           </footer>
         </div>
+      
+      
       </div>
 
       <!-- Chi Tiết Sản Phẩm -->
@@ -238,6 +266,8 @@ const {
   searchKeyword,
   selectedDongSanPham,
   selectedBoNhoTrong,
+  selectedHeDieuHanh, 
+  selectedNhaSanXuat, 
   selectedMauSac,
   dotGiamGia,
   edit,
@@ -245,6 +275,8 @@ const {
   filteredBoNhoTrong,
   filteredMauSac,
   filteredCTSPList,
+  uniqueHeDieuHanh,
+  uniqueNhaSanXuat,
   confirmAction,
   columns,
   getNestedValue,

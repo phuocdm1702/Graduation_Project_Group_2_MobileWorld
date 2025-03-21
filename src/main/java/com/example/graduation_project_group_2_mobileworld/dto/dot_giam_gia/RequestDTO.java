@@ -7,6 +7,8 @@ public class RequestDTO {
     private List<Integer> idDSPs;
     private List<Integer> idBoNhoTrongs;
     private List<Integer> mauSac;
+    private List<Integer> idHeDieuHanh; // Thêm
+    private List<Integer> idNhaSanXuat;
 
     public String getKeyword() {
         return keyword;
@@ -38,5 +40,21 @@ public class RequestDTO {
 
     public void setMauSac(List<Integer> mauSac) {
         this.mauSac = mauSac;
+    }
+
+    public List<Integer> getIdHeDieuHanh() {
+        return idHeDieuHanh;
+    }
+
+    public void setIdHeDieuHanh(List<Integer> idHeDieuHanh) {
+        this.idHeDieuHanh = idHeDieuHanh;
+    }
+
+    public List<Integer> getIdNhaSanXuat() {
+        return idNhaSanXuat;
+    }
+
+    public void setIdNhaSanXuat(List<Integer> idNhaSanXuat) {
+        this.idNhaSanXuat = idNhaSanXuat;
     }
 }
