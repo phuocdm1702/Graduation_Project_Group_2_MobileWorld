@@ -5,6 +5,7 @@ import com.example.graduation_project_group_2_mobileworld.dto.dot_giam_gia.addDo
 import com.example.graduation_project_group_2_mobileworld.dto.dot_giam_gia.viewCTSPDTO;
 import com.example.graduation_project_group_2_mobileworld.entity.ChiTietDotGiamGia;
 import com.example.graduation_project_group_2_mobileworld.entity.DotGiamGia;
+import com.example.graduation_project_group_2_mobileworld.entity.SanPham;
 import com.example.graduation_project_group_2_mobileworld.service.dot_giam_gia_service.DotGiamGiaExporter;
 import com.example.graduation_project_group_2_mobileworld.service.dot_giam_gia_service.dot_giam_gia_service;
 import jakarta.servlet.http.HttpServletResponse;
@@ -23,6 +24,7 @@ import java.math.BigDecimal;
 import java.sql.Date;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 @CrossOrigin(origins = "http://localhost:3000")
 @RestController
@@ -85,59 +87,59 @@ public class dot_giam_gia_controller {
     }
 
 
-//    @PostMapping("/ViewAddDotGiamGia")
-//    public ResponseEntity<CombinedResponse> hienThiAdd(
-//            @RequestBody RequestDTO request,
-//            @RequestParam(defaultValue = "0") int pageDSP, // Phân trang cho dspList
-//            @RequestParam(defaultValue = "5") int sizeDSP, // Kích thước trang cho dspList
-//            @RequestParam(defaultValue = "0") int pageCTSP, // Phân trang cho ctspList
-//            @RequestParam(defaultValue = "5") int sizeCTSP) { // Kích thước trang cho ctspList
-//        String keyword = request.getKeyword();
-//        List<Integer> idDSPs = request.getIdDSPs();
-//        List<Integer> idBoNhoTrongs = request.getIdBoNhoTrongs();
-//
-//        // Phân trang cho dspList
-//        Pageable pageableDSP = PageRequest.of(pageDSP, sizeDSP);
-//        Page<DongSanPham> dspPage = (keyword == null || keyword.trim().isEmpty())
-//                ? sr.getDSP(null, pageableDSP)
-//                : sr.getDSP(keyword, pageableDSP);
-//
-//        // Phân trang cho ctspList
-//        Pageable pageableCTSP = PageRequest.of(pageCTSP, sizeCTSP);
-//        Page<viewCTSPDTO> ctspPage = null;
-//        if (idDSPs != null && !idDSPs.isEmpty()) {
-//            ctspPage = sr.getAllCTSP(idDSPs, idBoNhoTrongs, pageableCTSP);
-//        } else {
-//            ctspPage = Page.empty(); // Nếu không có idDSPs, trả về trang rỗng
-//        }
-//
-//        CombinedResponse response = new CombinedResponse(
-//                dspPage.getContent(),
-//                ctspPage.getContent(),
-//                dspPage.getTotalPages(),  // Gán cho totalPages
-//                dspPage.getNumber(),
-//                dspPage.getTotalElements(),
-//                ctspPage.getTotalPages(), // Gán cho totalPagesCTSP
-//                ctspPage.getNumber(),
-//                ctspPage.getTotalElements()
-//        );
-//        return ResponseEntity.ok(response);
-//    }
+    @PostMapping("/ViewAddDotGiamGia")
+    public ResponseEntity<CombinedResponse> hienThiAdd(
+            @RequestBody RequestDTO request,
+            @RequestParam(defaultValue = "0") int pageDSP, // Phân trang cho dspList
+            @RequestParam(defaultValue = "5") int sizeDSP, // Kích thước trang cho dspList
+            @RequestParam(defaultValue = "0") int pageCTSP, // Phân trang cho ctspList
+            @RequestParam(defaultValue = "5") int sizeCTSP) { // Kích thước trang cho ctspList
+        String keyword = request.getKeyword();
+        List<Integer> idDSPs = request.getIdDSPs();
+        List<Integer> idBoNhoTrongs = request.getIdBoNhoTrongs();
+        List<Integer> idMauSac=request.getMauSac();
+
+        Pageable pageableDSP = PageRequest.of(pageDSP, sizeDSP);
+        Page<SanPham> dspPage = (keyword == null || keyword.trim().isEmpty())
+                ? sr.getDSP(null, pageableDSP)
+                : sr.getDSP(keyword, pageableDSP);
+
+        Pageable pageableCTSP = PageRequest.of(pageCTSP, sizeCTSP);
+        Page<viewCTSPDTO> ctspPage = null;
+        if (idDSPs != null && !idDSPs.isEmpty()) {
+            ctspPage = sr.getAllCTSP(idDSPs, idBoNhoTrongs, idMauSac,pageableCTSP);
+        } else {
+            ctspPage = Page.empty(); // Nếu không có idDSPs, trả về trang rỗng
+        }
+
+        CombinedResponse response = new CombinedResponse(
+                dspPage.getContent(),
+                ctspPage.getContent(),
+                dspPage.getTotalPages(),  // Gán cho totalPages
+                dspPage.getNumber(),
+                dspPage.getTotalElements(),
+                ctspPage.getTotalPages(), // Gán cho totalPagesCTSP
+                ctspPage.getNumber(),
+                ctspPage.getTotalElements()
+        );
+        return ResponseEntity.ok(response);
+    }
 
 
-//    @PostMapping("/AddDotGiamGia")
-//    public ResponseEntity<?> addData(@RequestBody addDotGiamGiaDTO request) {
-//        if (request == null || request.getDotGiamGia() == null) {
-//            return ResponseEntity.badRequest().body("Dữ liệu không hợp lệ");
-//        }
-//        try {
-//            System.out.println("Dữ liệu nhận được: " + request.toString());
-//            sr.addDotGiamGia(request.getDotGiamGia(), request.getIdDSPs(), request.getCtspList());
-//            return ResponseEntity.ok("Thêm thành công");
-//        } catch (Exception e) {
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Lỗi: " + e.getMessage());
-//        }
-//    }
+    @PostMapping("/AddDotGiamGia")
+    public ResponseEntity<?> addData(@RequestBody addDotGiamGiaDTO request) {
+        if (request == null || request.getDotGiamGia() == null) {
+            return ResponseEntity.badRequest().body("Dữ liệu không hợp lệ");
+        }
+        try {
+            System.out.println("Dữ liệu nhận được: " + request.toString());
+            System.out.println("ctspList nhận được: " + request.getCtspList());
+            sr.addDotGiamGia(request.getDotGiamGia(), request.getIdDSPs(), request.getCtspList());
+            return ResponseEntity.ok("Thêm thành công");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Lỗi: " + e.getMessage());
+        }
+    }
 
     @GetMapping("/ViewAddDotGiamGia/exists/ma")
     public ResponseEntity<Boolean> checkMa(@RequestParam String ma) {
@@ -149,7 +151,6 @@ public class dot_giam_gia_controller {
     public ResponseEntity<?> deleteDotGiamGia(@PathVariable("id") Integer id) {
         try {
             sr.deleteDotGiamGiaById(id);  // Gọi service để xóa
-//            sr.deleteChiTietDotGiamGiaById(id);
             return ResponseEntity.noContent().build(); // Trả về trạng thái thành công
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();  // Trả về lỗi nếu có vấn đề
@@ -159,9 +160,8 @@ public class dot_giam_gia_controller {
     @GetMapping("/viewUpdate")
     public ResponseEntity<?> viewUpdateDotGiamGia(@RequestParam Integer id) {
         try {
-//            List<DongSanPham> dspList = sr.getThatDongSanPham(id);
-//            return ResponseEntity.ok(dspList);
-            return ResponseEntity.ok("Show");
+            Map<String, Object> data = sr.getDataForUpdate(id);
+            return ResponseEntity.ok(data);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Lỗi: " + e.getMessage());
         }
@@ -174,7 +174,7 @@ public class dot_giam_gia_controller {
         }
         try {
             System.out.println("Dữ liệu nhận được: " + request.toString());
-//            sr.updateDotGiamGia(id, request.getDotGiamGia(), request.getIdDSPs(), request.getCtspList());
+            sr.updateDotGiamGia(id, request.getDotGiamGia(), request.getIdDSPs(), request.getCtspList());
             return ResponseEntity.ok("Thêm thành công");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Lỗi: " + e.getMessage());
