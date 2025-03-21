@@ -16,35 +16,49 @@ export default function usePhieuGiamGia() {
 
   const baseURL = "http://localhost:8080/phieu-giam-gia";
 
-  // Hàm tính toán trạng thái hiển thị
   const computeDisplayStatus = (item) => {
     const currentDate = new Date();
     const startDate = new Date(item.ngayBatDau);
     const endDate = new Date(item.ngayKetThuc);
 
     if (startDate > currentDate) {
-      return { text: "Chưa diễn ra", isActive: false };
+      return {
+        text: "Chưa diễn ra",
+        isActive: false,
+        cssClass: "badge-pending",
+        isToggleDisabled: true, // Vô hiệu hóa ToggleSwitch
+      };
     } else if (endDate >= currentDate) {
-      return item.trangThai
-        ? { text: "Không hoạt động", isActive: true }
-        : { text: "Hoạt động", isActive: false };
+      if (item.trangThai) {
+        return {
+          text: "Không hoạt động",
+          isActive: true,
+          cssClass: "badge-inactive",
+          isToggleDisabled: false, // Cho phép bật/tắt
+        };
+      } else {
+        return {
+          text: "Đang diễn ra",
+          isActive: false,
+          cssClass: "badge-active",
+          isToggleDisabled: false, // Cho phép bật/tắt
+        };
+      }
     }
-    return null; // Trả về null cho các PGG đã hết hạn để lọc bỏ sau
+    return null;
   };
 
-  // Hàm cập nhật vouchers với displayStatus và điều chỉnh trangThai
   const updateVouchersWithDisplayStatus = (voucherList) => {
     return voucherList
       .map((item) => {
         const displayStatus = computeDisplayStatus(item);
-        if (displayStatus === null) return null; // Bỏ qua các PGG đã hết hạn
+        if (displayStatus === null) return null;
         return {
           ...item,
-          displayStatus,
-          trangThai: displayStatus.isActive,
+          displayStatus: displayStatus,
         };
       })
-      .filter((item) => item !== null); // Loại bỏ các item null
+      .filter((item) => item !== null);
   };
 
   const fetchDataPGG = async (page = 0) => {
@@ -116,13 +130,16 @@ export default function usePhieuGiamGia() {
 
   const toggleStatusPGG = async (item) => {
     try {
+      if (item.displayStatus?.isToggleDisabled) {
+        console.log(`Cannot toggle ${item.ma}: ToggleSwitch is disabled`);
+        return;
+      }
       const newStatus = !item.trangThai;
       await axios.put(`${baseURL}/update-trang-thai/${item.id}`, { trangThai: newStatus });
       item.trangThai = newStatus; // Cập nhật trạng thái gốc
-      // Cập nhật lại displayStatus và trangThai
       const displayStatus = computeDisplayStatus(item);
       item.displayStatus = displayStatus;
-      item.trangThai = displayStatus.isActive; // Điều chỉnh lại trangThai để DynamicTable.vue sử dụng
+      console.log(`Toggled ${item.ma}: trangThai = ${item.trangThai}, displayStatus = ${item.displayStatus.text}`);
     } catch (error) {
       console.error("Lỗi khi cập nhật trạng thái:", error);
       console.log("Response từ server:", error.response?.data);
@@ -158,13 +175,13 @@ export default function usePhieuGiamGia() {
     { key: "hoaDonToiThieu", label: "Hóa\nĐơn\nTối\nThiểu" },
     { key: "ngayBatDau", label: "Ngày\nBĐ", formatter: (value) => new Date(value).toLocaleDateString("vi-VN") },
     { key: "ngayKetThuc", label: "Ngày\nKT", formatter: (value) => new Date(value).toLocaleDateString("vi-VN") },
-    { key: "displayStatus", label: "Trạng thái", cellSlot: "trangThaiSlot" }, // Thay đổi key thành "displayStatus"
+    { key: "displayStatus", label: "Trạng thái", cellSlot: "trangThaiPGG" },
     { key: "actions", label: "Hành động", cellSlot: "actionsSlot" },
   ]);
 
   const getNestedValue = (obj, key) => {
     if (key === "displayStatus") {
-      return obj.displayStatus?.text || "N/A"; // Trả về text của displayStatus
+      return obj.displayStatus?.text || "N/A";
     }
     return key.split(".").reduce((o, k) => (o && o[k] !== undefined ? o[k] : null), obj) || "N/A";
   };

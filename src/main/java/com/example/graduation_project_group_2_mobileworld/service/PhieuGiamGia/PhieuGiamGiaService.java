@@ -47,29 +47,29 @@ public class PhieuGiamGiaService {
         return listPgg;
     }
 
-    @Scheduled(fixedRate = 200000)
-    public void updateHanPGG() {
-        List<PhieuGiamGia> listPgg = phieuGiamGiaRepository.findAll();
-        Date now = new Date();
-
-        for (PhieuGiamGia pgg : listPgg) {
-            if (pgg.getNgayBatDau() != null && pgg.getNgayKetThuc() != null) {
-                // Đã bắt đầu (ngayBatDau <= now) và chưa hết hạn (ngayKetThuc >= now)
-                if ((pgg.getNgayBatDau().before(now) || pgg.getNgayBatDau().equals(now)) &&
-                        (pgg.getNgayKetThuc().after(now) || pgg.getNgayKetThuc().equals(now))) {
-                    if (pgg.getTrangThai() == null || !pgg.getTrangThai()) {
-                        pgg.setTrangThai(false); // Cập nhật thành Hoạt động
-                        phieuGiamGiaRepository.save(pgg);
-                    }
-                } else {
-                    if (pgg.getTrangThai() == null || pgg.getTrangThai()) {
-                        pgg.setTrangThai(true); // Cập nhật thành Không hoạt động
-                        phieuGiamGiaRepository.save(pgg);
-                    }
-                }
-            }
-        }
-    }
+//    @Scheduled(fixedRate = 200000)
+//    public void updateHanPGG() {
+//        List<PhieuGiamGia> listPgg = phieuGiamGiaRepository.findAll();
+//        Date now = new Date();
+//
+//        for (PhieuGiamGia pgg : listPgg) {
+//            if (pgg.getNgayBatDau() != null && pgg.getNgayKetThuc() != null) {
+//                // Đã bắt đầu (ngayBatDau <= now) và chưa hết hạn (ngayKetThuc >= now)
+//                if ((pgg.getNgayBatDau().before(now) || pgg.getNgayBatDau().equals(now)) &&
+//                        (pgg.getNgayKetThuc().after(now) || pgg.getNgayKetThuc().equals(now))) {
+//                    if (pgg.getTrangThai() == null || !pgg.getTrangThai()) {
+//                        pgg.setTrangThai(false); // Cập nhật thành Hoạt động
+//                        phieuGiamGiaRepository.save(pgg);
+//                    }
+//                } else {
+//                    if (pgg.getTrangThai() == null || pgg.getTrangThai()) {
+//                        pgg.setTrangThai(true); // Cập nhật thành Không hoạt động
+//                        phieuGiamGiaRepository.save(pgg);
+//                    }
+//                }
+//            }
+//        }
+//    }
 
     public Page<PhieuGiamGia> searchData(String keyword, Pageable pageable) {
         if (keyword == null || keyword.trim().isEmpty()) {

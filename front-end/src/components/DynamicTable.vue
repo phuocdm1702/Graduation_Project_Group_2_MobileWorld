@@ -30,6 +30,11 @@
               </div>
             </slot>
           </template>
+          <template v-else-if="column.cellSlot === 'trangThaiPGG'">
+            <span :class="item.displayStatus?.cssClass">
+              {{ item.displayStatus?.text || 'N/A' }}
+            </span>
+          </template>
           <template v-else-if="column.key === 'trangThai'">
             <span
               :class="{
@@ -81,5 +86,33 @@ const toggleStatus = (item) => {
 
 .td-cell {
   @apply px-4 py-2 text-sm;
+}
+
+.badge-pending {
+  background-color: #ffc107;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 15px;
+  font-size: 12px;
+  font-weight: 500;
+  text-align: center;
+}
+.badge-active {
+  background-color: #28a745;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 15px;
+  font-size: 12px;
+  font-weight: 500;
+  text-align: center;
+}
+.badge-inactive {
+  background-color: #dc3545;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 15px;
+  font-size: 12px;
+  font-weight: 500;
+  text-align: center;
 }
 </style>

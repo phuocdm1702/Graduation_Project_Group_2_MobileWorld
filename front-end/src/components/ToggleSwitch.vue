@@ -10,10 +10,9 @@
 <script setup>
 import { defineProps, defineEmits, computed } from 'vue';
 
-// Đảm bảo id được khai báo trong defineProps
 const props = defineProps({
   checked: { type: Boolean, default: false },
-  id: { type: [String, Number], default: '' } // Đảm bảo id được khai báo
+  id: { type: [String, Number], default: '' } 
 });
 
 defineEmits(['change']);
