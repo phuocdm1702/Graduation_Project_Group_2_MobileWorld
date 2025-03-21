@@ -20,29 +20,20 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
 import { useRoute } from "vue-router";
 
-defineProps<{
+// Khai báo props breadcrumbItems
+const props = defineProps<{
   breadcrumbItems: string[];
 }>();
 
 const route = useRoute();
 
-// Tính toán breadcrumb dựa trên meta của route
-const breadcrumbItems = computed(() => {
-  if (typeof route.meta.breadcrumb === "function") {
-    return route.meta.breadcrumb(route);
-  }
-  return route.meta?.breadcrumb || [];
-});
-
 // Hàm tạo link cho breadcrumb dựa trên danh sách route
 const getLinkForBreadcrumb = (index: number) => {
-  const items = breadcrumbItems.value.slice(0, index + 1); // Lấy các phần tử từ đầu đến index hiện tại
+  const items = props.breadcrumbItems.slice(0, index + 1); // Sử dụng props.breadcrumbItems
   const lastItem = items[index];
 
-  // Map các tên breadcrumb với đường dẫn tương ứng
   const breadcrumbMap: { [key: string]: string } = {
     "Thống kê": "/dashboard",
     "Quản Lý Phiếu Giảm Giá": "/phieu-giam-gia",
@@ -51,7 +42,7 @@ const getLinkForBreadcrumb = (index: number) => {
     "Thêm phiếu giảm giá": "/add-phieu-giam-gia",
     "Cập nhật phiếu giảm giá": `/update-phieu-giam-gia/:id`,
     "Thêm đợt giảm giá": "/ViewAddDotGiamGia",
-    "Cập nhật đợt giảm giá": `/update-dot-giam-gia/${route.params.id || ":id"}`, // Thêm đường dẫn mới
+    "Cập nhật đợt giảm giá": `/update-dot-giam-gia/${route.params.id || ":id"}`,
     "Bảo hành": "/phieu-bao-hanh",
     "Quản lý Phiếu bảo hành": "/phieu-bao-hanh",
     "Quản lý Lịch sử phiếu bảo hành": "/lich-su-bao-hanh",
@@ -104,7 +95,6 @@ const getLinkForBreadcrumb = (index: number) => {
     "Không tìm thấy": "/:pathMatch(.*)*"
   };
 
-  // Tạo đường dẫn dựa trên các phần tử trước đó
   for (let i = items.length - 1; i >= 0; i--) {
     const key = items[i];
     if (breadcrumbMap[key]) {
@@ -112,12 +102,11 @@ const getLinkForBreadcrumb = (index: number) => {
     }
   }
 
-  return "#"; // Mặc định nếu không tìm thấy
+  return "#";
 };
 </script>
 
 <style scoped>
-/* Tối ưu hóa CSS */
 nav {
   display: flex;
   align-items: center;

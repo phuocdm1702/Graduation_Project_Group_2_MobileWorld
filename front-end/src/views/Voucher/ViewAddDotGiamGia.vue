@@ -259,14 +259,14 @@ const {
   fetchCTSPData,
   idDSPs,
   selectAllCTSP,
-  deselectAllCTSP, // Thêm hàm mới
+  deselectAllCTSP,
 } = useDotGiamGia();
 
 const isEditMode = computed(() => edit.value);
 
 const breadcrumbItems = computed(() => {
-  if (edit.value && route.query.id) {
-    return ["Quản Lý Phiếu Giảm Giá", "Đợt giảm giá", `Cập nhật đợt giảm giá #${route.query.id}`];
+  if (edit.value) {
+    return ["Quản Lý Phiếu Giảm Giá", "Đợt giảm giá", `Cập nhật đợt giảm giá`];
   }
   return ["Quản Lý Phiếu Giảm Giá", "Đợt giảm giá", "Thêm đợt giảm giá"];
 });
@@ -281,5 +281,4 @@ const updateBoNhoTrong = () => {
 </script>
 
 <style scoped>
-/* Không cần thêm style mới vì Tailwind đã xử lý hết */
 </style>
