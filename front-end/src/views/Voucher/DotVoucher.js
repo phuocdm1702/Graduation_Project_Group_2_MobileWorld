@@ -58,12 +58,12 @@ export function useDiscountManagement() {
         maDGG: searchQuery.value || null,
         tenDGG: searchQuery.value || null,
         loaiGiamGiaApDung: filterType.value || null,
-        trangThai: filterStatus.value === "" ? null : filterStatus.value === "1",
+        trangThai: filterStatus.value === "0" ? false : filterStatus.value === "1" ? true : null,
+        deleted: filterStatus.value === "deleted" ? true : filterStatus.value === "" ? null : false,
         giaTriGiamGia: saleValue.value ? Number(saleValue.value) : null,
         soTienGiamToiDa: minOrder.value ? Number(minOrder.value) : null,
         ngayBatDau: startDate.value || null,
         ngayKetThuc: endDate.value || null,
-        deleted: deleted.value === true ? true : deleted.value === false ? false : null
       };
       console.log("Params sent:", params); // Debug
       const res = await axios.get("http://localhost:8080/dot_giam_gia/search", { params });
@@ -71,19 +71,21 @@ export function useDiscountManagement() {
 
       const processedData = res.data.content && res.data.content.length > 0
         ? res.data.content.map(item => {
-          let colorClass = item.deleted 
-            ? "bg-red-500"
+          let textColor = item.deleted
+            ? "text-red-500"
             : item.trangThai
-              ? "bg-blue-500"
-              : "bg-green-500";
+              ? "text-blue-500"
+              : "text-green-500";
+
           let text = item.deleted
             ? "Đã kết thúc"
             : item.trangThai
               ? "Sắp tới"
               : "Đang diễn ra";
+
           return {
             ...item,
-            trangThaiFormatted: `<span class="px-3 py-1 inline-block text-white font-semibold rounded-full ${colorClass}">${text}</span>`
+            trangThaiFormatted: `<span class="px-3 py-1 inline-block font-semibold rounded-full bg-gray-200 ${textColor}">${text}</span>`
           };
         })
         : [];
@@ -94,8 +96,7 @@ export function useDiscountManagement() {
       console.error("Lỗi:", error.response?.data || error.message);
       toast.value?.kshowToast("error", "Không thể tải dữ liệu!");
     }
-  };
-  
+  };  
   const confirmDelete = (discountId) => {
     confirmAction('Bạn có chắc chắn muốn xóa đợt giảm giá này?', () => deleteDotGiamGia(discountId));
   };

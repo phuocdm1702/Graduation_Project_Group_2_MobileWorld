@@ -3,8 +3,8 @@
   <div class="app-container">
     <component :is="layout">
       <router-view />
+      <footer-page />
     </component>
-    <footer-page />
   </div>
 </template>
 

@@ -39,7 +39,7 @@ public class DotGiamGiaExporter {
 
     private void writeHeaderRow2() {
         Row row = sheet2.createRow(0);
-        String[] headers = {"ID", "ID Đợt Giảm giá","Dòng sản phẩm","Mã","Giá ban đầu","Giá sau khi giảm","Deleted"};
+        String[] headers = {"ID", "ID Đợt Giảm giá","ID Sản phẩm","Mã","Giá ban đầu","Giá sau khi giảm","Deleted"};
         for (int i = 0; i < headers.length; i++) {
             Cell cell = row.createCell(i);
             cell.setCellValue(headers[i]);
@@ -64,27 +64,27 @@ public class DotGiamGiaExporter {
         }
     }
 
-//    private void writeDataRow2() {
-//        int rowNum=1;
-//
-//        for(ChiTietDotGiamGia ct:listCT){
-//            Row row=sheet2.createRow(rowNum++);
-//            row.createCell(0).setCellValue(ct.getId());
-//            row.createCell(1).setCellValue(ct.getDotGiamGia().getId());
-//            row.createCell(2).setCellValue(ct.getIdDongSanPham().getDongSanPham());
-//            row.createCell(3).setCellValue(ct.getMa());
-//            row.createCell(4).setCellValue(ct.getGiaBanDau().doubleValue());
-//            row.createCell(5).setCellValue(ct.getGiaSauKhiGiam().doubleValue());
-//            row.createCell(6).setCellValue(ct.getDeleted());
-//        }
-//    }
+    private void writeDataRow2() {
+        int rowNum=1;
+
+        for(ChiTietDotGiamGia ct:listCT){
+            Row row=sheet2.createRow(rowNum++);
+            row.createCell(0).setCellValue(ct.getId());
+            row.createCell(1).setCellValue(ct.getIdDotGiamGia().getId());
+            row.createCell(2).setCellValue(ct.getIdChiTietSanPham().getId());
+            row.createCell(3).setCellValue(ct.getMa());
+            row.createCell(4).setCellValue(ct.getGiaBanDau().doubleValue());
+            row.createCell(5).setCellValue(ct.getGiaSauKhiGiam().doubleValue());
+            row.createCell(6).setCellValue(ct.getDeleted());
+        }
+    }
 
     public void export(HttpServletResponse response) throws IOException {
         writeHeaderRow1();
         writeDataRow();
 
         writeHeaderRow2();
-//        writeDataRow2();
+        writeDataRow2();
 
         ServletOutputStream outputStream= response.getOutputStream();
         workbook.write(outputStream);

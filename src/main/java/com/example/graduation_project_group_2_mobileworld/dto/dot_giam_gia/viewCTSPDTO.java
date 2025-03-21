@@ -10,19 +10,20 @@ public class viewCTSPDTO {
     AnhSanPham anh;
     ChiTietDotGiamGia ctgg;
     BoNhoTrong bnt;
-
+    MauSac ms;
     BigDecimal giaSauKhiGiam;
+    private Boolean selected; // Thêm field selected để lưu trạng thái được chọn
 
     public viewCTSPDTO() {
     }
 
-    public viewCTSPDTO(SanPham sp, ChiTietSanPham ctsp, AnhSanPham anh, ChiTietDotGiamGia ctgg, BoNhoTrong bnt, BigDecimal giaSauKhiGiam) {
+    public viewCTSPDTO(SanPham sp, ChiTietSanPham ctsp, AnhSanPham anh, BoNhoTrong bnt, MauSac ms) {
         this.sp = sp;
         this.ctsp = ctsp;
         this.anh = anh;
-        this.ctgg = ctgg;
         this.bnt = bnt;
-        this.giaSauKhiGiam = giaSauKhiGiam;
+        this.ms = ms;
+        this.selected = true; // Mặc định là true khi khởi tạo, khớp với frontend
     }
 
     public SanPham getSp() {
@@ -71,5 +72,22 @@ public class viewCTSPDTO {
 
     public void setGiaSauKhiGiam(BigDecimal giaSauKhiGiam) {
         this.giaSauKhiGiam = giaSauKhiGiam;
+    }
+
+    public MauSac getMs() {
+        return ms;
+    }
+
+    public void setMs(MauSac ms) {
+        this.ms = ms;
+    }
+
+    public Boolean getSelected() {
+        return selected;
+    }
+
+    // Thêm setter cho selected
+    public void setSelected(Boolean selected) {
+        this.selected = selected;
     }
 }

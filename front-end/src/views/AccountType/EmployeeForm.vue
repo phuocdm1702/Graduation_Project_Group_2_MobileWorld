@@ -1,5 +1,6 @@
 <template>
   <div class="container mx-auto px-4 py-6">
+    <ToastNotification ref="toastRef" />
     <!-- BreadcrumbWrapper -->
     <BreadcrumbWrapper :breadcrumb-items="breadcrumbItems" />
 
@@ -162,10 +163,8 @@
               <label class="flex items-center space-x-2 cursor-pointer">
                 <input
                   v-model="employee.gioiTinh"
-                  value="False"
+                  value="false"
                   type="radio"
-                  name="gender"
-                  id="male"
                   class="form-radio h-5 w-5 text-orange-500 focus:ring-2 focus:ring-orange-500 focus:ring-opacity-50 transition duration-150 ease-in-out"
                 >
                 <span class="text-sm text-gray-700">Nam</span>
@@ -173,10 +172,8 @@
               <label class="flex items-center space-x-2 cursor-pointer">
                 <input
                   v-model="employee.gioiTinh"
-                  value="True"
+                  value="true"
                   type="radio"
-                  name="gender"
-                  id="female"
                   class="form-radio h-5 w-5 text-orange-500 focus:ring-2 focus:ring-orange-500 focus:ring-opacity-50 transition duration-150 ease-in-out"
                 >
                 <span class="text-sm text-gray-700">Nữ</span>
@@ -207,6 +204,13 @@
       </div>
     </div>
   </div>
+
+  <ConfirmModal
+    :show="showConfirmModal"
+    :message="'Bạn có chắc chắn muốn thêm nhân viên không?'"
+    @confirm="confirmAddNhanVien"
+    @cancel="showConfirmModal = false"
+  />
 </template>
 
 <style scoped>
@@ -228,23 +232,19 @@
   transition: all 0.2s;
 }
 
-/* Khi được chọn */
 .form-radio:checked {
-  background-color: #f97316; /* Màu cam tương ứng với theme */
+  background-color: #f97316;
   border-color: #f97316;
 }
 
-/* Hiệu ứng hover */
 .form-radio:hover {
   border-color: #f59e0b;
 }
 
-/* Focus ring */
 .form-radio:focus {
   box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.3);
 }
 
-/* Đảm bảo text và radio thẳng hàng */
 label {
   display: flex;
   align-items: center;
@@ -252,19 +252,22 @@ label {
 </style>
 
 <script setup>
-import {onMounted, ref, nextTick} from 'vue';
-import {computed} from 'vue';
-import {useRoute, useRouter} from 'vue-router';
+import { onMounted, ref, nextTick } from 'vue';
+import { computed } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import axios from 'axios';
-import {Html5Qrcode} from 'html5-qrcode';
+import { Html5Qrcode } from 'html5-qrcode';
 import BreadcrumbWrapper from '@/components/BreadcrumbWrapper.vue';
+import ToastNotification from '@/components/ToastNotification.vue';
+import ConfirmModal from '@/components/ConfirmModal.vue';
 
+const showConfirmModal = ref(false);
 const router = useRouter();
 const route = useRoute();
 const qrReader = ref(null);
 const isScanning = ref(false);
+const toastRef = ref(null);
 
-// Dữ liệu nhân viên
 const employee = ref({
   tenNhanVien: '',
   cccd: '',
@@ -283,40 +286,31 @@ const selectedProvince = ref('');
 const selectedDistrict = ref('');
 const selectedWard = ref('');
 
-// Dữ liệu ảnh
 const employeeImage = ref(null);
 const fileInput = ref(null);
 const uploadedImageUrl = ref(null);
 
-// Tính toán breadcrumb
 const breadcrumbItems = computed(() => {
-  if (typeof route.meta.breadcrumb === "function") {
+  if (typeof route.meta.breadcrumb === 'function') {
     return route.meta.breadcrumb(route);
   }
-  return route.meta?.breadcrumb || ["Nhân viên", "Thêm nhân viên"];
+  return route.meta?.breadcrumb || ['Nhân viên', 'Thêm nhân viên'];
 });
 
-// Quét mã QR
 const startScanning = async () => {
   isScanning.value = true;
   await nextTick();
   qrReader.value = new Html5Qrcode('qr-reader');
-
   qrReader.value
     .start(
-      {facingMode: 'environment'},
-      {
-        fps: 15,
-        qrbox: 250,
-      },
+      { facingMode: 'environment' },
+      { fps: 15, qrbox: 250 },
       (decodedText) => {
         handleQRData(decodedText);
         stopScanning();
       },
     )
-    .catch((err) => {
-      console.error('Lỗi khởi động quét QR:', err);
-    });
+    .catch((err) => console.error('Lỗi khởi động quét QR:', err));
 };
 
 const stopScanning = () => {
@@ -327,39 +321,29 @@ const stopScanning = () => {
         qrReader.value = null;
         isScanning.value = false;
       })
-      .catch((err) => {
-        console.error('Lỗi dừng quét:', err);
-      });
+      .catch((err) => console.error('Lỗi dừng quét:', err));
   }
 };
 
 const handleQRData = async (data) => {
-  console.log('Dữ liệu QR thô:', data);
   const fields = data.split('|');
-  console.log('Các trường phân tích:', fields);
-
   if (fields.length >= 6) {
     employee.value = {
       ...employee.value,
       cccd: fields[0].trim(),
       tenNhanVien: fields[2].trim() || 'Không xác định',
       ngaySinh: isValidDateFormat(fields[3].trim()) ? formatDate(fields[3].trim()) : '',
-      gioiTinh: fields[4].trim() === 'Nam' ? 'False' : 'True',
+      gioiTinh: data.idTaiKhoan?.deleted !== undefined ? String(!data.idTaiKhoan.deleted) : "",
       diaChicuthe: fields[5].trim(),
     };
     await parseAddress(fields[5].trim());
   } else {
-    employee.value = {
-      ...employee.value,
-      cccd: data.trim(),
-    };
+    employee.value = { ...employee.value, cccd: data.trim() };
   }
 };
 
 const isValidDateFormat = (dateStr) => {
-  if (dateStr.length !== 8 || !/^\d{8}$/.test(dateStr)) {
-    return false;
-  }
+  if (dateStr.length !== 8 || !/^\d{8}$/.test(dateStr)) return false;
   const day = parseInt(dateStr.slice(0, 2));
   const month = parseInt(dateStr.slice(2, 4));
   const year = parseInt(dateStr.slice(4, 8));
@@ -377,105 +361,55 @@ const formatDate = (dateStr) => {
   return '';
 };
 
-// Ánh xạ tên tỉnh từ QR sang tên trong API
-const provinceMapping = {
-  'Hà Nội': 'Thành phố Hà Nội',
-  'TP. Hồ Chí Minh': 'Thành phố Hồ Chí Minh',
-  // Thêm các ánh xạ khác nếu cần
-};
+const provinceMapping = { 'Hà Nội': 'Thành phố Hà Nội', 'TP. Hồ Chí Minh': 'Thành phố Hồ Chí Minh' };
+const wardMapping = { 'Trâu Quỳ': 'Thị trấn Trâu Quỳ' };
 
-// Ánh xạ tên phường/xã (nếu cần)
-const wardMapping = {
-  'Trà Quý': 'Thị trấn Trâu Quỳ', // Ánh xạ "Trà Quý" thành "Thị trấn Trâu Quỳ"
-  // Thêm các ánh xạ khác nếu cần
-};
-
-const normalizeProvinceName = (provinceName) => {
-  return provinceMapping[provinceName] || provinceName;
-};
-
-// Chuẩn hóa tên phường/xã từ QR sang tên trong API
-const normalizeWardName = (wardName) => {
-  return wardMapping[wardName] || wardName;
-};
-
-// Chuẩn hóa tên quận/huyện và phường/xã, bỏ tiền tố "Huyện", "Quận", "Phường", "Xã", "Thị trấn"
-const normalizeName = (name) => {
-  return name
-    .replace(/^(Huyện|Quận|Phường|Xã|Thị trấn)\s+/i, '') // Bỏ tiền tố
-    .trim();
-};
+const normalizeProvinceName = (provinceName) => provinceMapping[provinceName] || provinceName;
+const normalizeWardName = (wardName) => wardMapping[wardName] || wardName;
+const normalizeName = (name) => name.replace(/^(Huyện|Quận|Phường|Xã|Thị trấn)\s+/i, '').trim();
 
 const parseAddress = async (address) => {
-  console.log('Địa chỉ thô:', address);
-  const parts = address.split(', ').reverse(); // Đảo ngược để lấy từ tỉnh -> phường
-  console.log('Các phần địa chỉ:', parts);
-
+  const parts = address.split(', ').reverse();
   if (parts.length >= 3) {
-    // Xử lý trường hợp có địa chỉ cụ thể (ví dụ: "Tdp Kiến Thành")
-    let provinceName = parts[0].trim();
+    let provinceName = normalizeProvinceName(parts[0].trim());
     let districtName = parts[1].trim();
-    let wardName = parts[2].trim();
+    let wardName = normalizeWardName(parts[2].trim());
+    if (parts.length > 3) employee.value.diaChicuthe = parts.slice(3).reverse().join(', ').trim();
 
-    // Nếu có phần địa chỉ cụ thể (phần thứ 4), gán vào diaChicuthe
-    if (parts.length > 3) {
-      employee.value.diaChicuthe = parts.slice(3).reverse().join(', ').trim();
-    }
-
-    // Chuẩn hóa tên tỉnh
-    provinceName = normalizeProvinceName(provinceName);
-    console.log('Tỉnh chuẩn hóa:', provinceName);
-
-    // Gán tỉnh/thành phố
     const province = provinces.value.find((prov) => prov.name === provinceName);
     if (!province) {
-      console.error('Không tìm thấy tỉnh:', provinceName);
       alert('Không tìm thấy tỉnh/thành phố trong dữ liệu: ' + provinceName);
       return;
     }
     selectedProvince.value = province.name;
     handleProvinceChange();
 
-    // Đợi danh sách quận/huyện được cập nhật
     await nextTick();
-    console.log('Danh sách quận/huyện:', districts.value.map(d => d.name));
     const district = districts.value.find((dist) => normalizeName(dist.name) === normalizeName(districtName));
     if (!district) {
-      console.error('Không tìm thấy quận/huyện:', districtName);
       alert('Không tìm thấy quận/huyện trong dữ liệu: ' + districtName);
       return;
     }
     selectedDistrict.value = district.name;
     handleDistrictChange();
 
-    // Đợi danh sách phường/xã được cập nhật
     await nextTick();
-    console.log('Danh sách phường/xã:', wards.value.map(w => w.name));
-
-    // Chuẩn hóa tên phường/xã từ QR
-    wardName = normalizeWardName(wardName);
-    console.log('Phường/xã chuẩn hóa:', wardName);
-
     const ward = wards.value.find((w) => normalizeName(w.name) === normalizeName(wardName));
     if (!ward) {
-      console.error('Không tìm thấy phường/xã:', wardName);
-      alert('Không tìm thấy phường/xã trong dữ liệu: ' + wardName);
+      toastRef.value?.kshowToast('error', 'Không tìm thấy phường/xã trong dữ liệu: ' + wardName);
       return;
     }
-    selectedWard.value = ward.name; // Gán tên đầy đủ (bao gồm "Thị trấn")
+    selectedWard.value = ward.name;
   } else {
-    console.error('Địa chỉ không đủ thông tin:', address);
-    alert('Địa chỉ từ QR không đủ thông tin để phân tích: ' + address);
+    toastRef.value?.kshowToast('error', 'Địa chỉ từ QR không đủ thông tin: ' + address);
   }
 };
 
-
 async function uploadImage(file) {
   if (!file) return null;
-
-  const maxSize = 5 * 1024 * 1024; // 5MB
+  const maxSize = 5 * 1024 * 1024;
   if (file.size > maxSize) {
-    alert('Kích thước ảnh không được vượt quá 5MB!');
+    toastRef.value?.kshowToast('error', 'Kích thước ảnh không được vượt quá 5MB!');
     return null;
   }
 
@@ -484,24 +418,14 @@ async function uploadImage(file) {
 
   try {
     const response = await axios.post('http://localhost:8080/img/api/upload', formData, {
-      headers: {'Content-Type': 'multipart/form-data'},
+      headers: { 'Content-Type': 'multipart/form-data' },
     });
-
-    console.log('Response từ server:', response.data);
-
     const imageUrl = response.data.imageUrl;
-    if (!imageUrl) {
-      throw new Error('Không nhận được URL ảnh từ server. Response: ' + JSON.stringify(response.data));
-    }
-
+    if (!imageUrl) throw new Error('Không nhận được URL ảnh từ server.');
     uploadedImageUrl.value = imageUrl;
     return imageUrl;
   } catch (error) {
-    console.error('Lỗi upload ảnh:', error);
-    const errorMessage = error.response
-      ? `Server lỗi: ${error.response.status} - ${error.response.data.message || error.message}`
-      : error.message;
-    alert('Không thể tải ảnh lên: ' + errorMessage);
+    toastRef.value?.kshowToast('error', 'Không thể tải ảnh lên: ' + (error.response?.data?.message || error.message));
     return null;
   }
 }
@@ -515,9 +439,7 @@ function previewImage(event) {
       return;
     }
     const reader = new FileReader();
-    reader.onload = (e) => {
-      employeeImage.value = e.target.result;
-    };
+    reader.onload = (e) => (employeeImage.value = e.target.result);
     reader.readAsDataURL(file);
   }
 }
@@ -529,23 +451,55 @@ function deleteImage() {
 }
 
 function triggerFileInput() {
-  fileInput.value.click();
+  fileInput.value?.click();
+}
+
+function isOver18(birthDate) {
+  const date = new Date(birthDate);
+  const today = new Date();
+  const age = today.getFullYear() - date.getFullYear();
+  const isBirthdayPassed = today.getMonth() > date.getMonth() || (today.getMonth() === date.getMonth() && today.getDate() >= date.getDate());
+  return age > 18 || (age === 18 && isBirthdayPassed);
+}
+
+function dieukienADD() {
+  const OnlyABC = /^[^\d]+$/;
+  const OnlyNumbers = /^\d+$/;
+  const EmailCheck = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  const PhoneCheck = /^(03|05|07|08|09)\d{8}$/;
+
+  if (!employee.value.tenNhanVien?.trim()) return toastRef.value?.kshowToast('error', 'Vui lòng điền tên nhân viên!'), false;
+  if (!employee.value.diaChicuthe?.trim()) return toastRef.value?.kshowToast('error', 'Vui lòng điền địa chỉ!'), false;
+  if (!employee.value.cccd?.trim()) return toastRef.value?.kshowToast('error', 'Vui lòng điền CCCD!'), false;
+  if (employee.value.cccd?.trim().length !== 12) return toastRef.value?.kshowToast('error', 'CCCD phải có đúng 12 số!'), false;
+  if (!employee.value.sdt?.trim()) return toastRef.value?.kshowToast('error', 'Vui lòng điền số điện thoại!'), false;
+  if (!employee.value.email?.trim()) return toastRef.value?.kshowToast('error', 'Vui lòng điền email!'), false;
+  if (!employee.value.ngaySinh?.trim()) return toastRef.value?.kshowToast('error', 'Vui lòng chọn ngày sinh!'), false;
+  if (!employee.value.gioiTinh?.trim()) return toastRef.value?.kshowToast('error', 'Vui lòng chọn giới tính!'), false;
+  if (!selectedProvince.value.trim()) return toastRef.value?.kshowToast('error', 'Vui lòng chọn Tỉnh/Thành phố!'), false;
+  if (!selectedDistrict.value.trim()) return toastRef.value?.kshowToast('error', 'Vui lòng chọn Quận/Huyện!'), false;
+  if (!selectedWard.value.trim()) return toastRef.value?.kshowToast('error', 'Vui lòng chọn Xã/Phường!'), false;
+  if (!OnlyNumbers.test(employee.value.cccd?.trim())) return toastRef.value?.kshowToast('error', 'CCCD chỉ được chứa số!'), false;
+  if (!OnlyNumbers.test(employee.value.sdt?.trim())) return toastRef.value?.kshowToast('error', 'Số điện thoại chỉ được chứa số!'), false;
+  if (!PhoneCheck.test(employee.value.sdt?.trim())) return toastRef.value?.kshowToast('error', 'Số điện thoại không hợp lệ!'), false;
+  if (!EmailCheck.test(employee.value.email?.trim())) return toastRef.value?.kshowToast('error', 'Email không đúng định dạng!'), false;
+  if (!isOver18(employee.value.ngaySinh?.trim())) return toastRef.value?.kshowToast('error', 'Nhân viên phải >= 18 tuổi!'), false;
+  if (!OnlyABC(employee.value.tenNhanVien?.trim())) return toastRef.value?.kshowToast('error', 'Tên nhân viên không điền số!'), false;
+  if (new Date(employee.value.ngaySinh?.trim()) > new Date()) return toastRef.value?.kshowToast('error', 'Ngày sinh không được lớn hơn ngày hiện tại!'), false;
+
+  return true;
 }
 
 async function addNhanVien() {
-  if (!employee.value.tenNhanVien || !employee.value.sdt ||
-    !employee.value.cccd || !employee.value.email || !employee.value.diaChicuthe ||
-    !employee.value.ngaySinh || !employee.value.gioiTinh) {
-    alert('Vui lòng điền đầy đủ thông tin bắt buộc!');
-    return;
-  }
+  if (!dieukienADD()) return;
+  showConfirmModal.value = true;
+}
 
+async function confirmAddNhanVien() {
   let imagePath = uploadedImageUrl.value;
   if (fileInput.value?.files[0] && !imagePath) {
     imagePath = await uploadImage(fileInput.value.files[0]);
-    if (!imagePath) {
-      return;
-    }
+    if (!imagePath) return;
   }
 
   const employeeData = {
@@ -562,35 +516,32 @@ async function addNhanVien() {
     soDienThoai: employee.value.sdt,
     tenDangNhap: employee.value.userName,
     gioiTinh: employee.value.gioiTinh === 'True',
-    createdAt: new Date().toISOString()
+    createdAt: new Date().toISOString(),
   };
-
-  console.log('Dữ liệu gửi lên server:', employeeData);
 
   try {
     const response = await axios.post('http://localhost:8080/nhan-vien/add', employeeData, {
-      headers: {'Content-Type': 'application/json'},
+      headers: { 'Content-Type': 'application/json' },
     });
-    console.log('Phản hồi từ server:', response.data);
-    alert('Thêm nhân viên thành công!');
+    showConfirmModal.value = false;
 
-    router.push({
-      path: '/nhan-vien',
-      query: {newEmployee: JSON.stringify(response.data)}
-    });
+    setTimeout(() => {
+      router.push({
+        path: '/nhan-vien',
+        query: { newEmployee: JSON.stringify(response.data), status: 'success' },
+      });
+    }, 100);
   } catch (error) {
-    console.error('Lỗi khi thêm nhân viên:', error.response ? error.response.data : error.message);
-    alert('Thêm nhân viên thất bại: ' + (error.response?.data?.message || error.message));
+    toastRef.value?.kshowToast('error', 'Thêm nhân viên thất bại: ' + (error.response?.data?.message || error.message));
   }
 }
 
-// Tải dữ liệu tỉnh/thành phố
 onMounted(async () => {
   try {
     const response = await axios.get('https://provinces.open-api.vn/api/?depth=3');
     provinces.value = response.data;
   } catch (error) {
-    console.error('Lỗi khi tải dữ liệu:', error);
+    toastRef.value?.kshowToast('error', 'Lỗi khi tải dữ liệu tỉnh/thành phố: ' + error.message);
   }
 });
 

@@ -79,7 +79,7 @@
 
     <!-- Danh sách sản phẩm với DynamicTable -->
     <div class="bg-gray-100 p-4 rounded-lg mb-4">
-      <h3 class="text-lg font-medium text-gray-700 mb-2">Danh sách sản phẩm</h3>
+      <h3 class="text-lg font-medium text-gray-700 mb-2">Danh sách sản phẩm đã mua</h3>
       <DynamicTable
         :data="hoaDon?.chiTietHoaDon || []"
         :columns="productColumns"
@@ -107,17 +107,61 @@
             class="mt-4 px-4 py-2 bg-[#f97316] text-white font-semibold rounded-lg shadow-md hover:bg-orange-600 transition">
       Quay lại
     </button>
+    <!-- FormModal -->
+    <FormModal
+      v-model:show="isModalOpen"
+      entity-name="Sản phẩm"
+      :entity-data="newProduct"
+      @submit="handleAddProduct"
+      @close="closeModal"
+    >
+      <template #default="{ entityData }">
+        <div class="space-y-4">
+          <div>
+            <label class="block text-gray-700 font-medium mb-1">Tên sản phẩm</label>
+            <input
+              v-model="entityData.tenSanPham"
+              type="text"
+              class="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+              placeholder="Nhập tên sản phẩm"
+              required
+            />
+          </div>
+          <div>
+            <label class="block text-gray-700 font-medium mb-1">IMEI</label>
+            <input
+              v-model="entityData.imel"
+              type="text"
+              class="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+              placeholder="Nhập IMEI"
+              required
+            />
+          </div>
+          <div>
+            <label class="block text-gray-700 font-medium mb-1">Đơn giá</label>
+            <input
+              v-model="entityData.gia"
+              type="number"
+              class="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+              placeholder="Nhập đơn giá"
+              required
+            />
+          </div>
+        </div>
+      </template>
+    </FormModal>
   </div>
 </template>
 
 <script setup>
-import {defineProps, computed} from "vue";
+import { defineProps, computed, onMounted, ref } from "vue";
 import useShowHoaDon from "@/views/Bill/ShowHoaDon";
 import DynamicTable from "@/components/DynamicTable.vue";
 import { format } from 'date-fns';
-import { vi } from 'date-fns/locale'; // Thêm locale tiếng Việt
-import {useRoute} from "vue-router"; // Import PathRouter
-import BreadcrumbWrapper from '@/components/BreadcrumbWrapper.vue'; // Import BreadcrumbWrapper
+import { vi } from 'date-fns/locale';
+import { useRoute } from "vue-router";
+import BreadcrumbWrapper from '@/components/BreadcrumbWrapper.vue';
+import FormModal from "@/components/FormModal.vue";
 
 const props = defineProps({
   id: {
@@ -126,27 +170,79 @@ const props = defineProps({
   },
 });
 
-const {hoaDon, getNestedValue, paymentHistoryColumns, productColumns} = useShowHoaDon(props.id);
+const {
+  hoaDon,
+  getNestedValue,
+  paymentHistoryColumns,
+  productColumns,
+  isModalOpen,
+  openModal,
+  closeModal,
+} = useShowHoaDon(props.id);
 
-// Dữ liệu giả lập cho timeline
+const newProduct = ref({
+  tenSanPham: '',
+  imel: '',
+  gia: null,
+});
+
 const timelineStatuses = computed(() => [
-  {name: "Đặt Hàng Thành Công", time: "15:45:11 - 22/01/2024", completed: true},
-  {name: "Chờ Xác Nhận", time: "15:45:11 - 22/01/2024", completed: true},
-  {name: "Đang Giao", time: null, completed: false},
-  {name: "Hoàn Thành", time: null, completed: false},
+  { name: "Đặt Hàng Thành Công", time: "15:45:11 - 22/01/2024", completed: true },
+  { name: "Chờ Xác Nhận", time: "15:45:11 - 22/01/2024", completed: true },
+  { name: "Đang Giao", time: null, completed: false },
+  { name: "Hoàn Thành", time: null, completed: false },
 ]);
 
-// Lấy route hiện tại
 const route = useRoute();
-
-// Tính toán breadcrumb dựa trên meta của route
 const breadcrumbItems = computed(() => {
   if (typeof route.meta.breadcrumb === "function") {
     return route.meta.breadcrumb(route);
   }
-  return route.meta?.breadcrumb || ["Quản lý hóa đơn"]; // Mặc định nếu không có breadcrumb
+  return route.meta?.breadcrumb || ["Quản lý hóa đơn"];
+});
+
+const handleAddProduct = (data) => {
+  console.log("Dữ liệu sản phẩm mới:", data);
+  closeModal();
+};
+
+// Gắn sự kiện click cho các nút trong cột "Thao tác"
+onMounted(() => {
+  const attachEventListeners = () => {
+    const buttons = document.querySelectorAll('button[data-action]');
+    buttons.forEach(button => {
+      button.removeEventListener('click', handleButtonClick); // Xóa sự kiện cũ để tránh trùng lặp
+      button.addEventListener('click', handleButtonClick);
+    });
+  };
+
+  const handleButtonClick = (event) => {
+    const action = event.currentTarget.dataset.action;
+    const itemId = event.currentTarget.dataset.id;
+    if (action === "add") {
+      openModal();
+    } else if (action === "scan") {
+      console.log("Quét QR cho sản phẩm với ID:", itemId);
+    } else if (action === "delete") {
+      console.log("Xóa sản phẩm với ID:", itemId);
+    }
+  };
+
+  // Gắn sự kiện ban đầu
+  attachEventListeners();
+
+  // Theo dõi thay đổi dữ liệu (nếu danh sách sản phẩm thay đổi)
+  const observer = new MutationObserver(() => {
+    attachEventListeners();
+  });
+
+  const table = document.querySelector('.show-hoa-don table');
+  if (table) {
+    observer.observe(table, { childList: true, subtree: true });
+  }
 });
 </script>
+
 
 <style scoped>
 /* Thanh trạng thái */

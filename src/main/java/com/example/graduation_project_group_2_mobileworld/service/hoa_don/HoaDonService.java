@@ -23,9 +23,11 @@ import java.util.List;
 @Service
 public class HoaDonService {
     private final HoaDonRepository hoaDonRepository;
+    private final InHoaDonPDF inHoaDonPDF;
 
-    public HoaDonService(HoaDonRepository hoaDonRepository) {
+    public HoaDonService(HoaDonRepository hoaDonRepository, InHoaDonPDF inHoaDonPDF) {
         this.hoaDonRepository = hoaDonRepository;
+        this.inHoaDonPDF = inHoaDonPDF;
     }
 
     public List<HoaDonDTO> getAllData() {
@@ -35,15 +37,6 @@ public class HoaDonService {
                 .toList()
                 ;
     }
-
-//    public Page<HoaDonDTO> getAllData(Pageable pageable) {
-//        Page<HoaDon> hoaDonPage = hoaDonRepository.findAll(pageable);
-//        List<HoaDonDTO> hoaDonDTOs = hoaDonPage.getContent()
-//                .stream()
-//                .map(this::toDTO)
-//                .toList();
-//        return new PageImpl<>(hoaDonDTOs, pageable, hoaDonPage.getTotalElements());
-//    }
 
     public Page<HoaDonDTO> getHoaDonWithPagination(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
@@ -126,7 +119,6 @@ public class HoaDonService {
                 htttDTO.setIdPhuongThucThanhToan(httt.getIdPhuongThucThanhToan());
                 htttDTO.setTienChuyenKhoan(httt.getTienChuyenKhoan());
                 htttDTO.setTienMat(httt.getTienMat());
-                htttDTO.setTienMat(httt.getTienMat());
                 htttDTO.setMa(httt.getMa());
                 htttDTO.setDeleted(httt.getDeleted());
                 htttDTOs.add(htttDTO);
@@ -137,19 +129,19 @@ public class HoaDonService {
         return dto;
     }
 
-    // Lấy chi tiết hóa đơn theo ID
-    public HoaDonDTO getHoaDonDetails(Integer id) {
-        HoaDon hoaDon = hoaDonRepository.findHoaDonWithDetailsById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy hóa đơn"));
-        return toDTO(hoaDon);
-    }
-
-    // Lấy lịch sử hóa đơn theo ID
-    public HoaDonDTO getHoaDonHistory(Integer id) {
-        HoaDon hoaDon = hoaDonRepository.findHoaDonWithHistoryById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy hóa đơn"));
-        return toDTO(hoaDon);
-    }
+//    // Lấy chi tiết hóa đơn theo ID
+//    public HoaDonDTO getHoaDonDetails(Integer id) {
+//        HoaDon hoaDon = hoaDonRepository.findHoaDonWithDetailsById(id)
+//                .orElseThrow(() -> new RuntimeException("Không tìm thấy hóa đơn"));
+//        return toDTO(hoaDon);
+//    }
+//
+//    // Lấy lịch sử hóa đơn theo ID
+//    public HoaDonDTO getHoaDonHistory(Integer id) {
+//        HoaDon hoaDon = hoaDonRepository.findHoaDonWithHistoryById(id)
+//                .orElseThrow(() -> new RuntimeException("Không tìm thấy hóa đơn"));
+//        return toDTO(hoaDon);
+//    }
 
     // Lấy cả chi tiết và lịch sử hóa đơn theo ID (nếu cần)
     public HoaDonDTO getFullHoaDonDetails(Integer id) {
@@ -163,5 +155,8 @@ public class HoaDonService {
         return toDTO(hoaDon);
     }
 
-
+    public byte[] generateHoaDonPdf(Integer id) throws Exception {
+        HoaDonDTO hoaDon = getFullHoaDonDetails(id);
+        return inHoaDonPDF.generateHoaDonPdf(hoaDon);
+    }
 }
