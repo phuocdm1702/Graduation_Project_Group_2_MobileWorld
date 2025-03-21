@@ -1,6 +1,6 @@
 <template>
   <div class="container mx-auto px-4 py-6">
-    <!-- Thêm BreadcrumbWrapper -->
+    <ToastNotification ref="toastRef" />
     <BreadcrumbWrapper :breadcrumb-items="breadcrumbItems" />
 
     <div class="bg-white p-6 rounded-lg shadow-lg">
@@ -59,18 +59,17 @@
             required
           >
         </div>
-        <div>
-          <label class="block mb-1 text-sm font-medium">Email</label>
-          <input
-            v-model="custmer.email"
-            type="email"
-            class="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-            placeholder="Nhập Email"
-            required
-          >
-        </div>
       </div>
-
+      <div>
+        <label class="block mb-1 text-sm font-medium">Email</label>
+        <input
+          v-model="custmer.email"
+          type="email"
+          class="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+          placeholder="Nhập Email"
+          required
+        >
+      </div>
       <!-- Địa chỉ -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
         <div>
@@ -174,15 +173,24 @@
       </div>
     </div>
   </div>
+
+  <ConfirmModal
+    :show="showConfirmModal"
+    :message="'Bạn có chắc chắn muốn thêm khách hàng không?'"
+    @confirm="confirmAddKhachHang"
+    @cancel="showConfirmModal = false"
+  />
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue';
-import { computed } from 'vue';
+import { onMounted, ref, computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import axios from 'axios';
 import BreadcrumbWrapper from '@/components/BreadcrumbWrapper.vue';
+import ToastNotification from "@/components/ToastNotification.vue";
+import ConfirmModal from "@/components/ConfirmModal.vue";
 
+const showConfirmModal = ref(false);
 const router = useRouter();
 const route = useRoute();
 
@@ -195,7 +203,7 @@ const custmer = ref({
   diaChicuthe: '',
   ngaySinh: '',
   gioiTinh: '',
-  anhKhachHang:'',
+  anhKhachHang: '',
 });
 
 const provinces = ref([]);
@@ -204,6 +212,7 @@ const wards = ref([]);
 const selectedProvince = ref('');
 const selectedDistrict = ref('');
 const selectedWard = ref('');
+const toastRef = ref(null);
 
 // Dữ liệu ảnh
 const customerImage = ref(null);
@@ -223,7 +232,7 @@ async function uploadImage(file) {
 
   const maxSize = 5 * 1024 * 1024; // 5MB
   if (file.size > maxSize) {
-    alert('Kích thước ảnh không được vượt quá 5MB!');
+    toastRef.value.kshowToast('error', 'Kích thước ảnh không được vượt quá 5MB!');
     return null;
   }
 
@@ -240,7 +249,7 @@ async function uploadImage(file) {
     return imageUrl;
   } catch (error) {
     console.error('Lỗi upload ảnh:', error);
-    alert('Không thể tải ảnh lên: ' + (error.response?.data?.message || error.message));
+    toastRef.value.kshowToast('error', 'Không thể tải ảnh lên: ' + (error.response?.data?.message || error.message));
     return null;
   }
 }
@@ -249,7 +258,7 @@ function previewImage(event) {
   const file = event.target.files[0];
   if (file) {
     if (!file.type.startsWith('image/')) {
-      alert('Vui lòng chọn file ảnh hợp lệ!');
+      toastRef.value.kshowToast('error', 'Vui lòng chọn file ảnh hợp lệ!');
       fileInput.value.value = '';
       return;
     }
@@ -271,29 +280,86 @@ function triggerFileInput() {
   fileInput.value.click();
 }
 
-async function addKhachHang() {
-  if (
-    !custmer.value.ten ||
-    !custmer.value.sdt ||
-    !custmer.value.email ||
-    !custmer.value.diaChicuthe ||
-    !custmer.value.ngaySinh ||
-    custmer.value.gioiTinh === '' ||
-    !selectedProvince.value ||
-    !selectedDistrict.value ||
-    !selectedWard.value
-  ) {
-    alert('Vui lòng điền đầy đủ tất cả các trường bắt buộc!');
-    return;
-  }
-
+function isOver15(birthDate) {
+  const date = new Date(birthDate);
   const today = new Date();
-  const ngaySinhDate = new Date(custmer.value.ngaySinh);
-  if (ngaySinhDate > today) {
-    alert('Ngày sinh không được trong tương lai!');
-    return;
+  const age = today.getFullYear() - date.getFullYear();
+  const isBirthdayPassed = today.getMonth() > date.getMonth() || (today.getMonth() === date.getMonth() && today.getDate() >= date.getDate());
+  return age > 15 || (age === 15 && isBirthdayPassed);
+}
+
+function CheckAdd() {
+  const OnlyNumbers = /^\d+$/;
+  const OnlyABC = /^[^\d]+$/;
+  const EmailCheck = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  const PhoneCheck = /^(03|05|07|08|09)\d{8}$/;
+
+  if (!custmer.value.ten.trim()) {
+    toastRef.value.kshowToast('error', 'Vui lòng điền tên khách hàng!');
+    return false;
+  }
+  if (!OnlyABC.test(custmer.value.ten.trim())) {
+    toastRef.value.kshowToast('error', 'Tên khách hàng không được chứa số!');
+    return false;
+  }
+  if (!custmer.value.sdt.trim()) {
+    toastRef.value.kshowToast('error', 'Vui lòng điền số điện thoại!');
+    return false;
+  }
+  if (!OnlyNumbers.test(custmer.value.sdt.trim())) {
+    toastRef.value.kshowToast('error', 'Số điện thoại chỉ được chứa số!');
+    return false;
+  }
+  if (!PhoneCheck.test(custmer.value.sdt.trim())) {
+    toastRef.value.kshowToast('error', 'Số điện thoại phải đúng định dạng Việt Nam!');
+    return false;
+  }
+  if (!custmer.value.email.trim()) {
+    toastRef.value.kshowToast('error', 'Vui lòng điền email!');
+    return false;
+  }
+  if (!EmailCheck.test(custmer.value.email.trim())) {
+    toastRef.value.kshowToast('error', 'Vui lòng điền email đúng định dạng');
+    return false;
+  }
+  if (!custmer.value.gioiTinh) {
+    toastRef.value.kshowToast('error', 'Vui lòng chọn giới tính (Nam/Nữ)!');
+    return false;
+  }
+  if (!custmer.value.ngaySinh.trim()) {
+    toastRef.value.kshowToast('error', 'Vui lòng chọn ngày sinh!');
+    return false;
+  }
+  if (!isOver15(custmer.value.ngaySinh.trim())) {
+    toastRef.value.kshowToast('error', 'Khách hàng dưới 15 tuổi không thể tạo tài khoản!');
+    return false;
+  }
+  if (!selectedProvince.value.trim()) {
+    toastRef.value.kshowToast('error', 'Vui lòng chọn Tỉnh/Thành phố!');
+    return false;
+  }
+  if (!selectedDistrict.value.trim()) {
+    toastRef.value.kshowToast('error', 'Vui lòng chọn Quận/Huyện!');
+    return false;
+  }
+  if (!selectedWard.value.trim()) {
+    toastRef.value.kshowToast('error', 'Vui lòng chọn Xã/Phường!');
+    return false;
+  }
+  if (!custmer.value.diaChicuthe.trim()) {
+    toastRef.value.kshowToast('error', 'Vui lòng điền địa chỉ cụ thể!');
+    return false;
   }
 
+  return true;
+}
+
+async function addKhachHang() {
+  if (!CheckAdd()) return;
+  showConfirmModal.value = true; // Hiển thị modal xác nhận
+}
+
+async function confirmAddKhachHang() {
   let imagePath = uploadedImageUrl.value;
   if (fileInput.value?.files[0] && !imagePath) {
     imagePath = await uploadImage(fileInput.value.files[0]);
@@ -318,14 +384,14 @@ async function addKhachHang() {
     const response = await axios.post('http://localhost:8080/khach-hang/add', customerData, {
       headers: { 'Content-Type': 'application/json' },
     });
-    alert('Thêm khách hàng thành công!');
+    showConfirmModal.value = false;
     router.push({
       path: '/khach-hang',
-      query: { newCustomer: JSON.stringify(response.data) },
+      query: { newCustomer: JSON.stringify(response.data), status: 'success' },
     });
   } catch (error) {
     console.error('Lỗi khi thêm khách hàng:', error);
-    alert('Thêm khách hàng thất bại: ' + (error.response?.data?.message || error.message));
+    toastRef.value.kshowToast('error', 'Thêm khách hàng thất bại: ' + (error.response?.data?.message || error.message));
   }
 }
 

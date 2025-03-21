@@ -4,38 +4,45 @@ import { useRouter, useRoute } from "vue-router";
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
 
-export default function useCustomerManagement() {
+export default function useCustomerManagement(toastRef) { // Nhận toastRef từ component cha
   const router = useRouter();
   const route = useRoute();
 
   const dataTable = ref([]);
   const originalData = ref([]);
+  const allData = ref([]); // Lưu trữ toàn bộ dữ liệu khi cần tìm kiếm/lọc
   const searchKH = ref("");
   const filterStatus = ref("tat-ca");
-  const currentPage = ref(1);
+  const currentPage = ref(0);
   const totalPages = ref(1);
-  const visible = ref(false);
-  const message = ref("");
-  const type = ref("success");
+  const visible = ref(false); // Giữ lại để tương thích, nhưng sẽ không dùng nếu có toastRef
+  const message = ref(""); // Giữ lại để tương thích
+  const type = ref("success"); // Giữ lại để tương thích
   const showConfirmModal = ref(false);
   const selectedCustomerId = ref(null);
   const isLoading = ref(false);
+  const itemsPerPage = 5;
 
   const showToast = (toastType, msg) => {
-    message.value = msg;
-    type.value = toastType;
-    visible.value = true;
-    setTimeout(() => {
-      visible.value = false;
-    }, 3000);
+    if (toastRef?.value) {
+      toastRef.value.kshowToast(toastType, msg); // Sử dụng toastRef từ component cha
+    } else {
+      // Fallback nếu không có toastRef
+      message.value = msg;
+      type.value = toastType;
+      visible.value = true;
+      setTimeout(() => {
+        visible.value = false;
+      }, 3000);
+    }
   };
 
-  const fetchCustomers = async (page = 1, size = 10) => {
+  const fetchCustomers = async (page = 0) => {
     isLoading.value = true;
     try {
       const params = {
-        page: page - 1,
-        size,
+        page,
+        size: itemsPerPage,
       };
 
       const res = await axios.get("http://localhost:8080/khach-hang/home", { params });
@@ -73,15 +80,72 @@ export default function useCustomerManagement() {
     }
   };
 
-  const applyFilterAndSearch = () => {
-    let filteredData = [...originalData.value];
+  // Lấy toàn bộ dữ liệu từ API (dùng khi tìm kiếm/lọc)
+  const fetchAllCustomers = async () => {
+    isLoading.value = true;
+    try {
+      let allCustomers = [];
+      let page = 0;
+      let hasMore = true;
 
+      while (hasMore) {
+        const params = {
+          page,
+          size: itemsPerPage,
+        };
+        const res = await axios.get("http://localhost:8080/khach-hang/home", { params });
+        const customers = res.data.content || res.data || [];
+        allCustomers = [...allCustomers, ...customers];
+
+        // Đồng bộ địa chỉ mặc định
+        for (const customer of customers) {
+          const addressRes = await axios.get(`http://localhost:8080/dia-chi/getByKhachHang/${customer.id}`);
+          const addresses = addressRes.data || [];
+          const defaultAddress = addresses.find(addr => addr.macDinh) || addresses[0] || {};
+          customer.idDiaChiKH = {
+            diaChiCuThe: defaultAddress.diaChiCuThe || "Chưa có dữ liệu",
+            thanhPho: defaultAddress.thanhPho || "",
+            quan: defaultAddress.quan || "",
+            phuong: defaultAddress.phuong || "",
+          };
+        }
+
+        if (customers.length < itemsPerPage || page >= res.data.totalPages - 1) {
+          hasMore = false;
+        } else {
+          page++;
+        }
+      }
+
+      allData.value = allCustomers;
+      applyFilterAndSearch();
+    } catch (error) {
+      console.error("Lỗi khi lấy toàn bộ danh sách khách hàng:", error);
+      showToast("error", "Không thể lấy toàn bộ danh sách khách hàng!");
+    } finally {
+      isLoading.value = false;
+    }
+  };
+
+  const applyFilterAndSearch = () => {
+    let filteredData = [];
+
+    // Nếu có tìm kiếm hoặc lọc, sử dụng allData (toàn bộ dữ liệu)
+    if (searchKH.value.trim() || filterStatus.value !== "tat-ca") {
+      filteredData = [...allData.value];
+    } else {
+      // Nếu không có tìm kiếm/lọc, sử dụng dữ liệu từ API (phân trang phía server)
+      filteredData = [...originalData.value];
+    }
+
+    // Áp dụng bộ lọc trạng thái
     if (filterStatus.value === "kich-hoat") {
       filteredData = filteredData.filter((kh) => !kh.deleted);
     } else if (filterStatus.value === "huy-kich-hoat") {
       filteredData = filteredData.filter((kh) => kh.deleted);
     }
 
+    // Áp dụng tìm kiếm
     if (searchKH.value.trim()) {
       filteredData = filteredData.filter(
         (khachhang) =>
@@ -91,21 +155,28 @@ export default function useCustomerManagement() {
       );
     }
 
-    dataTable.value = filteredData;
+    // Cập nhật totalPages và dataTable
+    totalPages.value = Math.ceil(filteredData.length / itemsPerPage) || 1;
+    currentPage.value = Math.min(currentPage.value, totalPages.value - 1);
+    const startIndex = currentPage.value * itemsPerPage;
+    dataTable.value = filteredData.slice(startIndex, startIndex + itemsPerPage);
   };
 
   const btnSearch = () => {
-    applyFilterAndSearch();
+    if (!allData.value.length) {
+      fetchAllCustomers(); // Lấy toàn bộ dữ liệu nếu chưa có
+    } else {
+      currentPage.value = 0;
+      applyFilterAndSearch();
+    }
   };
 
-  const onFilterChange = () => {
-    applyFilterAndSearch();
-  };
-
-  const backSearch = () => {
+  const backSearch = async () => {
     searchKH.value = "";
     filterStatus.value = "tat-ca";
-    applyFilterAndSearch();
+    currentPage.value = 0;
+    allData.value = []; // Reset allData để sử dụng dữ liệu từ API
+    await fetchCustomers(0);
   };
 
   const toggleStatus = async (id) => {
@@ -113,6 +184,7 @@ export default function useCustomerManagement() {
       isLoading.value = true;
       const response = await axios.put(`http://localhost:8080/khach-hang/toggle-status/${id}`);
       await fetchCustomers(currentPage.value);
+      allData.value = []; // Reset allData để đồng bộ lại
       showToast("success", response.data.message || "Đã thay đổi trạng thái thành công!");
     } catch (error) {
       console.error("Lỗi khi thay đổi trạng thái:", error);
@@ -134,6 +206,7 @@ export default function useCustomerManagement() {
       await axios.put(`http://localhost:8080/khach-hang/delete/${selectedCustomerId.value}`);
       showToast("success", "Hủy kích hoạt khách hàng thành công!");
       await fetchCustomers(currentPage.value);
+      allData.value = []; // Reset allData để đồng bộ lại
     } catch (error) {
       console.error("Lỗi khi xóa khách hàng:", error);
       showToast("error", "Không thể xóa khách hàng!");
@@ -148,8 +221,15 @@ export default function useCustomerManagement() {
   };
 
   const goToPage = (page) => {
-    if (page >= 1 && page <= totalPages.value) {
-      fetchCustomers(page);
+    if (page >= 0 && page < totalPages.value && page !== currentPage.value) {
+      if (searchKH.value.trim() || filterStatus.value !== "tat-ca") {
+        // Nếu đang tìm kiếm hoặc lọc, chỉ cập nhật trang cục bộ
+        currentPage.value = page;
+        applyFilterAndSearch();
+      } else {
+        // Nếu không tìm kiếm hoặc lọc, gọi API để lấy dữ liệu trang mới
+        fetchCustomers(page);
+      }
     }
   };
 
@@ -159,7 +239,7 @@ export default function useCustomerManagement() {
   };
 
   const tableColumns = [
-    { key: "index", label: "#", formatter: (value, item, index) => index + 1 },
+    { key: "index", label: "#", formatter: (value, item, index) => index + 1 + (currentPage.value * itemsPerPage) },
     { key: "ma", label: "Mã" },
     { key: "ten", label: "Tên" },
     { key: "idTaiKhoan.email", label: "Email" },
@@ -295,8 +375,8 @@ export default function useCustomerManagement() {
         transform: translateX(20px);
       }
       input:checked + .slider {
-      background-color: #f97316;
-      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.15);
+        background-color: #f97316;
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.15);
       }
     `;
     document.head.appendChild(styleTag);
@@ -321,7 +401,6 @@ export default function useCustomerManagement() {
         quan,
         phuong,
       };
-      // Cập nhật originalData để giữ đồng bộ
       const originalIndex = originalData.value.findIndex(customer => customer.id === id);
       if (originalIndex !== -1) {
         originalData.value[originalIndex].idDiaChiKH = {
@@ -364,7 +443,6 @@ export default function useCustomerManagement() {
     fetchCustomers,
     btnSearch,
     backSearch,
-    onFilterChange,
     showDeleteConfirm,
     confirmDelete,
     editCustomer,

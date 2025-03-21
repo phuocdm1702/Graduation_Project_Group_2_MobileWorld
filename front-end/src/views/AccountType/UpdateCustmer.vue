@@ -1,5 +1,6 @@
 <template>
   <BreadcrumbWrapper :breadcrumb-items="breadcrumbItems" />
+  <ToastNotification ref="toastRef" />
   <div class="bg-gray-100 min-h-screen w-full flex items-start justify-center p-0">
     <div class="bg-white w-full h-full grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
       <!-- Bên trái -->
@@ -324,6 +325,13 @@
       </div>
     </div>
   </div>
+
+  <ConfirmModal
+    :show="showConfirmModal"
+    :message="'Bạn có chắc chắn muốn Update Khách hàng không không?'"
+    @confirm="executeUpdate"
+    @cancel="showConfirmModal = false"
+  />
 </template>
 
 <script setup>
@@ -331,6 +339,7 @@ import { onMounted, ref, computed, nextTick } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import axios from "axios";
 import BreadcrumbWrapper from '@/components/BreadcrumbWrapper.vue';
+import ToastNotification from "@/components/ToastNotification.vue";
 
 const route = useRoute();
 const router = useRouter();
@@ -365,7 +374,8 @@ const newDistricts = ref([]);
 const newWards = ref([]);
 const currentPage = ref(1);
 const itemsPerPage = ref(1);
-
+const showConfirmModal = ref(false);
+const toastRef = ref(null);
 const showAddAddress = ref(false);
 const newAddress = ref({
   diaChiCuThe: "",
@@ -481,6 +491,65 @@ const fetchCustomerData = async () => {
   }
 };
 
+const executeUpdate = () => {
+  if (updateAction.value === "updateKhachHang") {
+    updateKhachHang();
+  } else if (updateAction.value === "updateDistricts") {
+    updateDistricts();
+  }
+};
+
+function isOver15(birthDate) {
+  const date = new Date(birthDate);
+  const today = new Date();
+  const age = today.getFullYear() - date.getFullYear();
+  const isBirthdayPassed = today.getMonth() > date.getMonth() || (today.getMonth() === date.getMonth() && today.getDate() >= date.getDate());
+  return age > 15 || (age === 15 && isBirthdayPassed);
+}
+function CheckUpdate(){
+  const OnlyNumbers = /^\d+$/;
+  const OnlyABC = /^[^\d]+$/;
+  const EmailCheck = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  const PhoneCheck = /^(03|05|07|08|09)\d{8}$/;
+
+  if (!custmerData.value.email.trim()){
+    return false;
+  }
+  else if (!custmerData.value.ten.trim()){
+    return false;
+  }
+  else if (!custmerData.value.soDienThoai.trim()){
+    return false;
+  }
+  else if (!custmerData.value.ngaySinh.trim()){
+    return false;
+  }
+  else if (!custmerData.value.gioiTinh.trim()){
+    return false;
+  }
+  if (!isOver15(custmer.value.ngaySinh.trim())) {
+    toastRef.value.kshowToast('error', 'Khách hàng dưới 15 tuổi không thể tạo tài khoản!');
+    return false;
+  }
+  if (!PhoneCheck.test(custmer.value.sdt.trim())) {
+    toastRef.value.kshowToast('error', 'Số điện thoại phải đúng định dạng Việt Nam!');
+    return false;
+  }
+  if (!OnlyNumbers.test(custmer.value.sdt.trim())) {
+    toastRef.value.kshowToast('error', 'Số điện thoại chỉ được chứa số!');
+    return false;
+  }
+  if (!OnlyABC.test(custmer.value.ten.trim())) {
+    toastRef.value.kshowToast('error', 'Tên khách hàng không được chứa số!');
+    return false;
+  }
+  if (!EmailCheck.test(custmer.value.email.trim())) {
+    toastRef.value.kshowToast('error', 'Vui lòng điền email đúng định dạng');
+    return false;
+  }
+  return true;
+}
+
 const updateKhachHang = async () => {
   try {
     if (!custmerData.value.email || !custmerData.value.soDienThoai) {
@@ -499,7 +568,7 @@ const updateKhachHang = async () => {
     await axios.put(`http://localhost:8080/khach-hang/update/${route.query.id}`, updatedData, {
       headers: { "Content-Type": "application/json" }
     });
-    alert("Cập nhật thông tin khách hàng thành công!");
+    showConfirmModal.value = false;
     hasNewImage.value = false; // Reset sau khi cập nhật thành công
     await fetchCustomerData();
   } catch (error) {

@@ -1,20 +1,12 @@
 <template>
-  <!-- Thay Breadcrumb bằng BreadcrumbWrapper -->
   <BreadcrumbWrapper :breadcrumb-items="breadcrumbItems" />
-  <div v-if="visible" :class="`toast ${type}`">
-    <span v-if="type === 'success'" class="checkmark">✔</span>
-    <span v-if="type === 'error'" class="crossmark">✖</span>
-    {{ message }}
-  </div>
+  <ToastNotification ref="toastRef" />
   <div>
     <div class="mt-2 mx-auto">
-      <!-- Phần form (search và trạng thái) -->
       <div class="mt-2 bg-white border rounded-md shadow-md">
         <form @submit.prevent>
           <div class="p-5 flex flex-col gap-6">
-            <!-- Div chứa Search và Trạng thái -->
             <div class="flex items-center gap-6">
-              <!-- Search -->
               <div class="flex-1">
                 <label class="text-sm font-semibold block mb-2">Nhập thông tin tìm kiếm</label>
                 <input
@@ -25,13 +17,11 @@
                   class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-400 outline-none"
                 />
               </div>
-
-              <!-- Trạng thái (Combobox) -->
               <div class="w-60">
                 <label class="text-sm font-semibold block mb-2">Trạng thái</label>
                 <select
                   v-model="filterStatus"
-                  @change="fetchCustomers"
+                  @change="backSearch"
                   class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-400 outline-none"
                 >
                   <option value="tat-ca">Tất cả</option>
@@ -40,8 +30,6 @@
                 </select>
               </div>
             </div>
-
-            <!-- Div chứa các button Thêm Khách Hàng và Nhập bằng Excel -->
             <div class="flex justify-end gap-4">
               <router-link to="/them-khach-hang">
                 <button
@@ -81,7 +69,6 @@
         </form>
       </div>
 
-      <!-- Phần bảng (DynamicTable) -->
       <div class="mt-2">
         <DynamicTable
           :data="dataTable"
@@ -110,16 +97,20 @@
 </template>
 
 <script setup>
-import { onMounted } from "vue";
-import { computed } from "vue";
+import { onMounted, ref, computed, nextTick } from "vue";
 import { useRoute } from "vue-router";
 import ConfirmModal from "@/components/ConfirmModal.vue";
 import DynamicTable from "@/components/DynamicTable.vue";
 import Pagination from "@/components/Pagination.vue";
-import BreadcrumbWrapper from "@/components/BreadcrumbWrapper.vue"; // Import BreadcrumbWrapper
-import useCustomerManagement from "./useCustomerManagement"; // Import logic
+import BreadcrumbWrapper from "@/components/BreadcrumbWrapper.vue";
+import ToastNotification from "@/components/ToastNotification.vue";
+import useCustomerManagement from "./useCustomerManagement";
 
-// Use logic from useCustomerManagement.js
+const toastRef = ref(null);
+
+// Khởi tạo useCustomerManagement và truyền toastRef
+const customerManagement = useCustomerManagement(toastRef);
+
 const {
   dataTable,
   searchKH,
@@ -142,22 +133,29 @@ const {
   importExcel,
   tableColumns,
   getNestedValue,
-} = useCustomerManagement();
+  isLoading,
+} = customerManagement;
 
-// Lấy route hiện tại
 const route = useRoute();
 
-// Tính toán breadcrumb dựa trên meta của route
 const breadcrumbItems = computed(() => {
   if (typeof route.meta.breadcrumb === "function") {
     return route.meta.breadcrumb(route);
   }
-  return route.meta?.breadcrumb || ["Quản lý Khách Hàng"]; // Mặc định nếu không có breadcrumb
+  return route.meta?.breadcrumb || ["Quản lý Khách Hàng"];
 });
 
-// Gọi fetchCustomers khi component được mounted để hiển thị dữ liệu ban đầu
-onMounted(() => {
-  fetchCustomers();
+onMounted(async () => {
+  fetchCustomers(); // Tải danh sách khách hàng
+  await nextTick(); // Đợi DOM render xong để đảm bảo toastRef sẵn sàng
+  if (route.query.status === "success") {
+    if (toastRef.value) {
+      toastRef.value.kshowToast("success", "Thêm khách hàng thành công!");
+      window.history.replaceState({}, document.title, "/khach-hang");
+    } else {
+      console.error("toastRef is null trong CustomerManagement.vue");
+    }
+  }
 });
 </script>
 
