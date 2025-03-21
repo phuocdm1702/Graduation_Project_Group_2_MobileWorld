@@ -17,7 +17,6 @@
               class="w-full h-full object-cover"
               @error="handleImageError"
             >
-            <!-- Hiển thị placeholder nếu không có ảnh -->
             <div
               v-else
               class="w-full h-full flex items-center justify-center bg-gray-200 text-gray-500 font-medium"
@@ -111,8 +110,8 @@
             </button>
           </router-link>
           <button
-            @click="updateKhachHang"
-            class="px-6 py-2 bg-orange-500 text-white rounded-lg transition-all duration-300 flex items-center gap-2"
+            @click="showConfirmUpdate"
+            class="px-6 py-2 bg-orange-500 text-white rounded-lg transition-all duration-300 flex items-center gap-2 hover:bg-orange-600"
           >
             <i class="fas fa-pen-to-square"></i> Cập nhật
           </button>
@@ -125,7 +124,6 @@
         <hr class="w-full border-t-2 border-gray-200 my-4 rounded-full bg-gray-100">
 
         <div class="space-y-4">
-          <!-- Nút thêm địa chỉ -->
           <div class="w-full mt-4">
             <button
               @click="toggleAddAddress"
@@ -136,7 +134,6 @@
             </button>
           </div>
 
-          <!-- Form thêm địa chỉ mới -->
           <div v-if="showAddAddress" class="border border-gray-300 p-4 rounded-lg mt-4 bg-white shadow-md">
             <h2 class="text-lg font-medium text-gray-700 mb-4">Thêm địa chỉ mới</h2>
             <div class="space-y-4">
@@ -209,7 +206,6 @@
 
         <hr class="w-full border-t-2 border-gray-200 my-4 rounded-full bg-gray-100">
 
-        <!-- Danh sách địa chỉ -->
         <div class="space-y-4">
           <h2 class="text-lg font-medium text-gray-700">Danh sách địa chỉ</h2>
           <div class="space-y-6">
@@ -278,7 +274,7 @@
                 </label>
                 <div class="flex space-x-2 ml-auto">
                   <button
-                    @click="deleteAddress(address.id)"
+                    @click="showConfirmDeleteAddress(address.id)"
                     class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-all duration-300"
                   >
                     <i class="fas fa-trash"></i>
@@ -328,9 +324,9 @@
 
   <ConfirmModal
     :show="showConfirmModal"
-    :message="'Bạn có chắc chắn muốn Update Khách hàng không không?'"
-    @confirm="executeUpdate"
-    @cancel="showConfirmModal = false"
+    :message="confirmMessage"
+    @confirm="handleConfirm"
+    @cancel="cancelConfirm"
   />
 </template>
 
@@ -340,6 +336,7 @@ import { useRoute, useRouter } from "vue-router";
 import axios from "axios";
 import BreadcrumbWrapper from '@/components/BreadcrumbWrapper.vue';
 import ToastNotification from "@/components/ToastNotification.vue";
+import ConfirmModal from "@/components/ConfirmModal.vue"; // Đảm bảo import ConfirmModal
 
 const route = useRoute();
 const router = useRouter();
@@ -362,13 +359,13 @@ const custmerData = ref({
   quan: "",
   phuong: "",
   diaChiCuThe: "",
-  anhKhachHang: "", // Đổi thành anhKhachHang để khớp với backend
+  anhKhachHang: "",
 });
 
 const addresses = ref([]);
-const customerImage = ref(null); // Đổi từ employeeImage thành customerImage
+const customerImage = ref(null);
 const fileInput = ref(null);
-const hasNewImage = ref(false); // Theo dõi ảnh mới
+const hasNewImage = ref(false);
 const provinces = ref([]);
 const newDistricts = ref([]);
 const newWards = ref([]);
@@ -383,6 +380,8 @@ const newAddress = ref({
   quan: "",
   phuong: "",
 });
+const confirmAction = ref(null); // Để xác định hành động khi confirm
+const confirmMessage = ref(""); // Tin nhắn hiển thị trong modal
 
 const paginatedAddresses = computed(() => {
   const start = (currentPage.value - 1) * itemsPerPage.value;
@@ -403,14 +402,14 @@ const previewImage = (event) => {
   const file = event.target.files[0];
   if (file) {
     if (!file.type.startsWith('image/')) {
-      alert('Vui lòng chọn file ảnh hợp lệ!');
+      toastRef.value.kshowToast('error', 'Vui lòng chọn file ảnh hợp lệ!');
       fileInput.value.value = '';
       return;
     }
     const reader = new FileReader();
     reader.onload = (e) => {
       customerImage.value = e.target.result;
-      custmerData.value.anhKhachHang = e.target.result; // Lưu base64
+      custmerData.value.anhKhachHang = e.target.result;
       hasNewImage.value = true;
     };
     reader.readAsDataURL(file);
@@ -426,22 +425,21 @@ const deleteImage = () => {
 
 const handleImageError = () => {
   console.error("Không thể tải ảnh khách hàng!");
-  customerImage.value = null; // Reset ảnh nếu lỗi
+  customerImage.value = null;
 };
 
 const fetchCustomerData = async () => {
   const id = route.query.id;
   if (!id) {
     console.error("Không tìm thấy ID trong URL");
+    toastRef.value.kshowToast('error', 'Không tìm thấy ID khách hàng trong URL!');
     return;
   }
 
   try {
     const res = await axios.get(`http://localhost:8080/khach-hang/detail/${id}`);
     const data = res.data;
-    console.log("Dữ liệu thô từ API:", data);
 
-    // Tìm địa chỉ mặc định trong danh sách địa chỉ
     const addressRes = await axios.get(`http://localhost:8080/dia-chi/getByKhachHang/${id}`);
     addresses.value = addressRes.data.map(address => ({
       ...address,
@@ -452,13 +450,12 @@ const fetchCustomerData = async () => {
 
     const defaultAddress = addresses.value.find(addr => addr.macDinh) || addresses.value[0] || {};
 
-    // Gán dữ liệu khách hàng
     custmerData.value = {
       id: data.id || "",
       email: data.idTaiKhoan?.email || "",
       soDienThoai: data.idTaiKhoan?.soDienThoai || "",
       ngaySinh: data.ngaySinh ? new Date(data.ngaySinh).toISOString().split("T")[0] : "",
-      gioiTinh: data.gioiTinh !== undefined ? String(data.idTaiKhoan.deleted) : "",
+      gioiTinh: data.idTaiKhoan?.deleted !== undefined ? String(data.idTaiKhoan.deleted) : "",
       ten: data.ten || "",
       diaChiCuThe: defaultAddress.diaChiCuThe || "",
       thanhPho: defaultAddress.thanhPho || "",
@@ -467,7 +464,6 @@ const fetchCustomerData = async () => {
       anhKhachHang: data.anhKhachHang || "",
     };
 
-    // Xử lý ảnh từ API
     if (data.anhKhachHang) {
       if (data.anhKhachHang.startsWith("data:")) {
         customerImage.value = data.anhKhachHang;
@@ -478,24 +474,52 @@ const fetchCustomerData = async () => {
       customerImage.value = null;
     }
 
-    console.log("Ảnh khách hàng từ API:", customerImage.value);
-
-    // Cập nhật danh sách quận/huyện và xã/phường cho từng địa chỉ
     for (const address of addresses.value) {
       await updateDistricts(address);
       await updateWards(address);
     }
   } catch (error) {
     console.error("Lỗi khi lấy dữ liệu khách hàng:", error);
-    alert("Không thể tải dữ liệu khách hàng: " + (error.response?.data?.error || error.message));
+    toastRef.value.kshowToast('error', 'Không thể tải dữ liệu khách hàng: ' + (error.response?.data?.error || error.message));
   }
 };
 
-const executeUpdate = () => {
-  if (updateAction.value === "updateKhachHang") {
-    updateKhachHang();
-  } else if (updateAction.value === "updateDistricts") {
-    updateDistricts();
+const showConfirmUpdate = () => {
+  if (!CheckUpdate()) {
+    return;
+  }
+  confirmMessage.value = "Bạn có chắc chắn muốn cập nhật thông tin khách hàng này không?";
+  confirmAction.value = "updateKhachHang";
+  showConfirmModal.value = true;
+};
+
+const showConfirmDeleteAddress = (id) => {
+  confirmMessage.value = "Bạn có chắc chắn muốn xóa địa chỉ này không?";
+  confirmAction.value = () => deleteAddress(id);
+  showConfirmModal.value = true;
+};
+
+const handleConfirm = async () => {
+  if (confirmAction.value === "updateKhachHang") {
+    await confirmUpdate();
+  } else if (typeof confirmAction.value === "function") {
+    await confirmAction.value();
+  }
+  showConfirmModal.value = false;
+  confirmAction.value = null;
+};
+
+const cancelConfirm = () => {
+  showConfirmModal.value = false;
+  confirmAction.value = null;
+};
+
+const confirmUpdate = async () => {
+  try {
+    await updateKhachHang();
+    toastRef.value.kshowToast('success', 'Cập nhật thông tin khách hàng thành công!');
+  } catch (error) {
+    toastRef.value.kshowToast('error', 'Cập nhật thất bại: ' + (error.response?.data?.error || error.message));
   }
 };
 
@@ -506,75 +530,72 @@ function isOver15(birthDate) {
   const isBirthdayPassed = today.getMonth() > date.getMonth() || (today.getMonth() === date.getMonth() && today.getDate() >= date.getDate());
   return age > 15 || (age === 15 && isBirthdayPassed);
 }
-function CheckUpdate(){
+
+function CheckUpdate() {
   const OnlyNumbers = /^\d+$/;
   const OnlyABC = /^[^\d]+$/;
   const EmailCheck = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
   const PhoneCheck = /^(03|05|07|08|09)\d{8}$/;
 
-  if (!custmerData.value.email.trim()){
+  if (!custmerData.value.email.trim()) {
+    toastRef.value.kshowToast('error', 'Email không được để trống!');
     return false;
   }
-  else if (!custmerData.value.ten.trim()){
+  if (!EmailCheck.test(custmerData.value.email.trim())) {
+    toastRef.value.kshowToast('error', 'Vui lòng nhập email đúng định dạng!');
     return false;
   }
-  else if (!custmerData.value.soDienThoai.trim()){
+  if (!custmerData.value.ten.trim()) {
+    toastRef.value.kshowToast('error', 'Tên khách hàng không được để trống!');
     return false;
   }
-  else if (!custmerData.value.ngaySinh.trim()){
-    return false;
-  }
-  else if (!custmerData.value.gioiTinh.trim()){
-    return false;
-  }
-  if (!isOver15(custmer.value.ngaySinh.trim())) {
-    toastRef.value.kshowToast('error', 'Khách hàng dưới 15 tuổi không thể tạo tài khoản!');
-    return false;
-  }
-  if (!PhoneCheck.test(custmer.value.sdt.trim())) {
-    toastRef.value.kshowToast('error', 'Số điện thoại phải đúng định dạng Việt Nam!');
-    return false;
-  }
-  if (!OnlyNumbers.test(custmer.value.sdt.trim())) {
-    toastRef.value.kshowToast('error', 'Số điện thoại chỉ được chứa số!');
-    return false;
-  }
-  if (!OnlyABC.test(custmer.value.ten.trim())) {
+  if (!OnlyABC.test(custmerData.value.ten.trim())) {
     toastRef.value.kshowToast('error', 'Tên khách hàng không được chứa số!');
     return false;
   }
-  if (!EmailCheck.test(custmer.value.email.trim())) {
-    toastRef.value.kshowToast('error', 'Vui lòng điền email đúng định dạng');
+  if (!custmerData.value.soDienThoai.trim()) {
+    toastRef.value.kshowToast('error', 'Số điện thoại không được để trống!');
+    return false;
+  }
+  if (!PhoneCheck.test(custmerData.value.soDienThoai.trim())) {
+    toastRef.value.kshowToast('error', 'Số điện thoại phải đúng định dạng Việt Nam!');
+    return false;
+  }
+  if (!custmerData.value.ngaySinh.trim()) {
+    toastRef.value.kshowToast('error', 'Ngày sinh không được để trống!');
+    return false;
+  }
+  if (!isOver15(custmerData.value.ngaySinh.trim())) {
+    toastRef.value.kshowToast('error', 'Khách hàng dưới 15 tuổi không thể tạo tài khoản!');
+    return false;
+  }
+  if (!custmerData.value.gioiTinh.trim()) {
+    toastRef.value.kshowToast('error', 'Vui lòng chọn giới tính!');
     return false;
   }
   return true;
 }
 
 const updateKhachHang = async () => {
-  try {
-    if (!custmerData.value.email || !custmerData.value.soDienThoai) {
-      throw new Error("Email và số điện thoại không được để trống!");
-    }
-
-    const updatedData = {
-      email: custmerData.value.email,
-      soDienThoai: custmerData.value.soDienThoai,
-      ngaySinh: custmerData.value.ngaySinh,
-      gioiTinh: custmerData.value.gioiTinh === "true",
-      tenKH: custmerData.value.ten,
-      anhKH: hasNewImage.value ? custmerData.value.anhKhachHang : custmerData.value.anhKhachHang || "", // Gửi ảnh mới hoặc giữ nguyên
-    };
-
-    await axios.put(`http://localhost:8080/khach-hang/update/${route.query.id}`, updatedData, {
-      headers: { "Content-Type": "application/json" }
-    });
-    showConfirmModal.value = false;
-    hasNewImage.value = false; // Reset sau khi cập nhật thành công
-    await fetchCustomerData();
-  } catch (error) {
-    console.error("Lỗi khi cập nhật thông tin khách hàng:", error);
-    alert("Có lỗi xảy ra khi cập nhật thông tin khách hàng: " + (error.response?.data?.error || error.message));
+  if (!CheckUpdate()) {
+    return;
   }
+
+  const updatedData = {
+    email: custmerData.value.email,
+    soDienThoai: custmerData.value.soDienThoai,
+    ngaySinh: custmerData.value.ngaySinh,
+    gioiTinh: custmerData.value.gioiTinh === "true",
+    tenKH: custmerData.value.ten,
+    anhKH: hasNewImage.value ? custmerData.value.anhKhachHang : custmerData.value.anhKhachHang || "",
+  };
+
+  await axios.put(`http://localhost:8080/khach-hang/update/${route.query.id}`, updatedData, {
+    headers: { "Content-Type": "application/json" }
+  });
+
+  hasNewImage.value = false;
+  await fetchCustomerData();
 };
 
 const toggleAddAddress = () => {
@@ -616,10 +637,12 @@ const handleNewDistrictChange = async () => {
 const addNewAddress = async () => {
   try {
     if (!route.query.id || isNaN(parseInt(route.query.id))) {
-      throw new Error("ID khách hàng không hợp lệ");
+      toastRef.value.kshowToast('error', 'ID khách hàng không hợp lệ!');
+      return;
     }
     if (!newAddress.value.diaChiCuThe || !newAddress.value.phuong || !newAddress.value.thanhPho || !newAddress.value.quan) {
-      throw new Error("Vui lòng nhập đầy đủ thông tin địa chỉ");
+      toastRef.value.kshowToast('error', 'Vui lòng nhập đầy đủ thông tin địa chỉ!');
+      return;
     }
 
     const newData = {
@@ -634,13 +657,13 @@ const addNewAddress = async () => {
     };
 
     await axios.post(`http://localhost:8080/dia-chi/addDchi`, newData);
-    alert("Thêm địa chỉ thành công!");
+    toastRef.value.kshowToast('success', 'Thêm địa chỉ thành công!');
     toggleAddAddress();
     await fetchCustomerData();
     currentPage.value = totalPages.value;
   } catch (error) {
     console.error("Lỗi khi thêm địa chỉ:", error);
-    alert("Có lỗi xảy ra khi thêm địa chỉ: " + (error.response?.data?.error || error.message));
+    toastRef.value.kshowToast('error', 'Có lỗi xảy ra khi thêm địa chỉ: ' + (error.response?.data?.error || error.message));
   }
 };
 
@@ -690,7 +713,7 @@ const setDefaultAddress = async (selectedAddress) => {
       await axios.put(`http://localhost:8080/dia-chi/setDefault/${address.id}`, { macDinh: address.macDinh });
     }
 
-    alert("Cập nhật địa chỉ mặc định thành công!");
+    toastRef.value.kshowToast('success', 'Cập nhật địa chỉ mặc định thành công!');
     await fetchCustomerData();
 
     document.dispatchEvent(new CustomEvent('defaultAddressChanged', {
@@ -704,7 +727,7 @@ const setDefaultAddress = async (selectedAddress) => {
     }));
   } catch (error) {
     console.error("Lỗi khi cập nhật địa chỉ mặc định:", error);
-    alert("Có lỗi xảy ra khi cập nhật địa chỉ mặc định: " + (error.response?.data?.error || error.message));
+    toastRef.value.kshowToast('error', 'Có lỗi xảy ra khi cập nhật địa chỉ mặc định: ' + (error.response?.data?.error || error.message));
     selectedAddress.macDinh = !selectedAddress.macDinh;
   }
 };
@@ -716,7 +739,8 @@ const editAddress = (address) => {
 const saveAddress = async (address) => {
   try {
     if (!address.diaChiCuThe || !address.thanhPho || !address.quan || !address.phuong) {
-      throw new Error("Vui lòng nhập đầy đủ thông tin địa chỉ!");
+      toastRef.value.kshowToast('error', 'Vui lòng nhập đầy đủ thông tin địa chỉ!');
+      return;
     }
 
     const updatedData = {
@@ -729,27 +753,25 @@ const saveAddress = async (address) => {
 
     await axios.put(`http://localhost:8080/dia-chi/updateDchi/${address.id}`, updatedData);
     address.isEditing = false;
-    alert("Cập nhật địa chỉ thành công!");
+    toastRef.value.kshowToast('success', 'Cập nhật địa chỉ thành công!');
     await fetchCustomerData();
   } catch (error) {
     console.error("Lỗi khi cập nhật địa chỉ:", error);
-    alert("Có lỗi xảy ra khi cập nhật địa chỉ: " + (error.response?.data?.error || error.message));
+    toastRef.value.kshowToast('error', 'Có lỗi xảy ra khi cập nhật địa chỉ: ' + (error.response?.data?.error || error.message));
   }
 };
 
 const deleteAddress = async (id) => {
-  if (confirm("Bạn có chắc chắn muốn xóa địa chỉ này?")) {
-    try {
-      await axios.delete(`http://localhost:8080/dia-chi/delete/${id}`);
-      alert("Xóa địa chỉ thành công!");
-      await fetchCustomerData();
-      if (paginatedAddresses.value.length === 0 && currentPage.value > 1) {
-        currentPage.value--;
-      }
-    } catch (error) {
-      console.error("Lỗi khi xóa địa chỉ:", error);
-      alert("Có lỗi xảy ra khi xóa địa chỉ: " + (error.response?.data?.error || error.message));
+  try {
+    await axios.delete(`http://localhost:8080/dia-chi/delete/${id}`);
+    toastRef.value.kshowToast('success', 'Xóa địa chỉ thành công!');
+    await fetchCustomerData();
+    if (paginatedAddresses.value.length === 0 && currentPage.value > 1) {
+      currentPage.value--;
     }
+  } catch (error) {
+    console.error("Lỗi khi xóa địa chỉ:", error);
+    toastRef.value.kshowToast('error', 'Có lỗi xảy ra khi xóa địa chỉ: ' + (error.response?.data?.error || error.message));
   }
 };
 
@@ -757,11 +779,10 @@ onMounted(async () => {
   try {
     const response = await axios.get("https://provinces.open-api.vn/api/?depth=3");
     provinces.value = response.data;
-    console.log("Dữ liệu tỉnh/thành phố đã tải:", provinces.value);
     await fetchCustomerData();
   } catch (error) {
     console.error("Lỗi khi tải dữ liệu địa chỉ:", error);
-    alert("Không thể tải dữ liệu địa chỉ: " + (error.response?.data?.error || error.message));
+    toastRef.value.kshowToast('error', 'Không thể tải dữ liệu địa chỉ: ' + (error.response?.data?.error || error.message));
   }
 });
 </script>
