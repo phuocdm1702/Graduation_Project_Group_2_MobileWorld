@@ -8,6 +8,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -53,6 +56,31 @@ public class HoaDonController {
     @GetMapping("/detail/{id}")
     public ResponseEntity<HoaDonDTO> getFullHoaDonDetail(@PathVariable("id") Integer id) {
         return ResponseEntity.ok(hoaDonService.getFullHoaDonDetails(id));
+    }
+
+    @GetMapping("/print/{id}")
+    public ResponseEntity<byte[]> printHoaDon(@PathVariable("id") Integer id) {
+        try {
+            byte[] pdfBytes = hoaDonService.generateHoaDonPdf(id);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_PDF);
+            headers.setContentDispositionFormData("attachment", "hoa_don_" + id + ".pdf");
+            headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
+
+            return new ResponseEntity<>(pdfBytes, headers, HttpStatus.OK);
+        } catch (Exception e) {
+            // Convert the error message to byte[]
+            String errorMessage = "Không thể tạo PDF: " + e.getMessage();
+            byte[] errorBytes = errorMessage.getBytes();
+
+            // Set headers for the error response
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.TEXT_PLAIN); // Use text/plain for error message
+            headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
+
+            return new ResponseEntity<>(errorBytes, headers, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }
 

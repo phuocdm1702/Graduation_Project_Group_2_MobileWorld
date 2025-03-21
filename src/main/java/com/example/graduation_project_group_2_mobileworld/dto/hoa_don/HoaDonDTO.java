@@ -29,12 +29,13 @@ public class HoaDonDTO {
     private BigDecimal tongTienSauGiam;
     private Short trangThai;
     private String diaChiKhachHang;
+    private String tenKhachHang;
 
 
     public HoaDonDTO() {
     }
 
-    public HoaDonDTO(Integer id, List<HoaDonChiTietDTO> chiTietHoaDon, List<LichSuHoaDonDTO> lichSuHoaDon, List<HinhThucThanhToanDTO> hinhThucThanhToan, KhachHang idKhachHang, NhanVien idNhanVien, PhieuGiamGia idPhieuGiamGia, String ma, String soDienThoaiKhachHang, String loaiDon, BigDecimal tongTien, Date ngayTao, BigDecimal tongTienSauGiam, Short trangThai, String diaChiKhachHang) {
+    public HoaDonDTO(Integer id, List<HoaDonChiTietDTO> chiTietHoaDon, List<LichSuHoaDonDTO> lichSuHoaDon, List<HinhThucThanhToanDTO> hinhThucThanhToan, KhachHang idKhachHang, NhanVien idNhanVien, PhieuGiamGia idPhieuGiamGia, String ma, String soDienThoaiKhachHang, String loaiDon, BigDecimal tongTien, Date ngayTao, BigDecimal tongTienSauGiam, Short trangThai, String diaChiKhachHang, String tenKhachHang) {
         this.id = id;
         this.chiTietHoaDon = chiTietHoaDon;
         this.lichSuHoaDon = lichSuHoaDon;
@@ -50,6 +51,6 @@ public class HoaDonDTO {
         this.tongTienSauGiam = tongTienSauGiam;
         this.trangThai = trangThai;
         this.diaChiKhachHang = diaChiKhachHang;
+        this.tenKhachHang = tenKhachHang;
     }
-
 }

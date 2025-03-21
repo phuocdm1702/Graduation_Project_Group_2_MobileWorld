@@ -1,10 +1,10 @@
-import { ref, onMounted } from "vue";
+import {ref, onMounted} from "vue";
 import axios from "axios";
-import { format } from 'date-fns';
-import { vi } from 'date-fns/locale'; // Locale tiếng Việt
+import {format} from 'date-fns';
+import {vi} from 'date-fns/locale'; // Locale tiếng Việt
 export default function useShowHoaDon(id) {
   const hoaDon = ref(null);
-
+  const isModalOpen = ref(false);
   const fetchHoaDonDetail = async () => {
     try {
       const res = await axios.get(`http://localhost:8080/hoa-don/detail/${id}`);
@@ -57,7 +57,7 @@ export default function useShowHoaDon(id) {
 
         // Tính tổng tiền từ các hình thức thanh toán liên quan đến hóa đơn
         const totalAmount = htttList
-          .filter(httt => httt.idHoaDon === item.idHoaDon)  
+          .filter(httt => httt.idHoaDon === item.idHoaDon)
           .reduce((sum, httt) => {
             const tienMat = httt.tienMat || 0;
             const tienCK = httt.tienChuyenKhoan || 0;
@@ -70,11 +70,11 @@ export default function useShowHoaDon(id) {
     {
       label: "Thời gian",
       key: "thoiGian",
-      formatter: (value) => (value ? format(new Date(value), 'dd/MM/yyyy HH:mm:ss', { locale: vi }) : 'N/A'),
+      formatter: (value) => (value ? format(new Date(value), 'dd/MM/yyyy HH:mm:ss', {locale: vi}) : 'N/A'),
     },
     {
       label: "Ghi chú",
-      key: "hanhDong",
+      key: "",
       formatter: (value) => value || "...",
     },
     {
@@ -84,8 +84,7 @@ export default function useShowHoaDon(id) {
     },
   ];
 
-  // Columns cho Danh sách sản phẩm
-  const productColumns = [
+  const productColumns = ref([
     {
       label: "STT",
       key: "index",
@@ -93,7 +92,7 @@ export default function useShowHoaDon(id) {
     },
     {
       label: "Sản phẩm",
-      key: "idChiTietSanPham.idDongSanPham.dongSanPham",
+      key: "idChiTietSanPham.idSanPham.tenSanPham",
       formatter: (value) => value || "N/A",
     },
     {
@@ -110,15 +109,29 @@ export default function useShowHoaDon(id) {
       label: "Thao tác",
       key: "actions",
       formatter: (_, item) => `
-        <button class="bg-orange-500 text-white px-2 py-1 rounded mr-2">Quét QR</button>
-        <button class="bg-red-500 text-white px-2 py-1 rounded">Thêm sản phẩm</button>
+        <button class="bg-blue-500 text-white px-2 py-1 rounded" data-action="scan" data-id="${item.id}">
+          <i class="fas fa-qrcode"></i> Quét QR
+        </button>
+        <button class="bg-orange-500 text-white px-2 py-1 rounded mr-2" data-action="add" data-id="${item.id}">
+          <i class="fas fa-plus"></i> Thêm
+        </button>
+        <button class="bg-red-500 text-white px-2 py-1 rounded mr-2" data-action="delete" data-id="${item.id}">
+          <i class="fas fa-trash"></i> Xóa
+        </button>
       `,
     },
-  ];
+  ]);
 
-  // Hàm lấy giá trị lồng nhau
   const getNestedValue = (obj, path) => {
     return path.split(".").reduce((acc, part) => acc?.[part], obj) || null;
+  };
+
+  const openModal = () => {
+    isModalOpen.value = true;
+  };
+
+  const closeModal = () => {
+    isModalOpen.value = false;
   };
 
   onMounted(() => {
@@ -130,5 +143,8 @@ export default function useShowHoaDon(id) {
     getNestedValue,
     paymentHistoryColumns,
     productColumns,
+    isModalOpen,
+    openModal,
+    closeModal,
   };
 }

@@ -33,7 +33,7 @@ public interface HoaDonRepository extends JpaRepository<HoaDon, Integer> {
     Optional<HoaDon> findHoaDonWithDetailsAndHistoryById(@Param("id") Integer id);
 
     @Query("SELECT hd FROM HoaDon hd " +
-            "WHERE (:keyword IS NULL OR hd.ma LIKE %:keyword% OR hd.soDienThoaiKhachHang LIKE %:keyword%) " +
+            "WHERE (:keyword IS NULL OR hd.ma LIKE %:keyword% OR hd.idNhanVien.tenNhanVien LIKE %:keyword% OR hd.tenKhachHang LIKE %:keyword% OR hd.soDienThoaiKhachHang LIKE %:keyword% ) " +
             "AND (:loaiDon IS NULL OR hd.loaiDon = :loaiDon) " +
             "AND (:minAmount IS NULL OR hd.tongTienSauGiam >= :minAmount) " +
             "AND (:maxAmount IS NULL OR hd.tongTienSauGiam <= :maxAmount) " +
