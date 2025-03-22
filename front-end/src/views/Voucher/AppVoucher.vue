@@ -49,8 +49,8 @@
             class="input-field"
           >
             <option value="">Tất cả trạng thái</option>
-            <option value="Hoạt động">Hoạt động</option>
-            <option value="Không hoạt động">Không hoạt động</option>
+            <option value="Chưa diễn ra">Chưa diễn ra</option>
+            <option value="Đang diễn ra">Đang diễn ra</option>
           </select>
         </div>
 
@@ -192,6 +192,8 @@
   max-width: 90px; /* Điều chỉnh nhẹ để vừa khít */
 }
 
+
+
 /* Responsive design */
 @media (max-width: 1024px) {
   .dynamic-table th,
@@ -243,6 +245,10 @@ watch(searchQuery, (newQuery) =>  {
   if (newQuery.trim().length > 0) {
     searchPGG();
   }
+});
+
+watch([filterType, filterStatus, startDate, endDate, minOrder, valueFilter], () => {
+  goToPage(0);
 });
 
 // Lấy route hiện tại

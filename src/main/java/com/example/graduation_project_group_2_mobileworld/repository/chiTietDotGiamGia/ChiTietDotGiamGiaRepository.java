@@ -20,11 +20,11 @@ public interface ChiTietDotGiamGiaRepository extends JpaRepository<ChiTietDotGia
     @Query("SELECT MAX(c.ma) FROM ChiTietDotGiamGia c")
     String findMaxMa();
 
-    @Query("SELECT c FROM ChiTietDotGiamGia c WHERE c.idChiTietSanPham = :chiTietSanPham AND c.giaBanDau = :giaBanDau AND c.deleted = false")
-    List<ChiTietDotGiamGia> findByIdChiTietSanPhamAndGiaBanDau(@Param("chiTietSanPham") ChiTietSanPham chiTietSanPham, @Param("giaBanDau") BigDecimal giaBanDau);
-
-    @Query("SELECT d FROM DotGiamGia d WHERE d.ngayKetThuc < :today AND d.trangThai = true")
-    List<DotGiamGia> findByNgayKetThucBeforeAndTrangThaiTrue(@Param("today") LocalDate today);
+//    @Query("SELECT c FROM ChiTietDotGiamGia c WHERE c.idChiTietSanPham = :chiTietSanPham AND c.giaBanDau = :giaBanDau AND c.deleted = false")
+//    List<ChiTietDotGiamGia> findByIdChiTietSanPhamAndGiaBanDau(@Param("chiTietSanPham") ChiTietSanPham chiTietSanPham, @Param("giaBanDau") BigDecimal giaBanDau);
+//
+//    @Query("SELECT d FROM DotGiamGia d WHERE d.ngayKetThuc < :today AND d.trangThai = true")
+//    List<DotGiamGia> findByNgayKetThucBeforeAndTrangThaiTrue(@Param("today") LocalDate today);
 
     @Query("SELECT ctsp FROM ChiTietSanPham ctsp " +
             "JOIN ChiTietDotGiamGia ctdgg ON ctdgg.idChiTietSanPham.id = ctsp.id " +

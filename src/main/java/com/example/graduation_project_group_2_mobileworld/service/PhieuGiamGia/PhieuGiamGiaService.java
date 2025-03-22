@@ -47,29 +47,29 @@ public class PhieuGiamGiaService {
         return listPgg;
     }
 
-    @Scheduled(fixedRate = 200000)
-    public void updateHanPGG() {
-        List<PhieuGiamGia> listPgg = phieuGiamGiaRepository.findAll();
-        Date now = new Date();
-
-        for (PhieuGiamGia pgg : listPgg) {
-            if (pgg.getNgayBatDau() != null && pgg.getNgayKetThuc() != null) {
-                // Đã bắt đầu (ngayBatDau <= now) và chưa hết hạn (ngayKetThuc >= now)
-                if ((pgg.getNgayBatDau().before(now) || pgg.getNgayBatDau().equals(now)) &&
-                        (pgg.getNgayKetThuc().after(now) || pgg.getNgayKetThuc().equals(now))) {
-                    if (pgg.getTrangThai() == null || !pgg.getTrangThai()) {
-                        pgg.setTrangThai(false); // Cập nhật thành Hoạt động
-                        phieuGiamGiaRepository.save(pgg);
-                    }
-                } else {
-                    if (pgg.getTrangThai() == null || pgg.getTrangThai()) {
-                        pgg.setTrangThai(true); // Cập nhật thành Không hoạt động
-                        phieuGiamGiaRepository.save(pgg);
-                    }
-                }
-            }
-        }
-    }
+//    @Scheduled(fixedRate = 200000)
+//    public void updateHanPGG() {
+//        List<PhieuGiamGia> listPgg = phieuGiamGiaRepository.findAll();
+//        Date now = new Date();
+//
+//        for (PhieuGiamGia pgg : listPgg) {
+//            if (pgg.getNgayBatDau() != null && pgg.getNgayKetThuc() != null) {
+//                // Đã bắt đầu (ngayBatDau <= now) và chưa hết hạn (ngayKetThuc >= now)
+//                if ((pgg.getNgayBatDau().before(now) || pgg.getNgayBatDau().equals(now)) &&
+//                        (pgg.getNgayKetThuc().after(now) || pgg.getNgayKetThuc().equals(now))) {
+//                    if (pgg.getTrangThai() == null || !pgg.getTrangThai()) {
+//                        pgg.setTrangThai(false); // Cập nhật thành Hoạt động
+//                        phieuGiamGiaRepository.save(pgg);
+//                    }
+//                } else {
+//                    if (pgg.getTrangThai() == null || pgg.getTrangThai()) {
+//                        pgg.setTrangThai(true); // Cập nhật thành Không hoạt động
+//                        phieuGiamGiaRepository.save(pgg);
+//                    }
+//                }
+//            }
+//        }
+//    }
 
     public Page<PhieuGiamGia> searchData(String keyword, Pageable pageable) {
         if (keyword == null || keyword.trim().isEmpty()) {
@@ -88,6 +88,8 @@ public class PhieuGiamGiaService {
             Pageable pageable) {
 
         String loaiPhieu = loaiPhieuGiamGia;
+
+
         if (loaiPhieu != null && ("Tất cả loại phiếu".equals(loaiPhieu) || loaiPhieu.isEmpty())) {
             loaiPhieu = null;
         }
@@ -104,7 +106,7 @@ public class PhieuGiamGiaService {
         // Nếu không có filter nào được chọn, trả về tất cả
         if (loaiPhieu == null && trangThaiBoolean == null && ngayBatDau == null &&
                 ngayKetThuc == null && minOrder == null && valueFilter == null) {
-            return (Page<PhieuGiamGia>) phieuGiamGiaRepository.findAll();
+            return phieuGiamGiaRepository.findAll(pageable);
         }
 
         if (ngayBatDau != null && ngayKetThuc != null && ngayBatDau.after(ngayKetThuc)) {
@@ -118,6 +120,8 @@ public class PhieuGiamGiaService {
         if (valueFilter != null && valueFilter < 0) {
             throw new IllegalArgumentException("Giá trị phiếu không thể nhỏ hơn 0");
         }
+
+
 
         // Gọi query từ Repository
         return phieuGiamGiaRepository.filterPhieuGiamGia(

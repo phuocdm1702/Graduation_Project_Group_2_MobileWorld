@@ -1,4 +1,4 @@
-import {ref, computed} from "vue";
+import { ref, computed } from "vue";
 import axios from "axios";
 
 export default function usePhieuGiamGia() {
@@ -10,11 +10,56 @@ export default function usePhieuGiamGia() {
   const endDate = ref(null);
   const minOrder = ref(null);
   const valueFilter = ref(null);
-  const currentPage = ref(0); 
-  const pageSize = ref(10);   
-  const totalPages = ref(0); 
+  const currentPage = ref(0);
+  const pageSize = ref(10);
+  const totalPages = ref(0);
 
   const baseURL = "http://localhost:8080/phieu-giam-gia";
+
+  const computeDisplayStatus = (item) => {
+    const currentDate = new Date();
+    const startDate = new Date(item.ngayBatDau);
+    const endDate = new Date(item.ngayKetThuc);
+
+    if (startDate > currentDate) {
+      return {
+        text: "Chưa diễn ra",
+        isActive: false,
+        cssClass: "badge-pending",
+        isToggleDisabled: true, // Vô hiệu hóa ToggleSwitch
+      };
+    } else if (endDate >= currentDate) {
+      if (item.trangThai) {
+        return {
+          text: "Không hoạt động",
+          isActive: true,
+          cssClass: "badge-inactive",
+          isToggleDisabled: false, // Cho phép bật/tắt
+        };
+      } else {
+        return {
+          text: "Đang diễn ra",
+          isActive: false,
+          cssClass: "badge-active",
+          isToggleDisabled: false, // Cho phép bật/tắt
+        };
+      }
+    }
+    return null;
+  };
+
+  const updateVouchersWithDisplayStatus = (voucherList) => {
+    return voucherList
+      .map((item) => {
+        const displayStatus = computeDisplayStatus(item);
+        if (displayStatus === null) return null;
+        return {
+          ...item,
+          displayStatus: displayStatus,
+        };
+      })
+      .filter((item) => item !== null);
+  };
 
   const fetchDataPGG = async (page = 0) => {
     try {
@@ -22,10 +67,10 @@ export default function usePhieuGiamGia() {
         params: {
           page,
           size: pageSize.value,
-        }
+        },
       });
-      console.log("Dữ liệu nhận được từ API:", response.data);
-      vouchers.value = response.data.content || [];
+      const rawVouchers = response.data.content || [];
+      vouchers.value = updateVouchersWithDisplayStatus(rawVouchers);
       totalPages.value = response.data.totalPages;
     } catch (error) {
       console.error("Error loading data:", error);
@@ -41,7 +86,7 @@ export default function usePhieuGiamGia() {
           params: {
             page,
             size: pageSize.value,
-          }
+          },
         });
       } else {
         response = await axios.get(`${baseURL}/search`, {
@@ -52,26 +97,54 @@ export default function usePhieuGiamGia() {
           },
         });
       }
-      vouchers.value = response.data.content;
+      const rawVouchers = response.data.content;
+      vouchers.value = updateVouchersWithDisplayStatus(rawVouchers);
       totalPages.value = response.data.totalPages;
     } catch (error) {
       console.error("Lỗi search!", error);
     }
   };
 
+  const filterPGG = async (page = 0) => {
+    try {
+      const params = {
+        loaiPhieuGiamGia: filterType.value || null,
+        trangThai: filterStatus.value || null,
+        startDate: startDate.value ? startDate.value.toISOString().split("T")[0] : null,
+        endDate: endDate.value ? endDate.value.toISOString().split("T")[0] : null,
+        minOrder: minOrder.value ? Number(minOrder.value) : null,
+        valueFilter: valueFilter.value ? Number(valueFilter.value) : null,
+        page,
+        size: pageSize.value,
+      };
+
+      const response = await axios.get(`${baseURL}/filter`, { params });
+      const rawVouchers = response.data.content || [];
+      vouchers.value = updateVouchersWithDisplayStatus(rawVouchers);
+      totalPages.value = response.data.totalPages || 0;
+    } catch (error) {
+      console.error("Lỗi khi lọc phiếu giảm giá:", error);
+      vouchers.value = [];
+    }
+  };
+
   const toggleStatusPGG = async (item) => {
     try {
+      if (item.displayStatus?.isToggleDisabled) {
+        console.log(`Cannot toggle ${item.ma}: ToggleSwitch is disabled`);
+        return;
+      }
       const newStatus = !item.trangThai;
-      await axios.put(`${baseURL}/update-trang-thai/${item.id}`, {trangThai: newStatus});
-      item.trangThai = newStatus; // Cập nhật local state
+      await axios.put(`${baseURL}/update-trang-thai/${item.id}`, { trangThai: newStatus });
+      item.trangThai = newStatus; // Cập nhật trạng thái gốc
+      const displayStatus = computeDisplayStatus(item);
+      item.displayStatus = displayStatus;
+      console.log(`Toggled ${item.ma}: trangThai = ${item.trangThai}, displayStatus = ${item.displayStatus.text}`);
     } catch (error) {
       console.error("Lỗi khi cập nhật trạng thái:", error);
       console.log("Response từ server:", error.response?.data);
     }
   };
-
-
-  // Gán sau khi deletePGG đã được khai báo
 
   const columns = ref([
     {
@@ -81,11 +154,10 @@ export default function usePhieuGiamGia() {
     },
     { key: "ma", label: "Mã" },
     { key: "tenPhieuGiamGia", label: "Tên Phiếu" },
-    { key: "loaiPhieuGiamGia", label: "Loại Phiếu" },
-    { key: "phanTramGiamGia", label: "% Giảm Giá", formatter: (value) => `${value}%` }, // Chia nhỏ hơn
+    { key: "phanTramGiamGia", label: "% Giảm Giá", formatter: (value) => `${value}%` },
     {
       key: "soTienGiamToiDa",
-      label: "Số Tiền Giảm TĐ", // Viết tắt "TĐ" cho "Tối đa"
+      label: "Số Tiền Giảm TĐ",
       formatter: (value, item) => {
         if (item.loaiPhieuGiamGia === "Phần trăm") {
           const phanTramGiamGia = item.phanTramGiamGia || 0;
@@ -100,49 +172,18 @@ export default function usePhieuGiamGia() {
       },
     },
     { key: "soLuongDung", label: "Số lượng" },
-    { key: "hoaDonToiThieu", label: "Hóa\nĐơn\nTối\nThiểu",},
-    { key: "ngayBatDau", label: "Ngày\nBĐ", formatter: (value) => new Date(value).toLocaleDateString("vi-VN") }, // "BĐ" cho "Bắt đầu"
-    { key: "ngayKetThuc", label: "Ngày\nKT", formatter: (value) => new Date(value).toLocaleDateString("vi-VN") }, // "KT" cho "Kết thúc"
-    { key: "moTa", label: "Mô tả" },
-    { key: "trangThai", label: "Trạng thái", cellSlot: "trangThaiSlot" },
+    { key: "hoaDonToiThieu", label: "Hóa\nĐơn\nTối\nThiểu" },
+    { key: "ngayBatDau", label: "Ngày\nBĐ", formatter: (value) => new Date(value).toLocaleDateString("vi-VN") },
+    { key: "ngayKetThuc", label: "Ngày\nKT", formatter: (value) => new Date(value).toLocaleDateString("vi-VN") },
+    { key: "displayStatus", label: "Trạng thái", cellSlot: "trangThaiPGG" },
     { key: "actions", label: "Hành động", cellSlot: "actionsSlot" },
   ]);
 
   const getNestedValue = (obj, key) => {
-    return key.split(".").reduce((o, k) => (o && o[k] !== undefined ? o[k] : null), obj);
-  };
-
-  const filterPGG = async (page = 0) => {
-    try {
-      const params = {
-        loaiPhieuGiamGia: filterType.value || null,
-        trangThai: filterStatus.value || null,
-        startDate: startDate.value || null,
-        endDate: endDate.value || null,
-        minOrder: minOrder.value ? Number(minOrder.value) : null,
-        valueFilter: valueFilter.value ? Number(valueFilter.value) : null,
-        page,
-        size: pageSize.value,
-      };
-
-      if (
-        !params.loaiPhieuGiamGia &&
-        !params.trangThai &&
-        !params.startDate &&
-        !params.endDate &&
-        !params.minOrder &&
-        !params.valueFilter
-      ) {
-        await fetchDataPGG();
-        return;
-      }
-
-      const response = await axios.get(`${baseURL}/filter`, {params});
-      vouchers.value = response.data || [];
-    } catch (error) {
-      console.error("Lỗi khi lọc phiếu giảm giá:", error);
-      vouchers.value = [];
+    if (key === "displayStatus") {
+      return obj.displayStatus?.text || "N/A";
     }
+    return key.split(".").reduce((o, k) => (o && o[k] !== undefined ? o[k] : null), obj) || "N/A";
   };
 
   const goToPage = (page) => {
@@ -181,6 +222,6 @@ export default function usePhieuGiamGia() {
     fetchDataPGG,
     filterPGG,
     toggleStatusPGG,
-    goToPage
+    goToPage,
   };
 }

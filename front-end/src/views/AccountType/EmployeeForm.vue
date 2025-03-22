@@ -463,6 +463,7 @@ function isOver18(birthDate) {
 }
 
 function dieukienADD() {
+  const OnlyABC = /^[^\d]+$/;
   const OnlyNumbers = /^\d+$/;
   const EmailCheck = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
   const PhoneCheck = /^(03|05|07|08|09)\d{8}$/;
@@ -475,14 +476,15 @@ function dieukienADD() {
   if (!employee.value.email?.trim()) return toastRef.value?.kshowToast('error', 'Vui lòng điền email!'), false;
   if (!employee.value.ngaySinh?.trim()) return toastRef.value?.kshowToast('error', 'Vui lòng chọn ngày sinh!'), false;
   if (!employee.value.gioiTinh?.trim()) return toastRef.value?.kshowToast('error', 'Vui lòng chọn giới tính!'), false;
-  if (!selectedDistrict.value.trim()) return toastRef.value?.kshowToast('error', 'Vui lòng chọn Quận/Huyện!'), false;
   if (!selectedProvince.value.trim()) return toastRef.value?.kshowToast('error', 'Vui lòng chọn Tỉnh/Thành phố!'), false;
+  if (!selectedDistrict.value.trim()) return toastRef.value?.kshowToast('error', 'Vui lòng chọn Quận/Huyện!'), false;
   if (!selectedWard.value.trim()) return toastRef.value?.kshowToast('error', 'Vui lòng chọn Xã/Phường!'), false;
   if (!OnlyNumbers.test(employee.value.cccd?.trim())) return toastRef.value?.kshowToast('error', 'CCCD chỉ được chứa số!'), false;
   if (!OnlyNumbers.test(employee.value.sdt?.trim())) return toastRef.value?.kshowToast('error', 'Số điện thoại chỉ được chứa số!'), false;
   if (!PhoneCheck.test(employee.value.sdt?.trim())) return toastRef.value?.kshowToast('error', 'Số điện thoại không hợp lệ!'), false;
   if (!EmailCheck.test(employee.value.email?.trim())) return toastRef.value?.kshowToast('error', 'Email không đúng định dạng!'), false;
   if (!isOver18(employee.value.ngaySinh?.trim())) return toastRef.value?.kshowToast('error', 'Nhân viên phải >= 18 tuổi!'), false;
+  if (!OnlyABC(employee.value.tenNhanVien?.trim())) return toastRef.value?.kshowToast('error', 'Tên nhân viên không điền số!'), false;
   if (new Date(employee.value.ngaySinh?.trim()) > new Date()) return toastRef.value?.kshowToast('error', 'Ngày sinh không được lớn hơn ngày hiện tại!'), false;
 
   return true;

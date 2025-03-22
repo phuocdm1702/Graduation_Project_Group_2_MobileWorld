@@ -24,26 +24,30 @@
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700">Loại Phiếu</label>
-              <div class="flex items-center mt-2 space-x-4">
-                <label class="flex items-center">
-                  <input type="radio" name="voucherType" value="Phần trăm" v-model="loaiPhieuGiamGia" class="form-radio" />
-                  <span class="ml-2">Phần trăm</span>
-                </label>
-                <label class="flex items-center">
-                  <input type="radio" name="voucherType" value="Tiền mặt" v-model="loaiPhieuGiamGia" class="form-radio" />
-                  <span class="ml-2">Tiền mặt</span>
-                </label>
-              </div>
+              <select v-model="loaiPhieuGiamGia" class="form-input">
+                <option value="Phần trăm">Phần trăm</option>
+                <option value="Tiền mặt">Tiền mặt</option>
+              </select>
               <p v-if="errors.loaiPhieuGiamGia" class="error">{{ errors.loaiPhieuGiamGia }}</p>
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700">Phần trăm giảm giá</label>
-              <input type="number" v-model="phanTramGiamGia" class="form-input" />
+              <input
+                type="number"
+                v-model="phanTramGiamGia"
+                :disabled="loaiPhieuGiamGia === 'Tiền mặt'"
+                class="form-input"
+              />
               <p v-if="errors.phanTramGiamGia" class="error">{{ errors.phanTramGiamGia }}</p>
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700">Số tiền giảm tối đa</label>
-              <input type="number" v-model="soTienGiamToiDa" class="form-input" />
+              <input
+                type="number"
+                v-model="soTienGiamToiDa"
+                :disabled="loaiPhieuGiamGia === 'Phần trăm'"
+                class="form-input"
+              />
               <p v-if="errors.soTienGiamToiDa" class="error">{{ errors.soTienGiamToiDa }}</p>
             </div>
             <div>
@@ -57,7 +61,19 @@
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label class="block text-sm font-medium text-gray-700">Số lượng sử dụng</label>
-              <input type="number" v-model="soLuongDung" class="form-input" />
+              <div class="flex items-center gap-2">
+                <select v-model="quantityType" class="form-input w-1/2">
+                  <option value="Vô hạn">Vô hạn</option>
+                  <option value="Nhập số lượng">Nhập số lượng</option>
+                  <option value="Dựa theo khách hàng">Dựa theo khách hàng</option>
+                </select>
+                <input
+                  type="number"
+                  v-model="soLuongDung"
+                  :disabled="quantityType !== 'Nhập số lượng'"
+                  class="form-input w-1/2"
+                />
+              </div>
               <p v-if="errors.soLuongDung" class="error">{{ errors.soLuongDung }}</p>
             </div>
             <div>
@@ -74,9 +90,16 @@
 
           <!-- Privacy and Description -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="flex items-center">
-              <label class="block text-sm font-medium text-gray-700">Riêng tư</label>
-              <input type="checkbox" v-model="riengTu" class="ml-2 form-checkbox" />
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="flex items-center">
+                <label class="block text-sm font-medium text-gray-700">Riêng tư</label>
+                <ToggleSwitch
+                  :checked="riengTu"
+                  @change="riengTu = $event"
+                  :id="'riengTu-toggle'"
+                  class="ml-2"
+                />
+              </div>
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700">Mô tả</label>
@@ -110,6 +133,7 @@
           placeholder="Tìm kiếm khách hàng..."
           class="form-input w-full"
           @input="debouncedSearchKH"
+          :disabled="!riengTu"
         />
       </div>
 
@@ -126,7 +150,12 @@
           <tbody>
           <tr v-for="customer in filteredCustomers" :key="customer.id" class="border-b hover:bg-gray-50">
             <td class="p-3">
-              <input type="checkbox" v-model="selectedCustomers" :value="customer.id" class="form-checkbox" />
+              <input 
+                type="checkbox" 
+                v-model="selectedCustomers" 
+                :value="customer.id" 
+                class="form-checkbox" 
+                :disabled="!riengTu" />
             </td>
             <td class="p-3">{{ customer.ma }}</td>
             <td class="p-3">{{ customer.ten }}</td>
@@ -179,11 +208,14 @@ import { useRoute, useRouter } from "vue-router";
 import axios from "axios";
 import { debounce } from "lodash";
 import BreadcrumbWrapper from "@/components/BreadcrumbWrapper.vue";
+import ToggleSwitch from "@/components/ToggleSwitch.vue";
 
 const customers = ref([]);
 const selectedCustomers = ref([]);
 const router = useRouter();
 const route = useRoute();
+const quantityType = ref("Nhập số lượng");
+
 
 // Tính toán breadcrumb dựa trên meta của route
 const breadcrumbItems = computed(() => {
@@ -251,6 +283,14 @@ watch(searchQuery, (newQuery) => {
   }
 });
 
+watch([quantityType, selectedCustomers], ([newType, newSelectedCustomers]) => {
+  if (newType === "Vô hạn") {
+    soLuongDung.value = -1;
+  } else if (newType === "Dựa theo khách hàng") {
+    soLuongDung.value = newSelectedCustomers.length;
+  }
+});
+
 const selectedCustomerDetails = computed(() => {
   return customers.value.filter((customer) =>
     selectedCustomers.value.includes(customer.id)
@@ -273,7 +313,6 @@ const validateForm = () => {
   if (phanTramGiamGia.value < 0 || phanTramGiamGia.value > 100)
     errors.value.phanTramGiamGia = "Phần trăm giảm giá phải từ 0 đến 100";
   if (soTienGiamToiDa.value < 0) errors.value.soTienGiamToiDa = "Số tiền giảm không hợp lệ";
-  if (soLuongDung.value < 1) errors.value.soLuongDung = "Số lượng phải lớn hơn 0";
   if (hoaDonToiThieu.value < 0) errors.value.hoaDonToiThieu = "Hóa đơn tối thiểu không hợp lệ";
 
   if (!ngayBatDau.value) errors.value.ngayBatDau = "Vui lòng chọn ngày bắt đầu";

@@ -2,7 +2,10 @@ package com.example.graduation_project_group_2_mobileworld.repository.dot_giam_g
 
 import com.example.graduation_project_group_2_mobileworld.dto.dot_giam_gia.viewCTSPDTO;
 
+import com.example.graduation_project_group_2_mobileworld.dto.dot_giam_gia.viewSanPhamDTO;
 import com.example.graduation_project_group_2_mobileworld.entity.DotGiamGia;
+import com.example.graduation_project_group_2_mobileworld.entity.HeDieuHanh;
+import com.example.graduation_project_group_2_mobileworld.entity.NhaSanXuat;
 import com.example.graduation_project_group_2_mobileworld.entity.SanPham;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -28,9 +31,29 @@ public interface dot_giam_gia_repository extends JpaRepository<DotGiamGia, Integ
     @Query("SELECT dgg FROM DotGiamGia dgg WHERE dgg.deleted = true")
     public Page<DotGiamGia> hienThiFinish(Pageable pageable);
 
-    @Query("SELECT sp FROM SanPham sp WHERE (:timKiem IS NULL OR :timKiem = '' OR sp.ma LIKE CONCAT('%', :timKiem, '%') OR sp.tenSanPham LIKE CONCAT('%', :timKiem, '%')) AND sp.deleted = false ")
-    public Page<SanPham> getAllSanPham(@Param("timKiem") String timKiem, Pageable pageable);
+//    @Query("SELECT sp FROM SanPham sp WHERE (:timKiem IS NULL OR :timKiem = '' OR sp.ma LIKE CONCAT('%', :timKiem, '%') OR sp.tenSanPham LIKE CONCAT('%', :timKiem, '%')) AND sp.deleted = false ")
+//    public Page<SanPham> getAllSanPham(@Param("timKiem") String timKiem, Pageable pageable);
 
+    @Query("SELECT new com.example.graduation_project_group_2_mobileworld.dto.dot_giam_gia.viewSanPhamDTO(sp, nsx, hdh) " +
+            "FROM SanPham sp " +
+            "INNER JOIN HeDieuHanh hdh ON sp.idHeDieuHanh.id = hdh.id " +
+            "INNER JOIN NhaSanXuat nsx ON sp.idNhaSanXuat.id = nsx.id " +
+            "WHERE (:timKiem IS NULL OR :timKiem = '' OR sp.ma LIKE CONCAT('%', :timKiem, '%') OR sp.tenSanPham LIKE CONCAT('%', :timKiem, '%')) " +
+            "AND (:idHeDieuHanh IS NULL OR hdh.id IN :idHeDieuHanh) " +
+            "AND (:idNhaSanXuat IS NULL OR nsx.id IN :idNhaSanXuat) " +
+            "AND sp.deleted = false")
+    Page<viewSanPhamDTO> getAllSanPham(@Param("timKiem") String timKiem,
+                                       @Param("idHeDieuHanh") List<Integer> idHeDieuHanh,
+                                       @Param("idNhaSanXuat") List<Integer> idNhaSanXuat,
+                                       Pageable pageable);
+
+    // Lấy tất cả Hệ điều hành không bị xóa
+    @Query("SELECT hdh FROM HeDieuHanh hdh WHERE hdh.deleted = false")
+    List<HeDieuHanh> findAllHeDieuHanh();
+
+    // Lấy tất cả Nhà sản xuất không bị xóa
+    @Query("SELECT nsx FROM NhaSanXuat nsx WHERE nsx.deleted = false")
+    List<NhaSanXuat> findAllNhaSanXuat();
 
     @Query("SELECT new com.example.graduation_project_group_2_mobileworld.dto.dot_giam_gia.viewCTSPDTO(sp, ctsp, anh, bnt, ms) " +
             "FROM SanPham sp " +

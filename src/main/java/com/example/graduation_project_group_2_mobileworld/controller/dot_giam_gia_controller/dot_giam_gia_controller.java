@@ -3,9 +3,8 @@ package com.example.graduation_project_group_2_mobileworld.controller.dot_giam_g
 import com.example.graduation_project_group_2_mobileworld.dto.dot_giam_gia.RequestDTO;
 import com.example.graduation_project_group_2_mobileworld.dto.dot_giam_gia.addDotGiamGiaDTO;
 import com.example.graduation_project_group_2_mobileworld.dto.dot_giam_gia.viewCTSPDTO;
-import com.example.graduation_project_group_2_mobileworld.entity.ChiTietDotGiamGia;
-import com.example.graduation_project_group_2_mobileworld.entity.DotGiamGia;
-import com.example.graduation_project_group_2_mobileworld.entity.SanPham;
+import com.example.graduation_project_group_2_mobileworld.dto.dot_giam_gia.viewSanPhamDTO;
+import com.example.graduation_project_group_2_mobileworld.entity.*;
 import com.example.graduation_project_group_2_mobileworld.service.dot_giam_gia_service.DotGiamGiaExporter;
 import com.example.graduation_project_group_2_mobileworld.service.dot_giam_gia_service.dot_giam_gia_service;
 import jakarta.servlet.http.HttpServletResponse;
@@ -90,41 +89,53 @@ public class dot_giam_gia_controller {
     @PostMapping("/ViewAddDotGiamGia")
     public ResponseEntity<CombinedResponse> hienThiAdd(
             @RequestBody RequestDTO request,
-            @RequestParam(defaultValue = "0") int pageDSP, // Phân trang cho dspList
-            @RequestParam(defaultValue = "5") int sizeDSP, // Kích thước trang cho dspList
-            @RequestParam(defaultValue = "0") int pageCTSP, // Phân trang cho ctspList
-            @RequestParam(defaultValue = "5") int sizeCTSP) { // Kích thước trang cho ctspList
+            @RequestParam(defaultValue = "0") int pageDSP,
+            @RequestParam(defaultValue = "5") int sizeDSP,
+            @RequestParam(defaultValue = "0") int pageCTSP,
+            @RequestParam(defaultValue = "5") int sizeCTSP) {
         String keyword = request.getKeyword();
         List<Integer> idDSPs = request.getIdDSPs();
         List<Integer> idBoNhoTrongs = request.getIdBoNhoTrongs();
-        List<Integer> idMauSac=request.getMauSac();
+        List<Integer> idMauSac = request.getMauSac();
+        List<Integer> idHeDieuHanh = request.getIdHeDieuHanh(); // Thêm lọc Hệ điều hành
+        List<Integer> idNhaSanXuat = request.getIdNhaSanXuat(); // Thêm lọc Nhà sản xuất
 
         Pageable pageableDSP = PageRequest.of(pageDSP, sizeDSP);
-        Page<SanPham> dspPage = (keyword == null || keyword.trim().isEmpty())
-                ? sr.getDSP(null, pageableDSP)
-                : sr.getDSP(keyword, pageableDSP);
+        Page<viewSanPhamDTO> dspPage = sr.getDSP(keyword, idHeDieuHanh, idNhaSanXuat, pageableDSP);
 
         Pageable pageableCTSP = PageRequest.of(pageCTSP, sizeCTSP);
         Page<viewCTSPDTO> ctspPage = null;
         if (idDSPs != null && !idDSPs.isEmpty()) {
-            ctspPage = sr.getAllCTSP(idDSPs, idBoNhoTrongs, idMauSac,pageableCTSP);
+            ctspPage = sr.getAllCTSP(idDSPs, idBoNhoTrongs, idMauSac, pageableCTSP);
         } else {
-            ctspPage = Page.empty(); // Nếu không có idDSPs, trả về trang rỗng
+            ctspPage = Page.empty();
         }
 
         CombinedResponse response = new CombinedResponse(
                 dspPage.getContent(),
                 ctspPage.getContent(),
-                dspPage.getTotalPages(),  // Gán cho totalPages
+                dspPage.getTotalPages(),
                 dspPage.getNumber(),
                 dspPage.getTotalElements(),
-                ctspPage.getTotalPages(), // Gán cho totalPagesCTSP
+                ctspPage.getTotalPages(),
                 ctspPage.getNumber(),
                 ctspPage.getTotalElements()
         );
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/he-dieu-hanh")
+    public ResponseEntity<List<HeDieuHanh>> getAllHeDieuHanh() {
+        List<HeDieuHanh> heDieuHanhList = sr.getAllHeDieuHanh();
+        return ResponseEntity.ok(heDieuHanhList);
+    }
+
+    // API lấy tất cả Nhà sản xuất
+    @GetMapping("/nha-san-xuat")
+    public ResponseEntity<List<NhaSanXuat>> getAllNhaSanXuat() {
+        List<NhaSanXuat> nhaSanXuatList = sr.getAllNhaSanXuat();
+        return ResponseEntity.ok(nhaSanXuatList);
+    }
 
     @PostMapping("/AddDotGiamGia")
     public ResponseEntity<?> addData(@RequestBody addDotGiamGiaDTO request) {

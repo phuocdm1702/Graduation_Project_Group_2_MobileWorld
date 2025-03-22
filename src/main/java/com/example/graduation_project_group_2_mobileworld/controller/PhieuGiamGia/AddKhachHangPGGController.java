@@ -6,11 +6,14 @@ import com.example.graduation_project_group_2_mobileworld.entity.PhieuGiamGia;
 import com.example.graduation_project_group_2_mobileworld.entity.PhieuGiamGiaCaNhan;
 import com.example.graduation_project_group_2_mobileworld.service.PhieuGiamGia.PhieuGiamGiaCaNhanService;
 import com.example.graduation_project_group_2_mobileworld.service.PhieuGiamGia.PhieuGiamGiaService;
+import com.example.graduation_project_group_2_mobileworld.service.PhieuGiamGia.email.EmailSend;
 import com.example.graduation_project_group_2_mobileworld.service.khach_hang.KhachHangServices;
+import com.example.graduation_project_group_2_mobileworld.service.tai_khoan.TaiKhoanServices;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
@@ -28,6 +31,11 @@ public class AddKhachHangPGGController {
     @Autowired
     private PhieuGiamGiaCaNhanService phieuGiamGiaCaNhanService;
 
+    @Autowired
+    private TaiKhoanServices taiKhoanServices;
+
+    @Autowired
+    private EmailSend emailSend;
 
     @GetMapping("/data-kh")
     public List<KhachHang> fetchDataKH() {
@@ -42,7 +50,7 @@ public class AddKhachHangPGGController {
     }
 
     @PostMapping("/addPhieuGiamGia")
-    public ResponseEntity<String> addPGG(@RequestBody PhieuGiamGiaDTO dtoPGG) {
+    public ResponseEntity<PhieuGiamGia> addPGG(@RequestBody PhieuGiamGiaDTO dtoPGG) {
         PhieuGiamGia pgg = new PhieuGiamGia();
         pgg.setMa(dtoPGG.getMa());
         pgg.setTenPhieuGiamGia(dtoPGG.getTenPhieuGiamGia());
@@ -58,7 +66,8 @@ public class AddKhachHangPGGController {
         pgg.setMoTa(dtoPGG.getMoTa());
         pgg.setDeleted(false);
 
-        phieuGiamGiaService.addPGG(pgg);
+        PhieuGiamGia savePgg = phieuGiamGiaService.addPGG(pgg);
+
         if(dtoPGG.getRiengTu() == 1  && dtoPGG.getCustomerIds() != null) {
             for (Integer khachHangID : dtoPGG.getCustomerIds()) {
                 KhachHang kh = khachHangService.findById(khachHangID);
@@ -73,11 +82,24 @@ public class AddKhachHangPGGController {
                     pggcn.setDeleted(false);
 
                     phieuGiamGiaCaNhanService.addPGGCN(pggcn);
+
+                    String email = taiKhoanServices.findById(khachHangID);
+                    if(email != null) {
+                        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+                        String ngayHH = dateFormat.format(pgg.getNgayKetThuc());
+
+                        emailSend.sendDiscountEmail(
+                                email,
+                                pggcn.getMa(),
+                                pgg.getTenPhieuGiamGia(),
+                                ngayHH
+                        );
+                    }
                 }
             }
         }
 
-        return ResponseEntity.ok("Thêm thành công !");
+        return ResponseEntity.ok(savePgg);
     }
 
 }
