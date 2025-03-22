@@ -3,7 +3,8 @@ package com.example.graduation_project_group_2_mobileworld.service.hoa_don;
 import com.example.graduation_project_group_2_mobileworld.dto.hoa_don.HoaDonChiTietDTO;
 import com.example.graduation_project_group_2_mobileworld.dto.hoa_don.HoaDonDTO;
 import net.sf.jasperreports.engine.*;
-import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
+import net.sf.jasperreports.engine.data
+        .JRBeanCollectionDataSource;
 import net.sf.jasperreports.engine.util.JRLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
