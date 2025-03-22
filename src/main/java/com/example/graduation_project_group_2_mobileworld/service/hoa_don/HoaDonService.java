@@ -77,6 +77,7 @@ public class HoaDonService {
         dto.setTrangThai(hoaDon.getTrangThai());
         dto.setDiaChiKhachHang(hoaDon.getDiaChiKhachHang());
         dto.setTenKhachHang(hoaDon.getTenKhachHang());
+        dto.setGhiChu(hoaDon.getGhiChu());
 
         // Ánh xạ chi tiết hóa đơn
         if (hoaDon.getChiTietHoaDon() != null) {

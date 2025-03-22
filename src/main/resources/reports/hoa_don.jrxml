@@ -20,7 +20,7 @@
 		<band height="100" splitType="Stretch">
 			<image>
 				<reportElement uuid="2652335e-ae25-40e0-8812-c3ffc193e553" x="227" y="0" width="100" height="60"/>
-				<imageExpression><![CDATA["C:/Users/ADMIN/Downloads/DATN/Logo_DATN_V2-Photoroom.jpg"]]></imageExpression>
+				<imageExpression><![CDATA["front-end/src/assets/large-removebg-preview.png"]]></imageExpression>
 			</image>
 			<staticText>
 				<reportElement uuid="ec897322-cc3c-4244-aebd-39d2ad8d21a7" x="0" y="60" width="555" height="40"/>
