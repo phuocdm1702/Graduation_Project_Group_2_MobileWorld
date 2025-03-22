@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface KhachHangRepository extends JpaRepository<KhachHang, Integer> {
 
@@ -26,4 +27,5 @@ public interface KhachHangRepository extends JpaRepository<KhachHang, Integer> {
     List<KhachHang> searchFormAdd(String keyword);
 
 
+    Optional<KhachHang> findByMa(String ma);
 }

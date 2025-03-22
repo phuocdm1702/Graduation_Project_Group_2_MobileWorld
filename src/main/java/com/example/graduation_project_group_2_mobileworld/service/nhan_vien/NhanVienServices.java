@@ -210,4 +210,68 @@ public class NhanVienServices {
         nv.setDeleted(!nv.isDeleted()); // Toggle trạng thái
         return nhanVienRepository.save(nv);
     }
+
+    public void importNhanVien(List<NhanVien> nhanViens) {
+        for (NhanVien nhanVien : nhanViens) {
+            // Kiểm tra xem nhân viên đã tồn tại hay chưa (dựa trên mã)
+            Optional<NhanVien> existingNhanVien = nhanVienRepository.findByMa(nhanVien.getMa());
+
+            if (existingNhanVien.isPresent()) {
+                // Nếu nhân viên đã tồn tại, cập nhật thông tin
+                NhanVien existing = existingNhanVien.get();
+                existing.setTenNhanVien(nhanVien.getTenNhanVien());
+                existing.setThanhPho(nhanVien.getThanhPho());
+                existing.setQuan(nhanVien.getQuan());
+                existing.setPhuong(nhanVien.getPhuong());
+                existing.setDiaChiCuThe(nhanVien.getDiaChiCuThe());
+                existing.setDeleted(nhanVien.isDeleted());
+                existing.setUpdatedAt(new Date());
+
+                // Cập nhật thông tin tài khoản
+                if (existing.getIdTaiKhoan() != null && nhanVien.getIdTaiKhoan() != null) {
+                    TaiKhoan taiKhoan = taiKhoanRepository.findById(existing.getIdTaiKhoan().getId())
+                            .orElseThrow(() -> new RuntimeException("Tài khoản không tồn tại!"));
+                    taiKhoan.setEmail(nhanVien.getIdTaiKhoan().getEmail());
+                    taiKhoan.setSoDienThoai(nhanVien.getIdTaiKhoan().getSoDienThoai());
+                    taiKhoanRepository.save(taiKhoan);
+                }
+
+                nhanVienRepository.save(existing);
+            } else {
+                // Nếu nhân viên không tồn tại, thêm mới
+                // Tạo tài khoản mới cho nhân viên
+                QuyenHan quyenHan = new QuyenHan();
+                quyenHan.setId(3); // Quyền nhân viên
+
+                TaiKhoan taiKhoan = new TaiKhoan();
+                taiKhoan.setMa(MaTaiKhoan());
+                taiKhoan.setEmail(nhanVien.getIdTaiKhoan().getEmail());
+                taiKhoan.setSoDienThoai(nhanVien.getIdTaiKhoan().getSoDienThoai());
+                taiKhoan.setTenDangNhap(nhanVien.getIdTaiKhoan().getTenDangNhap() != null ? nhanVien.getIdTaiKhoan().getTenDangNhap() : nhanVien.getIdTaiKhoan().getEmail());
+                taiKhoan.setIdQuyenHan(quyenHan);
+                taiKhoan.setDeleted(false);
+
+                String randomPassword = emailServices.generateRandomPassword(8);
+                taiKhoan.setMatKhau(randomPassword != null ? randomPassword : "defaultPassword");
+                taiKhoan = taiKhoanRepository.save(taiKhoan);
+
+                // Gửi email chào mừng
+                try {
+                    emailServices.sendWelcomeEmail(
+                            taiKhoan.getEmail(),
+                            nhanVien.getTenNhanVien(),
+                            taiKhoan.getEmail(),
+                            randomPassword
+                    );
+                } catch (Exception e) {
+                    System.err.println("Lỗi gửi email: " + e.getMessage());
+                }
+
+                // Tạo nhân viên mới
+                nhanVien.setIdTaiKhoan(taiKhoan);
+                nhanVien.setCreatedAt(nhanVien.getCreatedAt() != null ? nhanVien.getCreatedAt() : new Date());
+                nhanVienRepository.save(nhanVien);
+            }
+        }
+    }
 }

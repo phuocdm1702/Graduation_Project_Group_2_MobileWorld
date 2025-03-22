@@ -1,33 +1,34 @@
 import { ref, onMounted, onUnmounted } from "vue";
 import axios from "axios";
 import { useRouter, useRoute } from "vue-router";
-import { format } from 'date-fns';
-import { vi } from 'date-fns/locale';
+import { format, parse, isValid } from "date-fns";
+import { vi } from "date-fns/locale";
+import * as XLSX from "xlsx";
 
-export default function useCustomerManagement(toastRef) { // Nhận toastRef từ component cha
+export default function useCustomerManagement(toastRef) {
   const router = useRouter();
   const route = useRoute();
 
   const dataTable = ref([]);
   const originalData = ref([]);
-  const allData = ref([]); // Lưu trữ toàn bộ dữ liệu khi cần tìm kiếm/lọc
+  const allData = ref([]);
   const searchKH = ref("");
   const filterStatus = ref("tat-ca");
   const currentPage = ref(0);
   const totalPages = ref(1);
-  const visible = ref(false); // Giữ lại để tương thích, nhưng sẽ không dùng nếu có toastRef
-  const message = ref(""); // Giữ lại để tương thích
-  const type = ref("success"); // Giữ lại để tương thích
+  const visible = ref(false);
+  const message = ref("");
+  const type = ref("success");
   const showConfirmModal = ref(false);
   const selectedCustomerId = ref(null);
   const isLoading = ref(false);
+  const fileInputRef = ref(null); // Added for file input management
   const itemsPerPage = 5;
 
   const showToast = (toastType, msg) => {
     if (toastRef?.value) {
-      toastRef.value.kshowToast(toastType, msg); // Sử dụng toastRef từ component cha
+      toastRef.value.kshowToast(toastType, msg);
     } else {
-      // Fallback nếu không có toastRef
       message.value = msg;
       type.value = toastType;
       visible.value = true;
@@ -40,26 +41,21 @@ export default function useCustomerManagement(toastRef) { // Nhận toastRef t�
   const fetchCustomers = async (page = 0) => {
     isLoading.value = true;
     try {
-      const params = {
-        page,
-        size: itemsPerPage,
-      };
-
+      const params = { page, size: itemsPerPage };
       const res = await axios.get("http://localhost:8080/khach-hang/home", { params });
       originalData.value = res.data.content || res.data || [];
       totalPages.value = res.data.totalPages || 1;
       currentPage.value = page;
 
-      // Đồng bộ địa chỉ mặc định từ danh sách địa chỉ
       for (const customer of originalData.value) {
         const addressRes = await axios.get(`http://localhost:8080/dia-chi/getByKhachHang/${customer.id}`);
         const addresses = addressRes.data || [];
-        const defaultAddress = addresses.find(addr => addr.macDinh) || addresses[0] || {};
+        const defaultAddress = addresses.find((addr) => addr.macDinh) || addresses[0] || {};
         customer.idDiaChiKH = {
           diaChiCuThe: defaultAddress.diaChiCuThe || "Chưa có dữ liệu",
-          thanhPho: defaultAddress.thanhPho || "",
-          quan: defaultAddress.quan || "",
-          phuong: defaultAddress.phuong || "",
+          thanhPho: defaultAddress.thanhPho || "N/A",
+          quan: defaultAddress.quan || "N/A",
+          phuong: defaultAddress.phuong || "N/A",
         };
       }
 
@@ -80,7 +76,6 @@ export default function useCustomerManagement(toastRef) { // Nhận toastRef t�
     }
   };
 
-  // Lấy toàn bộ dữ liệu từ API (dùng khi tìm kiếm/lọc)
   const fetchAllCustomers = async () => {
     isLoading.value = true;
     try {
@@ -89,24 +84,20 @@ export default function useCustomerManagement(toastRef) { // Nhận toastRef t�
       let hasMore = true;
 
       while (hasMore) {
-        const params = {
-          page,
-          size: itemsPerPage,
-        };
+        const params = { page, size: itemsPerPage };
         const res = await axios.get("http://localhost:8080/khach-hang/home", { params });
         const customers = res.data.content || res.data || [];
         allCustomers = [...allCustomers, ...customers];
 
-        // Đồng bộ địa chỉ mặc định
         for (const customer of customers) {
           const addressRes = await axios.get(`http://localhost:8080/dia-chi/getByKhachHang/${customer.id}`);
           const addresses = addressRes.data || [];
-          const defaultAddress = addresses.find(addr => addr.macDinh) || addresses[0] || {};
+          const defaultAddress = addresses.find((addr) => addr.macDinh) || addresses[0] || {};
           customer.idDiaChiKH = {
             diaChiCuThe: defaultAddress.diaChiCuThe || "Chưa có dữ liệu",
-            thanhPho: defaultAddress.thanhPho || "",
-            quan: defaultAddress.quan || "",
-            phuong: defaultAddress.phuong || "",
+            thanhPho: defaultAddress.thanhPho || "N/A",
+            quan: defaultAddress.quan || "N/A",
+            phuong: defaultAddress.phuong || "N/A",
           };
         }
 
@@ -130,22 +121,18 @@ export default function useCustomerManagement(toastRef) { // Nhận toastRef t�
   const applyFilterAndSearch = () => {
     let filteredData = [];
 
-    // Nếu có tìm kiếm hoặc lọc, sử dụng allData (toàn bộ dữ liệu)
     if (searchKH.value.trim() || filterStatus.value !== "tat-ca") {
       filteredData = [...allData.value];
     } else {
-      // Nếu không có tìm kiếm/lọc, sử dụng dữ liệu từ API (phân trang phía server)
       filteredData = [...originalData.value];
     }
 
-    // Áp dụng bộ lọc trạng thái
     if (filterStatus.value === "kich-hoat") {
       filteredData = filteredData.filter((kh) => !kh.deleted);
     } else if (filterStatus.value === "huy-kich-hoat") {
       filteredData = filteredData.filter((kh) => kh.deleted);
     }
 
-    // Áp dụng tìm kiếm
     if (searchKH.value.trim()) {
       filteredData = filteredData.filter(
         (khachhang) =>
@@ -155,7 +142,6 @@ export default function useCustomerManagement(toastRef) { // Nhận toastRef t�
       );
     }
 
-    // Cập nhật totalPages và dataTable
     totalPages.value = Math.ceil(filteredData.length / itemsPerPage) || 1;
     currentPage.value = Math.min(currentPage.value, totalPages.value - 1);
     const startIndex = currentPage.value * itemsPerPage;
@@ -164,7 +150,7 @@ export default function useCustomerManagement(toastRef) { // Nhận toastRef t�
 
   const btnSearch = () => {
     if (!allData.value.length) {
-      fetchAllCustomers(); // Lấy toàn bộ dữ liệu nếu chưa có
+      fetchAllCustomers();
     } else {
       currentPage.value = 0;
       applyFilterAndSearch();
@@ -175,7 +161,7 @@ export default function useCustomerManagement(toastRef) { // Nhận toastRef t�
     searchKH.value = "";
     filterStatus.value = "tat-ca";
     currentPage.value = 0;
-    allData.value = []; // Reset allData để sử dụng dữ liệu từ API
+    allData.value = [];
     await fetchCustomers(0);
   };
 
@@ -184,7 +170,7 @@ export default function useCustomerManagement(toastRef) { // Nhận toastRef t�
       isLoading.value = true;
       const response = await axios.put(`http://localhost:8080/khach-hang/toggle-status/${id}`);
       await fetchCustomers(currentPage.value);
-      allData.value = []; // Reset allData để đồng bộ lại
+      allData.value = [];
       showToast("success", response.data.message || "Đã thay đổi trạng thái thành công!");
     } catch (error) {
       console.error("Lỗi khi thay đổi trạng thái:", error);
@@ -206,7 +192,7 @@ export default function useCustomerManagement(toastRef) { // Nhận toastRef t�
       await axios.put(`http://localhost:8080/khach-hang/delete/${selectedCustomerId.value}`);
       showToast("success", "Hủy kích hoạt khách hàng thành công!");
       await fetchCustomers(currentPage.value);
-      allData.value = []; // Reset allData để đồng bộ lại
+      allData.value = [];
     } catch (error) {
       console.error("Lỗi khi xóa khách hàng:", error);
       showToast("error", "Không thể xóa khách hàng!");
@@ -216,40 +202,256 @@ export default function useCustomerManagement(toastRef) { // Nhận toastRef t�
     }
   };
 
-  const editCustomer = (customer) => {
-    console.log("Editing customer:", customer);
-  };
-
   const goToPage = (page) => {
     if (page >= 0 && page < totalPages.value && page !== currentPage.value) {
       if (searchKH.value.trim() || filterStatus.value !== "tat-ca") {
-        // Nếu đang tìm kiếm hoặc lọc, chỉ cập nhật trang cục bộ
         currentPage.value = page;
         applyFilterAndSearch();
       } else {
-        // Nếu không tìm kiếm hoặc lọc, gọi API để lấy dữ liệu trang mới
         fetchCustomers(page);
       }
     }
   };
 
-  const importExcel = () => {
-    console.log("Import Excel functionality not implemented yet.");
-    showToast("info", "Chức năng nhập bằng Excel đang được phát triển!");
+  const importExcel = async (event) => {
+    const file = event.target.files[0];
+    if (!file) {
+      showToast("error", "Vui lòng chọn file Excel!");
+      return;
+    }
+
+    try {
+      isLoading.value = true;
+
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        try {
+          const data = new Uint8Array(e.target.result);
+          const workbook = XLSX.read(data, { type: "array" });
+          const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+          const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+          if (!jsonData.length) {
+            showToast("error", "File Excel không có dữ liệu!");
+            return;
+          }
+
+          const customersFromExcel = jsonData.map((row, index) => {
+            let createdAt;
+            const rawDate = row["Ngày tham gia"];
+            if (rawDate) {
+              try {
+                const parsedDate = parse(rawDate, "dd/MM/yyyy HH:mm:ss", new Date(), { locale: vi });
+                createdAt = isValid(parsedDate) ? parsedDate.toISOString() : new Date().toISOString();
+              } catch (error) {
+                console.warn(`Ngày không hợp lệ tại hàng ${index + 1}: ${rawDate}`);
+                createdAt = new Date().toISOString();
+              }
+            } else {
+              createdAt = new Date().toISOString();
+            }
+
+            let diaChiCuThe = "Chưa có dữ liệu";
+            let thanhPho = "N/A";
+            let quan = "N/A";
+            let phuong = "N/A";
+            if (row["Địa chỉ"] && typeof row["Địa chỉ"] === "string") {
+              const addressParts = row["Địa chỉ"].split(",");
+              diaChiCuThe = addressParts[0]?.trim() || "Chưa có dữ liệu";
+              thanhPho = addressParts[1]?.trim() || "N/A";
+              quan = addressParts[2]?.trim() || "N/A";
+              phuong = addressParts[3]?.trim() || "N/A";
+            }
+
+            return {
+              ma: row["Mã"]?.toString() || "N/A",
+              tenKH: row["Tên"]?.toString() || "N/A",
+              email: row["Email"]?.toString() || "N/A",
+              soDienThoai: row["SĐT"]?.toString() || "N/A",
+              userName: row["Tên đăng nhập"]?.toString() || row["Email"]?.toString() || "N/A",
+              gioiTinh: row["Giới tính"] === "Nam",
+              createdAt: createdAt,
+              diaChiCuThe,
+              thanhPho,
+              quan,
+              phuong,
+              deleted: row["Trạng thái"] === "Hủy kích hoạt",
+            };
+          });
+
+          // Validation
+          for (let i = 0; i < customersFromExcel.length; i++) {
+            const customer = customersFromExcel[i];
+            if (customer.ma === "N/A") {
+              showToast("error", `Hàng ${i + 1}: Mã không được để trống!`);
+              return;
+            }
+            if (customer.tenKH === "N/A") {
+              showToast("error", `Hàng ${i + 1}: Tên không được để trống!`);
+              return;
+            }
+            if (customer.email === "N/A") {
+              showToast("error", `Hàng ${i + 1}: Email không được để trống!`);
+              return;
+            }
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(customer.email)) {
+              showToast("error", `Hàng ${i + 1}: Email không hợp lệ!`);
+              return;
+            }
+            if (customer.soDienThoai !== "N/A") {
+              const phoneRegex = /^[0-9]{10,11}$/;
+              if (!phoneRegex.test(customer.soDienThoai)) {
+                showToast("error", `Hàng ${i + 1}: Số điện thoại không hợp lệ!`);
+                return;
+              }
+            }
+          }
+
+          console.log("Dữ liệu gửi lên server:", JSON.stringify(customersFromExcel, null, 2));
+          const response = await axios.post("http://localhost:8080/khach-hang/import", customersFromExcel);
+          console.log("Phản hồi từ server:", response.data);
+
+          if (response.status === 200) {
+            showToast("success", "Nhập dữ liệu khách hàng từ Excel thành công!");
+            await fetchCustomers(currentPage.value);
+            allData.value = [];
+          } else {
+            showToast("error", "Lưu dữ liệu khách hàng vào server thất bại!");
+          }
+        } catch (error) {
+          console.error("Lỗi trong quá trình đọc file Excel:", error);
+          if (error.response) {
+            console.error("Chi tiết lỗi từ server:", error.response.data);
+            showToast("error", `Lỗi từ server: ${error.response.data.message || "Không xác định"}`);
+          } else {
+            showToast("error", "Đọc file Excel thất bại!");
+          }
+        } finally {
+          if (fileInputRef.value) {
+            fileInputRef.value.value = "";
+          }
+          isLoading.value = false;
+        }
+      };
+      reader.onerror = () => {
+        showToast("error", "Lỗi khi đọc file Excel!");
+        if (fileInputRef.value) {
+          fileInputRef.value.value = "";
+        }
+        isLoading.value = false;
+      };
+      reader.readAsArrayBuffer(file);
+    } catch (error) {
+      console.error("Lỗi khi nhập Excel:", error);
+      showToast("error", "Nhập dữ liệu từ Excel thất bại!");
+      if (fileInputRef.value) {
+        fileInputRef.value.value = "";
+      }
+      isLoading.value = false;
+    }
+  };
+
+  const exportToExcel = () => {
+    try {
+      isLoading.value = true;
+      let filteredData = [...originalData.value];
+
+      if (filterStatus.value === "kich-hoat") {
+        filteredData = filteredData.filter((kh) => !kh.deleted);
+      } else if (filterStatus.value === "huy-kich-hoat") {
+        filteredData = filteredData.filter((kh) => kh.deleted);
+      }
+
+      if (searchKH.value.trim()) {
+        filteredData = filteredData.filter(
+          (khachhang) =>
+            khachhang?.idTaiKhoan?.email?.toLowerCase().includes(searchKH.value.toLowerCase()) ||
+            khachhang?.ten?.toLowerCase().includes(searchKH.value.toLowerCase()) ||
+            khachhang?.idTaiKhoan?.soDienThoai?.toLowerCase().includes(searchKH.value.toLowerCase())
+        );
+      }
+
+      if (!filteredData.length) {
+        showToast("error", "Không có dữ liệu để xuất!");
+        return;
+      }
+
+      const dataToExport = filteredData.map((item, index) => ({
+        "#": index + 1,
+        "Mã": item.ma || "N/A",
+        "Tên": item.ten || "N/A",
+        "Email": item.idTaiKhoan?.email || "N/A",
+        "SĐT": item.idTaiKhoan?.soDienThoai || "N/A",
+        "Tên đăng nhập": item.idTaiKhoan?.tenDangNhap || item.idTaiKhoan?.email || "N/A",
+        "Ngày tham gia": item.createdAt
+          ? format(new Date(item.createdAt), "dd/MM/yyyy HH:mm:ss", { locale: vi })
+          : "Chưa có dữ liệu",
+        "Địa chỉ": `${item.idDiaChiKH?.diaChiCuThe || "Chưa có dữ liệu"}, ${item.idDiaChiKH?.thanhPho || "N/A"}, ${item.idDiaChiKH?.quan || "N/A"}, ${item.idDiaChiKH?.phuong || "N/A"}`,
+        "Trạng thái": item.deleted ? "Hủy kích hoạt" : "Kích hoạt",
+        "Giới tính": item.idTaiKhoan?.gioiTinh ? "Nam" : "Nữ",
+      }));
+
+      const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "DanhSachKhachHang");
+
+      const currentDate = format(new Date(), "yyyy-MM-dd_HH-mm-ss", { locale: vi });
+      XLSX.writeFile(workbook, `Danh_sach_khach_hang_${currentDate}.xlsx`);
+
+      showToast("success", "Xuất file Excel thành công!");
+    } catch (error) {
+      console.error("Lỗi khi xuất Excel:", error);
+      showToast("error", "Xuất file Excel thất bại!");
+    } finally {
+      isLoading.value = false;
+    }
+  };
+
+  const downloadTemplate = () => {
+    try {
+      isLoading.value = true;
+      const templateData = [
+        {
+          "#": 1,
+          "Mã": "KH000001",
+          "Tên": "Nguyễn Văn A",
+          "Email": "vana@gmail.com",
+          "SĐT": "0987654321",
+          "Tên đăng nhập": "vana@gmail.com",
+          "Ngày tham gia": "18/02/2025 00:00:00",
+          "Địa chỉ": "123 Đường Láng, Hà Nội, Đống Đa, Láng Thượng",
+          "Trạng thái": "Kích hoạt",
+          "Giới tính": "Nam",
+        },
+      ];
+
+      const worksheet = XLSX.utils.json_to_sheet(templateData);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "MauKhachHang");
+
+      XLSX.writeFile(workbook, "MauKhachHang.xlsx");
+      showToast("success", "Tải file mẫu thành công!");
+    } catch (error) {
+      console.error("Lỗi khi tải file mẫu:", error);
+      showToast("error", "Tải file mẫu thất bại!");
+    } finally {
+      isLoading.value = false;
+    }
   };
 
   const tableColumns = [
-    { key: "index", label: "#", formatter: (value, item, index) => index + 1 + (currentPage.value * itemsPerPage) },
+    { key: "index", label: "#", formatter: (value, item, index) => currentPage.value * itemsPerPage + index + 1 },
     { key: "ma", label: "Mã" },
     { key: "ten", label: "Tên" },
     { key: "idTaiKhoan.email", label: "Email" },
-    { key: "idTaiKhoan.soDienThoai", label: "SDT" },
+    { key: "idTaiKhoan.soDienThoai", label: "SĐT" },
     {
       key: "createdAt",
       label: "Ngày tham gia",
       formatter: (value) => {
         if (!value || isNaN(Date.parse(value))) return "Chưa có dữ liệu";
-        return format(new Date(value), 'dd/MM/yyyy HH:mm:ss', { locale: vi });
+        return format(new Date(value), "dd/MM/yyyy HH:mm:ss", { locale: vi });
       },
     },
     {
@@ -270,10 +472,7 @@ export default function useCustomerManagement(toastRef) { // Nhận toastRef t�
           padding: 8px;
           line-height: 1.5;
         ">
-          ${item.idDiaChiKH ? `${item.idDiaChiKH.diaChiCuThe}
-          , ${item.idDiaChiKH.phuong},
-           ${item.idDiaChiKH.quan}
-          , ${item.idDiaChiKH.thanhPho}` : "Chưa có dữ liệu"}
+          ${item.idDiaChiKH ? `${item.idDiaChiKH.diaChiCuThe}, ${item.idDiaChiKH.thanhPho}, ${item.idDiaChiKH.quan}, ${item.idDiaChiKH.phuong}` : "Chưa có dữ liệu"}
         </div>
       `,
     },
@@ -294,7 +493,7 @@ export default function useCustomerManagement(toastRef) { // Nhận toastRef t�
             <i class="fas fa-pen-to-square"></i>
           </a>
           <label class="switch ml-4">
-            <input type="checkbox" ${item.deleted ? '' : 'checked'} onchange="document.dispatchEvent(new CustomEvent('toggleStatus', { detail: '${item.id}' }))">
+            <input type="checkbox" ${item.deleted ? "" : "checked"} onchange="document.dispatchEvent(new CustomEvent('toggleStatus', { detail: '${item.id}' }))">
             <span class="slider round"></span>
           </label>
         </td>
@@ -390,34 +589,9 @@ export default function useCustomerManagement(toastRef) { // Nhận toastRef t�
     showDeleteConfirm(event.detail);
   };
 
-  const handleDefaultAddressChanged = (event) => {
-    const { id, diaChiCuThe, thanhPho, quan, phuong } = event.detail;
-    const customerIndex = dataTable.value.findIndex(customer => customer.id === id);
-    if (customerIndex !== -1) {
-      dataTable.value[customerIndex].idDiaChiKH = {
-        ...dataTable.value[customerIndex].idDiaChiKH,
-        diaChiCuThe,
-        thanhPho,
-        quan,
-        phuong,
-      };
-      const originalIndex = originalData.value.findIndex(customer => customer.id === id);
-      if (originalIndex !== -1) {
-        originalData.value[originalIndex].idDiaChiKH = {
-          ...originalData.value[originalIndex].idDiaChiKH,
-          diaChiCuThe,
-          thanhPho,
-          quan,
-          phuong,
-        };
-      }
-    }
-  };
-
   onMounted(async () => {
     document.addEventListener("showDeleteConfirm", handleShowDeleteConfirm);
     document.addEventListener("toggleStatus", (event) => toggleStatus(event.detail));
-    document.addEventListener("defaultAddressChanged", handleDefaultAddressChanged);
     await fetchCustomers();
     injectCSS();
   });
@@ -425,7 +599,6 @@ export default function useCustomerManagement(toastRef) { // Nhận toastRef t�
   onUnmounted(() => {
     document.removeEventListener("showDeleteConfirm", handleShowDeleteConfirm);
     document.removeEventListener("toggleStatus", (event) => toggleStatus(event.detail));
-    document.removeEventListener("defaultAddressChanged", handleDefaultAddressChanged);
   });
 
   return {
@@ -445,11 +618,13 @@ export default function useCustomerManagement(toastRef) { // Nhận toastRef t�
     backSearch,
     showDeleteConfirm,
     confirmDelete,
-    editCustomer,
     goToPage,
     importExcel,
+    exportToExcel,
+    downloadTemplate,
     tableColumns,
     getNestedValue,
     isLoading,
+    fileInputRef, // Return for template usage
   };
 }

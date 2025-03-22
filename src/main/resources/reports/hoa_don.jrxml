@@ -13,171 +13,208 @@
 	<field name="tenSanPham" class="java.lang.String"/>
 	<field name="imel" class="java.lang.String"/>
 	<field name="gia" class="java.math.BigDecimal"/>
+
 	<background>
 		<band splitType="Stretch"/>
 	</background>
+
 	<title>
-		<band height="100" splitType="Stretch">
+		<band height="120" splitType="Stretch">
 			<image>
 				<reportElement uuid="2652335e-ae25-40e0-8812-c3ffc193e553" x="227" y="0" width="100" height="60"/>
-				<imageExpression><![CDATA["front-end/src/assets/large-removebg-preview.png"]]></imageExpression>
+				<imageExpression><![CDATA["front-end/src/assets/Logo_Mobile_World_vector.png"]]></imageExpression>
 			</image>
 			<staticText>
-				<reportElement uuid="ec897322-cc3c-4244-aebd-39d2ad8d21a7" x="0" y="60" width="555" height="40"/>
-				<textElement textAlignment="Center">
+				<reportElement uuid="ec897322-cc3c-4244-aebd-39d2ad8d21a7" x="0" y="70" width="555" height="50"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="DejaVu Sans" size="10" pdfFontName="DejaVu Sans" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
-				<text><![CDATA[Số điện thoại: 01234567890
-Email: MobileWorld@gmail.com
-Địa chỉ: Cổng Ong, Tòa nhà FPT Polytechnic, 13 phố Trịnh Văn Bô, phường Phương Canh, quận Nam Từ Liêm, TP Hà Nội]]></text>
+				<text><![CDATA[
+Số điện thoại: 01234567890 | Email: MobileWorld@gmail.com
+Địa chỉ: Tòa nhà FPT Polytechnic, 13 phố Trịnh Văn Bô, phường Phương Canh, quận Nam Từ Liêm, TP Hà Nội]]></text>
 			</staticText>
 		</band>
 	</title>
+
 	<pageHeader>
-		<band height="110" splitType="Stretch">
+		<band height="100" splitType="Stretch">
+			<!-- Tiêu đề "HÓA ĐƠN BÁN HÀNG" -->
 			<staticText>
 				<reportElement uuid="d0441378-31f5-4d8a-82c2-7018015de773" x="0" y="0" width="555" height="30"/>
-				<textElement textAlignment="Center">
-					<font fontName="DejaVu Sans" size="16" isBold="true" pdfFontName="DejaVu Sans" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" size="18" isBold="true" pdfFontName="DejaVu Sans" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
 				<text><![CDATA[HÓA ĐƠN BÁN HÀNG]]></text>
 			</staticText>
-			<!-- Mã Hóa Đơn -->
+
+			<!-- Dòng 1: Mã Hóa Đơn (trái) và Khách Hàng (phải) -->
+			<!-- Cột trái: Mã Hóa Đơn -->
 			<staticText>
-				<reportElement x="0" y="40" width="80" height="20"/>
-				<textElement>
-					<font fontName="DejaVu Sans" size="10" pdfFontName="DejaVu Sans" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+				<reportElement x="0" y="35" width="80" height="18"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" size="10" isBold="true" pdfFontName="DejaVu Sans" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
 				<text><![CDATA[Mã Hóa Đơn:]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="80" y="40" width="100" height="20"/>
-				<textElement>
+				<reportElement x="80" y="35" width="190" height="18"/>
+				<textElement verticalAlignment="Middle">
 					<font fontName="DejaVu Sans" size="10" pdfFontName="DejaVu Sans" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{maHoaDon}]]></textFieldExpression>
 			</textField>
-			<!-- Ngày Bán -->
+			<!-- Cột phải: Khách Hàng -->
 			<staticText>
-				<reportElement x="400" y="40" width="80" height="20"/>
-				<textElement>
-					<font fontName="DejaVu Sans" size="10" pdfFontName="DejaVu Sans" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
-				</textElement>
-				<text><![CDATA[Ngày Bán:]]></text>
-			</staticText>
-			<textField>
-				<reportElement x="480" y="40" width="75" height="20"/>
-				<textElement>
-					<font fontName="DejaVu Sans" size="10" pdfFontName="DejaVu Sans" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$P{ngayBan}]]></textFieldExpression>
-			</textField>
-			<!-- Nhân Viên -->
-			<staticText>
-				<reportElement x="0" y="60" width="80" height="20"/>
-				<textElement>
-					<font fontName="DejaVu Sans" size="10" pdfFontName="DejaVu Sans" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
-				</textElement>
-				<text><![CDATA[Nhân Viên:]]></text>
-			</staticText>
-			<textField>
-				<reportElement x="80" y="60" width="150" height="20"/>
-				<textElement>
-					<font fontName="DejaVu Sans" size="10" pdfFontName="DejaVu Sans" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$P{tenNhanVien}]]></textFieldExpression>
-			</textField>
-			<!-- Khách Hàng -->
-			<staticText>
-				<reportElement x="400" y="60" width="80" height="20"/>
-				<textElement>
-					<font fontName="DejaVu Sans" size="10" pdfFontName="DejaVu Sans" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+				<reportElement x="285" y="35" width="80" height="18"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" size="10" isBold="true" pdfFontName="DejaVu Sans" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
 				<text><![CDATA[Khách Hàng:]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="480" y="60" width="75" height="20"/>
-				<textElement>
+				<reportElement x="365" y="35" width="190" height="18"/>
+				<textElement verticalAlignment="Middle">
 					<font fontName="DejaVu Sans" size="10" pdfFontName="DejaVu Sans" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{tenKhachHang}]]></textFieldExpression>
 			</textField>
-			<!-- Số Điện Thoại -->
+
+			<!-- Dòng 2: Ngày Bán (trái) và Số Điện Thoại (phải) -->
+			<!-- Cột trái: Ngày Bán -->
 			<staticText>
-				<reportElement x="400" y="80" width="80" height="20"/>
-				<textElement>
+				<reportElement x="0" y="58" width="80" height="18"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" size="10" isBold="true" pdfFontName="DejaVu Sans" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[Ngày Bán:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="80" y="58" width="190" height="18"/>
+				<textElement verticalAlignment="Middle">
 					<font fontName="DejaVu Sans" size="10" pdfFontName="DejaVu Sans" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{ngayBan}]]></textFieldExpression>
+			</textField>
+			<!-- Cột phải: Số Điện Thoại -->
+			<staticText>
+				<reportElement x="285" y="58" width="80" height="18"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" size="10" isBold="true" pdfFontName="DejaVu Sans" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
 				<text><![CDATA[Số Điện Thoại:]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="480" y="80" width="75" height="20"/>
-				<textElement>
+				<reportElement x="365" y="58" width="190" height="18"/>
+				<textElement verticalAlignment="Middle">
 					<font fontName="DejaVu Sans" size="10" pdfFontName="DejaVu Sans" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{soDienThoai}]]></textFieldExpression>
 			</textField>
-			<!-- Địa Chỉ -->
+
+			<!-- Dòng 3: Tên Nhân Viên (trái) và Địa Chỉ (phải) -->
+			<!-- Cột trái: Tên Nhân Viên -->
 			<staticText>
-				<reportElement x="0" y="80" width="80" height="20"/>
-				<textElement>
+				<reportElement x="0" y="81" width="80" height="18"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" size="10" isBold="true" pdfFontName="DejaVu Sans" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[Tên Nhân Viên:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="80" y="81" width="190" height="18"/>
+				<textElement verticalAlignment="Middle">
 					<font fontName="DejaVu Sans" size="10" pdfFontName="DejaVu Sans" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{tenNhanVien}]]></textFieldExpression>
+			</textField>
+			<!-- Cột phải: Địa Chỉ -->
+			<staticText>
+				<reportElement x="285" y="81" width="80" height="18"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" size="10" isBold="true" pdfFontName="DejaVu Sans" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
 				<text><![CDATA[Địa Chỉ:]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="80" y="80" width="300" height="20"/>
-				<textElement>
+				<reportElement x="365" y="81" width="190" height="18"/>
+				<textElement verticalAlignment="Middle">
 					<font fontName="DejaVu Sans" size="10" pdfFontName="DejaVu Sans" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{diaChi}]]></textFieldExpression>
 			</textField>
+
+			<!-- Đường phân cách cuối pageHeader -->
+			<line>
+				<reportElement x="0" y="99" width="555" height="1"/>
+			</line>
 		</band>
 	</pageHeader>
+
 	<columnHeader>
 		<band height="30" splitType="Stretch">
 			<!-- Viền trên của bảng -->
 			<line>
 				<reportElement x="0" y="0" width="555" height="1"/>
 			</line>
+			<!-- Viền trái của khung -->
+			<line>
+				<reportElement x="0" y="0" width="1" height="30"/>
+			</line>
 			<!-- Cột STT -->
 			<staticText>
-				<reportElement x="0" y="5" width="30" height="20"/>
-				<textElement textAlignment="Center">
+				<reportElement x="0" y="5" width="40" height="20"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="DejaVu Sans" size="10" isBold="true" pdfFontName="DejaVu Sans" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
 				<text><![CDATA[STT]]></text>
 			</staticText>
+			<!-- Đường phân cách giữa STT và Tên Sản Phẩm -->
+			<line>
+				<reportElement x="40" y="0" width="1" height="30"/>
+			</line>
 			<!-- Cột Tên Sản Phẩm -->
 			<staticText>
-				<reportElement x="30" y="5" width="200" height="20"/>
-				<textElement textAlignment="Center">
+				<reportElement x="40" y="5" width="250" height="20"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="DejaVu Sans" size="10" isBold="true" pdfFontName="DejaVu Sans" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
-				<text><![CDATA[Tên Sản Phẩm]]></text>
+				<text><![CDATA[SẢN PHẨM]]></text>
 			</staticText>
+			<!-- Đường phân cách giữa Tên Sản Phẩm và IMEI -->
+			<line>
+				<reportElement x="290" y="0" width="1" height="30"/>
+			</line>
 			<!-- Cột IMEI -->
 			<staticText>
-				<reportElement x="230" y="5" width="200" height="20"/>
-				<textElement textAlignment="Center">
+				<reportElement x="290" y="5" width="120" height="20"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="DejaVu Sans" size="10" isBold="true" pdfFontName="DejaVu Sans" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
 				<text><![CDATA[IMEI]]></text>
 			</staticText>
+			<!-- Đường phân cách giữa IMEI và Đơn Giá -->
+			<line>
+				<reportElement x="410" y="0" width="1" height="30"/>
+			</line>
 			<!-- Cột Đơn Giá -->
 			<staticText>
-				<reportElement x="430" y="5" width="125" height="20"/>
-				<textElement textAlignment="Center">
+				<reportElement x="410" y="5" width="145" height="20"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="DejaVu Sans" size="10" isBold="true" pdfFontName="DejaVu Sans" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
-				<text><![CDATA[Đơn Giá]]></text>
+				<text><![CDATA[ĐƠN GIÁ]]></text>
 			</staticText>
+			<!-- Viền phải của khung -->
+			<line>
+				<reportElement x="554" y="0" width="1" height="30"/>
+			</line>
 			<!-- Viền dưới của header -->
 			<line>
 				<reportElement x="0" y="29" width="555" height="1"/>
 			</line>
 		</band>
 	</columnHeader>
+
 	<detail>
 		<band height="25" splitType="Stretch">
 			<!-- Viền trái -->
@@ -186,41 +223,41 @@ Email: MobileWorld@gmail.com
 			</line>
 			<!-- Cột STT -->
 			<textField>
-				<reportElement x="0" y="0" width="30" height="25"/>
-				<textElement textAlignment="Center">
+				<reportElement x="0" y="0" width="40" height="25"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="DejaVu Sans" size="10" pdfFontName="DejaVu Sans" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{stt}]]></textFieldExpression>
 			</textField>
 			<line>
-				<reportElement x="30" y="0" width="1" height="25"/>
+				<reportElement x="40" y="0" width="1" height="25"/>
 			</line>
 			<!-- Cột Tên Sản Phẩm -->
 			<textField>
-				<reportElement x="31" y="0" width="199" height="25"/>
-				<textElement textAlignment="Left">
+				<reportElement x="41" y="0" width="249" height="25"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="DejaVu Sans" size="10" pdfFontName="DejaVu Sans" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{tenSanPham}]]></textFieldExpression>
 			</textField>
 			<line>
-				<reportElement x="230" y="0" width="1" height="25"/>
+				<reportElement x="290" y="0" width="1" height="25"/>
 			</line>
 			<!-- Cột IMEI -->
 			<textField>
-				<reportElement x="231" y="0" width="199" height="25"/>
-				<textElement textAlignment="Left">
+				<reportElement x="291" y="0" width="119" height="25"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="DejaVu Sans" size="10" pdfFontName="DejaVu Sans" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{imel}]]></textFieldExpression>
 			</textField>
 			<line>
-				<reportElement x="430" y="0" width="1" height="25"/>
+				<reportElement x="410" y="0" width="1" height="25"/>
 			</line>
 			<!-- Cột Đơn Giá -->
 			<textField>
-				<reportElement x="431" y="0" width="124" height="25"/>
-				<textElement textAlignment="Right">
+				<reportElement x="411" y="0" width="144" height="25"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="DejaVu Sans" size="10" pdfFontName="DejaVu Sans" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{gia}]]></textFieldExpression>
@@ -235,33 +272,35 @@ Email: MobileWorld@gmail.com
 			</line>
 		</band>
 	</detail>
+
 	<columnFooter>
-		<band height="60" splitType="Stretch"> <!-- Tăng chiều cao từ 40 lên 60 -->
-			<!-- Tổng Tiền -->
+		<band height="70" splitType="Stretch">
+			<line>
+				<reportElement x="0" y="0" width="555" height="1"/>
+			</line>
 			<staticText>
-				<reportElement x="350" y="10" width="80" height="20"/>
+				<reportElement x="350" y="10" width="100" height="20"/>
 				<textElement textAlignment="Right">
 					<font fontName="DejaVu Sans" size="10" isBold="true" pdfFontName="DejaVu Sans" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
 				<text><![CDATA[Tổng Tiền:]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="430" y="10" width="125" height="20"/>
+				<reportElement x="450" y="10" width="105" height="20"/>
 				<textElement textAlignment="Right">
 					<font fontName="DejaVu Sans" size="10" pdfFontName="DejaVu Sans" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{tongTien}]]></textFieldExpression>
 			</textField>
-			<!-- Tổng Tiền Sau Giảm -->
 			<staticText>
-				<reportElement x="350" y="30" width="80" height="20"/>
+				<reportElement x="350" y="35" width="100" height="20"/>
 				<textElement textAlignment="Right">
 					<font fontName="DejaVu Sans" size="10" isBold="true" pdfFontName="DejaVu Sans" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
 				<text><![CDATA[Tổng Tiền Sau Giảm:]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="430" y="30" width="125" height="20"/>
+				<reportElement x="450" y="35" width="105" height="20"/>
 				<textElement textAlignment="Right">
 					<font fontName="DejaVu Sans" size="10" pdfFontName="DejaVu Sans" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
 				</textElement>
@@ -269,10 +308,20 @@ Email: MobileWorld@gmail.com
 			</textField>
 		</band>
 	</columnFooter>
+
 	<pageFooter>
-		<band height="30" splitType="Stretch"/>
+		<band height="50" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="10" width="555" height="20"/>
+				<textElement textAlignment="Center">
+					<font fontName="DejaVu Sans" size="10" isItalic="true" pdfFontName="DejaVu Sans" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[Cảm ơn quý khách đã mua hàng tại Mobile World!]]></text>
+			</staticText>
+		</band>
 	</pageFooter>
+
 	<summary>
-		<band height="20" splitType="Stretch"/>
+		<band height="0" splitType="Stretch"/>
 	</summary>
 </jasperReport>
