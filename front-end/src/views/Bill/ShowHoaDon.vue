@@ -17,7 +17,7 @@
           <p class="text-xs text-gray-500">{{ status.time || "N/A" }}</p>
         </div>
       </div>
-      <!-- Add the "Chi tiết" button here, aligned to the right -->
+      <!-- Nút "Chi tiết" -->
       <div class="text-right mt-4">
         <button
           @click="fetchInvoiceHistory(hoaDon?.id)"
@@ -28,23 +28,72 @@
       </div>
     </div>
 
-    <!-- Modal for Invoice History with DynamicTable -->
-    <FormModal
-      v-model:show="isHistoryModalOpen"
-      :entity-name="`Lịch sử hóa đơn - ${hoaDon?.id}`"
-      @close="closeHistoryModal"
+    <!-- Modal tự xây dựng cho Invoice History -->
+    <div
+      v-if="isHistoryModalOpen"
+      class="fixed inset-0 z-50 overflow-y-auto"
+      aria-labelledby="modal-title"
+      role="dialog"
+      aria-modal="true"
     >
-      <template #default>
-        <div class="space-y-4">
-          <h3 class="text-lg font-medium text-gray-700 mb-2">Lịch sử hóa đơn</h3>
-          <DynamicTable
-            :data="invoiceHistory"
-            :columns="historyColumns"
-            :get-nested-value="getNestedValue"
-          />
+      <!-- Overlay -->
+      <div
+        class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
+        @click="closeHistoryModal"
+      ></div>
+
+      <!-- Modal content -->
+      <div class="flex min-h-full items-center justify-center p-4">
+        <div
+          class="relative bg-white rounded-lg shadow-xl w-full max-w-5xl transform transition-all"
+        >
+          <!-- Header -->
+          <div class="px-6 py-4 border-b border-gray-200">
+            <h3 class="text-lg font-medium text-gray-700">
+              Lịch sử hóa đơn - {{ hoaDon?.id }}
+            </h3>
+            <button
+              @click="closeHistoryModal"
+              class="absolute right-4 top-4 text-gray-400 hover:text-gray-500"
+            >
+              <span class="sr-only">Đóng</span>
+              <svg
+                class="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+          </div>
+
+          <!-- Body -->
+          <div class="px-6 py-4 space-y-4">
+            <DynamicTable
+              :data="invoiceHistory"
+              :columns="historyColumns"
+              :get-nested-value="getNestedValue"
+            />
+          </div>
+
+          <!-- Footer -->
+          <div class="px-6 py-4 border-t border-gray-200 flex justify-end">
+            <button
+              @click="closeHistoryModal"
+              class="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200"
+            >
+              Đóng
+            </button>
+          </div>
         </div>
-      </template>
-    </FormModal>
+      </div>
+    </div>
 
     <!-- Thông tin đơn hàng -->
     <div class="bg-gray-50 p-6 rounded-xl mb-6 shadow-sm">
@@ -92,7 +141,7 @@
     </div>
 
     <div class="bg-gray-100 p-4 rounded-lg mb-4">
-      <h3 class="text-lg font-medium text-gray-700 mb-2">Hình thức thanh toán</h3>
+      <h3 class="text-lg font-medium text-gray-700 mb-2">Lịch sử thanh toán</h3>
       <DynamicTable
         :data="hoaDon?.hinhThucThanhToan || []"
         :columns="paymentMethodColumns"
@@ -124,7 +173,81 @@
       </div>
     </div>
 
-    <!-- Wrap the "Quay lại" button in a div with text-right -->
+    <!-- Modal tự xây dựng cho Invoice ProDuct -->
+    <div
+      v-if="isModalOpen"
+      class="fixed inset-0 z-50 overflow-y-auto"
+      aria-labelledby="modal-title"
+      role="dialog"
+      aria-modal="true"
+    >
+      <!-- Overlay -->
+      <div
+        class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
+        @click="closeModal"
+      ></div>
+
+      <!-- Modal content -->
+      <div class="flex min-h-full items-center justify-center p-4">
+        <div
+          class="relative bg-white rounded-lg shadow-xl w-full max-w-5xl transform transition-all"
+        >
+          <!-- Header -->
+          <div class="px-6 py-4 border-b border-gray-200">
+            <h3 class="text-lg font-medium text-gray-700">
+              Thêm Sản Phẩm - {{ hoaDon?.id }}
+            </h3>
+            <button
+              @click="closeModal"
+              class="absolute right-4 top-4 text-gray-400 hover:text-gray-500"
+            >
+              <span class="sr-only">Đóng</span>
+              <svg
+                class="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+          </div>
+
+          <!-- Body -->
+          <div class="px-6 py-4 space-y-4">
+            <DynamicTable
+              :data="hardcodedProducts"
+              :columns="productModalColumns"
+              :get-nested-value="getNestedValue"
+            />
+          </div>
+
+          <!-- Footer -->
+          <div class="px-6 py-4 border-t border-gray-200 flex justify-end">
+            <button
+              @click="closeModal"
+              class="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200"
+            >
+              Đóng
+            </button>
+
+            <button
+              @click="closeModal"
+              class="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200"
+            >
+              Thêm
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Nút Quay lại -->
     <div class="text-right mt-4">
       <button
         @click="$router.push('/hoa-don')"
@@ -134,23 +257,8 @@
       </button>
     </div>
 
-    <!-- FormModal for displaying hardcoded product data -->
-    <FormModal
-      v-model:show="isModalOpen"
-      entity-name="Danh sách sản phẩm"
-      @close="closeModal"
-    >
-      <template #default>
-        <div class="space-y-4">
-          <h3 class="text-lg font-medium text-gray-700 mb-2">Danh sách sản phẩm</h3>
-          <DynamicTable
-            :data="hardcodedProducts"
-            :columns="productModalColumns"
-            :get-nested-value="getNestedValue"
-          />
-        </div>
-      </template>
-    </FormModal>
+
+   
   </div>
 </template>
 
@@ -162,7 +270,6 @@ import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import { useRoute } from "vue-router";
 import BreadcrumbWrapper from '@/components/BreadcrumbWrapper.vue';
-import FormModal from "@/components/FormModal.vue";
 
 const props = defineProps({
   id: {
@@ -209,10 +316,6 @@ const breadcrumbItems = computed(() => {
   return route.meta?.breadcrumb || ["Quản lý hóa đơn"];
 });
 
-const handleAddProduct = (data) => {
-  console.log("Dữ liệu sản phẩm mới:", data);
-  closeModal();
-};
 
 // Gắn sự kiện click cho các nút trong cột "Thao tác"
 onMounted(() => {
@@ -289,5 +392,4 @@ button {
   border: none;
   cursor: pointer;
 }
-
 </style>

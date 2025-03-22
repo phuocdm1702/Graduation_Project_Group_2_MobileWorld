@@ -128,14 +128,8 @@ export default function useShowHoaDon(id) {
       formatter: (_, __, index) => index + 1,
     },
     {
-      label: "Mã",
-      key: "ma",
-      formatter: (value) => value || "N/A",
-    },
-    {
-      label: "Hành động",
-      key: "hanhDong",
-      formatter: (value) => value || "N/A",
+      label: "Nhân viên",
+      key: "idNhanVien.tenNhanVien",
     },
     {
       label: "Thời gian",
@@ -143,8 +137,9 @@ export default function useShowHoaDon(id) {
       formatter: (value) => (value ? format(new Date(value), 'HH:mm:ss dd/MM/yyyy', { locale: vi }) : "N/A"),
     },
     {
-      label: "Nhân viên",
-      key: "idNhanVien.tenNhanVien",
+      label: "Hành động",
+      key: "hanhDong",
+      formatter: (value) => value || "N/A",
     },
   ]);
 

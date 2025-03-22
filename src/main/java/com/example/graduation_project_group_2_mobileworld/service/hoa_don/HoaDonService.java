@@ -133,20 +133,6 @@ public class HoaDonService {
         return dto;
     }
 
-//    // Lấy chi tiết hóa đơn theo ID
-//    public HoaDonDTO getHoaDonDetails(Integer id) {
-//        HoaDon hoaDon = hoaDonRepository.findHoaDonWithDetailsById(id)
-//                .orElseThrow(() -> new RuntimeException("Không tìm thấy hóa đơn"));
-//        return toDTO(hoaDon);
-//    }
-//
-//    // Lấy lịch sử hóa đơn theo ID
-//    public HoaDonDTO getHoaDonHistory(Integer id) {
-//        HoaDon hoaDon = hoaDonRepository.findHoaDonWithHistoryById(id)
-//                .orElseThrow(() -> new RuntimeException("Không tìm thấy hóa đơn"));
-//        return toDTO(hoaDon);
-//    }
-
     // Lấy cả chi tiết và lịch sử hóa đơn theo ID (nếu cần)
     public HoaDonDTO getFullHoaDonDetails(Integer id) {
         // Có thể cần thêm một phương thức mới trong repository để lấy cả chi tiết và lịch sử
@@ -163,6 +149,7 @@ public class HoaDonService {
         HoaDonDTO hoaDon = getFullHoaDonDetails(id);
         return inHoaDonPDF.generateHoaDonPdf(hoaDon);
     }
+
     // Lấy hóa đơn theo ID
     public HoaDonDTO getHoaDonById(Integer id) {
         HoaDon hoaDon = hoaDonRepository.findById(id)
