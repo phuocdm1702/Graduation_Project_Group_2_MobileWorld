@@ -30,7 +30,7 @@ import UpdateCustmer from "@/views/AccountType/UpdateCustmer.vue";
 
 // Sản phẩm
 import ProductDetails from "../views/Products/SanPham/ChiTietSanPham.vue";
-import ProductDetailAdd from "@/views/Products/SanPham/ProductDetailAdd.vue";
+import ProductDetailAdd from "@/views/Products/SanPham/AddChiTietSanPham.vue";
 
 // Thương hiệu
 import Manufacturer from "../views/Products/Brand/Manufacturer/Manufacturer.vue";
@@ -77,6 +77,8 @@ import ImelAdd from "@/views/Products/Imel/ImelAdd.vue";
 import ImelEdit from "@/views/Products/Imel/ImelEdit.vue";
 import LichSuPhieuBaoHanh from "../views/BaoHanh/LichSuPhieuBaoHanh.vue";
 import CongNgheMH from "@/views/Products/Screen/CongNgheMH.vue";
+import SanPham from "@/views/Products/SanPham/SanPham.vue";
+import AddChiTietSanPham from "@/views/Products/SanPham/AddChiTietSanPham.vue";
 
 const routes: Array<RouteRecordRaw> = [
   // Login
@@ -209,14 +211,14 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: "/products",
     name: "SanPham",
-    component: ProductDetails,
+    component: SanPham,
     meta: { breadcrumb: ["Sản phẩm"] },
   },
 
   {
     path: "/products/add",
     name: "AddProduct",
-    component: ProductDetailAdd,
+    component: AddChiTietSanPham,
     meta: { breadcrumb: ["sản Phẩm", "Thêm Sản Phẩm"] },
   },
 
