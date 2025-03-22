@@ -197,7 +197,7 @@ export function useDiscountManagement() {
       } },
     { key: "ma", label: "Mã" },
     { key: "tenDotGiamGia", label: "Tên đợt giảm giá" },
-    { key: "loaiGiamGiaApDung", label: "Loại giảm giá" },
+    // { key: "loaiGiamGiaApDung", label: "Loại giảm giá" },
     {
       key: "giaTriGiamGia",
       label: "Giá trị",

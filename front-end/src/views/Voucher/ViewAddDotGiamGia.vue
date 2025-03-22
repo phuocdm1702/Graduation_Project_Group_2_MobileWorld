@@ -94,15 +94,15 @@
           </form>
         </div>
 
-        <!-- Bảng Dòng Sản Phẩm -->
+        <!-- Bảng Sản Phẩm -->
         <div class="bg-white border rounded-lg shadow-md p-6">
-          <h4 class="text-lg font-semibold text-gray-800 mb-4">Dòng Sản Phẩm</h4>
+          <h4 class="text-lg font-semibold text-gray-800 mb-4">Sản Phẩm</h4>
           <input
             v-model="searchKeyword"
             placeholder="Tìm kiếm theo tên, mã..."
             class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none transition mb-4"
           />
-          <div class="grid grid-cols-1 gap-4 mb-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div class="grid grid-cols-2 gap-4 mb-6 sm:grid-cols-2 lg:grid-cols-2">
             <div >
               <label class="block text-sm font-medium text-gray-700 mb-1">Hệ điều hành</label>
               <select
