@@ -24,7 +24,8 @@
     "vue-cli-service": "^5.0.10",
     "vue-qrcode-reader": "^5.7.1",
     "vue-router": "^4.0.3",
-    "vue3-apexcharts": "^1.8.0"
+    "vue3-apexcharts": "^1.8.0",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@types/lodash": "^4.17.15",
