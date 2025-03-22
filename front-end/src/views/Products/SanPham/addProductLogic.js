@@ -1,5 +1,5 @@
-import {ref, onMounted, computed} from 'vue';
-import {useRouter, useRoute} from 'vue-router';
+import { ref, onMounted, computed } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
 import axios from 'axios';
 
 export default function addProductLogic() {
@@ -21,7 +21,6 @@ export default function addProductLogic() {
     idGpu: '',
     idCongNgheMang: '',
     idCongSac: '',
-    idCongNgheSac: '',
     idHoTroCongNgheSac: '',
     idChiSoKhangBuiVaNuoc: '',
     idLoaiTinhTrang: '',
@@ -31,16 +30,18 @@ export default function addProductLogic() {
 
   const productVariants = ref([]);
   const currentVariant = ref({
-    idRam: '',
-    idBoNhoTrong: '',
-    idMauSac: '',
+    selectedRams: [], // Danh sách RAM được chọn
+    selectedBoNhoTrongs: [], // Danh sách ROM được chọn
+    selectedMauSacs: [], // Danh sách Màu Sắc được chọn
   });
 
-  const productImages = ref([]);
+  const productImages = ref([]); // Danh sách ảnh chung
   const currentImage = ref({
     file: null,
     fileName: '',
   });
+
+  const variantImages = ref({}); // Danh sách ảnh cho từng biến thể (key là index của biến thể)
 
   // Danh sách tùy chọn từ API
   const heDieuHanhOptions = ref([]);
@@ -54,13 +55,18 @@ export default function addProductLogic() {
   const gpuOptions = ref([]);
   const congNgheMangOptions = ref([]);
   const congSacOptions = ref([]);
-  const congNgheSacOptions = ref([]);
   const hoTroCongNgheSacOptions = ref([]);
   const chiSoKhangBuiVaNuocOptions = ref([]);
   const tinhTrangOptions = ref([]);
   const ramOptions = ref([]);
   const boNhoTrongOptions = ref([]);
   const mauSacOptions = ref([]);
+
+  const dropdownOpen = ref({
+    ram: false,
+    boNhoTrong: false,
+    mauSac: false,
+  });
 
   const breadcrumbItems = computed(() => {
     if (typeof route.meta.breadcrumb === "function") {
@@ -83,13 +89,12 @@ export default function addProductLogic() {
         gpuRes,
         congNgheMangRes,
         congSacRes,
-        congNgheSacRes,
-        // hoTroCongNgheSacRes,
-        // chiSoKhangBuiVaNuocRes,
-        // tinhTrangRes,
-        // ramRes,
-        // boNhoTrongRes,
-        // mauSacRes,
+        hoTroCongNgheSacRes,
+        chiSoKhangBuiVaNuocRes,
+        tinhTrangRes,
+        ramRes,
+        boNhoTrongRes,
+        mauSacRes,
       ] = await Promise.all([
         axios.get('http://localhost:8080/api/he-dieu-hanh'),
         axios.get('http://localhost:8080/api/man-hinh'),
@@ -102,13 +107,12 @@ export default function addProductLogic() {
         axios.get('http://localhost:8080/api/gpu'),
         axios.get('http://localhost:8080/api/cong-nghe-mang'),
         axios.get('http://localhost:8080/api/cong-sac'),
-        axios.get('http://localhost:8080/api/cong-nghe-sac'),
-        // axios.get('http://localhost:8080/api/chi-tiet-san-pham/ho-tro-cong-nghe-sacs'),
-        // axios.get('http://localhost:8080/api/chi-tiet-san-pham/chi-so-khang-bui-va-nuocs'),
-        // axios.get('http://localhost:8080/api/chi-tiet-san-pham/tinh-trangs'),
-        // axios.get('http://localhost:8080/api/chi-tiet-san-pham/rams'),
-        // axios.get('http://localhost:8080/api/chi-tiet-san-pham/bo-nho-trongs'),
-        // axios.get('http://localhost:8080/api/chi-tiet-san-pham/mau-sacs'),
+        axios.get('http://localhost:8080/api/ho-tro-cong-nghe-sac/details'),
+        axios.get('http://localhost:8080/api/chi-so-khang-bui-va-nuoc'),
+        axios.get('http://localhost:8080/api/tinh-trang'),
+        axios.get('http://localhost:8080/api/ram'),
+        axios.get('http://localhost:8080/api/bo-nho-trong'),
+        axios.get('http://localhost:8080/api/mau-sac'),
       ]);
 
       heDieuHanhOptions.value = heDieuHanhRes.data.content;
@@ -122,13 +126,12 @@ export default function addProductLogic() {
       gpuOptions.value = gpuRes.data.content;
       congNgheMangOptions.value = congNgheMangRes.data.content;
       congSacOptions.value = congSacRes.data.content;
-      congNgheSacOptions.value = congNgheSacRes.data.content;
-      // hoTroCongNgheSacOptions.value = hoTroCongNgheSacRes.data;
-      // chiSoKhangBuiVaNuocOptions.value = chiSoKhangBuiVaNuocRes.data;
-      // tinhTrangOptions.value = tinhTrangRes.data;
-      // ramOptions.value = ramRes.data;
-      // boNhoTrongOptions.value = boNhoTrongRes.data;
-      // mauSacOptions.value = mauSacRes.data;
+      hoTroCongNgheSacOptions.value = hoTroCongNgheSacRes.data.content;
+      chiSoKhangBuiVaNuocOptions.value = chiSoKhangBuiVaNuocRes.data.content;
+      tinhTrangOptions.value = tinhTrangRes.data.content;
+      ramOptions.value = ramRes.data.content;
+      boNhoTrongOptions.value = boNhoTrongRes.data.content;
+      mauSacOptions.value = mauSacRes.data.content;
     } catch (error) {
       if (toast.value) {
         toast.value?.kshowToast('error', 'Lỗi khi tải danh sách tùy chọn!');
@@ -137,26 +140,78 @@ export default function addProductLogic() {
     }
   };
 
+  const toggleDropdown = (type) => {
+    dropdownOpen.value[type] = !dropdownOpen.value[type];
+    Object.keys(dropdownOpen.value).forEach((key) => {
+      if (key !== type) {
+        dropdownOpen.value[key] = false;
+      }
+    });
+  };
+
   const handleImageUpload = (event) => {
     currentImage.value.file = event.target.files[0];
     currentImage.value.fileName = event.target.files[0] ? event.target.files[0].name : 'No file chosen';
   };
 
-  const addVariant = () => {
-    if (currentVariant.value.idRam && currentVariant.value.idBoNhoTrong && currentVariant.value.idMauSac) {
-      productVariants.value.push({...currentVariant.value});
-      currentVariant.value = {idRam: '', idBoNhoTrong: '', idMauSac: ''};
-    } else {
-      if (toast.value) {
-        toast.value?.kshowToast('error', 'Vui lòng điền đầy đủ thông tin phiên bản!');
-      }
+  const handleVariantImageUpload = (event, index) => {
+    const file = event.target.files[0];
+    if (file) {
+      variantImages.value[index] = {
+        file,
+        fileName: file.name,
+      };
     }
+  };
+
+  const addVariant = () => {
+    if (
+      currentVariant.value.selectedRams.length === 0 ||
+      currentVariant.value.selectedBoNhoTrongs.length === 0 ||
+      currentVariant.value.selectedMauSacs.length === 0
+    ) {
+      if (toast.value) {
+        toast.value?.kshowToast('error', 'Vui lòng chọn ít nhất một RAM, một Bộ Nhớ Trong và một Màu Sắc!');
+      }
+      return;
+    }
+
+    // Tạo tổ hợp từ các RAM, ROM, và Màu Sắc đã chọn
+    const newVariants = [];
+    currentVariant.value.selectedRams.forEach((ramId) => {
+      currentVariant.value.selectedBoNhoTrongs.forEach((boNhoId) => {
+        currentVariant.value.selectedMauSacs.forEach((mauSacId) => {
+          newVariants.push({
+            idRam: ramId,
+            idBoNhoTrong: boNhoId,
+            idMauSac: mauSacId,
+            soLuong: 0, // Số lượng mặc định
+            donGia: productData.value.giaBan || '', // Đơn giá mặc định từ giá bán sản phẩm
+          });
+        });
+      });
+    });
+
+    // Thêm các biến thể mới vào danh sách
+    productVariants.value.push(...newVariants);
+
+    // Reset form sau khi thêm
+    currentVariant.value = {
+      selectedRams: [],
+      selectedBoNhoTrongs: [],
+      selectedMauSacs: [],
+    };
+  };
+
+  const removeVariant = (index) => {
+    productVariants.value.splice(index, 1);
+    delete variantImages.value[index];
   };
 
   const addImage = () => {
     if (currentImage.value.file) {
-      productImages.value.push({...currentImage.value});
-      currentImage.value = {file: null, fileName: ''};
+      productImages.value.push({ ...currentImage.value });
+      currentImage.value = { file: null, fileName: '' };
     } else {
       if (toast.value) {
         toast.value?.kshowToast('error', 'Vui lòng chọn file ảnh!');
@@ -165,7 +220,11 @@ export default function addProductLogic() {
   };
 
   const handleSubmit = async () => {
-    if (!productData.value.id || !productData.value.giaBan || Object.values(productData.value).some(val => val === '')) {
+    if (
+      !productData.value.id ||
+      !productData.value.giaBan ||
+      Object.values(productData.value).some((val) => val === '')
+    ) {
       if (toast.value) {
         toast.value?.kshowToast('error', 'Vui lòng nhập đầy đủ thông tin sản phẩm!');
       }
@@ -176,6 +235,9 @@ export default function addProductLogic() {
     formData.append('productData', JSON.stringify(productData.value));
     productVariants.value.forEach((variant, index) => {
       formData.append(`variants[${index}]`, JSON.stringify(variant));
+      if (variantImages.value[index]?.file) {
+        formData.append(`variantImages[${index}]`, variantImages.value[index].file);
+      }
     });
     productImages.value.forEach((image, index) => {
       formData.append(`images[${index}][file]`, image.file);
@@ -183,7 +245,7 @@ export default function addProductLogic() {
 
     try {
       await axios.post('http://localhost:8080/api/chi-tiet-san-pham', formData, {
-        headers: {'Content-Type': 'multipart/form-data'},
+        headers: { 'Content-Type': 'multipart/form-data' },
       });
       if (toast.value) {
         toast.value?.kshowToast('success', 'Thêm mới thành công!');
@@ -211,7 +273,6 @@ export default function addProductLogic() {
       idGpu: '',
       idCongNgheMang: '',
       idCongSac: '',
-      idCongNgheSac: '',
       idHoTroCongNgheSac: '',
       idChiSoKhangBuiVaNuoc: '',
       idLoaiTinhTrang: '',
@@ -220,8 +281,9 @@ export default function addProductLogic() {
     };
     productVariants.value = [];
     productImages.value = [];
-    currentVariant.value = {idRam: '', idBoNhoTrong: '', idMauSac: ''};
-    currentImage.value = {file: null, fileName: ''};
+    variantImages.value = {};
+    currentVariant.value = { selectedRams: [], selectedBoNhoTrongs: [], selectedMauSacs: [] };
+    currentImage.value = { file: null, fileName: '' };
   };
 
   const openAddModal = (attribute) => {
@@ -236,75 +298,71 @@ export default function addProductLogic() {
         case 'id':
           break;
         case 'heDieuHanh':
-          response = await axios.post('http://localhost:8080/api/he-dieu-hanhs', {tenHeDieuHanh: data.tenHeDieuHanh});
+          response = await axios.post('http://localhost:8080/api/he-dieu-hanhs', { tenHeDieuHanh: data.tenHeDieuHanh });
           heDieuHanhOptions.value.push(response.data);
           break;
         case 'manHinh':
-          response = await axios.post('http://localhost:8080/api/man-hinhs', {kichThuoc: data.kichThuoc});
+          response = await axios.post('http://localhost:8080/api/man-hinhs', { kichThuoc: data.kichThuoc });
           manHinhOptions.value.push(response.data);
           break;
         case 'nhaSanXuat':
-          response = await axios.post('http://localhost:8080/api/nha-san-xuats', {tenNhaSanXuat: data.tenNhaSanXuat});
+          response = await axios.post('http://localhost:8080/api/nha-san-xuats', { tenNhaSanXuat: data.tenNhaSanXuat });
           nhaSanXuatOptions.value.push(response.data);
           break;
         case 'cumCamera':
-          response = await axios.post('http://localhost:8080/api/cum-cameras', {tenCamera: data.tenCamera});
+          response = await axios.post('http://localhost:8080/api/cum-cameras', { tenCamera: data.tenCamera });
           cumCameraOptions.value.push(response.data);
           break;
         case 'sim':
-          response = await axios.post('http://localhost:8080/api/sims', {loaiSim: data.loaiSim});
+          response = await axios.post('http://localhost:8080/api/sims', { loaiSim: data.loaiSim });
           simOptions.value.push(response.data);
           break;
         case 'thietKe':
-          response = await axios.post('http://localhost:8080/api/thiet-kes', {tenThietKe: data.tenThietKe});
+          response = await axios.post('http://localhost:8080/api/thiet-kes', { tenThietKe: data.tenThietKe });
           thietKeOptions.value.push(response.data);
           break;
         case 'pin':
-          response = await axios.post('http://localhost:8080/api/pins', {dungLuong: data.dungLuong});
+          response = await axios.post('http://localhost:8080/api/pins', { dungLuong: data.dungLuong });
           pinOptions.value.push(response.data);
           break;
         case 'cpu':
-          response = await axios.post('http://localhost:8080/api/cpus', {tenCpu: data.tenCpu});
+          response = await axios.post('http://localhost:8080/api/cpus', { tenCpu: data.tenCpu });
           cpuOptions.value.push(response.data);
           break;
         case 'gpu':
-          response = await axios.post('http://localhost:8080/api/gpus', {tenGpu: data.tenGpu});
+          response = await axios.post('http://localhost:8080/api/gpus', { tenGpu: data.tenGpu });
           gpuOptions.value.push(response.data);
           break;
         case 'congNgheMang':
-          response = await axios.post('http://localhost:8080/api/cong-nghe-mangs', {tenCongNgheMang: data.tenCongNgheMang});
+          response = await axios.post('http://localhost:8080/api/cong-nghe-mangs', { tenCongNgheMang: data.tenCongNgheMang });
           congNgheMangOptions.value.push(response.data);
           break;
         case 'congSac':
-          response = await axios.post('http://localhost:8080/api/cong-sacs', {congSac: data.congSac});
-          congSacOptions.value.push(response.data);
-          break;
-        case 'congNgheSac':
-          response = await axios.post('http://localhost:8080/api/cong-nghe-sacs', {tenCongNghe: data.tenCongNghe});
+          response = await axios.post('http://localhost:8080/api/cong-sacs', { congSac: data.congSac });
           congSacOptions.value.push(response.data);
           break;
         case 'hoTroCongNgheSac':
-          response = await axios.post('http://localhost:8080/api/ho-tro-cong-nghe-sacs', {ten: data.ten});
+          response = await axios.post('http://localhost:8080/api/ho-tro-cong-nghe-sacs', { ten: data.ten });
           hoTroCongNgheSacOptions.value.push(response.data);
           break;
         case 'chiSoKhangBuiVaNuoc':
-          response = await axios.post('http://localhost:8080/api/chi-so-khang-bui-va-nuocs', {maChiSo: data.maChiSo});
+          response = await axios.post('http://localhost:8080/api/chi-so-khang-bui-va-nuocs', { tenChiSo: data.tenChiSo });
           chiSoKhangBuiVaNuocOptions.value.push(response.data);
           break;
         case 'tinhTrang':
-          response = await axios.post('http://localhost:8080/api/tinh-trangs', {tenTinhTrang: data.tenTinhTrang});
+          response = await axios.post('http://localhost:8080/api/tinh-trangs', { loaiTinhTrang: data.loaiTinhTrang });
           tinhTrangOptions.value.push(response.data);
           break;
         case 'ram':
-          response = await axios.post('http://localhost:8080/api/rams', {dungLuong: data.dungLuong});
+          response = await axios.post('http://localhost:8080/api/ram', { ma: data.ma, dungLuong: data.dungLuong });
           ramOptions.value.push(response.data);
           break;
         case 'boNhoTrong':
-          response = await axios.post('http://localhost:8080/api/bo-nho-trongs', {dungLuong: data.dungLuong});
+          response = await axios.post('http://localhost:8080/api/bo-nho-trong', { ma: data.ma, dungLuong: data.dungLuong });
           boNhoTrongOptions.value.push(response.data);
           break;
         case 'mauSac':
-          response = await axios.post('http://localhost:8080/api/mau-sacs', {tenMau: data.tenMau});
+          response = await axios.post('http://localhost:8080/api/mau-sac', { ma: data.ma, tenMau: data.tenMau });
           mauSacOptions.value.push(response.data);
           break;
         case 'tienIchDacBiet':
@@ -344,6 +402,7 @@ export default function addProductLogic() {
     currentVariant,
     productImages,
     currentImage,
+    variantImages,
     heDieuHanhOptions,
     manHinhOptions,
     nhaSanXuatOptions,
@@ -355,7 +414,6 @@ export default function addProductLogic() {
     gpuOptions,
     congNgheMangOptions,
     congSacOptions,
-    congNgheSacOptions,
     hoTroCongNgheSacOptions,
     chiSoKhangBuiVaNuocOptions,
     tinhTrangOptions,
@@ -363,9 +421,13 @@ export default function addProductLogic() {
     boNhoTrongOptions,
     mauSacOptions,
     breadcrumbItems,
+    dropdownOpen,
     fetchOptions,
+    toggleDropdown,
     handleImageUpload,
+    handleVariantImageUpload,
     addVariant,
+    removeVariant,
     addImage,
     handleSubmit,
     resetForm,

@@ -5,20 +5,20 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class CongNgheSacDTO {
+public class ChiSoKhangBuiVaNuocDTO {
 
     private Integer id;
 
     private String ma;
 
-    private String tenCongNghe;
+    private String tenChiSo;
 
     private Boolean deleted = false;
 
-    public CongNgheSacDTO(Integer id, String ma, String tenCongNghe, Boolean deleted) {
+    public ChiSoKhangBuiVaNuocDTO(Integer id, String ma, String tenChiSo, Boolean deleted) {
         this.id = id;
         this.ma = ma;
-        this.tenCongNghe = tenCongNghe;
+        this.tenChiSo = tenChiSo;
         this.deleted = deleted;
     }
 }

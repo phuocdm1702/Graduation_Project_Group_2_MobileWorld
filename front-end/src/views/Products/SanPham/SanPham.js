@@ -50,7 +50,7 @@ export default function sanPham(toast) {
   // Fetch product details
   const fetchData = async () => {
     try {
-      const { data } = await axios.get('http://localhost:8080/api/chi-tiet-san-pham', {
+      const { data } = await axios.get('http://localhost:8080/api/san-pham', {
         params: { page: currentPage.value, size: pageSize.value },
       });
       productDetails.value = data.content;
@@ -58,6 +58,23 @@ export default function sanPham(toast) {
     } catch (error) {
       toast.value?.kshowToast('error', 'Không thể tải dữ liệu!');
       console.error('Fetch error:', error);
+    }
+  };
+
+  // Fetch options for filters
+  const fetchOptions = async () => {
+    try {
+      const [nhaSanXuatRes, heDieuHanhRes, manHinhRes] = await Promise.all([
+        axios.get('http://localhost:8080/api/nha-san-xuat'),
+        axios.get('http://localhost:8080/api/he-dieu-hanh'),
+        axios.get('http://localhost:8080/api/man-hinh'),
+      ]);
+      nhaSanXuatOptions.value = nhaSanXuatRes.data.content || nhaSanXuatRes.data || [];
+      heDieuHanhOptions.value = heDieuHanhRes.data.content || heDieuHanhRes.data || [];
+      manHinhOptions.value = manHinhRes.data.content || manHinhRes.data || [];
+    } catch (error) {
+      toast.value?.kshowToast('error', 'Lỗi khi tải danh sách tùy chọn!');
+      console.error('Fetch options error:', error);
     }
   };
 
@@ -77,12 +94,12 @@ export default function sanPham(toast) {
     const filters = { ...searchFilters.value };
 
     try {
-      const { data } = await axios.get('http://localhost:8080/api/chi-tiet-san-pham/search', {
+      const { data } = await axios.get('http://localhost:8080/api/san-pham/search', {
         params: {
           keyword: keyword || undefined,
-          ...Object.fromEntries(
-            Object.entries(filters).map(([key, value]) => [key, value || undefined])
-          ),
+          idNhaSanXuat: searchFilters.value.idNhaSanXuat || undefined,
+          idHeDieuHanh: searchFilters.value.idHeDieuHanh || undefined,
+          idManHinh: searchFilters.value.idManHinh || undefined,
           page: currentPage.value,
           size: pageSize.value,
         },
@@ -121,10 +138,10 @@ export default function sanPham(toast) {
     fetchData();
   };
 
-  // Delete single product detail
+  // Delete single product
   const deleteProductDetail = async (id) => {
     try {
-      await axios.delete(`http://localhost:8080/api/chi-tiet-san-pham/${id}`);
+      await axios.delete(`http://localhost:8080/api/san-pham/${id}`);
       toast.value?.kshowToast('success', 'Xóa thành công!');
       totalItems.value -= 1;
       adjustPageAfterDelete();
@@ -138,7 +155,7 @@ export default function sanPham(toast) {
   // Delete selected products
   const deleteSelectedProducts = async () => {
     try {
-      await axios.delete('http://localhost:8080/api/chi-tiet-san-pham/bulk', {
+      await axios.delete('http://localhost:8080/api/san-pham/bulk', {
         data: { ids: selectedProducts.value },
       });
       toast.value?.kshowToast('success', 'Xóa thành công!');
@@ -172,7 +189,7 @@ export default function sanPham(toast) {
 
   // Confirm actions
   const confirmDelete = (id) => {
-    confirmAction('Bạn có chắc chắn muốn xóa chi tiết sản phẩm này?', () => deleteProductDetail(id));
+    confirmAction('Bạn có chắc chắn muốn xóa sản phẩm này?', () => deleteProductDetail(id));
   };
 
   const confirmDeleteSelected = () => {
@@ -208,12 +225,13 @@ export default function sanPham(toast) {
     const index = selectedProducts.value.indexOf(id);
     if (index === -1) {
       selectedProducts.value.push(id);
-    } else {      selectedProducts.value.splice(index, 1);
+    } else {
+      selectedProducts.value.splice(index, 1);
     }
   };
 
   // Navigation
-  const navigateToAddPage = () => router.push('/product-detail/add');
+  const navigateToAddPage = () => router.push('/products/add');
 
   // Utility
   const getNestedValue = (obj, path) => path.split('.').reduce((acc, part) => acc && acc[part], obj);
@@ -221,7 +239,7 @@ export default function sanPham(toast) {
   // Event handlers
   const handleCustomEvents = () => {
     document.addEventListener('openEditModal', (event) => {
-      router.push(`/product-detail/edit/${event.detail.id}`);
+      router.push(`/product/edit/${event.detail.id}`);
     });
     document.addEventListener('confirmDelete', (event) => {
       confirmDelete(event.detail);
@@ -264,6 +282,7 @@ export default function sanPham(toast) {
     heDieuHanhOptions,
     manHinhOptions,
     fetchData,
+    fetchOptions,
     goToPage,
     searchProductDetails,
     resetSearch,
