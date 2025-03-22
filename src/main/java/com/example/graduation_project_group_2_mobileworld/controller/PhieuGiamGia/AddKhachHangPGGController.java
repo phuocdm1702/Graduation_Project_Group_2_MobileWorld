@@ -87,12 +87,14 @@ public class AddKhachHangPGGController {
                     if(email != null) {
                         SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
                         String ngayHH = dateFormat.format(pgg.getNgayKetThuc());
+                        Double TinhSTGTD = pgg.getPhanTramGiamGia() * pgg.getHoaDonToiThieu() / 100;
 
                         emailSend.sendDiscountEmail(
                                 email,
                                 pggcn.getMa(),
-                                pgg.getTenPhieuGiamGia(),
-                                ngayHH
+                                ngayHH,
+                                pgg.getPhanTramGiamGia(),
+                                TinhSTGTD
                         );
                     }
                 }

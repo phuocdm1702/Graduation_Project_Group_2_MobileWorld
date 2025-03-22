@@ -1,10 +1,11 @@
 import { ref, onMounted, onUnmounted } from "vue";
 import axios from "axios";
 import { useRouter, useRoute } from "vue-router";
-import { format } from "date-fns";
+import { format, parse, isValid } from "date-fns";
 import { vi } from "date-fns/locale";
+import * as XLSX from "xlsx";
 
-export default function useEmployeeManagement(toastRef) { // Nhận toastRef từ component cha
+export default function useEmployeeManagement(toastRef) {
   const router = useRouter();
   const route = useRoute();
 
@@ -23,6 +24,7 @@ export default function useEmployeeManagement(toastRef) { // Nhận toastRef t�
   const filterStatus = ref("tat-ca");
   const searchNV = ref("");
   const isLoading = ref(false);
+  const fileInputRef = ref(null); // Thêm ref để quản lý input file
 
   function previewImage(event) {
     const file = event.target.files[0];
@@ -37,6 +39,7 @@ export default function useEmployeeManagement(toastRef) { // Nhận toastRef t�
 
   const fetchNhanVien = async () => {
     try {
+      isLoading.value = true;
       const res = await axios.get("http://localhost:8080/nhan-vien/home");
       originalData.value = res.data || [];
 
@@ -45,13 +48,15 @@ export default function useEmployeeManagement(toastRef) { // Nhận toastRef t�
         const parsedEmployee = JSON.parse(newEmployee);
         originalData.value.unshift(parsedEmployee);
         router.replace({ query: null });
-        currentPage.value = 0; // Đặt lại trang đầu để hiển thị nhân viên mới
+        currentPage.value = 0;
       }
 
       applyFilterAndSearch();
     } catch (error) {
       console.error("Lỗi khi lấy danh sách nhân viên:", error);
       showToast("error", "Không thể lấy danh sách nhân viên!");
+    } finally {
+      isLoading.value = false;
     }
   };
 
@@ -96,7 +101,7 @@ export default function useEmployeeManagement(toastRef) { // Nhận toastRef t�
 
   const showToast = (toastType, msg) => {
     if (toastRef?.value) {
-      toastRef.value.kshowToast(toastType, msg); // Sử dụng toastRef từ component cha
+      toastRef.value.kshowToast(toastType, msg);
     } else {
       message.value = msg;
       type.value = toastType;
@@ -116,6 +121,7 @@ export default function useEmployeeManagement(toastRef) { // Nhận toastRef t�
     if (!selectedNVId.value) return;
 
     try {
+      isLoading.value = true;
       await axios.put(`http://localhost:8080/nhan-vien/delete/${selectedNVId.value}`);
       showToast("success", "Cho nhân viên nghỉ thành công!");
       await fetchNhanVien();
@@ -125,6 +131,7 @@ export default function useEmployeeManagement(toastRef) { // Nhận toastRef t�
     } finally {
       showConfirmModal.value = false;
       selectedNVId.value = null;
+      isLoading.value = false;
     }
   };
 
@@ -142,9 +149,229 @@ export default function useEmployeeManagement(toastRef) { // Nhận toastRef t�
     }
   };
 
-  const importExcel = () => {
-    console.log("Chức năng nhập Excel chưa được triển khai!");
-    showToast("info", "Chức năng nhập Excel chưa được triển khai!");
+  const importExcel = async (event) => {
+    try {
+      const file = event.target.files[0];
+      if (!file) {
+        showToast("error", "Vui lòng chọn file Excel!");
+        return;
+      }
+
+      isLoading.value = true;
+
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        try {
+          const data = new Uint8Array(e.target.result);
+          const workbook = XLSX.read(data, { type: "array" });
+
+          const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+          const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+          if (!jsonData.length) {
+            showToast("error", "File Excel không có dữ liệu!");
+            return;
+          }
+
+          const employeesFromExcel = jsonData.map((row, index) => {
+            let createdAt;
+            const rawDate = row["Ngày tham gia"];
+            if (rawDate) {
+              try {
+                const parsedDate = parse(rawDate, "dd/MM/yyyy HH:mm:ss", new Date(), { locale: vi });
+                if (isValid(parsedDate)) {
+                  createdAt = parsedDate.toISOString();
+                } else {
+                  createdAt = new Date().toISOString();
+                }
+              } catch (error) {
+                console.warn(`Ngày không hợp lệ tại hàng ${index + 1}: ${rawDate}, sử dụng ngày hiện tại.`);
+                createdAt = new Date().toISOString();
+              }
+            } else {
+              createdAt = new Date().toISOString();
+            }
+
+            let diaChiCuThe = "Chưa có dữ liệu";
+            let thanhPho = "N/A";
+            let quan = "N/A";
+            let phuong = "N/A";
+
+            if (row["Địa chỉ"] && typeof row["Địa chỉ"] === "string") {
+              const addressParts = row["Địa chỉ"].split(",");
+              diaChiCuThe = addressParts[0]?.trim() || "Chưa có dữ liệu";
+              thanhPho = addressParts[1]?.trim() || "N/A";
+              quan = addressParts[2]?.trim() || "N/A";
+              phuong = addressParts[3]?.trim() || "N/A";
+            }
+
+            return {
+              ma: row["Mã"]?.toString() || "N/A",
+              tenNhanVien: row["Tên"]?.toString() || "N/A",
+              idTaiKhoan: {
+                email: row["Email"]?.toString() || "N/A",
+                soDienThoai: row["SĐT"]?.toString() || "N/A",
+                tenDangNhap: row["Email"]?.toString() || "N/A",
+                idQuyenHan: { id: 3 },
+                deleted: false,
+              },
+              createdAt: createdAt,
+              diaChiCuThe,
+              thanhPho,
+              quan,
+              phuong,
+              deleted: row["Trạng thái"] === "Đã nghỉ",
+            };
+          });
+
+          for (let i = 0; i < employeesFromExcel.length; i++) {
+            const employee = employeesFromExcel[i];
+            if (employee.ma === "N/A") {
+              showToast("error", `Hàng ${i + 1}: Mã không được để trống!`);
+              return;
+            }
+            if (employee.tenNhanVien === "N/A") {
+              showToast("error", `Hàng ${i + 1}: Tên không được để trống!`);
+              return;
+            }
+            if (employee.idTaiKhoan.email === "N/A") {
+              showToast("error", `Hàng ${i + 1}: Email không được để trống!`);
+              return;
+            }
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(employee.idTaiKhoan.email)) {
+              showToast("error", `Hàng ${i + 1}: Email không hợp lệ!`);
+              return;
+            }
+            if (employee.idTaiKhoan.soDienThoai !== "N/A") {
+              const phoneRegex = /^[0-9]{10,11}$/;
+              if (!phoneRegex.test(employee.idTaiKhoan.soDienThoai)) {
+                showToast("error", `Hàng ${i + 1}: Số điện thoại không hợp lệ!`);
+                return;
+              }
+            }
+          }
+
+          console.log("Dữ liệu gửi lên server:", employeesFromExcel);
+
+          const response = await axios.post("http://localhost:8080/nhan-vien/import", employeesFromExcel);
+          if (response.status === 200) {
+            showToast("success", "Cập nhật dữ liệu từ Excel thành công!");
+            await fetchNhanVien();
+          } else {
+            showToast("error", "Lưu dữ liệu vào server thất bại!");
+          }
+        } catch (error) {
+          console.error("Lỗi trong quá trình đọc file Excel:", error);
+          showToast("error", "Đọc file Excel thất bại!");
+        } finally {
+          // Reset input file sau khi xử lý
+          if (fileInputRef.value) {
+            fileInputRef.value.value = "";
+          }
+          isLoading.value = false;
+        }
+      };
+      reader.onerror = () => {
+        showToast("error", "Lỗi khi đọc file Excel!");
+        if (fileInputRef.value) {
+          fileInputRef.value.value = "";
+        }
+        isLoading.value = false;
+      };
+      reader.readAsArrayBuffer(file);
+    } catch (error) {
+      console.error("Lỗi khi nhập Excel:", error.response?.data || error.message);
+      showToast("error", error.response?.data || "Nhập dữ liệu từ Excel thất bại!");
+      if (fileInputRef.value) {
+        fileInputRef.value.value = "";
+      }
+      isLoading.value = false;
+    }
+  };
+
+  const exportToExcel = () => {
+    try {
+      isLoading.value = true;
+      let filteredData = [...originalData.value];
+
+      if (filterStatus.value === "dang-lam") {
+        filteredData = filteredData.filter((nv) => !nv.deleted);
+      } else if (filterStatus.value === "da-nghi") {
+        filteredData = filteredData.filter((nv) => nv.deleted);
+      }
+
+      if (searchNV.value.trim()) {
+        filteredData = filteredData.filter(
+          (nhanvien) =>
+            nhanvien?.idTaiKhoan?.email?.toLowerCase().includes(searchNV.value.toLowerCase()) ||
+            nhanvien?.tenNhanVien?.toLowerCase().includes(searchNV.value.toLowerCase()) ||
+            nhanvien?.idTaiKhoan?.soDienThoai?.toLowerCase(). включает(searchNV.value.toLowerCase())
+        );
+      }
+
+      if (!filteredData.length) {
+        showToast("error", "Không có dữ liệu để xuất!");
+        return;
+      }
+
+      const dataToExport = filteredData.map((item, index) => ({
+        "#": index + 1,
+        "Mã": item.ma || "N/A",
+        "Tên": item.tenNhanVien || "N/A",
+        "Email": item.idTaiKhoan?.email || "N/A",
+        "SĐT": item.idTaiKhoan?.soDienThoai || "N/A",
+        "Ngày tham gia": item.createdAt
+          ? format(new Date(item.createdAt), "dd/MM/yyyy HH:mm:ss", { locale: vi })
+          : "Chưa có dữ liệu",
+        "Địa chỉ": `${item.diaChiCuThe || "Chưa có dữ liệu"}, ${item.thanhPho}, ${item.quan}, ${item.phuong}`,
+        "Trạng thái": item.deleted ? "Đã nghỉ" : "Đang làm",
+      }));
+
+      const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "DanhSachNhanVien");
+
+      const currentDate = format(new Date(), "yyyy-MM-dd_HH-mm-ss", { locale: vi });
+      XLSX.writeFile(workbook, `Danh_sach_nhan_vien_${currentDate}.xlsx`);
+
+      showToast("success", "Xuất file Excel thành công!");
+    } catch (error) {
+      console.error("Lỗi khi xuất Excel:", error);
+      showToast("error", "Xuất file Excel thất bại!");
+    } finally {
+      isLoading.value = false;
+    }
+  };
+
+  const downloadTemplate = () => {
+    try {
+      isLoading.value = true;
+      const templateData = [
+        {
+          "#": 1,
+          "Mã": "NV000001",
+          "Tên": "Nguyễn Văn B",
+          "Email": "vanb@gmail.com",
+          "SĐT": "0987654321",
+          "Ngày tham gia": "18/02/2025 00:00:00",
+          "Địa chỉ": "123 Đường Láng, Hà Nội, Đống Đa, Láng Thượng",
+          "Trạng thái": "Đang làm",
+        },
+      ];
+
+      const worksheet = XLSX.utils.json_to_sheet(templateData);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "MauNhanVien");
+
+      XLSX.writeFile(workbook, "MauNhanVien.xlsx");
+      showToast("success", "Tải file mẫu thành công!");
+    } catch (error) {
+      console.error("Lỗi khi tải file mẫu:", error);
+      showToast("error", "Tải file mẫu thất bại!");
+    } finally {
+      isLoading.value = false;
+    }
   };
 
   const tableColumns = [
@@ -331,5 +558,9 @@ export default function useEmployeeManagement(toastRef) { // Nhận toastRef t�
     totalPages,
     goToPage,
     importExcel,
+    exportToExcel,
+    downloadTemplate,
+    fileInputRef, // Trả về ref để sử dụng trong template
+    isLoading,
   };
 }

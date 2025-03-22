@@ -65,7 +65,7 @@ public class HoaDonController {
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_PDF);
-            headers.setContentDispositionFormData("attachment", "hoa_don_" + id + ".pdf");
+            headers.setContentDispositionFormData("inline", "hoa_don_" + id + ".pdf");
             headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
 
             return new ResponseEntity<>(pdfBytes, headers, HttpStatus.OK);

@@ -163,16 +163,18 @@ export default function usePhieuGiamGia() {
           const phanTramGiamGia = item.phanTramGiamGia || 0;
           const hoaDonToiThieu = item.hoaDonToiThieu || 0;
           const soTienGiamToiDa = (phanTramGiamGia / 100) * hoaDonToiThieu;
-          return soTienGiamToiDa.toLocaleString("vi-VN", {
-            style: "currency",
-            currency: "VND",
-          });
+          return soTienGiamToiDa.toLocaleString("vi-VN") + " VND";
         }
-        return value ? value.toLocaleString("vi-VN", { style: "currency", currency: "VND" }) : "0 ₫";
+        return value ? value.toLocaleString("vi-VN") + " VND" : "0 VND";
       },
     },
     { key: "soLuongDung", label: "Số lượng" },
-    { key: "hoaDonToiThieu", label: "Hóa\nĐơn\nTối\nThiểu" },
+    { key: "hoaDonToiThieu", 
+      label: "Hóa\nĐơn\nTối\nThiểu", 
+      formatter: (value, item) => {
+        return value.toLocaleString("vi-VN") + "VND";
+      }
+    },
     { key: "ngayBatDau", label: "Ngày\nBĐ", formatter: (value) => new Date(value).toLocaleDateString("vi-VN") },
     { key: "ngayKetThuc", label: "Ngày\nKT", formatter: (value) => new Date(value).toLocaleDateString("vi-VN") },
     { key: "displayStatus", label: "Trạng thái", cellSlot: "trangThaiPGG" },

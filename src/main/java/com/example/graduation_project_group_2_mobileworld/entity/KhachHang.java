@@ -72,7 +72,7 @@ public class KhachHang {
     private Integer createdBy;
 
     @Column(name = "updated_at")
-    private Instant updatedAt;
+    private Date updatedAt;
 
     @Column(name = "updated_by")
     private Integer updatedBy;
@@ -164,11 +164,11 @@ public class KhachHang {
         this.createdBy = createdBy;
     }
 
-    public Instant getUpdatedAt() {
+    public Date getUpdatedAt() {
         return updatedAt;
     }
 
-    public void setUpdatedAt(Instant updatedAt) {
+    public void setUpdatedAt(Date updatedAt) {
         this.updatedAt = updatedAt;
     }
 

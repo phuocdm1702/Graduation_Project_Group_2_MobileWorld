@@ -14,7 +14,7 @@
     >
       <div class="flex items-center justify-center">
         <div class="flex items-center">
-          <img src="@/assets/large-removebg-preview.png" class="w-auto h-40">
+          <img src="@/assets/Logo_Mobile_World_vector.png" class="w-auto h-40">
         </div>
       </div>
 

@@ -16,6 +16,7 @@
     "core-js": "^3.8.3",
     "dashboard-vue": "file:",
     "lodash": "^4.17.21",
+    "pdfjs-dist": "^5.0.375",
     "postcss": "^8",
     "tailwindcss": "^3",
     "vue": "^3.5.13",
@@ -23,7 +24,8 @@
     "vue-cli-service": "^5.0.10",
     "vue-qrcode-reader": "^5.7.1",
     "vue-router": "^4.0.3",
-    "vue3-apexcharts": "^1.8.0"
+    "vue3-apexcharts": "^1.8.0",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@types/lodash": "^4.17.15",

@@ -1,10 +1,14 @@
-import {ref, onMounted} from "vue";
+import { ref, onMounted } from "vue";
 import axios from "axios";
-import {format} from 'date-fns';
-import {vi} from 'date-fns/locale'; // Locale tiếng Việt
+import { format } from 'date-fns';
+import { vi } from 'date-fns/locale';
+
 export default function useShowHoaDon(id) {
   const hoaDon = ref(null);
   const isModalOpen = ref(false);
+  const isHistoryModalOpen = ref(false);
+  const invoiceHistory = ref([]);
+
   const fetchHoaDonDetail = async () => {
     try {
       const res = await axios.get(`http://localhost:8080/hoa-don/detail/${id}`);
@@ -15,72 +19,66 @@ export default function useShowHoaDon(id) {
     }
   };
 
-  // Columns cho Lịch sử thanh toán
-  const paymentHistoryColumns = [
+  const fetchInvoiceHistory = async (invoiceId) => {
+    try {
+      const res = await axios.get(`http://localhost:8080/hoa-don/detail/${invoiceId}`); // Use the same endpoint to get full details including history
+      invoiceHistory.value = res.data.lichSuHoaDon || []; // Extract the history from the DTO
+      isHistoryModalOpen.value = true;
+    } catch (error) {
+      console.error("Lỗi khi lấy lịch sử hóa đơn:", error);
+      invoiceHistory.value = [];
+    }
+  };
+
+  const paymentMethodColumns = [
     {
       label: "STT",
       key: "index",
       formatter: (_, __, index) => index + 1,
     },
     {
+      label: "Mã thanh toán",
+      key: "ma",
+    },
+    {
       label: "Phương thức thanh toán",
-      key: "hinhThucThanhToan", // Nếu backend bổ sung thuộc tính này
+      key: "hinhThucThanhToan",
       formatter: (_, item) => {
-        // Lấy danh sách hình thức thanh toán từ hoaDon
-        const htttList = hoaDon.value?.hinhThucThanhToan || [];
-        if (!htttList.length) return "Không xác định";
-
-        // Giả sử mỗi LichSuHoaDon liên kết với một hoặc nhiều HinhThucThanhToan
-        const paymentMethods = htttList
-          .filter(httt => httt.idHoaDon === item.idHoaDon)
-          .map(httt => {
-            const tienMat = httt.tienMat || 0;
-            const tienCK = httt.tienChuyenKhoan || 0;
-            if (tienMat > 0 && tienCK > 0) {
-              return `Tiền mặt (${tienMat.toLocaleString()} VND) + Chuyển khoản (${tienCK.toLocaleString()} VND)`;
-            } else if (tienMat > 0) {
-              return `Tiền mặt (${tienMat.toLocaleString()} VND)`;
-            } else if (tienCK > 0) {
-              return `Chuyển khoản (${tienCK.toLocaleString()} VND)`;
-            }
-            return "Không xác định";
-          });
-        return paymentMethods.join(", ") || "Không xác định";
+        const tienMat = item.tienMat || 0;
+        const tienCK = item.tienChuyenKhoan || 0;
+        if (tienMat > 0 && tienCK > 0) {
+          return `Tiền mặt (${tienMat.toLocaleString()} VND) + Chuyển khoản (${tienCK.toLocaleString()} VND)`;
+        } else if (tienMat > 0) {
+          return `Tiền mặt (${tienMat.toLocaleString()} VND)`;
+        } else if (tienCK > 0) {
+          return `Chuyển khoản (${tienCK.toLocaleString()} VND)`;
+        }
+        return "Không xác định";
       },
     },
     {
       label: "Số tiền",
       key: "tongTien",
       formatter: (_, item) => {
-        const htttList = hoaDon.value?.hinhThucThanhToan || [];
-        if (!htttList.length) return "0 VND";
-
-        // Tính tổng tiền từ các hình thức thanh toán liên quan đến hóa đơn
-        const totalAmount = htttList
-          .filter(httt => httt.idHoaDon === item.idHoaDon)
-          .reduce((sum, httt) => {
-            const tienMat = httt.tienMat || 0;
-            const tienCK = httt.tienChuyenKhoan || 0;
-            return sum + tienMat + tienCK;
-          }, 0);
-
+        const tienMat = item.tienMat || 0;
+        const tienCK = item.tienChuyenKhoan || 0;
+        const totalAmount = tienMat + tienCK;
         return totalAmount > 0 ? `${totalAmount.toLocaleString()} VND` : "0 VND";
       },
     },
     {
-      label: "Thời gian",
-      key: "thoiGian",
-      formatter: (value) => (value ? format(new Date(value), 'dd/MM/yyyy HH:mm:ss', {locale: vi}) : 'N/A'),
-    },
-    {
       label: "Ghi chú",
-      key: "",
-      formatter: (value) => value || "...",
+      key: "ghiChu",
+      formatter: () => {
+        return hoaDon.value?.ghiChu || "N/A";
+      },
     },
     {
       label: "Người xác nhận",
       key: "idNhanVien.tenNhanVien",
-      formatter: (value) => value || "N/A",
+      formatter: () => {
+        return hoaDon.value?.idNhanVien?.tenNhanVien || hoaDon.value?.idNhanVien?.id || "N/A";
+      },
     },
   ];
 
@@ -122,6 +120,72 @@ export default function useShowHoaDon(id) {
     },
   ]);
 
+  // Define columns for the history table in the modal
+  const historyColumns = ref([
+    {
+      label: "STT",
+      key: "index",
+      formatter: (_, __, index) => index + 1,
+    },
+    {
+      label: "Nhân viên",
+      key: "idNhanVien.tenNhanVien",
+    },
+    {
+      label: "Thời gian",
+      key: "thoiGian",
+      formatter: (value) => (value ? format(new Date(value), 'HH:mm:ss dd/MM/yyyy', { locale: vi }) : "N/A"),
+    },
+    {
+      label: "Hành động",
+      key: "hanhDong",
+      formatter: (value) => value || "N/A",
+    },
+  ]);
+
+  // Define columns for the product modal table
+  const productModalColumns = ref([
+    {
+      label: "STT",
+      key: "index",
+      formatter: (_, __, index) => index + 1,
+    },
+    {
+      label: "Tên sản phẩm",
+      key: "tenSanPham",
+      formatter: (value) => value || "N/A",
+    },
+    {
+      label: "IMEI",
+      key: "imel",
+      formatter: (value) => value || "N/A",
+    },
+    {
+      label: "Đơn giá",
+      key: "gia",
+      formatter: (value) => (value ? `${value.toLocaleString()} VND` : "0 VND"),
+    },
+  ]);
+
+  // Hardcoded product data
+  const hardcodedProducts = ref([
+    {
+      tenSanPham: "iPhone 14 Pro",
+      imel: "123456789012345",
+      gia: 25000000,
+    },
+    {
+      tenSanPham: "Samsung Galaxy S23",
+      imel: "987654321098765",
+      gia: 20000000,
+    },
+    {
+      tenSanPham: "Xiaomi 13",
+      imel: "456789123456789",
+      gia: 15000000,
+    },
+  ]);
+
   const getNestedValue = (obj, path) => {
     return path.split(".").reduce((acc, part) => acc?.[part], obj) || null;
   };
@@ -134,6 +198,11 @@ export default function useShowHoaDon(id) {
     isModalOpen.value = false;
   };
 
+  const closeHistoryModal = () => {
+    isHistoryModalOpen.value = false;
+    invoiceHistory.value = [];
+  };
+
   onMounted(() => {
     fetchHoaDonDetail();
   });
@@ -141,10 +210,17 @@ export default function useShowHoaDon(id) {
   return {
     hoaDon,
     getNestedValue,
-    paymentHistoryColumns,
+    paymentMethodColumns,
     productColumns,
+    historyColumns,
+    productModalColumns,
+    hardcodedProducts,
     isModalOpen,
     openModal,
     closeModal,
+    isHistoryModalOpen,
+    invoiceHistory,
+    fetchInvoiceHistory,
+    closeHistoryModal,
   };
 }

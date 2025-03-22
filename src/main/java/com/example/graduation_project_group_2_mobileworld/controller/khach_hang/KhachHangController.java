@@ -95,6 +95,19 @@ public class KhachHangController {
             return ResponseEntity.badRequest().body(new ResponseMessage(e.getMessage()));
         }
     }
+    @PostMapping("/import")
+    public ResponseEntity<ResponseMessage> importKhachHangFromExcel(@RequestBody List<KhachHangDTO> khachHangDTOs) {
+        try {
+            khachHangServices.importKhachHangFromExcel(khachHangDTOs);
+            return ResponseEntity.ok(new ResponseMessage("Nhập dữ liệu từ Excel thành công!"));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(new ResponseMessage(e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ResponseMessage("Nhập dữ liệu từ Excel thất bại: " + e.getMessage()));
+        }
+    }
+
 
     // Các endpoint khác như /home, /delete/{id}, v.v.
 }

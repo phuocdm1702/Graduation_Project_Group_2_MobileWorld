@@ -1,5 +1,4 @@
 <template>
-  <!-- Sử dụng BreadcrumbWrapper thay vì PathRouter trực tiếp -->
   <BreadcrumbWrapper :breadcrumb-items="breadcrumbItems" />
   <div class="show-hoa-don bg-white shadow-lg rounded-lg p-5 mt-2 mx-auto">
     <!-- Thanh trạng thái -->
@@ -18,13 +17,88 @@
           <p class="text-xs text-gray-500">{{ status.time || "N/A" }}</p>
         </div>
       </div>
+      <!-- Nút "Chi tiết" -->
+      <div class="text-right mt-4">
+        <button
+          @click="fetchInvoiceHistory(hoaDon?.id)"
+          class="px-4 py-2 bg-green-500 text-white font-semibold rounded-lg shadow-md hover:bg-green-600 transition"
+        >
+          Chi tiết
+        </button>
+      </div>
+    </div>
+
+    <!-- Modal tự xây dựng cho Invoice History -->
+    <div
+      v-if="isHistoryModalOpen"
+      class="fixed inset-0 z-50 overflow-y-auto"
+      aria-labelledby="modal-title"
+      role="dialog"
+      aria-modal="true"
+    >
+      <!-- Overlay -->
+      <div
+        class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
+        @click="closeHistoryModal"
+      ></div>
+
+      <!-- Modal content -->
+      <div class="flex min-h-full items-center justify-center p-4">
+        <div
+          class="relative bg-white rounded-lg shadow-xl w-full max-w-5xl transform transition-all"
+        >
+          <!-- Header -->
+          <div class="px-6 py-4 border-b border-gray-200">
+            <h3 class="text-lg font-medium text-gray-700">
+              Lịch sử hóa đơn - {{ hoaDon?.id }}
+            </h3>
+            <button
+              @click="closeHistoryModal"
+              class="absolute right-4 top-4 text-gray-400 hover:text-gray-500"
+            >
+              <span class="sr-only">Đóng</span>
+              <svg
+                class="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+          </div>
+
+          <!-- Body -->
+          <div class="px-6 py-4 space-y-4">
+            <DynamicTable
+              :data="invoiceHistory"
+              :columns="historyColumns"
+              :get-nested-value="getNestedValue"
+            />
+          </div>
+
+          <!-- Footer -->
+          <div class="px-6 py-4 border-t border-gray-200 flex justify-end">
+            <button
+              @click="closeHistoryModal"
+              class="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200"
+            >
+              Đóng
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Thông tin đơn hàng -->
     <div class="bg-gray-50 p-6 rounded-xl mb-6 shadow-sm">
       <h3 class="text-xl font-semibold text-gray-900 mb-5">Thông Tin Đơn Hàng</h3>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
-        <!-- Cột trái -->
         <div class="space-y-4">
           <div class="flex items-start">
             <span class="w-28 font-medium text-gray-700">Mã đơn:</span>
@@ -43,13 +117,12 @@
             <span class="flex-1 text-gray-900">{{ hoaDon?.idPhieuGiamGia?.ma || "Không áp dụng" }}</span>
           </div>
         </div>
-        <!-- Cột phải -->
         <div class="space-y-4">
           <div class="flex items-start">
             <span class="w-28 font-medium text-gray-700">Ngày đặt hàng:</span>
             <span class="flex-1 text-gray-900">
-    {{ hoaDon?.ngayTao ? format(new Date(hoaDon.ngayTao), 'dd/MM/yyyy HH:mm:ss', {locale: vi}) : '' }}
-  </span>
+              {{ hoaDon?.ngayTao ? format(new Date(hoaDon.ngayTao), 'dd/MM/yyyy HH:mm:ss', {locale: vi}) : '' }}
+            </span>
           </div>
           <div class="flex items-start">
             <span class="w-28 font-medium text-gray-700">Khách hàng:</span>
@@ -67,17 +140,15 @@
       </div>
     </div>
 
-    <!-- Lịch sử thanh toán với DynamicTable -->
     <div class="bg-gray-100 p-4 rounded-lg mb-4">
       <h3 class="text-lg font-medium text-gray-700 mb-2">Lịch sử thanh toán</h3>
       <DynamicTable
-        :data="hoaDon?.lichSuHoaDon || []"
-        :columns="paymentHistoryColumns"
+        :data="hoaDon?.hinhThucThanhToan || []"
+        :columns="paymentMethodColumns"
         :get-nested-value="getNestedValue"
       />
     </div>
 
-    <!-- Danh sách sản phẩm với DynamicTable -->
     <div class="bg-gray-100 p-4 rounded-lg mb-4">
       <h3 class="text-lg font-medium text-gray-700 mb-2">Danh sách sản phẩm đã mua</h3>
       <DynamicTable
@@ -87,7 +158,6 @@
       />
     </div>
 
-    <!-- Tổng tiền -->
     <div class="bg-gray-100 p-4 rounded-lg">
       <h3 class="text-lg font-medium text-gray-700 mb-2">Tổng tiền</h3>
       <div class="grid grid-cols-2 gap-4">
@@ -103,53 +173,92 @@
       </div>
     </div>
 
-    <button @click="$router.push('/hoa-don')"
-            class="mt-4 px-4 py-2 bg-[#f97316] text-white font-semibold rounded-lg shadow-md hover:bg-orange-600 transition">
-      Quay lại
-    </button>
-    <!-- FormModal -->
-    <FormModal
-      v-model:show="isModalOpen"
-      entity-name="Sản phẩm"
-      :entity-data="newProduct"
-      @submit="handleAddProduct"
-      @close="closeModal"
+    <!-- Modal tự xây dựng cho Invoice ProDuct -->
+    <div
+      v-if="isModalOpen"
+      class="fixed inset-0 z-50 overflow-y-auto"
+      aria-labelledby="modal-title"
+      role="dialog"
+      aria-modal="true"
     >
-      <template #default="{ entityData }">
-        <div class="space-y-4">
-          <div>
-            <label class="block text-gray-700 font-medium mb-1">Tên sản phẩm</label>
-            <input
-              v-model="entityData.tenSanPham"
-              type="text"
-              class="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-              placeholder="Nhập tên sản phẩm"
-              required
+      <!-- Overlay -->
+      <div
+        class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
+        @click="closeModal"
+      ></div>
+
+      <!-- Modal content -->
+      <div class="flex min-h-full items-center justify-center p-4">
+        <div
+          class="relative bg-white rounded-lg shadow-xl w-full max-w-5xl transform transition-all"
+        >
+          <!-- Header -->
+          <div class="px-6 py-4 border-b border-gray-200">
+            <h3 class="text-lg font-medium text-gray-700">
+              Thêm Sản Phẩm - {{ hoaDon?.id }}
+            </h3>
+            <button
+              @click="closeModal"
+              class="absolute right-4 top-4 text-gray-400 hover:text-gray-500"
+            >
+              <span class="sr-only">Đóng</span>
+              <svg
+                class="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+          </div>
+
+          <!-- Body -->
+          <div class="px-6 py-4 space-y-4">
+            <DynamicTable
+              :data="hardcodedProducts"
+              :columns="productModalColumns"
+              :get-nested-value="getNestedValue"
             />
           </div>
-          <div>
-            <label class="block text-gray-700 font-medium mb-1">IMEI</label>
-            <input
-              v-model="entityData.imel"
-              type="text"
-              class="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-              placeholder="Nhập IMEI"
-              required
-            />
-          </div>
-          <div>
-            <label class="block text-gray-700 font-medium mb-1">Đơn giá</label>
-            <input
-              v-model="entityData.gia"
-              type="number"
-              class="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-              placeholder="Nhập đơn giá"
-              required
-            />
+
+          <!-- Footer -->
+          <div class="px-6 py-4 border-t border-gray-200 flex justify-end">
+            <button
+              @click="closeModal"
+              class="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200"
+            >
+              Đóng
+            </button>
+
+            <button
+              @click="closeModal"
+              class="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200"
+            >
+              Thêm
+            </button>
           </div>
         </div>
-      </template>
-    </FormModal>
+      </div>
+    </div>
+
+    <!-- Nút Quay lại -->
+    <div class="text-right mt-4">
+      <button
+        @click="$router.push('/hoa-don')"
+        class="px-4 py-2 bg-[#f97316] text-white font-semibold rounded-lg shadow-md hover:bg-orange-600 transition"
+      >
+        Quay lại
+      </button>
+    </div>
+
+
+   
   </div>
 </template>
 
@@ -161,7 +270,6 @@ import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import { useRoute } from "vue-router";
 import BreadcrumbWrapper from '@/components/BreadcrumbWrapper.vue';
-import FormModal from "@/components/FormModal.vue";
 
 const props = defineProps({
   id: {
@@ -173,11 +281,18 @@ const props = defineProps({
 const {
   hoaDon,
   getNestedValue,
-  paymentHistoryColumns,
+  paymentMethodColumns,
   productColumns,
+  historyColumns,
+  productModalColumns,
+  hardcodedProducts,
   isModalOpen,
   openModal,
   closeModal,
+  isHistoryModalOpen,
+  invoiceHistory,
+  fetchInvoiceHistory,
+  closeHistoryModal,
 } = useShowHoaDon(props.id);
 
 const newProduct = ref({
@@ -201,17 +316,13 @@ const breadcrumbItems = computed(() => {
   return route.meta?.breadcrumb || ["Quản lý hóa đơn"];
 });
 
-const handleAddProduct = (data) => {
-  console.log("Dữ liệu sản phẩm mới:", data);
-  closeModal();
-};
 
 // Gắn sự kiện click cho các nút trong cột "Thao tác"
 onMounted(() => {
   const attachEventListeners = () => {
     const buttons = document.querySelectorAll('button[data-action]');
     buttons.forEach(button => {
-      button.removeEventListener('click', handleButtonClick); // Xóa sự kiện cũ để tránh trùng lặp
+      button.removeEventListener('click', handleButtonClick);
       button.addEventListener('click', handleButtonClick);
     });
   };
@@ -228,10 +339,8 @@ onMounted(() => {
     }
   };
 
-  // Gắn sự kiện ban đầu
   attachEventListeners();
 
-  // Theo dõi thay đổi dữ liệu (nếu danh sách sản phẩm thay đổi)
   const observer = new MutationObserver(() => {
     attachEventListeners();
   });
@@ -242,7 +351,6 @@ onMounted(() => {
   }
 });
 </script>
-
 
 <style scoped>
 /* Thanh trạng thái */

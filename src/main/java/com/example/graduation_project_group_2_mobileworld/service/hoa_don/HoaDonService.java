@@ -30,6 +30,8 @@ public class HoaDonService {
         this.inHoaDonPDF = inHoaDonPDF;
     }
 
+
+
     public List<HoaDonDTO> getAllData() {
         return hoaDonRepository.findAll()
                 .stream()
@@ -74,6 +76,8 @@ public class HoaDonService {
         dto.setTongTienSauGiam(hoaDon.getTongTienSauGiam());
         dto.setTrangThai(hoaDon.getTrangThai());
         dto.setDiaChiKhachHang(hoaDon.getDiaChiKhachHang());
+        dto.setTenKhachHang(hoaDon.getTenKhachHang());
+        dto.setGhiChu(hoaDon.getGhiChu());
 
         // Ánh xạ chi tiết hóa đơn
         if (hoaDon.getChiTietHoaDon() != null) {
@@ -129,20 +133,6 @@ public class HoaDonService {
         return dto;
     }
 
-//    // Lấy chi tiết hóa đơn theo ID
-//    public HoaDonDTO getHoaDonDetails(Integer id) {
-//        HoaDon hoaDon = hoaDonRepository.findHoaDonWithDetailsById(id)
-//                .orElseThrow(() -> new RuntimeException("Không tìm thấy hóa đơn"));
-//        return toDTO(hoaDon);
-//    }
-//
-//    // Lấy lịch sử hóa đơn theo ID
-//    public HoaDonDTO getHoaDonHistory(Integer id) {
-//        HoaDon hoaDon = hoaDonRepository.findHoaDonWithHistoryById(id)
-//                .orElseThrow(() -> new RuntimeException("Không tìm thấy hóa đơn"));
-//        return toDTO(hoaDon);
-//    }
-
     // Lấy cả chi tiết và lịch sử hóa đơn theo ID (nếu cần)
     public HoaDonDTO getFullHoaDonDetails(Integer id) {
         // Có thể cần thêm một phương thức mới trong repository để lấy cả chi tiết và lịch sử
@@ -158,5 +148,12 @@ public class HoaDonService {
     public byte[] generateHoaDonPdf(Integer id) throws Exception {
         HoaDonDTO hoaDon = getFullHoaDonDetails(id);
         return inHoaDonPDF.generateHoaDonPdf(hoaDon);
+    }
+
+    // Lấy hóa đơn theo ID
+    public HoaDonDTO getHoaDonById(Integer id) {
+        HoaDon hoaDon = hoaDonRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy hóa đơn với ID: " + id));
+        return toDTO(hoaDon);
     }
 }

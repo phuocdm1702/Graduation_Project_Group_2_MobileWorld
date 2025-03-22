@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 7.0.2.final using JasperReports Library version 7.0.2-31532122640f516c6d17238ae0e41a08113d5ac0  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="hoa_don" language="java" columnCount="1" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
+	<parameter name="maHoaDon" class="java.lang.String"/>
+	<parameter name="tenKhachHang" class="java.lang.String"/>
+	<parameter name="ngayBan" class="java.lang.String"/>
+	<parameter name="tenNhanVien" class="java.lang.String"/>
+	<parameter name="soDienThoai" class="java.lang.String"/>
+	<parameter name="diaChi" class="java.lang.String"/>
+	<parameter name="tongTien" class="java.math.BigDecimal"/>
+	<parameter name="tongTienSauGiam" class="java.math.BigDecimal"/>
+	<queryString language="sql"><![CDATA[]]></queryString>
+	<background/>
+	<title>
+		<band height="79" splitType="Stretch"/>
+	</title>
+	<pageHeader>
+		<band height="165" splitType="Stretch">
+			<textField>
+				<reportElement x="0" y="0" width="100" height="30"/>
+				<textFieldExpression><![CDATA[$P{maHoaDon}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="310" y="30" width="100" height="30"/>
+				<textFieldExpression><![CDATA[$P{tenKhachHang}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="310" y="0" width="100" height="30"/>
+				<textFieldExpression><![CDATA[$P{ngayBan}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="30" width="100" height="30"/>
+				<textFieldExpression><![CDATA[$P{tenNhanVien}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="310" y="60" width="100" height="30"/>
+				<textFieldExpression><![CDATA[$P{soDienThoai}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="310" y="90" width="100" height="30"/>
+				<textFieldExpression><![CDATA[$P{diaChi}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="310" y="120" width="100" height="30"/>
+				<textFieldExpression><![CDATA[$P{tongTien}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="410" y="120" width="100" height="30"/>
+				<textFieldExpression><![CDATA[$P{tongTienSauGiam}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageHeader>
+	<columnFooter>
+		<band height="45" splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band height="54" splitType="Stretch"/>
+	</pageFooter>
+	<summary>
+		<band height="42" splitType="Stretch"/>
+	</summary>
+</jasperReport>

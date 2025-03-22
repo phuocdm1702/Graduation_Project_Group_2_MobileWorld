@@ -16,6 +16,7 @@ public interface HoaDonRepository extends JpaRepository<HoaDon, Integer> {
     @Query("SELECT hd FROM HoaDon hd " +
             "ORDER BY hd.id DESC")
     Page<HoaDon> findAllWithPagination(Pageable pageable);
+
     // Lấy hóa đơn với chi tiết
     @Query("SELECT hd FROM HoaDon hd LEFT JOIN FETCH hd.chiTietHoaDon cthd WHERE hd.id = :id")
     Optional<HoaDon> findHoaDonWithDetailsById(@Param("id") Integer id);
@@ -23,6 +24,7 @@ public interface HoaDonRepository extends JpaRepository<HoaDon, Integer> {
     // Lấy hóa đơn với lịch sử
     @Query("SELECT hd FROM HoaDon hd LEFT JOIN FETCH hd.lichSuHoaDon lshd WHERE hd.id = :id")
     Optional<HoaDon> findHoaDonWithHistoryById(@Param("id") Integer id);
+
 
     // Truy vấn mới: Lấy cả chi tiết và lịch sử cùng lúc
     @Query("SELECT hd FROM HoaDon hd " +

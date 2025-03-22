@@ -18,10 +18,15 @@ public class HoaDonChiTietDTO {
     private Short trangThai;
     private String ghiChu;
 
+    private Integer stt; // Số thứ tự tự tăng
+    private String tenSanPham; // Tên sản phẩm
+    private String imel; // IMEI
+
     public HoaDonChiTietDTO() {
 
     }
-    public HoaDonChiTietDTO(Integer id,Integer idHoaDon, ChiTietSanPham idChiTietSanPham, ImelDaBan idImelDaBan, String ma, BigDecimal gia, Short trangThai, String ghiChu) {
+
+    public HoaDonChiTietDTO(Integer id, Integer idHoaDon, ChiTietSanPham idChiTietSanPham, ImelDaBan idImelDaBan, String ma, BigDecimal gia, Short trangThai, String ghiChu, Integer stt, String tenSanPham, String imel) {
         this.id = id;
         this.idHoaDon = idHoaDon;
         this.idChiTietSanPham = idChiTietSanPham;
@@ -30,6 +35,8 @@ public class HoaDonChiTietDTO {
         this.gia = gia;
         this.trangThai = trangThai;
         this.ghiChu = ghiChu;
+        this.stt = stt;
+        this.tenSanPham = tenSanPham;
+        this.imel = imel;
     }
-
 }

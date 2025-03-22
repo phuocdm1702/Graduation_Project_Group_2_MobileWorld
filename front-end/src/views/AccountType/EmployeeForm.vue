@@ -484,7 +484,7 @@ function dieukienADD() {
   if (!PhoneCheck.test(employee.value.sdt?.trim())) return toastRef.value?.kshowToast('error', 'Số điện thoại không hợp lệ!'), false;
   if (!EmailCheck.test(employee.value.email?.trim())) return toastRef.value?.kshowToast('error', 'Email không đúng định dạng!'), false;
   if (!isOver18(employee.value.ngaySinh?.trim())) return toastRef.value?.kshowToast('error', 'Nhân viên phải >= 18 tuổi!'), false;
-  if (!OnlyABC(employee.value.tenNhanVien?.trim())) return toastRef.value?.kshowToast('error', 'Tên nhân viên không điền số!'), false;
+  if (!OnlyABC.test(employee.value.tenNhanVien?.trim())) return toastRef.value?.kshowToast('error', 'Tên nhân viên không điền số!'), false;
   if (new Date(employee.value.ngaySinh?.trim()) > new Date()) return toastRef.value?.kshowToast('error', 'Ngày sinh không được lớn hơn ngày hiện tại!'), false;
 
   return true;

@@ -35,7 +35,10 @@ public class HoaDonChiTietService {
                 hoaDonChiTiet.getMa(),
                 hoaDonChiTiet.getGia(),
                 hoaDonChiTiet.getTrangThai(),
-                hoaDonChiTiet.getGhiChu()
+                hoaDonChiTiet.getGhiChu(),
+                hoaDonChiTiet.getId(),
+                hoaDonChiTiet.getMa(),
+                hoaDonChiTiet.getMa()
         );
     }
 }
