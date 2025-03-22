@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface NhanVienRepository extends JpaRepository<NhanVien, Integer> {
     @Query("SELECT COUNT(n) > 0 FROM NhanVien n WHERE n.ma = :ma AND n.id <> :id")
@@ -28,4 +29,6 @@ public interface NhanVienRepository extends JpaRepository<NhanVien, Integer> {
             "OR LOWER(tk.soDienThoai) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
             "AND (:status = 'tat-ca' OR (nv.deleted = true AND :status = 'da-nghi') OR (nv.deleted = false AND :status = 'dang-lam'))")
     List<NhanVien> searchNhanVien(@Param("keyword") String keyword, @Param("status") String status);
+
+    Optional<NhanVien> findByMa(String ma);
 }

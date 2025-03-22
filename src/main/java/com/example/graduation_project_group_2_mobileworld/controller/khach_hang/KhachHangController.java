@@ -95,6 +95,17 @@ public class KhachHangController {
             return ResponseEntity.badRequest().body(new ResponseMessage(e.getMessage()));
         }
     }
+    @PostMapping("/import")
+    public ResponseEntity<String> importKhachHang(@RequestBody List<KhachHang> khachHangs) {
+        try {
+            khachHangServices.importKhachHang(khachHangs);
+            return ResponseEntity.ok("Nhập dữ liệu từ Excel thành công!");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Nhập dữ liệu từ Excel thất bại: " + e.getMessage());
+        }
+    }
+
 
     // Các endpoint khác như /home, /delete/{id}, v.v.
 }

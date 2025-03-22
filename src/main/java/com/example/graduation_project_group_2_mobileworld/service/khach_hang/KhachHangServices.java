@@ -211,4 +211,90 @@ public class KhachHangServices {
         khachHang.setDeleted(!khachHang.isDeleted()); // Toggle trạng thái
         return khachHangRepository.save(khachHang);
     }
+
+    public void importKhachHang(List<KhachHang> khachHangs) {
+        for (KhachHang khachHang : khachHangs) {
+            Optional<KhachHang> existingKhachHang = khachHangRepository.findByMa(khachHang.getMa());
+
+            if (existingKhachHang.isPresent()) {
+                // Cập nhật khách hàng hiện có
+                KhachHang existing = existingKhachHang.get();
+                existing.setTen(khachHang.getTen());
+                existing.setDeleted(khachHang.isDeleted());
+                existing.setUpdatedAt(new Date());
+
+                if (existing.getIdTaiKhoan() != null && khachHang.getIdTaiKhoan() != null) {
+                    TaiKhoan taiKhoan = taiKhoanRepository.findById(existing.getIdTaiKhoan().getId())
+                            .orElseThrow(() -> new RuntimeException("Tài khoản không tồn tại!"));
+                    taiKhoan.setEmail(khachHang.getIdTaiKhoan().getEmail());
+                    taiKhoan.setSoDienThoai(khachHang.getIdTaiKhoan().getSoDienThoai());
+                    taiKhoanRepository.save(taiKhoan);
+                }
+
+                List<DiaChiKhachHang> existingAddresses = diaChiKhachHangRepo.findByIdKhachHang(existing);
+                if (!existingAddresses.isEmpty()) {
+                    DiaChiKhachHang defaultAddress = existingAddresses.stream()
+                            .filter(DiaChiKhachHang::getMacDinh)
+                            .findFirst()
+                            .orElse(existingAddresses.get(0));
+                    defaultAddress.setDiaChiCuThe(khachHang.getIdDiaChiKH().getDiaChiCuThe());
+                    defaultAddress.setThanhPho(khachHang.getIdDiaChiKH().getThanhPho());
+                    defaultAddress.setQuan(khachHang.getIdDiaChiKH().getQuan());
+                    defaultAddress.setPhuong(khachHang.getIdDiaChiKH().getPhuong());
+                    diaChiKhachHangRepo.save(defaultAddress);
+                } else {
+                    DiaChiKhachHang diaChi = new DiaChiKhachHang();
+                    diaChi.setIdKhachHang(existing);
+                    diaChi.setDiaChiCuThe(khachHang.getIdDiaChiKH().getDiaChiCuThe());
+                    diaChi.setThanhPho(khachHang.getIdDiaChiKH().getThanhPho());
+                    diaChi.setQuan(khachHang.getIdDiaChiKH().getQuan());
+                    diaChi.setPhuong(khachHang.getIdDiaChiKH().getPhuong());
+                    diaChi.setMacDinh(true);
+                    diaChiKhachHangRepo.save(diaChi);
+                }
+
+                khachHangRepository.save(existing);
+            } else {
+                // Thêm khách hàng mới
+                QuyenHan quyenHan = new QuyenHan();
+                quyenHan.setId(2);
+
+                TaiKhoan taiKhoan = new TaiKhoan();
+                taiKhoan.setMa(MaTaiKhoan());
+                taiKhoan.setEmail(khachHang.getIdTaiKhoan().getEmail());
+                taiKhoan.setSoDienThoai(khachHang.getIdTaiKhoan().getSoDienThoai());
+                taiKhoan.setTenDangNhap(khachHang.getIdTaiKhoan().getTenDangNhap());
+                taiKhoan.setIdQuyenHan(quyenHan);
+                taiKhoan.setDeleted(false);
+
+                String randomPassword = emailServices.generateRandomPassword(8);
+                taiKhoan.setMatKhau(randomPassword);
+                taiKhoan = taiKhoanRepository.save(taiKhoan);
+
+                try {
+                    emailServices.sendWelcomeEmail(
+                            taiKhoan.getEmail(),
+                            khachHang.getTen(),
+                            taiKhoan.getEmail(),
+                            randomPassword
+                    );
+                } catch (Exception e) {
+                    System.err.println("Lỗi gửi email: " + e.getMessage());
+                }
+
+                khachHang.setIdTaiKhoan(taiKhoan);
+                khachHang.setCreatedAt(khachHang.getCreatedAt() != null ? khachHang.getCreatedAt() : new Date());
+                khachHang = khachHangRepository.save(khachHang);
+
+                DiaChiKhachHang diaChi = new DiaChiKhachHang();
+                diaChi.setIdKhachHang(khachHang);
+                diaChi.setDiaChiCuThe(khachHang.getIdDiaChiKH().getDiaChiCuThe());
+                diaChi.setThanhPho(khachHang.getIdDiaChiKH().getThanhPho());
+                diaChi.setQuan(khachHang.getIdDiaChiKH().getQuan());
+                diaChi.setPhuong(khachHang.getIdDiaChiKH().getPhuong());
+                diaChi.setMacDinh(true);
+                diaChiKhachHangRepo.save(diaChi);
+            }
+        }
+    }
 }
