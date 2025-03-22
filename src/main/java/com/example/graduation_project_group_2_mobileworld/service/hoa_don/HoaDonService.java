@@ -30,6 +30,8 @@ public class HoaDonService {
         this.inHoaDonPDF = inHoaDonPDF;
     }
 
+
+
     public List<HoaDonDTO> getAllData() {
         return hoaDonRepository.findAll()
                 .stream()
@@ -74,6 +76,7 @@ public class HoaDonService {
         dto.setTongTienSauGiam(hoaDon.getTongTienSauGiam());
         dto.setTrangThai(hoaDon.getTrangThai());
         dto.setDiaChiKhachHang(hoaDon.getDiaChiKhachHang());
+        dto.setTenKhachHang(hoaDon.getTenKhachHang());
 
         // Ánh xạ chi tiết hóa đơn
         if (hoaDon.getChiTietHoaDon() != null) {
@@ -158,5 +161,11 @@ public class HoaDonService {
     public byte[] generateHoaDonPdf(Integer id) throws Exception {
         HoaDonDTO hoaDon = getFullHoaDonDetails(id);
         return inHoaDonPDF.generateHoaDonPdf(hoaDon);
+    }
+    // Lấy hóa đơn theo ID
+    public HoaDonDTO getHoaDonById(Integer id) {
+        HoaDon hoaDon = hoaDonRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy hóa đơn với ID: " + id));
+        return toDTO(hoaDon);
     }
 }

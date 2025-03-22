@@ -270,7 +270,31 @@ export default function useHoaDonLineList() {
       toast.value?.kshowToast('error', errorMessage);
     }
   };
-
+  // const printInvoice = async (id) => {
+  //   try {
+  //     const url = `http://localhost:8080/hoa-don/print/${id}`;
+  //     const newWindow = window.open(url, '_blank');
+  //
+  //     if (newWindow) {
+  //       newWindow.onload = () => {
+  //         newWindow.print(); // Gọi cửa sổ in mặc định
+  //       };
+  //     } else {
+  //       throw new Error('Trình duyệt đã chặn mở tab mới. Vui lòng cho phép popup để in hóa đơn.');
+  //     }
+  //
+  //     toast.value?.kshowToast('success', 'Đã mở cửa sổ in hóa đơn!');
+  //   } catch (error) {
+  //     console.error('Lỗi khi mở hóa đơn:', error);
+  //     let errorMessage = error.message || 'Không thể mở hóa đơn!';
+  //     if (error.response && error.response.data) {
+  //       const text = await error.response.data.text();
+  //       console.error('Error response from server:', text);
+  //       errorMessage = text;
+  //     }
+  //     toast.value?.kshowToast('error', errorMessage);
+  //   }
+  // };
   const exportExcel = async () => {
     try {
       const response = await axios.get('http://localhost:8080/hoa-don/exportExcel', {

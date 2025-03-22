@@ -12,7 +12,9 @@ import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -58,9 +60,30 @@ public class InHoaDonPDF {
                 parameters.put("tongTien", hoaDon.getTongTien() != null ? hoaDon.getTongTien() : 0);
                 parameters.put("tongTienSauGiam", hoaDon.getTongTienSauGiam() != null ? hoaDon.getTongTienSauGiam() : 0);
 
-                // Chuẩn bị dữ liệu cho bảng chi tiết sản phẩm
+                // Chuẩn bị dữ liệu cho bảng chi tiết sản phẩm với stt tự tăng
                 List<HoaDonChiTietDTO> chiTietList = hoaDon.getChiTietHoaDon();
-                JRBeanCollectionDataSource dataSource = new JRBeanCollectionDataSource(chiTietList);
+                List<HoaDonChiTietDTO> chiTietListWithStt = new ArrayList<>();
+
+                if (chiTietList != null && !chiTietList.isEmpty()) {
+                    int stt = 1; // Bắt đầu từ 1
+                    for (HoaDonChiTietDTO chiTiet : chiTietList) {
+                        HoaDonChiTietDTO chiTietWithStt = new HoaDonChiTietDTO();
+                        chiTietWithStt.setStt(stt++); // Gán stt tự tăng
+                        // Tên sản phẩm từ ChiTietSanPham
+                        chiTietWithStt.setTenSanPham(chiTiet.getIdChiTietSanPham() != null && chiTiet.getIdChiTietSanPham().getIdSanPham() != null
+                                ? chiTiet.getIdChiTietSanPham().getIdSanPham().getTenSanPham() : "N/A");
+                        // IMEI từ ImelDaBan
+                        chiTietWithStt.setImel(chiTiet.getIdImelDaBan() != null ? chiTiet.getIdImelDaBan().getImel() : "N/A");
+                        // Đơn giá từ gia trong HoaDonChiTietDTO
+                        chiTietWithStt.setGia(chiTiet.getGia() != null ? chiTiet.getGia() : BigDecimal.ZERO);
+                        chiTietListWithStt.add(chiTietWithStt);
+                    }
+                } else {
+                    logger.warn("Danh sách chi tiết hóa đơn trống cho HoaDon: {}", hoaDon.getId());
+                }
+
+                // Tạo JRBeanCollectionDataSource từ danh sách đã thêm stt
+                JRBeanCollectionDataSource dataSource = new JRBeanCollectionDataSource(chiTietListWithStt);
 
                 // Tạo JasperPrint
                 JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, parameters, dataSource);

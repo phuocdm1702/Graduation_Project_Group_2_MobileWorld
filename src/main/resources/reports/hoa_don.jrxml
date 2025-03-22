@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Created with Jaspersoft Studio version 7.0.2.final using JasperReports Library version 7.0.2-31532122640f516c6d17238ae0e41a08113d5ac0  -->
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="hoa_don" language="java" columnCount="1" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="hoa_don" language="java" columnCount="1" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="1633b09c-1862-400f-a8b4-2d93cd35572b">
 	<parameter name="maHoaDon" class="java.lang.String"/>
 	<parameter name="tenKhachHang" class="java.lang.String"/>
 	<parameter name="ngayBan" class="java.lang.String"/>
@@ -10,53 +9,270 @@
 	<parameter name="tongTien" class="java.math.BigDecimal"/>
 	<parameter name="tongTienSauGiam" class="java.math.BigDecimal"/>
 	<queryString language="sql"><![CDATA[]]></queryString>
-	<background/>
+	<field name="stt" class="java.lang.Integer"/>
+	<field name="tenSanPham" class="java.lang.String"/>
+	<field name="imel" class="java.lang.String"/>
+	<field name="gia" class="java.math.BigDecimal"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
 	<title>
-		<band height="79" splitType="Stretch"/>
+		<band height="100" splitType="Stretch">
+			<image>
+				<reportElement uuid="2652335e-ae25-40e0-8812-c3ffc193e553" x="227" y="0" width="100" height="60"/>
+				<imageExpression><![CDATA["C:/Users/ADMIN/Downloads/DATN/Logo_DATN_V2-Photoroom.jpg"]]></imageExpression>
+			</image>
+			<staticText>
+				<reportElement uuid="ec897322-cc3c-4244-aebd-39d2ad8d21a7" x="0" y="60" width="555" height="40"/>
+				<textElement textAlignment="Center">
+					<font fontName="DejaVu Sans" size="10" pdfFontName="DejaVu Sans" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[Số điện thoại: 01234567890
+Email: MobileWorld@gmail.com
+Địa chỉ: Cổng Ong, Tòa nhà FPT Polytechnic, 13 phố Trịnh Văn Bô, phường Phương Canh, quận Nam Từ Liêm, TP Hà Nội]]></text>
+			</staticText>
+		</band>
 	</title>
 	<pageHeader>
-		<band height="165" splitType="Stretch">
+		<band height="110" splitType="Stretch">
+			<staticText>
+				<reportElement uuid="d0441378-31f5-4d8a-82c2-7018015de773" x="0" y="0" width="555" height="30"/>
+				<textElement textAlignment="Center">
+					<font fontName="DejaVu Sans" size="16" isBold="true" pdfFontName="DejaVu Sans" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[HÓA ĐƠN BÁN HÀNG]]></text>
+			</staticText>
+			<!-- Mã Hóa Đơn -->
+			<staticText>
+				<reportElement x="0" y="40" width="80" height="20"/>
+				<textElement>
+					<font fontName="DejaVu Sans" size="10" pdfFontName="DejaVu Sans" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[Mã Hóa Đơn:]]></text>
+			</staticText>
 			<textField>
-				<reportElement x="0" y="0" width="100" height="30"/>
+				<reportElement x="80" y="40" width="100" height="20"/>
+				<textElement>
+					<font fontName="DejaVu Sans" size="10" pdfFontName="DejaVu Sans" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+				</textElement>
 				<textFieldExpression><![CDATA[$P{maHoaDon}]]></textFieldExpression>
 			</textField>
+			<!-- Ngày Bán -->
+			<staticText>
+				<reportElement x="400" y="40" width="80" height="20"/>
+				<textElement>
+					<font fontName="DejaVu Sans" size="10" pdfFontName="DejaVu Sans" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[Ngày Bán:]]></text>
+			</staticText>
 			<textField>
-				<reportElement x="310" y="30" width="100" height="30"/>
-				<textFieldExpression><![CDATA[$P{tenKhachHang}]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="310" y="0" width="100" height="30"/>
+				<reportElement x="480" y="40" width="75" height="20"/>
+				<textElement>
+					<font fontName="DejaVu Sans" size="10" pdfFontName="DejaVu Sans" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+				</textElement>
 				<textFieldExpression><![CDATA[$P{ngayBan}]]></textFieldExpression>
 			</textField>
+			<!-- Nhân Viên -->
+			<staticText>
+				<reportElement x="0" y="60" width="80" height="20"/>
+				<textElement>
+					<font fontName="DejaVu Sans" size="10" pdfFontName="DejaVu Sans" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[Nhân Viên:]]></text>
+			</staticText>
 			<textField>
-				<reportElement x="0" y="30" width="100" height="30"/>
+				<reportElement x="80" y="60" width="150" height="20"/>
+				<textElement>
+					<font fontName="DejaVu Sans" size="10" pdfFontName="DejaVu Sans" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+				</textElement>
 				<textFieldExpression><![CDATA[$P{tenNhanVien}]]></textFieldExpression>
 			</textField>
+			<!-- Khách Hàng -->
+			<staticText>
+				<reportElement x="400" y="60" width="80" height="20"/>
+				<textElement>
+					<font fontName="DejaVu Sans" size="10" pdfFontName="DejaVu Sans" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[Khách Hàng:]]></text>
+			</staticText>
 			<textField>
-				<reportElement x="310" y="60" width="100" height="30"/>
+				<reportElement x="480" y="60" width="75" height="20"/>
+				<textElement>
+					<font fontName="DejaVu Sans" size="10" pdfFontName="DejaVu Sans" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{tenKhachHang}]]></textFieldExpression>
+			</textField>
+			<!-- Số Điện Thoại -->
+			<staticText>
+				<reportElement x="400" y="80" width="80" height="20"/>
+				<textElement>
+					<font fontName="DejaVu Sans" size="10" pdfFontName="DejaVu Sans" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[Số Điện Thoại:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="480" y="80" width="75" height="20"/>
+				<textElement>
+					<font fontName="DejaVu Sans" size="10" pdfFontName="DejaVu Sans" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+				</textElement>
 				<textFieldExpression><![CDATA[$P{soDienThoai}]]></textFieldExpression>
 			</textField>
+			<!-- Địa Chỉ -->
+			<staticText>
+				<reportElement x="0" y="80" width="80" height="20"/>
+				<textElement>
+					<font fontName="DejaVu Sans" size="10" pdfFontName="DejaVu Sans" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[Địa Chỉ:]]></text>
+			</staticText>
 			<textField>
-				<reportElement x="310" y="90" width="100" height="30"/>
+				<reportElement x="80" y="80" width="300" height="20"/>
+				<textElement>
+					<font fontName="DejaVu Sans" size="10" pdfFontName="DejaVu Sans" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+				</textElement>
 				<textFieldExpression><![CDATA[$P{diaChi}]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="310" y="120" width="100" height="30"/>
-				<textFieldExpression><![CDATA[$P{tongTien}]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="410" y="120" width="100" height="30"/>
-				<textFieldExpression><![CDATA[$P{tongTienSauGiam}]]></textFieldExpression>
 			</textField>
 		</band>
 	</pageHeader>
+	<columnHeader>
+		<band height="30" splitType="Stretch">
+			<!-- Viền trên của bảng -->
+			<line>
+				<reportElement x="0" y="0" width="555" height="1"/>
+			</line>
+			<!-- Cột STT -->
+			<staticText>
+				<reportElement x="0" y="5" width="30" height="20"/>
+				<textElement textAlignment="Center">
+					<font fontName="DejaVu Sans" size="10" isBold="true" pdfFontName="DejaVu Sans" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[STT]]></text>
+			</staticText>
+			<!-- Cột Tên Sản Phẩm -->
+			<staticText>
+				<reportElement x="30" y="5" width="200" height="20"/>
+				<textElement textAlignment="Center">
+					<font fontName="DejaVu Sans" size="10" isBold="true" pdfFontName="DejaVu Sans" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[Tên Sản Phẩm]]></text>
+			</staticText>
+			<!-- Cột IMEI -->
+			<staticText>
+				<reportElement x="230" y="5" width="200" height="20"/>
+				<textElement textAlignment="Center">
+					<font fontName="DejaVu Sans" size="10" isBold="true" pdfFontName="DejaVu Sans" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[IMEI]]></text>
+			</staticText>
+			<!-- Cột Đơn Giá -->
+			<staticText>
+				<reportElement x="430" y="5" width="125" height="20"/>
+				<textElement textAlignment="Center">
+					<font fontName="DejaVu Sans" size="10" isBold="true" pdfFontName="DejaVu Sans" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[Đơn Giá]]></text>
+			</staticText>
+			<!-- Viền dưới của header -->
+			<line>
+				<reportElement x="0" y="29" width="555" height="1"/>
+			</line>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="25" splitType="Stretch">
+			<!-- Viền trái -->
+			<line>
+				<reportElement x="0" y="0" width="1" height="25"/>
+			</line>
+			<!-- Cột STT -->
+			<textField>
+				<reportElement x="0" y="0" width="30" height="25"/>
+				<textElement textAlignment="Center">
+					<font fontName="DejaVu Sans" size="10" pdfFontName="DejaVu Sans" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{stt}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="30" y="0" width="1" height="25"/>
+			</line>
+			<!-- Cột Tên Sản Phẩm -->
+			<textField>
+				<reportElement x="31" y="0" width="199" height="25"/>
+				<textElement textAlignment="Left">
+					<font fontName="DejaVu Sans" size="10" pdfFontName="DejaVu Sans" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{tenSanPham}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="230" y="0" width="1" height="25"/>
+			</line>
+			<!-- Cột IMEI -->
+			<textField>
+				<reportElement x="231" y="0" width="199" height="25"/>
+				<textElement textAlignment="Left">
+					<font fontName="DejaVu Sans" size="10" pdfFontName="DejaVu Sans" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{imel}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="430" y="0" width="1" height="25"/>
+			</line>
+			<!-- Cột Đơn Giá -->
+			<textField>
+				<reportElement x="431" y="0" width="124" height="25"/>
+				<textElement textAlignment="Right">
+					<font fontName="DejaVu Sans" size="10" pdfFontName="DejaVu Sans" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{gia}]]></textFieldExpression>
+			</textField>
+			<!-- Viền phải -->
+			<line>
+				<reportElement x="554" y="0" width="1" height="25"/>
+			</line>
+			<!-- Viền dưới mỗi hàng -->
+			<line>
+				<reportElement x="0" y="24" width="555" height="1"/>
+			</line>
+		</band>
+	</detail>
 	<columnFooter>
-		<band height="45" splitType="Stretch"/>
+		<band height="60" splitType="Stretch"> <!-- Tăng chiều cao từ 40 lên 60 -->
+			<!-- Tổng Tiền -->
+			<staticText>
+				<reportElement x="350" y="10" width="80" height="20"/>
+				<textElement textAlignment="Right">
+					<font fontName="DejaVu Sans" size="10" isBold="true" pdfFontName="DejaVu Sans" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[Tổng Tiền:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="430" y="10" width="125" height="20"/>
+				<textElement textAlignment="Right">
+					<font fontName="DejaVu Sans" size="10" pdfFontName="DejaVu Sans" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{tongTien}]]></textFieldExpression>
+			</textField>
+			<!-- Tổng Tiền Sau Giảm -->
+			<staticText>
+				<reportElement x="350" y="30" width="80" height="20"/>
+				<textElement textAlignment="Right">
+					<font fontName="DejaVu Sans" size="10" isBold="true" pdfFontName="DejaVu Sans" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[Tổng Tiền Sau Giảm:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="430" y="30" width="125" height="20"/>
+				<textElement textAlignment="Right">
+					<font fontName="DejaVu Sans" size="10" pdfFontName="DejaVu Sans" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{tongTienSauGiam}]]></textFieldExpression>
+			</textField>
+		</band>
 	</columnFooter>
 	<pageFooter>
-		<band height="54" splitType="Stretch"/>
+		<band height="30" splitType="Stretch"/>
 	</pageFooter>
 	<summary>
-		<band height="42" splitType="Stretch"/>
+		<band height="20" splitType="Stretch"/>
 	</summary>
 </jasperReport>
