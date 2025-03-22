@@ -4,7 +4,6 @@ import com.example.graduation_project_group_2_mobileworld.dto.hoa_don.HoaDonChiT
 import com.example.graduation_project_group_2_mobileworld.dto.hoa_don.HoaDonDTO;
 import net.sf.jasperreports.engine.*;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
-import net.sf.jasperreports.engine.util.JRLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
@@ -51,6 +50,7 @@ public class InHoaDonPDF {
                 Map<String, Object> parameters = new HashMap<>();
                 parameters.put("maHoaDon", hoaDon.getMa() != null ? hoaDon.getMa() : "N/A");
                 parameters.put("tenKhachHang", hoaDon.getTenKhachHang() != null ? hoaDon.getTenKhachHang() : "N/A");
+                parameters.put("tenNhanVien", hoaDon.getIdNhanVien().getTenNhanVien() != null ? hoaDon.getIdNhanVien().getTenNhanVien() : "N/A");
 
                 SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
                 parameters.put("ngayBan", hoaDon.getNgayTao() != null ? dateFormat.format(hoaDon.getNgayTao()) : "N/A");
