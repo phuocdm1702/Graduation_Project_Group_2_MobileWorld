@@ -131,6 +131,7 @@ public class dot_giam_gia_service {
             Set<String> addedCTSP = new HashSet<>();
 
             for (viewCTSPDTO ctspDTO : dsCTSP) {
+                //Tìm kiếm những dữ liệu CTSP có tồn tại
                 if (ctspDTO.getSelected() == null || !ctspDTO.getSelected()) continue;
                 Integer idCTSP = ctspDTO.getCtsp().getId();
                 ChiTietSanPham selectedChiTietSanPham = dsChiTietSanPham.stream()
@@ -162,7 +163,7 @@ public class dot_giam_gia_service {
                     if (!existingInOtherDot.isEmpty()) {
                         for (ChiTietDotGiamGia existing : existingInOtherDot) {
                             if (!existing.getIdDotGiamGia().getId().equals(dotGiamGia.getId())) {
-                                if (existing.getIdDotGiamGia().getNgayKetThuc().equals(dotGiamGia.getNgayKetThuc())) {
+                                if (existing.getIdDotGiamGia().getNgayKetThuc().equals(dotGiamGia.getNgayKetThuc())) { // Xử lý trùng ngày kết thúc
                                     if (giaSauKhiGiam.compareTo(existing.getGiaSauKhiGiam()) < 0) {
                                         existing.setDeleted(true);
                                         repo2.save(existing);
@@ -174,7 +175,7 @@ public class dot_giam_gia_service {
                                                 " vì giá không thấp hơn đợt " + existing.getIdDotGiamGia().getId());
                                         continue;
                                     }
-                                } else if (isOverlapping(
+                                } else if (isOverlapping( //Xử lý nằm trong thời gian của đợt khác
                                         existing.getIdDotGiamGia().getNgayBatDau(),
                                         existing.getIdDotGiamGia().getNgayKetThuc(),
                                         dotGiamGia.getNgayBatDau(),
@@ -255,20 +256,11 @@ public class dot_giam_gia_service {
         }
     }
 
-    // Hàm kiểm tra thời gian trùng lặp (sửa lại)
+    // Hàm kiểm tra thời gian trùng lặp
     private boolean isOverlapping3(Date start1, Date end1, Date start2, Date end2) {
         return !start1.after(end2) && !start2.after(end1);  // start1 <= end2 && start2 <= end1
     }
 
-
-//    public void deleteChiTietDotGiamGiaById(Integer id) {
-//        try {
-//            repo2.updateChiTietDotGiamGiaDeleted(id);
-//        } catch (Exception e) {
-//            System.err.println("Lỗi khi cập nhật ChiTietDotGiamGia: " + e.getMessage());
-//            throw e;
-//        }
-//    }
 
     public List<SanPham> getThatDongSanPham(Integer id) {
         return repository.getThatDongSanPham(id);
@@ -335,7 +327,7 @@ public class dot_giam_gia_service {
             Set<String> addedCTSP = new HashSet<>();
             Set<Integer> selectedCTSPIds = selectedCTSPMap.keySet();
 
-            // Xóa các bản ghi không còn được chọn trong idDotGiamGia hiện tại
+            // Xóa bản ghi không được chọn khi cập nhật idDotGiamGia hiện tại
             List<ChiTietDotGiamGia> existingChiTietList = repo2.findByIdDotGiamGia(dotGiamGia);
             for (ChiTietDotGiamGia chiTiet : existingChiTietList) {
                 Integer idCTSP = chiTiet.getIdChiTietSanPham().getId();
@@ -345,7 +337,7 @@ public class dot_giam_gia_service {
                 }
             }
 
-            // Xử lý thêm hoặc cập nhật ChiTietDotGiamGia
+            // Xử lý thêm/ cập nhật ChiTietDotGiamGia
             for (viewCTSPDTO ctspDTO : dsCTSP) {
                 if (ctspDTO.getSelected() == null || !ctspDTO.getSelected()) continue;
 
@@ -356,7 +348,7 @@ public class dot_giam_gia_service {
                         .orElse(null);
                 if (selectedChiTietSanPham == null) continue;
 
-                // Lấy tất cả ChiTietSanPham có cùng idSanPham, idMauSac, idBoNhoTrong
+                // Lấy tất cả ChiTietSanPham cùng idSanPham, idMauSac, idBoNhoTrong
                 List<ChiTietSanPham> matchingChiTietSanPhams = dsChiTietSanPham.stream()
                         .filter(ctsp -> ctsp.getIdSanPham().getId().equals(selectedChiTietSanPham.getIdSanPham().getId()) &&
                                 ctsp.getIdMauSac().getId().equals(selectedChiTietSanPham.getIdMauSac().getId()) &&
@@ -372,7 +364,7 @@ public class dot_giam_gia_service {
                     String key = idCTSPInGroup + "_" + giaBanDau;
                     if (addedCTSP.contains(key)) continue;
 
-                    // Kiểm tra xem idChiTietSanPham đã tồn tại trong đợt giảm giá khác chưa
+                    // Kiểm tra idChiTietSanPham đã tồn tại trong đợt giảm giá ko
                     List<ChiTietDotGiamGia> existingInOtherDot = repo2.findByIdChiTietSanPhamAndDeleted(chiTietSanPham, false);
                     boolean shouldAdd = true;
 
@@ -407,7 +399,7 @@ public class dot_giam_gia_service {
 
                     if (!shouldAdd) continue;
 
-                    // Thêm hoặc cập nhật bản ghi trong idDotGiamGia hiện tại
+                    // Thêm/ cập nhật bản ghi trong idDotGiamGia hiện tại
                     List<ChiTietDotGiamGia> deletedRecords = repo2.findByDotGiamGiaAndIdChiTietSanPhamAndGiaBanDauAndDeleted(
                             dotGiamGia, chiTietSanPham, giaBanDau, true);
                     if (!deletedRecords.isEmpty()) {
