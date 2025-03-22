@@ -212,22 +212,26 @@ public class KhachHangServices {
         return khachHangRepository.save(khachHang);
     }
 
-    public void importKhachHang(List<KhachHang> khachHangs) {
-        for (KhachHang khachHang : khachHangs) {
-            Optional<KhachHang> existingKhachHang = khachHangRepository.findByMa(khachHang.getMa());
+    public void importKhachHangFromExcel(List<KhachHangDTO> khachHangDTOs) {
+        for (KhachHangDTO dto : khachHangDTOs) {
+            if (dto.getMa() == null || dto.getTenKH() == null || dto.getEmail() == null) {
+                throw new IllegalArgumentException("Mã, tên hoặc email khách hàng không được để trống!");
+            }
 
+            Optional<KhachHang> existingKhachHang = khachHangRepository.findByMa(dto.getMa());
             if (existingKhachHang.isPresent()) {
                 // Cập nhật khách hàng hiện có
                 KhachHang existing = existingKhachHang.get();
-                existing.setTen(khachHang.getTen());
-                existing.setDeleted(khachHang.isDeleted());
+                existing.setTen(dto.getTenKH());
+                existing.setDeleted(dto.getGioiTinh() != null ? dto.getGioiTinh() : false);
                 existing.setUpdatedAt(new Date());
 
-                if (existing.getIdTaiKhoan() != null && khachHang.getIdTaiKhoan() != null) {
+                if (existing.getIdTaiKhoan() != null) {
                     TaiKhoan taiKhoan = taiKhoanRepository.findById(existing.getIdTaiKhoan().getId())
                             .orElseThrow(() -> new RuntimeException("Tài khoản không tồn tại!"));
-                    taiKhoan.setEmail(khachHang.getIdTaiKhoan().getEmail());
-                    taiKhoan.setSoDienThoai(khachHang.getIdTaiKhoan().getSoDienThoai());
+                    taiKhoan.setEmail(dto.getEmail());
+                    taiKhoan.setSoDienThoai(dto.getSoDienThoai());
+                    taiKhoan.setTenDangNhap(dto.getUserName() != null ? dto.getUserName() : dto.getEmail());
                     taiKhoanRepository.save(taiKhoan);
                 }
 
@@ -237,20 +241,22 @@ public class KhachHangServices {
                             .filter(DiaChiKhachHang::getMacDinh)
                             .findFirst()
                             .orElse(existingAddresses.get(0));
-                    defaultAddress.setDiaChiCuThe(khachHang.getIdDiaChiKH().getDiaChiCuThe());
-                    defaultAddress.setThanhPho(khachHang.getIdDiaChiKH().getThanhPho());
-                    defaultAddress.setQuan(khachHang.getIdDiaChiKH().getQuan());
-                    defaultAddress.setPhuong(khachHang.getIdDiaChiKH().getPhuong());
+                    defaultAddress.setDiaChiCuThe(dto.getDiaChiCuThe() != null ? dto.getDiaChiCuThe() : "Chưa có dữ liệu");
+                    defaultAddress.setThanhPho(dto.getThanhPho() != null ? dto.getThanhPho() : "N/A");
+                    defaultAddress.setQuan(dto.getQuan() != null ? dto.getQuan() : "N/A");
+                    defaultAddress.setPhuong(dto.getPhuong() != null ? dto.getPhuong() : "N/A");
                     diaChiKhachHangRepo.save(defaultAddress);
                 } else {
                     DiaChiKhachHang diaChi = new DiaChiKhachHang();
+                    diaChi.setMa(MaDchi());
                     diaChi.setIdKhachHang(existing);
-                    diaChi.setDiaChiCuThe(khachHang.getIdDiaChiKH().getDiaChiCuThe());
-                    diaChi.setThanhPho(khachHang.getIdDiaChiKH().getThanhPho());
-                    diaChi.setQuan(khachHang.getIdDiaChiKH().getQuan());
-                    diaChi.setPhuong(khachHang.getIdDiaChiKH().getPhuong());
+                    diaChi.setDiaChiCuThe(dto.getDiaChiCuThe() != null ? dto.getDiaChiCuThe() : "Chưa có dữ liệu");
+                    diaChi.setThanhPho(dto.getThanhPho() != null ? dto.getThanhPho() : "N/A");
+                    diaChi.setQuan(dto.getQuan() != null ? dto.getQuan() : "N/A");
+                    diaChi.setPhuong(dto.getPhuong() != null ? dto.getPhuong() : "N/A");
                     diaChi.setMacDinh(true);
                     diaChiKhachHangRepo.save(diaChi);
+                    existing.setIdDiaChiKH(diaChi);
                 }
 
                 khachHangRepository.save(existing);
@@ -261,39 +267,41 @@ public class KhachHangServices {
 
                 TaiKhoan taiKhoan = new TaiKhoan();
                 taiKhoan.setMa(MaTaiKhoan());
-                taiKhoan.setEmail(khachHang.getIdTaiKhoan().getEmail());
-                taiKhoan.setSoDienThoai(khachHang.getIdTaiKhoan().getSoDienThoai());
-                taiKhoan.setTenDangNhap(khachHang.getIdTaiKhoan().getTenDangNhap());
+                taiKhoan.setEmail(dto.getEmail());
+                taiKhoan.setSoDienThoai(dto.getSoDienThoai());
+                taiKhoan.setTenDangNhap(dto.getUserName() != null ? dto.getUserName() : dto.getEmail());
                 taiKhoan.setIdQuyenHan(quyenHan);
-                taiKhoan.setDeleted(false);
+                taiKhoan.setDeleted(dto.getGioiTinh() != null ? dto.getGioiTinh() : false);
 
                 String randomPassword = emailServices.generateRandomPassword(8);
                 taiKhoan.setMatKhau(randomPassword);
                 taiKhoan = taiKhoanRepository.save(taiKhoan);
 
-                try {
-                    emailServices.sendWelcomeEmail(
-                            taiKhoan.getEmail(),
-                            khachHang.getTen(),
-                            taiKhoan.getEmail(),
-                            randomPassword
-                    );
-                } catch (Exception e) {
-                    System.err.println("Lỗi gửi email: " + e.getMessage());
-                }
-
+                KhachHang khachHang = new KhachHang();
+                khachHang.setMa(dto.getMa());
                 khachHang.setIdTaiKhoan(taiKhoan);
-                khachHang.setCreatedAt(khachHang.getCreatedAt() != null ? khachHang.getCreatedAt() : new Date());
+                khachHang.setTen(dto.getTenKH());
+                khachHang.setCreatedAt(dto.getCreatedAt() != null ? dto.getCreatedAt() : new Date());
+                khachHang.setDeleted(dto.getGioiTinh() != null ? dto.getGioiTinh() : false);
                 khachHang = khachHangRepository.save(khachHang);
 
                 DiaChiKhachHang diaChi = new DiaChiKhachHang();
+                diaChi.setMa(MaDchi());
                 diaChi.setIdKhachHang(khachHang);
-                diaChi.setDiaChiCuThe(khachHang.getIdDiaChiKH().getDiaChiCuThe());
-                diaChi.setThanhPho(khachHang.getIdDiaChiKH().getThanhPho());
-                diaChi.setQuan(khachHang.getIdDiaChiKH().getQuan());
-                diaChi.setPhuong(khachHang.getIdDiaChiKH().getPhuong());
+                diaChi.setDiaChiCuThe(dto.getDiaChiCuThe() != null ? dto.getDiaChiCuThe() : "Chưa có dữ liệu");
+                diaChi.setThanhPho(dto.getThanhPho() != null ? dto.getThanhPho() : "N/A");
+                diaChi.setQuan(dto.getQuan() != null ? dto.getQuan() : "N/A");
+                diaChi.setPhuong(dto.getPhuong() != null ? dto.getPhuong() : "N/A");
                 diaChi.setMacDinh(true);
                 diaChiKhachHangRepo.save(diaChi);
+                khachHang.setIdDiaChiKH(diaChi);
+                khachHangRepository.save(khachHang);
+
+                try {
+                    emailServices.sendWelcomeEmail(taiKhoan.getEmail(), khachHang.getTen(), taiKhoan.getEmail(), randomPassword);
+                } catch (Exception e) {
+                    System.err.println("Lỗi gửi email: " + e.getMessage());
+                }
             }
         }
     }

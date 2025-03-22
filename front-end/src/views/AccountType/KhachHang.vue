@@ -12,7 +12,7 @@
                 <input
                   v-model="searchKH"
                   @input="btnSearch"
-                  placeholder="Tìm theo mã,tên,email,sdt...."
+                  placeholder="Tìm theo mã, tên, email, sdt..."
                   type="text"
                   class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-400 outline-none"
                 />
@@ -48,33 +48,9 @@
                   Thêm Khách Hàng
                 </button>
               </router-link>
-              <label for="import-excel" class="cursor-pointer">
-                <div
-                  class="px-4 py-2 bg-green-500 text-white rounded-md flex items-center"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                    class="w-5 h-5 mr-1"
-                  >
-                    <path
-                      d="M19.5 3h-4.5V1.5H9V3H4.5C3.675 3 3 3.675 3 4.5v15c0 .825.675 1.5 1.5 1.5h15c.825 0 1.5-.675 1.5-1.5v-15c0-.825-.675-1.5-1.5-1.5zM9 19.5H7.5v-1.5H9v1.5zm0-3H7.5v-1.5H9v1.5zm0-3H7.5v-1.5H9v1.5zm0-3H7.5V9H9v1.5zm4.5 9H12v-1.5h1.5v1.5zm0-3H12v-1.5h1.5v1.5zm0-3H12v-1.5h1.5v1.5zm0-3H12V9h1.5v1.5zm3 9H15v-1.5h1.5v1.5zm0-3H15v-1.5h1.5v1.5zm0-3H15v-1.5h1.5v1.5zm0-3H15V9h1.5v1.5zM18 7.5H6V6h12v1.5z"
-                    />
-                  </svg>
-                  Nhập bằng Excel
-                </div>
-                <input
-                  id="import-excel"
-                  type="file"
-                  accept=".xlsx, .xls"
-                  class="hidden"
-                  @change="importExcel"
-                />
-              </label>
-              <button
-                @click="exportExcel"
-                class="px-4 py-2 bg-blue-500 text-white rounded-md flex items-center"
+              <label
+                for="excel-upload"
+                class="px-4 py-2 bg-green-500 text-white rounded-md flex items-center cursor-pointer hover:bg-green-600 transition"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -86,7 +62,31 @@
                     d="M19.5 3h-4.5V1.5H9V3H4.5C3.675 3 3 3.675 3 4.5v15c0 .825.675 1.5 1.5 1.5h15c.825 0 1.5-.675 1.5-1.5v-15c0-.825-.675-1.5-1.5-1.5zM9 19.5H7.5v-1.5H9v1.5zm0-3H7.5v-1.5H9v1.5zm0-3H7.5v-1.5H9v1.5zm0-3H7.5V9H9v1.5zm4.5 9H12v-1.5h1.5v1.5zm0-3H12v-1.5h1.5v1.5zm0-3H12v-1.5h1.5v1.5zm0-3H12V9h1.5v1.5zm3 9H15v-1.5h1.5v1.5zm0-3H15v-1.5h1.5v1.5zm0-3H15v-1.5h1.5v1.5zm0-3H15V9h1.5v1.5zM18 7.5H6V6h12v1.5z"
                   />
                 </svg>
-                Xuất bằng Excel
+                Nhập bằng Excel
+                <input
+                  id="excel-upload"
+                  ref="fileInputRef"
+                  type="file"
+                  @change="importExcel"
+                  accept=".xlsx, .xls"
+                  class="hidden"
+                />
+              </label>
+              <button
+                @click="exportToExcel"
+                class="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white font-semibold rounded-lg shadow-md hover:bg-blue-600 transition"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  class="w-5 h-5 mr-1"
+                >
+                  <path
+                    d="M19.5 3h-4.5V1.5H9V3H4.5C3.675 3 3 3.675 3 4.5v15c0 .825.675 1.5 1.5 1.5h15c.825 0 1.5-.675 1.5-1.5v-15c0-.825-.675-1.5-1.5-1.5zM9 19.5H7.5v-1.5H9v1.5zm0-3H7.5v-1.5H9v1.5zm0-3H7.5v-1.5H9v1.5zm0-3H7.5V9H9v1.5zm4.5 9H12v-1.5h1.5v1.5zm0-3H12v-1.5h1.5v1.5zm0-3H12v-1.5h1.5v1.5zm0-3H12V9h1.5v1.5zm3 9H15v-1.5h1.5v1.5zm0-3H15v-1.5h1.5v1.5zm0-3H15v-1.5h1.5v1.5zm0-3H15V9h1.5v1.5zM18 7.5H6V6h12v1.5z"
+                  />
+                </svg>
+                Xuất Excel
               </button>
             </div>
           </div>
@@ -105,7 +105,7 @@
 
     <ConfirmModal
       :show="showConfirmModal"
-      :message="'Bạn có chắc chắn muốn hủy kích hoạt của khách hang ?'"
+      :message="'Bạn có chắc chắn muốn hủy kích hoạt của khách hàng?'"
       @confirm="confirmDelete"
       @cancel="showConfirmModal = false"
     />
@@ -118,6 +118,10 @@
       @page-changed="goToPage"
     />
   </footer>
+
+  <div v-if="isLoading" class="fixed inset-0 flex items-center justify-center bg-gray-500 bg-opacity-50 z-50">
+    <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-blue-500"></div>
+  </div>
 </template>
 
 <script setup>
@@ -131,6 +135,7 @@ import ToastNotification from "@/components/ToastNotification.vue";
 import useCustomerManagement from "./useCustomerManagement";
 
 const toastRef = ref(null);
+const fileInputRef = ref(null); // Added for template binding
 
 const customerManagement = useCustomerManagement(toastRef);
 
@@ -151,14 +156,20 @@ const {
   backSearch,
   showDeleteConfirm,
   confirmDelete,
-  editCustomer,
   goToPage,
   importExcel,
-  exportExcel, // Thêm exportExcel vào đây
+  exportToExcel,
+  downloadTemplate,
   tableColumns,
   getNestedValue,
   isLoading,
+  fileInputRef: composableFileInputRef, // Renamed to avoid conflict
 } = customerManagement;
+
+// Sync the template ref with the composable ref
+onMounted(() => {
+  composableFileInputRef.value = fileInputRef.value;
+});
 
 const route = useRoute();
 
@@ -191,6 +202,7 @@ onMounted(async () => {
   padding: 10px 20px;
   border-radius: 5px;
   color: white;
+  z-index: 1000;
 }
 .success {
   background: green;
@@ -200,5 +212,9 @@ onMounted(async () => {
 }
 .info {
   background: blue;
+}
+
+input[type="file"] {
+  display: none;
 }
 </style>
