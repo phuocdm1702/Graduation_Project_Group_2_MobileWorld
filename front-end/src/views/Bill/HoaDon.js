@@ -252,16 +252,36 @@ export default function useHoaDonLineList() {
       const contentType = response.headers['content-type'];
       if (contentType === 'application/pdf') {
         const blob = response.data;
-        saveAs(blob, `hoa_don_${id}.pdf`);
-        toast.value?.kshowToast('success', 'In hóa đơn thành công!');
+
+        // Tạo URL tạm thời từ blob để hiển thị PDF
+        const blobUrl = window.URL.createObjectURL(blob);
+
+        // Mở PDF trong một cửa sổ mới và gọi hộp thoại in
+        const printWindow = window.open(blobUrl);
+        if (printWindow) {
+          printWindow.onload = () => {
+            printWindow.print(); // Mở hộp thoại in
+            // Tự động đóng cửa sổ sau khi in (tùy chọn)
+            printWindow.onafterprint = () => {
+              printWindow.close();
+            };
+          };
+          toast.value?.kshowToast('success', 'Mở hộp thoại in thành công!');
+        } else {
+          console.error('Không thể mở cửa sổ in. Vui lòng kiểm tra trình chặn popup.');
+          toast.value?.kshowToast('error', 'Không thể mở cửa sổ in!');
+        }
+
+        // Giải phóng URL blob sau khi sử dụng
+        window.URL.revokeObjectURL(blobUrl);
       } else {
         const text = await response.data.text();
         console.error('Error response from server:', text);
         toast.value?.kshowToast('error', text);
       }
     } catch (error) {
-      console.error('Lỗi khi in hóa đơn:', error);
-      let errorMessage = 'Không thể in hóa đơn!';
+      console.error('Lỗi khi mở hộp thoại in:', error);
+      let errorMessage = 'Không thể mở hộp thoại in!';
       if (error.response && error.response.data) {
         const text = await error.response.data.text();
         console.error('Error response from server:', text);
@@ -270,23 +290,26 @@ export default function useHoaDonLineList() {
       toast.value?.kshowToast('error', errorMessage);
     }
   };
+  
   // const printInvoice = async (id) => {
   //   try {
-  //     const url = `http://localhost:8080/hoa-don/print/${id}`;
-  //     const newWindow = window.open(url, '_blank');
+  //     const response = await axios.get(`http://localhost:8080/hoa-don/print/${id}`, {
+  //       responseType: 'blob',
+  //     });
   //
-  //     if (newWindow) {
-  //       newWindow.onload = () => {
-  //         newWindow.print(); // Gọi cửa sổ in mặc định
-  //       };
+  //     const contentType = response.headers['content-type'];
+  //     if (contentType === 'application/pdf') {
+  //       const blob = response.data;
+  //       saveAs(blob, `hoa_don_${id}.pdf`);
+  //       toast.value?.kshowToast('success', 'In hóa đơn thành công!');
   //     } else {
-  //       throw new Error('Trình duyệt đã chặn mở tab mới. Vui lòng cho phép popup để in hóa đơn.');
+  //       const text = await response.data.text();
+  //       console.error('Error response from server:', text);
+  //       toast.value?.kshowToast('error', text);
   //     }
-  //
-  //     toast.value?.kshowToast('success', 'Đã mở cửa sổ in hóa đơn!');
   //   } catch (error) {
-  //     console.error('Lỗi khi mở hóa đơn:', error);
-  //     let errorMessage = error.message || 'Không thể mở hóa đơn!';
+  //     console.error('Lỗi khi in hóa đơn:', error);
+  //     let errorMessage = 'Không thể in hóa đơn!';
   //     if (error.response && error.response.data) {
   //       const text = await error.response.data.text();
   //       console.error('Error response from server:', text);
@@ -295,6 +318,7 @@ export default function useHoaDonLineList() {
   //     toast.value?.kshowToast('error', errorMessage);
   //   }
   // };
+
   const exportExcel = async () => {
     try {
       const response = await axios.get('http://localhost:8080/hoa-don/exportExcel', {
