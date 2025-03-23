@@ -9,12 +9,18 @@ import com.example.graduation_project_group_2_mobileworld.entity.HoaDon;
 import com.example.graduation_project_group_2_mobileworld.entity.HoaDonChiTiet;
 import com.example.graduation_project_group_2_mobileworld.entity.LichSuHoaDon;
 import com.example.graduation_project_group_2_mobileworld.repository.hoa_don.HoaDonRepository;
+import com.itextpdf.io.exceptions.IOException;
+import com.itextpdf.io.source.ByteArrayOutputStream;
+import jakarta.servlet.http.HttpServletResponse;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -25,12 +31,11 @@ public class HoaDonService {
     private final HoaDonRepository hoaDonRepository;
     private final InHoaDonPDF inHoaDonPDF;
 
+
     public HoaDonService(HoaDonRepository hoaDonRepository, InHoaDonPDF inHoaDonPDF) {
         this.hoaDonRepository = hoaDonRepository;
         this.inHoaDonPDF = inHoaDonPDF;
     }
-
-
 
     public List<HoaDonDTO> getAllData() {
         return hoaDonRepository.findAll()
@@ -49,11 +54,11 @@ public class HoaDonService {
             int page, int size, String keyword, String loaiDon, Long minAmount, Long maxAmount, String startDate, String endDate) {
         Pageable pageable = PageRequest.of(page, size);
 
-        // Chuyển đổi ngày từ String sang LocalDate (nếu có)
-        LocalDate start = (startDate != null && !startDate.isEmpty()) ?
-                LocalDate.parse(startDate, DateTimeFormatter.ofPattern("yyyy-MM-dd")) : null;
-        LocalDate end = (endDate != null && !endDate.isEmpty()) ?
-                LocalDate.parse(endDate, DateTimeFormatter.ofPattern("yyyy-MM-dd")) : null;
+        // Chuyển đổi ngày từ String sang Timestamp (nếu có)
+        Timestamp start = (startDate != null && !startDate.isEmpty()) ?
+                Timestamp.valueOf(LocalDate.parse(startDate, DateTimeFormatter.ofPattern("yyyy-MM-dd")).atStartOfDay()) : null;
+        Timestamp end = (endDate != null && !endDate.isEmpty()) ?
+                Timestamp.valueOf(LocalDate.parse(endDate, DateTimeFormatter.ofPattern("yyyy-MM-dd")).atStartOfDay()) : null;
 
         // Gọi repository với các tham số lọc
         return hoaDonRepository.findHoaDonWithFilters(keyword, loaiDon, minAmount, maxAmount, start, end, pageable)
@@ -78,6 +83,7 @@ public class HoaDonService {
         dto.setDiaChiKhachHang(hoaDon.getDiaChiKhachHang());
         dto.setTenKhachHang(hoaDon.getTenKhachHang());
         dto.setGhiChu(hoaDon.getGhiChu());
+        dto.setPhiVanChuyen(hoaDon.getPhiVanChuyen());
 
         // Ánh xạ chi tiết hóa đơn
         if (hoaDon.getChiTietHoaDon() != null) {
@@ -156,4 +162,23 @@ public class HoaDonService {
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy hóa đơn với ID: " + id));
         return toDTO(hoaDon);
     }
+
+    public void exportHoaDonToExcel(HttpServletResponse response) throws IOException, java.io.IOException {
+        List<HoaDonDTO> listHD = getAllData();
+
+        List<HoaDonChiTietDTO> listCT = new ArrayList<>();
+        for (HoaDonDTO hoaDon : listHD) {
+            if (hoaDon.getChiTietHoaDon() != null) {
+                listCT.addAll(hoaDon.getChiTietHoaDon());
+            }
+        }
+
+        try (XSSFWorkbook workbook = new XSSFWorkbook()) {
+            XSSFSheet sheet1 = workbook.createSheet("DanhSachHoaDon");
+
+            XuatDanhSachHoaDon exporter = new XuatDanhSachHoaDon(workbook, sheet1, listHD, listCT);
+            exporter.export(response);
+        }
+    }
+
 }

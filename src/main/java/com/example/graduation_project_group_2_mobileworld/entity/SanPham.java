@@ -118,4 +118,5 @@ public class SanPham {
 
     @Column(name = "updated_by")
     private Integer updatedBy;
+
 }
