@@ -14,7 +14,7 @@
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label class="block text-sm font-medium text-gray-700">Mã</label>
-              <input type="text" v-model="ma" class="form-input" />
+              <input type="text" v-model="ma" class="form-input" @blur="checkMaTrung" />
               <p v-if="errors.ma" class="error">{{ errors.ma }}</p>
             </div>
             <div>
@@ -78,12 +78,12 @@
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700">Ngày bắt đầu</label>
-              <input type="date" v-model="ngayBatDau" class="form-input" />
+              <input type="date" v-model="ngayBatDau" class="form-input" :min="minDate" />
               <p v-if="errors.ngayBatDau" class="error">{{ errors.ngayBatDau }}</p>
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700">Ngày kết thúc</label>
-              <input type="date" v-model="ngayKetThuc" class="form-input" />
+              <input type="date" v-model="ngayKetThuc" class="form-input" :min="minEndDate" />
               <p v-if="errors.ngayKetThuc" class="error">{{ errors.ngayKetThuc }}</p>
             </div>
           </div>
@@ -150,11 +150,11 @@
           <tbody>
           <tr v-for="customer in filteredCustomers" :key="customer.id" class="border-b hover:bg-gray-50">
             <td class="p-3">
-              <input 
-                type="checkbox" 
-                v-model="selectedCustomers" 
-                :value="customer.id" 
-                class="form-checkbox" 
+              <input
+                type="checkbox"
+                v-model="selectedCustomers"
+                :value="customer.id"
+                class="form-checkbox"
                 :disabled="!riengTu" />
             </td>
             <td class="p-3">{{ customer.ma }}</td>
@@ -216,13 +216,12 @@ const router = useRouter();
 const route = useRoute();
 const quantityType = ref("Nhập số lượng");
 
-
 // Tính toán breadcrumb dựa trên meta của route
 const breadcrumbItems = computed(() => {
   if (typeof route.meta.breadcrumb === "function") {
     return route.meta.breadcrumb(route);
   }
-  return route.meta?.breadcrumb || ["Phiếu Giảm Giá", "Thêm Phiếu Giảm Giá"]; // Mặc định cho trang thêm phiếu giảm giá
+  return route.meta?.breadcrumb || ["Phiếu Giảm Giá", "Thêm Phiếu Giảm Giá"];
 });
 
 const searchQuery = ref("");
@@ -230,25 +229,37 @@ const filteredCustomers = ref([]);
 
 const ma = ref("");
 const tenPhieuGiamGia = ref("");
-const loaiPhieuGiamGia = ref("Phần trăm"); // Đặt mặc định là "Phần trăm"
+const loaiPhieuGiamGia = ref("Phần trăm");
 const phanTramGiamGia = ref("");
 const soTienGiamToiDa = ref("");
 const hoaDonToiThieu = ref("");
 const soLuongDung = ref("");
 const ngayBatDau = ref("");
 const ngayKetThuc = ref("");
-const trangThai = ref(true); // Boolean
-const riengTu = ref(false); // Boolean
+const trangThai = ref(true);
+const riengTu = ref(false);
 const moTa = ref("");
-const deleted = ref(false); // Mặc định là false
+const deleted = ref(false);
 
 const baseURL = "http://localhost:8080/add-phieu-giam-gia";
+
+// Tính ngày hiện tại để làm giá trị min cho ngày bắt đầu
+const today = new Date();
+const minDate = today.toISOString().split("T")[0]; // Định dạng YYYY-MM-DD
+
+// Tính ngày tối thiểu cho ngày kết thúc (dựa trên ngày bắt đầu)
+const minEndDate = computed(() => {
+  if (!ngayBatDau.value) return minDate;
+  const startDate = new Date(ngayBatDau.value);
+  startDate.setDate(startDate.getDate() + 1); // Ngày kết thúc phải sau ngày bắt đầu ít nhất 1 ngày
+  return startDate.toISOString().split("T")[0];
+});
 
 const fetchDataKH = async () => {
   try {
     const response = await axios.get(`${baseURL}/data-kh`);
     customers.value = response.data;
-    filteredCustomers.value = response.data; // Khởi tạo filteredCustomers
+    filteredCustomers.value = response.data;
   } catch (error) {
     console.log("Error: ", error);
   }
@@ -270,6 +281,24 @@ const searchKH = async (query) => {
   }
 };
 
+// Kiểm tra mã trùng
+const checkMaTrung = async () => {
+  if (!ma.value) return;
+  try {
+    const response = await axios.get(`${baseURL}/check-ma`, {
+      params: { ma: ma.value.trim() },
+    });
+    if (response.data.exists) {
+      errors.value.ma = "Mã phiếu đã tồn tại, vui lòng chọn mã khác";
+    } else {
+      delete errors.value.ma;
+    }
+  } catch (error) {
+    console.error("Lỗi khi kiểm tra mã trùng:", error);
+    errors.value.ma = "Lỗi khi kiểm tra mã, vui lòng thử lại";
+  }
+};
+
 // Debounce search
 const debouncedSearchKH = debounce((event) => {
   searchKH(searchQuery.value);
@@ -279,7 +308,7 @@ watch(searchQuery, (newQuery) => {
   if (newQuery.trim().length > 0) {
     debouncedSearchKH();
   } else {
-    filteredCustomers.value = customers.value; // Reset khi xóa search
+    filteredCustomers.value = customers.value;
   }
 });
 
@@ -306,25 +335,64 @@ const errors = ref({});
 const validateForm = () => {
   errors.value = {};
 
+  // Validate mã
   if (!ma.value) errors.value.ma = "Mã phiếu không được để trống";
+
+  // Validate tên phiếu
   if (!tenPhieuGiamGia.value) errors.value.tenPhieuGiamGia = "Tên phiếu không được để trống";
+
+  // Validate loại phiếu
   if (!loaiPhieuGiamGia.value) errors.value.loaiPhieuGiamGia = "Vui lòng chọn loại phiếu";
 
-  if (phanTramGiamGia.value < 0 || phanTramGiamGia.value > 100)
+  // Validate phần trăm giảm giá
+  if (loaiPhieuGiamGia.value === "Phần trăm" && (phanTramGiamGia.value < 0 || phanTramGiamGia.value > 100)) {
     errors.value.phanTramGiamGia = "Phần trăm giảm giá phải từ 0 đến 100";
-  if (soTienGiamToiDa.value < 0) errors.value.soTienGiamToiDa = "Số tiền giảm không hợp lệ";
+  }
+
+  // Validate số tiền giảm tối đa
+  if (loaiPhieuGiamGia.value === "Tiền mặt" && soTienGiamToiDa.value < 0) {
+    errors.value.soTienGiamToiDa = "Số tiền giảm không hợp lệ";
+  }
+
+  // Validate hóa đơn tối thiểu
   if (hoaDonToiThieu.value < 0) errors.value.hoaDonToiThieu = "Hóa đơn tối thiểu không hợp lệ";
 
-  if (!ngayBatDau.value) errors.value.ngayBatDau = "Vui lòng chọn ngày bắt đầu";
-  if (!ngayKetThuc.value) errors.value.ngayKetThuc = "Vui lòng chọn ngày kết thúc";
-  if (ngayBatDau.value && ngayKetThuc.value && ngayBatDau.value > ngayKetThuc.value) {
-    errors.value.ngayKetThuc = "Ngày kết thúc phải sau ngày bắt đầu";
+  // Validate ngày bắt đầu
+  if (!ngayBatDau.value) {
+    errors.value.ngayBatDau = "Vui lòng chọn ngày bắt đầu";
+  } else {
+    const startDate = new Date(ngayBatDau.value);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Đặt giờ về 00:00:00 để so sánh chính xác
+    if (startDate < today) {
+      errors.value.ngayBatDau = "Ngày bắt đầu không được là ngày đã qua";
+    }
+  }
+
+  // Validate ngày kết thúc
+  if (!ngayKetThuc.value) {
+    errors.value.ngayKetThuc = "Vui lòng chọn ngày kết thúc";
+  } else {
+    const startDate = new Date(ngayBatDau.value);
+    const endDate = new Date(ngayKetThuc.value);
+    if (endDate <= startDate) {
+      errors.value.ngayKetThuc = "Ngày kết thúc phải sau ngày bắt đầu";
+    }
+    if (ngayBatDau.value && endDate < new Date(ngayBatDau.value)) {
+      errors.value.ngayKetThuc = "Ngày kết thúc không được trước ngày bắt đầu";
+    }
   }
 
   return Object.keys(errors.value).length === 0;
 };
 
 const submitForm = async () => {
+  // Kiểm tra mã trùng trước khi submit
+  await checkMaTrung();
+  if (errors.value.ma) {
+    return;
+  }
+
   if (!validateForm()) {
     return;
   }

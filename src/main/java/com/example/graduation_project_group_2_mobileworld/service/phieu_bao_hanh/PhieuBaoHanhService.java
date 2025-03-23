@@ -1,15 +1,6 @@
 package com.example.graduation_project_group_2_mobileworld.service.phieu_bao_hanh;
 
-import com.example.graduation_project_group_2_mobileworld.dto.san_pham.imel.ImelDaBanDTO;
-import com.example.graduation_project_group_2_mobileworld.dto.phieu_bao_hanh.PhieuBaoHanhDTO;
-import com.example.graduation_project_group_2_mobileworld.entity.ImelDaBan;
-import com.example.graduation_project_group_2_mobileworld.entity.PhieuBaoHanh;
-import com.example.graduation_project_group_2_mobileworld.repository.san_pham.imel.ImelDaBanRepository;
-import com.example.graduation_project_group_2_mobileworld.repository.bao_hanh.PhieuBaoHanhRepository;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 public class PhieuBaoHanhService {
