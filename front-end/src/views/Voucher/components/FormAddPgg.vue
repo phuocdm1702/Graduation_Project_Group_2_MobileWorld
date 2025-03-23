@@ -4,7 +4,8 @@
   <div class="flex h-screen p-4 bg-gray-100 gap-4">
     <!-- Form Container -->
     <div class="w-2/3 p-6 bg-white rounded-lg shadow-md">
-      <form @submit.prevent="submitForm">
+      <ToastNotification ref="toast"/>
+      <form @submit.prevent="handleSubmit">
         <!-- Header -->
         <h3 class="text-xl font-semibold mb-4 text-gray-800">Thêm Phiếu Giảm Giá</h3>
 
@@ -200,6 +201,14 @@
       </div>
     </div>
   </div>
+
+  <!-- ConfirmModal for the "Thêm" button -->
+  <ConfirmModal
+    :show="showConfirmModal"
+    :message="confirmMessage"
+    @confirm="executeConfirmedAction"
+    @cancel="closeConfirmModal"
+  />
 </template>
 
 <script setup>
@@ -209,6 +218,10 @@ import axios from "axios";
 import { debounce } from "lodash";
 import BreadcrumbWrapper from "@/components/BreadcrumbWrapper.vue";
 import ToggleSwitch from "@/components/ToggleSwitch.vue";
+import ToastNotification from "@/components/ToastNotification.vue";
+import ConfirmModal from "@/components/ConfirmModal.vue"; // Import ConfirmModal
+
+const toast = ref(null); // Ref để truy cập ToastNotification
 
 const customers = ref([]);
 const selectedCustomers = ref([]);
@@ -240,6 +253,29 @@ const trangThai = ref(true);
 const riengTu = ref(false);
 const moTa = ref("");
 const deleted = ref(false);
+
+// Modal state
+const showConfirmModal = ref(false);
+const confirmMessage = ref('');
+const confirmedAction = ref(null);
+
+const confirmAction = (message, action) => {
+  confirmMessage.value = message;
+  confirmedAction.value = action;
+  showConfirmModal.value = true;
+};
+
+const executeConfirmedAction = () => {
+  if (confirmedAction.value) {
+    confirmedAction.value();
+  }
+  closeConfirmModal();
+};
+
+const closeConfirmModal = () => {
+  showConfirmModal.value = false;
+  confirmedAction.value = null;
+};
 
 const baseURL = "http://localhost:8080/add-phieu-giam-gia";
 
@@ -281,24 +317,6 @@ const searchKH = async (query) => {
   }
 };
 
-// Kiểm tra mã trùng
-const checkMaTrung = async () => {
-  if (!ma.value) return;
-  try {
-    const response = await axios.get(`${baseURL}/check-ma`, {
-      params: { ma: ma.value.trim() },
-    });
-    if (response.data.exists) {
-      errors.value.ma = "Mã phiếu đã tồn tại, vui lòng chọn mã khác";
-    } else {
-      delete errors.value.ma;
-    }
-  } catch (error) {
-    console.error("Lỗi khi kiểm tra mã trùng:", error);
-    errors.value.ma = "Lỗi khi kiểm tra mã, vui lòng thử lại";
-  }
-};
-
 // Debounce search
 const debouncedSearchKH = debounce((event) => {
   searchKH(searchQuery.value);
@@ -335,29 +353,22 @@ const errors = ref({});
 const validateForm = () => {
   errors.value = {};
 
-  // Validate mã
   if (!ma.value) errors.value.ma = "Mã phiếu không được để trống";
 
-  // Validate tên phiếu
   if (!tenPhieuGiamGia.value) errors.value.tenPhieuGiamGia = "Tên phiếu không được để trống";
 
-  // Validate loại phiếu
   if (!loaiPhieuGiamGia.value) errors.value.loaiPhieuGiamGia = "Vui lòng chọn loại phiếu";
 
-  // Validate phần trăm giảm giá
   if (loaiPhieuGiamGia.value === "Phần trăm" && (phanTramGiamGia.value < 0 || phanTramGiamGia.value > 100)) {
     errors.value.phanTramGiamGia = "Phần trăm giảm giá phải từ 0 đến 100";
   }
 
-  // Validate số tiền giảm tối đa
   if (loaiPhieuGiamGia.value === "Tiền mặt" && soTienGiamToiDa.value < 0) {
     errors.value.soTienGiamToiDa = "Số tiền giảm không hợp lệ";
   }
 
-  // Validate hóa đơn tối thiểu
   if (hoaDonToiThieu.value < 0) errors.value.hoaDonToiThieu = "Hóa đơn tối thiểu không hợp lệ";
 
-  // Validate ngày bắt đầu
   if (!ngayBatDau.value) {
     errors.value.ngayBatDau = "Vui lòng chọn ngày bắt đầu";
   } else {
@@ -369,7 +380,6 @@ const validateForm = () => {
     }
   }
 
-  // Validate ngày kết thúc
   if (!ngayKetThuc.value) {
     errors.value.ngayKetThuc = "Vui lòng chọn ngày kết thúc";
   } else {
@@ -387,13 +397,13 @@ const validateForm = () => {
 };
 
 const submitForm = async () => {
-  // Kiểm tra mã trùng trước khi submit
-  await checkMaTrung();
-  if (errors.value.ma) {
-    return;
-  }
-
+  
   if (!validateForm()) {
+    if (toast.value && toast.value.kshowToast) {
+      toast.value.kshowToast('warning', 'Vui lòng kiểm tra lại thông tin');
+    } else {
+      console.error("Toast component is not available or kshowToast is not defined");
+    }
     return;
   }
 
@@ -418,15 +428,37 @@ const submitForm = async () => {
   try {
     const response = await axios.post(`${baseURL}/addPhieuGiamGia`, newPgg);
     console.log("Response: ", response);
-    alert("Thêm phiếu giảm giá thành công!");
+    if (toast.value && toast.value.kshowToast) {
+      toast.value.kshowToast('success', 'Thêm phiếu giảm giá thành công!');
+    } else {
+      console.error("Toast component is not available or kshowToast is not defined");
+    }
     await router.push("/phieu-giam-gia");
   } catch (error) {
     console.error("Lỗi khi thêm phiếu giảm giá:", error);
-    alert("Thêm thất bại, vui lòng kiểm tra lại!");
+    if (toast.value && toast.value.kshowToast) {
+      toast.value.kshowToast('error', 'Thêm thất bại, vui lòng thử lại!');
+    } else {
+      console.error("Toast component is not available or kshowToast is not defined");
+    }
   }
 };
 
-onMounted(fetchDataKH);
+// Handle form submission with confirmation
+const handleSubmit = () => {
+  confirmAction('Bạn có chắc chắn muốn thêm phiếu giảm giá này không?', submitForm);
+};
+
+onMounted(() => {
+  fetchDataKH();
+  // Debug: Kiểm tra xem toast ref đã được khởi tạo chưa
+  if (toast.value) {
+    console.log("Toast component is mounted:", toast.value);
+    console.log("kshowToast method available:", !!toast.value.kshowToast);
+  } else {
+    console.warn("Toast component is not mounted yet");
+  }
+});
 </script>
 
 <style scoped>

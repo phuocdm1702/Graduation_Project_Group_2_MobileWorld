@@ -172,7 +172,7 @@ export default function usePhieuGiamGia() {
     { key: "hoaDonToiThieu", 
       label: "Hóa\nĐơn\nTối\nThiểu", 
       formatter: (value, item) => {
-        return value.toLocaleString("vi-VN") + "VND";
+        return value.toLocaleString("vi-VN") + " VND";
       }
     },
     { key: "ngayBatDau", label: "Ngày\nBĐ", formatter: (value) => new Date(value).toLocaleDateString("vi-VN") },
