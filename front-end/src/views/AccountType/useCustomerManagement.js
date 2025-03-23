@@ -11,7 +11,6 @@ export default function useCustomerManagement(toastRef) {
 
   const dataTable = ref([]);
   const originalData = ref([]);
-  const allData = ref([]);
   const searchKH = ref("");
   const filterStatus = ref("tat-ca");
   const currentPage = ref(0);
@@ -22,7 +21,7 @@ export default function useCustomerManagement(toastRef) {
   const showConfirmModal = ref(false);
   const selectedCustomerId = ref(null);
   const isLoading = ref(false);
-  const fileInputRef = ref(null); // Added for file input management
+  const fileInputRef = ref(null);
   const itemsPerPage = 5;
 
   const showToast = (toastType, msg) => {
@@ -38,14 +37,11 @@ export default function useCustomerManagement(toastRef) {
     }
   };
 
-  const fetchCustomers = async (page = 0) => {
+  const fetchCustomers = async () => {
     isLoading.value = true;
     try {
-      const params = { page, size: itemsPerPage };
-      const res = await axios.get("http://localhost:8080/khach-hang/home", { params });
-      originalData.value = res.data.content || res.data || [];
-      totalPages.value = res.data.totalPages || 1;
-      currentPage.value = page;
+      const res = await axios.get("http://localhost:8080/khach-hang/home");
+      originalData.value = res.data || [];
 
       for (const customer of originalData.value) {
         const addressRes = await axios.get(`http://localhost:8080/dia-chi/getByKhachHang/${customer.id}`);
@@ -64,6 +60,7 @@ export default function useCustomerManagement(toastRef) {
         const parsedCustomer = JSON.parse(newCustomer);
         originalData.value.unshift(parsedCustomer);
         router.replace({ query: null });
+        currentPage.value = 0; // Đặt lại về trang đầu
       }
 
       applyFilterAndSearch();
@@ -76,56 +73,11 @@ export default function useCustomerManagement(toastRef) {
     }
   };
 
-  const fetchAllCustomers = async () => {
-    isLoading.value = true;
-    try {
-      let allCustomers = [];
-      let page = 0;
-      let hasMore = true;
-
-      while (hasMore) {
-        const params = { page, size: itemsPerPage };
-        const res = await axios.get("http://localhost:8080/khach-hang/home", { params });
-        const customers = res.data.content || res.data || [];
-        allCustomers = [...allCustomers, ...customers];
-
-        for (const customer of customers) {
-          const addressRes = await axios.get(`http://localhost:8080/dia-chi/getByKhachHang/${customer.id}`);
-          const addresses = addressRes.data || [];
-          const defaultAddress = addresses.find((addr) => addr.macDinh) || addresses[0] || {};
-          customer.idDiaChiKH = {
-            diaChiCuThe: defaultAddress.diaChiCuThe || "Chưa có dữ liệu",
-            thanhPho: defaultAddress.thanhPho || "N/A",
-            quan: defaultAddress.quan || "N/A",
-            phuong: defaultAddress.phuong || "N/A",
-          };
-        }
-
-        if (customers.length < itemsPerPage || page >= res.data.totalPages - 1) {
-          hasMore = false;
-        } else {
-          page++;
-        }
-      }
-
-      allData.value = allCustomers;
-      applyFilterAndSearch();
-    } catch (error) {
-      console.error("Lỗi khi lấy toàn bộ danh sách khách hàng:", error);
-      showToast("error", "Không thể lấy toàn bộ danh sách khách hàng!");
-    } finally {
-      isLoading.value = false;
-    }
-  };
-
   const applyFilterAndSearch = () => {
-    let filteredData = [];
+    let filteredData = [...originalData.value];
 
-    if (searchKH.value.trim() || filterStatus.value !== "tat-ca") {
-      filteredData = [...allData.value];
-    } else {
-      filteredData = [...originalData.value];
-    }
+    // Sắp xếp theo createdAt giảm dần (mới nhất lên đầu)
+    filteredData.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
     if (filterStatus.value === "kich-hoat") {
       filteredData = filteredData.filter((kh) => !kh.deleted);
@@ -149,28 +101,27 @@ export default function useCustomerManagement(toastRef) {
   };
 
   const btnSearch = () => {
-    if (!allData.value.length) {
-      fetchAllCustomers();
-    } else {
-      currentPage.value = 0;
-      applyFilterAndSearch();
-    }
+    currentPage.value = 0;
+    applyFilterAndSearch();
+  };
+
+  const onFilterChange = () => {
+    currentPage.value = 0;
+    applyFilterAndSearch();
   };
 
   const backSearch = async () => {
     searchKH.value = "";
     filterStatus.value = "tat-ca";
     currentPage.value = 0;
-    allData.value = [];
-    await fetchCustomers(0);
+    await fetchCustomers();
   };
 
   const toggleStatus = async (id) => {
     try {
       isLoading.value = true;
       const response = await axios.put(`http://localhost:8080/khach-hang/toggle-status/${id}`);
-      await fetchCustomers(currentPage.value);
-      allData.value = [];
+      await fetchCustomers();
       showToast("success", response.data.message || "Đã thay đổi trạng thái thành công!");
     } catch (error) {
       console.error("Lỗi khi thay đổi trạng thái:", error);
@@ -191,8 +142,7 @@ export default function useCustomerManagement(toastRef) {
     try {
       await axios.put(`http://localhost:8080/khach-hang/delete/${selectedCustomerId.value}`);
       showToast("success", "Hủy kích hoạt khách hàng thành công!");
-      await fetchCustomers(currentPage.value);
-      allData.value = [];
+      await fetchCustomers();
     } catch (error) {
       console.error("Lỗi khi xóa khách hàng:", error);
       showToast("error", "Không thể xóa khách hàng!");
@@ -204,12 +154,8 @@ export default function useCustomerManagement(toastRef) {
 
   const goToPage = (page) => {
     if (page >= 0 && page < totalPages.value && page !== currentPage.value) {
-      if (searchKH.value.trim() || filterStatus.value !== "tat-ca") {
-        currentPage.value = page;
-        applyFilterAndSearch();
-      } else {
-        fetchCustomers(page);
-      }
+      currentPage.value = page;
+      applyFilterAndSearch();
     }
   };
 
@@ -279,7 +225,6 @@ export default function useCustomerManagement(toastRef) {
             };
           });
 
-          // Validation
           for (let i = 0; i < customersFromExcel.length; i++) {
             const customer = customersFromExcel[i];
             if (customer.ma === "N/A") {
@@ -308,21 +253,16 @@ export default function useCustomerManagement(toastRef) {
             }
           }
 
-          console.log("Dữ liệu gửi lên server:", JSON.stringify(customersFromExcel, null, 2));
           const response = await axios.post("http://localhost:8080/khach-hang/import", customersFromExcel);
-          console.log("Phản hồi từ server:", response.data);
-
           if (response.status === 200) {
             showToast("success", "Nhập dữ liệu khách hàng từ Excel thành công!");
-            await fetchCustomers(currentPage.value);
-            allData.value = [];
+            await fetchCustomers();
           } else {
             showToast("error", "Lưu dữ liệu khách hàng vào server thất bại!");
           }
         } catch (error) {
           console.error("Lỗi trong quá trình đọc file Excel:", error);
           if (error.response) {
-            console.error("Chi tiết lỗi từ server:", error.response.data);
             showToast("error", `Lỗi từ server: ${error.response.data.message || "Không xác định"}`);
           } else {
             showToast("error", "Đọc file Excel thất bại!");
@@ -412,12 +352,10 @@ export default function useCustomerManagement(toastRef) {
     try {
       isLoading.value = true;
 
-      // Lấy tiêu đề từ tableColumns
       const templateHeaders = tableColumns.map((column) => ({
         [column.label]: "",
       }));
 
-      // Tạo một object rỗng với các tiêu đề
       const templateData = [Object.assign({}, ...templateHeaders)];
 
       const worksheet = XLSX.utils.json_to_sheet(templateData);
@@ -609,6 +547,7 @@ export default function useCustomerManagement(toastRef) {
     showToast,
     fetchCustomers,
     btnSearch,
+    onFilterChange,
     backSearch,
     showDeleteConfirm,
     confirmDelete,
@@ -619,6 +558,6 @@ export default function useCustomerManagement(toastRef) {
     tableColumns,
     getNestedValue,
     isLoading,
-    fileInputRef, // Return for template usage
+    fileInputRef,
   };
 }

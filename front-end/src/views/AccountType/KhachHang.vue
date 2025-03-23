@@ -21,7 +21,7 @@
                 <label class="text-sm font-semibold block mb-2">Trạng thái</label>
                 <select
                   v-model="filterStatus"
-                  @change="backSearch"
+                  @change="onFilterChange"
                   class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-400 outline-none"
                 >
                   <option value="tat-ca">Tất cả</option>
@@ -88,7 +88,6 @@
                 </svg>
                 Xuất Excel
               </button>
-
               <button
                 @click="downloadTemplate"
                 class="flex items-center gap-2 px-4 py-2 bg-gray-500 text-white font-semibold rounded-lg shadow-md hover:bg-gray-600 transition"
@@ -152,7 +151,7 @@ import ToastNotification from "@/components/ToastNotification.vue";
 import useCustomerManagement from "./useCustomerManagement";
 
 const toastRef = ref(null);
-const fileInputRef = ref(null); // Added for template binding
+const fileInputRef = ref(null);
 
 const customerManagement = useCustomerManagement(toastRef);
 
@@ -170,6 +169,7 @@ const {
   showToast,
   fetchCustomers,
   btnSearch,
+  onFilterChange,
   backSearch,
   showDeleteConfirm,
   confirmDelete,
@@ -180,7 +180,7 @@ const {
   tableColumns,
   getNestedValue,
   isLoading,
-  fileInputRef: composableFileInputRef, // Renamed to avoid conflict
+  fileInputRef: composableFileInputRef,
 } = customerManagement;
 
 // Sync the template ref with the composable ref
