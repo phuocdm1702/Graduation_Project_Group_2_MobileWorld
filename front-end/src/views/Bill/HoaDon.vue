@@ -182,6 +182,7 @@ const {
   confirmMessage,
   executeConfirmedAction,
   closeConfirmModal,
+  confirmAction,
   minRange,
   maxRange,
   adjustMin,

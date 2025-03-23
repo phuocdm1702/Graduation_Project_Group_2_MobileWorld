@@ -58,7 +58,7 @@ export default function useHoaDonLineList() {
       }
     },
     {
-      key: "phi_van_chuyen",
+      key: "phiVanChuyen",
       label: "Phí",
       formatter: (value) => value ? `${value.toLocaleString()} VND` : "0 VND"
     },
@@ -315,13 +315,40 @@ export default function useHoaDonLineList() {
   //   }
   // };
 
+  // Hàm exportExcel mới: Tạo liên kết tạm thời để trình duyệt hiển thị hộp thoại "Save As"
   const exportExcel = async () => {
     try {
-      const response = await axios.get('http://localhost:8080/hoa-don/exportExcel', {
+      const response = await axios.get('http://localhost:8080/hoa-don/export-excel', {
         responseType: 'blob',
       });
+
+      // Tạo URL tạm thời từ blob
       const blob = response.data;
-      saveAs(blob, 'hoaDon.xlsx');
+      const url = window.URL.createObjectURL(blob);
+
+      // Tạo một thẻ <a> ẩn để kích hoạt tải file
+      const link = document.createElement('a');
+      link.href = url;
+
+      // Lấy tên file từ header Content-Disposition (nếu có)
+      const contentDisposition = response.headers['content-disposition'];
+      let filename = 'DanhSachHoaDon.xlsx'; // Tên mặc định nếu không lấy được từ header
+      if (contentDisposition) {
+        const filenameMatch = contentDisposition.match(/filename="(.+)"/);
+        if (filenameMatch && filenameMatch[1]) {
+          filename = filenameMatch[1];
+        }
+      }
+      link.setAttribute('download', filename); // Đặt tên file
+
+      // Thêm thẻ <a> vào DOM, kích hoạt tải, và xóa thẻ
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      // Giải phóng URL blob
+      window.URL.revokeObjectURL(url);
+
       toast.value?.kshowToast('success', 'Xuất Excel thành công!');
     } catch (error) {
       console.error('Lỗi khi xuất Excel:', error);
@@ -375,6 +402,7 @@ export default function useHoaDonLineList() {
 
   return {
     toast,
+    confirmAction,
     dataTable,
     currentPage,
     totalPages,
@@ -397,6 +425,6 @@ export default function useHoaDonLineList() {
     minRange,
     maxRange,
     adjustMin,
-    adjustMax
+    adjustMax,
   };
 }
