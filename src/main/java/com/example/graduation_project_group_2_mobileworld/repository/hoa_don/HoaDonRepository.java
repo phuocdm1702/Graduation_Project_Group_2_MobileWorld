@@ -8,11 +8,13 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.Optional;
 
 @Repository
 public interface HoaDonRepository extends JpaRepository<HoaDon, Integer> {
+
     @Query("SELECT hd FROM HoaDon hd " +
             "ORDER BY hd.id DESC")
     Page<HoaDon> findAllWithPagination(Pageable pageable);
@@ -35,7 +37,7 @@ public interface HoaDonRepository extends JpaRepository<HoaDon, Integer> {
     Optional<HoaDon> findHoaDonWithDetailsAndHistoryById(@Param("id") Integer id);
 
     @Query("SELECT hd FROM HoaDon hd " +
-            "WHERE (:keyword IS NULL OR hd.ma LIKE %:keyword% OR hd.idNhanVien.tenNhanVien LIKE %:keyword% OR hd.tenKhachHang LIKE %:keyword% OR hd.soDienThoaiKhachHang LIKE %:keyword% ) " +
+            "WHERE (:keyword IS NULL OR hd.ma LIKE %:keyword% OR hd.idNhanVien.tenNhanVien LIKE %:keyword% OR hd.tenKhachHang LIKE %:keyword% OR hd.soDienThoaiKhachHang LIKE %:keyword%) " +
             "AND (:loaiDon IS NULL OR hd.loaiDon = :loaiDon) " +
             "AND (:minAmount IS NULL OR hd.tongTienSauGiam >= :minAmount) " +
             "AND (:maxAmount IS NULL OR hd.tongTienSauGiam <= :maxAmount) " +
@@ -47,7 +49,7 @@ public interface HoaDonRepository extends JpaRepository<HoaDon, Integer> {
             @Param("loaiDon") String loaiDon,
             @Param("minAmount") Long minAmount,
             @Param("maxAmount") Long maxAmount,
-            @Param("startDate") LocalDate startDate,
-            @Param("endDate") LocalDate endDate,
+            @Param("startDate") Timestamp startDate,
+            @Param("endDate") Timestamp endDate,
             Pageable pageable);
 }
