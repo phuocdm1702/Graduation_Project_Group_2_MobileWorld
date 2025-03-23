@@ -145,7 +145,7 @@ public class KhachHangServices {
 
         kh.setIdDiaChiKH(dchi); // Gán lại địa chỉ khách hàng vào khachHang
         try {
-            emailServices.sendWelcomeEmail(
+            emailServices.EmailKH(
                     khachHangDTO.getEmail(),
                     khachHangDTO.getTenKH(),
                     khachHangDTO.getEmail(),
