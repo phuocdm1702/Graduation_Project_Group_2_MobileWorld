@@ -24,7 +24,7 @@ export default function useEmployeeManagement(toastRef) {
   const filterStatus = ref("tat-ca");
   const searchNV = ref("");
   const isLoading = ref(false);
-  const fileInputRef = ref(null); // Thêm ref để quản lý input file
+  const fileInputRef = ref(null);
 
   function previewImage(event) {
     const file = event.target.files[0];
@@ -46,9 +46,9 @@ export default function useEmployeeManagement(toastRef) {
       const newEmployee = route.query.newEmployee;
       if (newEmployee) {
         const parsedEmployee = JSON.parse(newEmployee);
-        originalData.value.unshift(parsedEmployee);
+        originalData.value.unshift(parsedEmployee); // Thêm vào đầu mảng
         router.replace({ query: null });
-        currentPage.value = 0;
+        currentPage.value = 0; // Đặt lại về trang đầu
       }
 
       applyFilterAndSearch();
@@ -62,6 +62,9 @@ export default function useEmployeeManagement(toastRef) {
 
   const applyFilterAndSearch = () => {
     let filteredData = [...originalData.value];
+
+    // Sắp xếp theo createdAt giảm dần (mới nhất lên đầu)
+    filteredData.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
     if (filterStatus.value === "dang-lam") {
       filteredData = filteredData.filter((nv) => !nv.deleted);
@@ -252,12 +255,10 @@ export default function useEmployeeManagement(toastRef) {
             }
           }
 
-          console.log("Dữ liệu gửi lên server:", employeesFromExcel);
-
           const response = await axios.post("http://localhost:8080/nhan-vien/import", employeesFromExcel);
           if (response.status === 200) {
             showToast("success", "Cập nhật dữ liệu từ Excel thành công!");
-            await fetchNhanVien();
+            await fetchNhanVien(); // Gọi lại fetchNhanVien để làm mới dữ liệu
           } else {
             showToast("error", "Lưu dữ liệu vào server thất bại!");
           }
@@ -265,7 +266,6 @@ export default function useEmployeeManagement(toastRef) {
           console.error("Lỗi trong quá trình đọc file Excel:", error);
           showToast("error", "Đọc file Excel thất bại!");
         } finally {
-          // Reset input file sau khi xử lý
           if (fileInputRef.value) {
             fileInputRef.value.value = "";
           }
@@ -306,7 +306,7 @@ export default function useEmployeeManagement(toastRef) {
           (nhanvien) =>
             nhanvien?.idTaiKhoan?.email?.toLowerCase().includes(searchNV.value.toLowerCase()) ||
             nhanvien?.tenNhanVien?.toLowerCase().includes(searchNV.value.toLowerCase()) ||
-            nhanvien?.idTaiKhoan?.soDienThoai?.toLowerCase(). включает(searchNV.value.toLowerCase())
+            nhanvien?.idTaiKhoan?.soDienThoai?.toLowerCase().includes(searchNV.value.toLowerCase())
         );
       }
 
@@ -560,7 +560,7 @@ export default function useEmployeeManagement(toastRef) {
     importExcel,
     exportToExcel,
     downloadTemplate,
-    fileInputRef, // Trả về ref để sử dụng trong template
+    fileInputRef,
     isLoading,
   };
 }
