@@ -15,6 +15,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -29,7 +30,6 @@ public class HoaDonService {
         this.hoaDonRepository = hoaDonRepository;
         this.inHoaDonPDF = inHoaDonPDF;
     }
-
 
 
     public List<HoaDonDTO> getAllData() {
@@ -49,11 +49,11 @@ public class HoaDonService {
             int page, int size, String keyword, String loaiDon, Long minAmount, Long maxAmount, String startDate, String endDate) {
         Pageable pageable = PageRequest.of(page, size);
 
-        // Chuyển đổi ngày từ String sang LocalDate (nếu có)
-        LocalDate start = (startDate != null && !startDate.isEmpty()) ?
-                LocalDate.parse(startDate, DateTimeFormatter.ofPattern("yyyy-MM-dd")) : null;
-        LocalDate end = (endDate != null && !endDate.isEmpty()) ?
-                LocalDate.parse(endDate, DateTimeFormatter.ofPattern("yyyy-MM-dd")) : null;
+        // Chuyển đổi ngày từ String sang Timestamp (nếu có)
+        Timestamp start = (startDate != null && !startDate.isEmpty()) ?
+                Timestamp.valueOf(LocalDate.parse(startDate, DateTimeFormatter.ofPattern("yyyy-MM-dd")).atStartOfDay()) : null;
+        Timestamp end = (endDate != null && !endDate.isEmpty()) ?
+                Timestamp.valueOf(LocalDate.parse(endDate, DateTimeFormatter.ofPattern("yyyy-MM-dd")).atStartOfDay()) : null;
 
         // Gọi repository với các tham số lọc
         return hoaDonRepository.findHoaDonWithFilters(keyword, loaiDon, minAmount, maxAmount, start, end, pageable)

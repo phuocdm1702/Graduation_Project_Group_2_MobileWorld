@@ -225,11 +225,7 @@ export default function useHoaDonLineList() {
       totalElements.value = 0;
     }
   };
-
-  const applyFilters = () => {
-    fetchData();
-  };
-
+  
   const goToPage = (page) => {
     currentPage.value = page;
     if (isFiltering.value) {
@@ -371,6 +367,11 @@ export default function useHoaDonLineList() {
     fetchOrderTypes();
     fetchInitialData();
   });
+
+  const applyFilters = () => {
+    fetchData();
+  };
+
 
   return {
     toast,
