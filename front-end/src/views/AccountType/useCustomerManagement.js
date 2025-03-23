@@ -411,20 +411,14 @@ export default function useCustomerManagement(toastRef) {
   const downloadTemplate = () => {
     try {
       isLoading.value = true;
-      const templateData = [
-        {
-          "#": 1,
-          "Mã": "KH000001",
-          "Tên": "Nguyễn Văn A",
-          "Email": "vana@gmail.com",
-          "SĐT": "0987654321",
-          "Tên đăng nhập": "vana@gmail.com",
-          "Ngày tham gia": "18/02/2025 00:00:00",
-          "Địa chỉ": "123 Đường Láng, Hà Nội, Đống Đa, Láng Thượng",
-          "Trạng thái": "Kích hoạt",
-          "Giới tính": "Nam",
-        },
-      ];
+
+      // Lấy tiêu đề từ tableColumns
+      const templateHeaders = tableColumns.map((column) => ({
+        [column.label]: "",
+      }));
+
+      // Tạo một object rỗng với các tiêu đề
+      const templateData = [Object.assign({}, ...templateHeaders)];
 
       const worksheet = XLSX.utils.json_to_sheet(templateData);
       const workbook = XLSX.utils.book_new();

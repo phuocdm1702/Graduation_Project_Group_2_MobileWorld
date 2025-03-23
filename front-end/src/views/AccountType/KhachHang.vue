@@ -50,7 +50,7 @@
               </router-link>
               <label
                 for="excel-upload"
-                class="px-4 py-2 bg-green-500 text-white rounded-md flex items-center cursor-pointer hover:bg-green-600 transition"
+                class="px-4 py-2 bg-blue-500 text-white rounded-md flex items-center cursor-pointer hover:bg-blue-600 transition"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -62,7 +62,7 @@
                     d="M19.5 3h-4.5V1.5H9V3H4.5C3.675 3 3 3.675 3 4.5v15c0 .825.675 1.5 1.5 1.5h15c.825 0 1.5-.675 1.5-1.5v-15c0-.825-.675-1.5-1.5-1.5zM9 19.5H7.5v-1.5H9v1.5zm0-3H7.5v-1.5H9v1.5zm0-3H7.5v-1.5H9v1.5zm0-3H7.5V9H9v1.5zm4.5 9H12v-1.5h1.5v1.5zm0-3H12v-1.5h1.5v1.5zm0-3H12v-1.5h1.5v1.5zm0-3H12V9h1.5v1.5zm3 9H15v-1.5h1.5v1.5zm0-3H15v-1.5h1.5v1.5zm0-3H15v-1.5h1.5v1.5zm0-3H15V9h1.5v1.5zM18 7.5H6V6h12v1.5z"
                   />
                 </svg>
-                Nhập bằng Excel
+                Nhập từ Excel
                 <input
                   id="excel-upload"
                   ref="fileInputRef"
@@ -74,7 +74,7 @@
               </label>
               <button
                 @click="exportToExcel"
-                class="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white font-semibold rounded-lg shadow-md hover:bg-blue-600 transition"
+                class="flex items-center gap-2 px-4 py-2 bg-green-500 text-white font-semibold rounded-lg shadow-md hover:bg-green-600 transition"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -87,6 +87,23 @@
                   />
                 </svg>
                 Xuất Excel
+              </button>
+
+              <button
+                @click="downloadTemplate"
+                class="flex items-center gap-2 px-4 py-2 bg-gray-500 text-white font-semibold rounded-lg shadow-md hover:bg-gray-600 transition"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  class="w-5 h-5 mr-1"
+                >
+                  <path
+                    d="M19.5 3h-4.5V1.5H9V3H4.5C3.675 3 3 3.675 3 4.5v15c0 .825.675 1.5 1.5 1.5h15c.825 0 1.5-.675 1.5-1.5v-15c0-.825-.675-1.5-1.5-1.5zM9 19.5H7.5v-1.5H9v1.5zm0-3H7.5v-1.5H9v1.5zm0-3H7.5v-1.5H9v1.5zm0-3H7.5V9H9v1.5zm4.5 9H12v-1.5h1.5v1.5zm0-3H12v-1.5h1.5v1.5zm0-3H12v-1.5h1.5v1.5zm0-3H12V9h1.5v1.5zm3 9H15v-1.5h1.5v1.5zm0-3H15v-1.5h1.5v1.5zm0-3H15v-1.5h1.5v1.5zm0-3H15V9h1.5v1.5zM18 7.5H6V6h12v1.5z"
+                  />
+                </svg>
+                Tài liệu mẫu
               </button>
             </div>
           </div>
