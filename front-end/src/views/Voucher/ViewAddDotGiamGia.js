@@ -23,6 +23,8 @@ window.handleCheckboxChangeCTSP = function (id, isChecked) {
 let useDotGiamGiaInstance = null;
 
 export const useDotGiamGia = () => {
+  const route = useRoute();
+  
   const dspList = ref([]);
   const ctspList = ref([]);
   const searchKeyword = ref("");
@@ -34,7 +36,7 @@ export const useDotGiamGia = () => {
   const selectedNhaSanXuat = ref(null);
   const heDieuHanhList = ref([]); // Danh sách cố định Hệ điều hành
   const nhaSanXuatList = ref([]);
-  
+
   const currentPageDSP = ref(0);
   const pageSizeDSP = ref(12);
   const totalPagesDSP = ref(0);
@@ -164,7 +166,7 @@ export const useDotGiamGia = () => {
         if (!seenIds.has(item.ctsp.id)) {
           seenIds.add(item.ctsp.id);
           const isSelected = selectedIds.has(item.ctsp.id) || ctspIdsInDotGiamGia.value.includes(item.ctsp.id);
-          uniqueCtspList.push({ ...item, selected: isSelected });
+          uniqueCtspList.push({...item, selected: isSelected});
         }
       });
       ctspList.value = uniqueCtspList;
@@ -259,6 +261,7 @@ export const useDotGiamGia = () => {
     {key: "sp.ma", label: "Mã"},
     {key: "sp.tenSanPham", label: "Tên sản phẩm"},
     {key: "nsx.nhaSanXuat", label: "Hãng"},
+    {key: "soLuongCTSP", label: "Số lượng"},
   ]);
 
   const getNestedValue = (obj, key) => {
@@ -290,7 +293,16 @@ export const useDotGiamGia = () => {
     {
       key: "anh.duongDan",
       label: "Ảnh",
-      formatter: (value) => value ? `<img src="${value}" alt="Ảnh" class="w-10 h-10 object-cover">` : "N/A",
+      formatter: (value, item) => {
+        const duplicateCount = item.duplicateCtspCount || 0; // Lấy từ dữ liệu API
+        if (!value) return "N/A";
+        return `
+        <div class="image-wrapper">
+          <img src="${value}" alt="Ảnh" class="w-10 h-10 object-cover">
+          ${duplicateCount > 0 ? `<span class="duplicate-count">${duplicateCount}</span>` : ''}
+        </div>
+      `;
+      },
     },
     {
       key: "sp.tenSanPham_va_MauSac",
@@ -353,7 +365,7 @@ export const useDotGiamGia = () => {
     const allMauSac = ctspList.value.map(ctsp => ctsp.ctsp?.idMauSac?.mauSac).filter(Boolean);
     return [...new Set(allMauSac)];
   });
-  
+
   const uniqueHeDieuHanh = computed(() => heDieuHanhList.value);
   const uniqueNhaSanXuat = computed(() => nhaSanXuatList.value);
 
@@ -374,7 +386,7 @@ export const useDotGiamGia = () => {
       return matchDSP && matchDongSanPham && matchBoNhoTrong && matchMauSac;
     });
   });
-  
+
   const checkDuplicate = async (field, value, excludeId = null) => {
     try {
       const {data} = await axios.get(`http://localhost:8080/dot_giam_gia/ViewAddDotGiamGia/exists/${field}`, {
@@ -458,6 +470,12 @@ export const useDotGiamGia = () => {
     });
   };
 
+  const goBackToDotGiamGia = () => {
+    setTimeout(()=>{
+      window.location.href = "http://localhost:3000/dot-giam-gia";
+    },1000)
+  };
+
   const resetForm = () => {
     dotGiamGia.value = {
       id: null,
@@ -503,14 +521,14 @@ export const useDotGiamGia = () => {
           toast.value?.kshowToast("success", "Thêm thành công");
           resetForm();
         }
+        goBackToDotGiamGia();
       } catch (error) {
-        console.error("Lỗi khi thêm đợt giảm giá:", error);
+        console.error("Lỗi:", error);
         toast.value?.kshowToast("error", "Thêm thất bại!");
       }
     }
   };
-
-  const route = useRoute();
+  
 
   const formatDateLocal = (dateString) => {
     const date = new Date(dateString);
@@ -522,7 +540,7 @@ export const useDotGiamGia = () => {
     currentPageCTSP.value = 0;
     fetchData();
   });
-  
+
   watch(
     () => [
       dotGiamGia.value.loaiGiamGiaApDung,
@@ -535,7 +553,8 @@ export const useDotGiamGia = () => {
     },
     {deep: true}
   );
-
+  
+  
   watch(
     () => route.query,
     (newQuery) => {
@@ -612,10 +631,11 @@ export const useDotGiamGia = () => {
     filteredBoNhoTrong,
     filteredCTSPList,
     filteredMauSac,
-    uniqueHeDieuHanh, 
-    uniqueNhaSanXuat, 
+    uniqueHeDieuHanh,
+    uniqueNhaSanXuat,
     addData,
     resetForm,
+    goBackToDotGiamGia,
     confirmAction,
     columns,
     getNestedValue,
@@ -633,7 +653,7 @@ export const useDotGiamGia = () => {
     ctspIdsInDotGiamGia,
     fetchDongSanPham,
     selectAllCTSP,
-    deselectAllCTSP
+    deselectAllCTSP,
   };
 
   return useDotGiamGiaInstance;

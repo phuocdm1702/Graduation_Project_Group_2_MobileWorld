@@ -31,13 +31,11 @@ public interface dot_giam_gia_repository extends JpaRepository<DotGiamGia, Integ
     @Query("SELECT dgg FROM DotGiamGia dgg WHERE dgg.deleted = true")
     public Page<DotGiamGia> hienThiFinish(Pageable pageable);
 
-//    @Query("SELECT sp FROM SanPham sp WHERE (:timKiem IS NULL OR :timKiem = '' OR sp.ma LIKE CONCAT('%', :timKiem, '%') OR sp.tenSanPham LIKE CONCAT('%', :timKiem, '%')) AND sp.deleted = false ")
-//    public Page<SanPham> getAllSanPham(@Param("timKiem") String timKiem, Pageable pageable);
-
-    @Query("SELECT new com.example.graduation_project_group_2_mobileworld.dto.dot_giam_gia.viewSanPhamDTO(sp, nsx, hdh) " +
+    @Query("SELECT new com.example.graduation_project_group_2_mobileworld.dto.dot_giam_gia.viewSanPhamDTO(sp, nsx, hdh, " +
+            "(SELECT COUNT(ctsp) FROM ChiTietSanPham ctsp WHERE ctsp.idSanPham.id = sp.id AND ctsp.deleted = false)) " +
             "FROM SanPham sp " +
-            "INNER JOIN HeDieuHanh hdh ON sp.idHeDieuHanh.id = hdh.id " +
-            "INNER JOIN NhaSanXuat nsx ON sp.idNhaSanXuat.id = nsx.id " +
+            "INNER JOIN sp.idHeDieuHanh hdh " +
+            "INNER JOIN sp.idNhaSanXuat nsx " +
             "WHERE (:timKiem IS NULL OR :timKiem = '' OR sp.ma LIKE CONCAT('%', :timKiem, '%') OR sp.tenSanPham LIKE CONCAT('%', :timKiem, '%')) " +
             "AND (:idHeDieuHanh IS NULL OR hdh.id IN :idHeDieuHanh) " +
             "AND (:idNhaSanXuat IS NULL OR nsx.id IN :idNhaSanXuat) " +
@@ -46,6 +44,7 @@ public interface dot_giam_gia_repository extends JpaRepository<DotGiamGia, Integ
                                        @Param("idHeDieuHanh") List<Integer> idHeDieuHanh,
                                        @Param("idNhaSanXuat") List<Integer> idNhaSanXuat,
                                        Pageable pageable);
+
 
     // Lấy tất cả Hệ điều hành không bị xóa
     @Query("SELECT hdh FROM HeDieuHanh hdh WHERE hdh.deleted = false")

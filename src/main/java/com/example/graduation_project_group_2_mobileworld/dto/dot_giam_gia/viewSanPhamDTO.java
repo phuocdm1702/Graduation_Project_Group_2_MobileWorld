@@ -8,14 +8,24 @@ public class viewSanPhamDTO {
     SanPham sp;
     NhaSanXuat nsx;
     HeDieuHanh hdh;
+    long soLuongCTSP;
 
     public viewSanPhamDTO() {
     }
 
-    public viewSanPhamDTO(SanPham sp, NhaSanXuat nsx, HeDieuHanh hdh) {
+    public viewSanPhamDTO(SanPham sp, NhaSanXuat nsx, HeDieuHanh hdh, long soLuongCTSP) {
         this.sp = sp;
         this.nsx = nsx;
         this.hdh = hdh;
+        this.soLuongCTSP = soLuongCTSP;
+    }
+
+    public Long getSoLuongCTSP() {
+        return soLuongCTSP;
+    }
+
+    public void setSoLuongCTSP(Long soLuongCTSP) {
+        this.soLuongCTSP = soLuongCTSP;
     }
 
     public SanPham getSp() {
