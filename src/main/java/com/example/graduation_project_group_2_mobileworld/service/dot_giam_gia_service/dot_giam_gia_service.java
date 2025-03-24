@@ -7,7 +7,6 @@ import com.example.graduation_project_group_2_mobileworld.entity.*;
 import com.example.graduation_project_group_2_mobileworld.repository.chiTietDotGiamGia.CTSPForCTDGG;
 import com.example.graduation_project_group_2_mobileworld.repository.chiTietDotGiamGia.ChiTietDotGiamGiaRepository;
 import com.example.graduation_project_group_2_mobileworld.repository.dot_giam_gia_repo.dot_giam_gia_repository;
-
 import com.example.graduation_project_group_2_mobileworld.repository.dot_giam_gia_repo.repoDongSanPhamDGG;
 import jakarta.annotation.PostConstruct;
 import org.springframework.data.domain.Page;
@@ -18,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.time.LocalDate;
@@ -26,10 +26,6 @@ import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 @Service
 public class dot_giam_gia_service {
@@ -65,6 +61,7 @@ public class dot_giam_gia_service {
     public Page<viewSanPhamDTO> getDSP(String timKiem, List<Integer> idHeDieuHanh, List<Integer> idNhaSanXuat, Pageable pageable) {
         return repository.getAllSanPham(timKiem, idHeDieuHanh, idNhaSanXuat, pageable);
     }
+
     public List<HeDieuHanh> getAllHeDieuHanh() {
         return repository.findAllHeDieuHanh();
     }
@@ -81,13 +78,27 @@ public class dot_giam_gia_service {
         return repository.existsByMaAndDeletedTrue(ma);
     }
 
+
+    private BigDecimal calculateGiaSauKhiGiam(BigDecimal giaBanDau, BigDecimal giaTriGiamGia, BigDecimal soTienGiamToiDa) {
+        BigDecimal newGiaSauKhiGiam;
+        if (giaTriGiamGia.compareTo(BigDecimal.ZERO) == 0) {
+            newGiaSauKhiGiam = giaBanDau.subtract(soTienGiamToiDa);
+        } else {
+            BigDecimal giamTheoPhanTram = giaBanDau.multiply(giaTriGiamGia)
+                    .divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP);
+            if (giamTheoPhanTram.compareTo(soTienGiamToiDa) > 0) {
+                newGiaSauKhiGiam = giaBanDau.subtract(soTienGiamToiDa);
+            } else {
+                newGiaSauKhiGiam = giaBanDau.subtract(giamTheoPhanTram);
+            }
+        }
+        return newGiaSauKhiGiam.max(BigDecimal.ZERO);
+    }
+
+
     @Transactional
     public void addDotGiamGia(dot_giam_gia_DTO dotGiamGiaDTO, List<Integer> idSanPham, List<viewCTSPDTO> dsCTSP) {
         try {
-            // Lưu DotGiamGia
-            if (dotGiamGiaDTO.getNgayBatDau() == null || dotGiamGiaDTO.getNgayKetThuc() == null) {
-                throw new IllegalArgumentException("Ngày bắt đầu hoặc ngày kết thúc không được null");
-            }
             Date ngayBatDau = new Date(dotGiamGiaDTO.getNgayBatDau().getTime());
             Date ngayKetThuc = new Date(dotGiamGiaDTO.getNgayKetThuc().getTime());
             DotGiamGia dotGiamGia = new DotGiamGia();
@@ -99,48 +110,32 @@ public class dot_giam_gia_service {
             dotGiamGia.setNgayBatDau(ngayBatDau);
             dotGiamGia.setNgayKetThuc(ngayKetThuc);
             dotGiamGia.setDeleted(false);
-            dotGiamGia.setTrangThai(ngayBatDau.after(new Date(System.currentTimeMillis())));
+            dotGiamGia.setTrangThai(ngayBatDau.after(Date.valueOf(LocalDate.now())));
             repository.save(dotGiamGia);
-            System.out.println("Lưu đợt giảm giá thành công!");
 
             List<SanPham> dsSanPham = sanPhamRepository.findAllById(idSanPham);
-            System.out.println("dsSanPham: " + dsSanPham.size());
-
-            // Map các CTSP được chọn từ dsCTSP
             Map<Integer, viewCTSPDTO> selectedCTSPMap = dsCTSP.stream()
                     .filter(ctsp -> ctsp.getSelected() != null && ctsp.getSelected())
                     .collect(Collectors.toMap(ctsp -> ctsp.getCtsp().getId(), ctsp -> ctsp, (e, r) -> e));
-            System.out.println("selectedCTSPMap size: " + selectedCTSPMap.size());
-            System.out.println("selectedCTSPMap keys: " + selectedCTSPMap.keySet());
-
-            // Lấy tất cả ChiTietSanPham theo idSanPham
             List<ChiTietSanPham> dsChiTietSanPham = chiTietSanPhamRepository.findAllByIdSanPhamIn(idSanPham);
-            System.out.println("dsChiTietSanPham size: " + dsChiTietSanPham.size());
-            System.out.println("dsChiTietSanPham IDs: " + dsChiTietSanPham.stream().map(ChiTietSanPham::getId).collect(Collectors.toList()));
 
             String maxMaChiTiet = repo2.findMaxMa();
             int nextNumber = 1;
             if (maxMaChiTiet != null && maxMaChiTiet.startsWith("CTDGG")) {
-                try {
-                    nextNumber = Integer.parseInt(maxMaChiTiet.substring(5)) + 1;
-                } catch (NumberFormatException e) {
-                    System.err.println("Lỗi khi parse mã CTDGG: " + e.getMessage());
-                }
+                nextNumber = Integer.parseInt(maxMaChiTiet.substring(5)) + 1;
             }
 
             Set<String> addedCTSP = new HashSet<>();
+            Date today = Date.valueOf(LocalDate.now());
 
             for (viewCTSPDTO ctspDTO : dsCTSP) {
-                //Tìm kiếm những dữ liệu CTSP có tồn tại
                 if (ctspDTO.getSelected() == null || !ctspDTO.getSelected()) continue;
                 Integer idCTSP = ctspDTO.getCtsp().getId();
                 ChiTietSanPham selectedChiTietSanPham = dsChiTietSanPham.stream()
                         .filter(ctsp -> ctsp.getId().equals(idCTSP))
-                        .findFirst()
-                        .orElse(null);
+                        .findFirst().orElse(null);
                 if (selectedChiTietSanPham == null) continue;
 
-                // Lấy tất cả ChiTietSanPham có cùng idSanPham, idMauSac, idBoNhoTrong
                 List<ChiTietSanPham> matchingChiTietSanPhams = dsChiTietSanPham.stream()
                         .filter(ctsp -> ctsp.getIdSanPham().getId().equals(selectedChiTietSanPham.getIdSanPham().getId()) &&
                                 ctsp.getIdMauSac().getId().equals(selectedChiTietSanPham.getIdMauSac().getId()) &&
@@ -149,63 +144,64 @@ public class dot_giam_gia_service {
                         .collect(Collectors.toList());
 
                 BigDecimal giaBanDau = selectedChiTietSanPham.getGiaBan();
-                BigDecimal giaSauKhiGiam = ctspDTO.getGiaSauKhiGiam();
+                BigDecimal giaSauKhiGiamMoi = calculateGiaSauKhiGiam(giaBanDau, dotGiamGia.getGiaTriGiamGia(), dotGiamGia.getSoTienGiamToiDa());
 
                 for (ChiTietSanPham chiTietSanPham : matchingChiTietSanPhams) {
                     Integer idCTSPInGroup = chiTietSanPham.getId();
                     String key = idCTSPInGroup + "_" + giaBanDau;
                     if (addedCTSP.contains(key)) continue;
 
-                    // Kiểm tra xem idChiTietSanPham đã tồn tại trong đợt giảm giá khác chưa
-                    List<ChiTietDotGiamGia> existingInOtherDot = repo2.findByIdChiTietSanPhamAndDeleted(chiTietSanPham, false);
-                    boolean shouldAdd = true;
+                    List<ChiTietDotGiamGia> activeCtggList = repo2.findActiveChiTietDotGiamGiaByCtspId(idCTSPInGroup, today);
+                    BigDecimal finalGiaSauKhiGiam = giaSauKhiGiamMoi;
 
-                    if (!existingInOtherDot.isEmpty()) {
-                        for (ChiTietDotGiamGia existing : existingInOtherDot) {
-                            if (!existing.getIdDotGiamGia().getId().equals(dotGiamGia.getId())) {
-                                if (existing.getIdDotGiamGia().getNgayKetThuc().equals(dotGiamGia.getNgayKetThuc())) { // Xử lý trùng ngày kết thúc
-                                    if (giaSauKhiGiam.compareTo(existing.getGiaSauKhiGiam()) < 0) {
-                                        existing.setDeleted(true);
-                                        repo2.save(existing);
-                                        System.out.println("Hủy chi tiết giảm giá cũ trong đợt " + existing.getIdDotGiamGia().getId() +
-                                                " vì giá mới thấp hơn cho idChiTietSanPham: " + idCTSPInGroup);
-                                    } else {
-                                        shouldAdd = false;
-                                        System.out.println("Không thêm chi tiết giảm giá cho đợt " + dotGiamGia.getId() +
-                                                " vì giá không thấp hơn đợt " + existing.getIdDotGiamGia().getId());
-                                        continue;
-                                    }
-                                } else if (isOverlapping( //Xử lý nằm trong thời gian của đợt khác
-                                        existing.getIdDotGiamGia().getNgayBatDau(),
-                                        existing.getIdDotGiamGia().getNgayKetThuc(),
-                                        dotGiamGia.getNgayBatDau(),
-                                        dotGiamGia.getNgayKetThuc())) {
-                                    existing.setDeleted(true);
-                                    repo2.save(existing);
-                                    System.out.println("Hủy chi tiết giảm giá cũ trong đợt " + existing.getIdDotGiamGia().getId() +
-                                            " do thời gian trùng lặp cho idChiTietSanPham: " + idCTSPInGroup);
-                                }
+                    if (!activeCtggList.isEmpty()) {
+                        boolean isOverlappingAndActive = false;
+                        for (ChiTietDotGiamGia existingCtgg : activeCtggList) {
+                            DotGiamGia existingDot = existingCtgg.getIdDotGiamGia();
+                            if (isOverlapping(dotGiamGia.getNgayBatDau(), dotGiamGia.getNgayKetThuc(),
+                                    existingDot.getNgayBatDau(), existingDot.getNgayKetThuc()) &&
+                                    today.compareTo(dotGiamGia.getNgayBatDau()) >= 0 &&
+                                    today.compareTo(existingDot.getNgayBatDau()) >= 0) {
+                                isOverlappingAndActive = true;
+                                break;
+                            }
+                        }
+
+                        if (isOverlappingAndActive) {
+                            List<DotGiamGia> overlappingDots = new ArrayList<>();
+                            overlappingDots.add(dotGiamGia);
+                            for (ChiTietDotGiamGia ctgg : activeCtggList) {
+                                overlappingDots.add(ctgg.getIdDotGiamGia());
+                            }
+                            BigDecimal avgGiaTriGiamGia = overlappingDots.stream()
+                                    .map(DotGiamGia::getGiaTriGiamGia)
+                                    .reduce(BigDecimal.ZERO, BigDecimal::add)
+                                    .divide(BigDecimal.valueOf(overlappingDots.size()), 2, RoundingMode.HALF_UP);
+                            BigDecimal avgSoTienGiamToiDa = overlappingDots.stream()
+                                    .map(DotGiamGia::getSoTienGiamToiDa)
+                                    .reduce(BigDecimal.ZERO, BigDecimal::add)
+                                    .divide(BigDecimal.valueOf(overlappingDots.size()), 2, RoundingMode.HALF_UP);
+                            finalGiaSauKhiGiam = calculateGiaSauKhiGiam(giaBanDau, avgGiaTriGiamGia, avgSoTienGiamToiDa);
+
+                            for (ChiTietDotGiamGia ctgg : activeCtggList) {
+                                ctgg.setGiaSauKhiGiam(finalGiaSauKhiGiam);
+                                repo2.save(ctgg);
                             }
                         }
                     }
 
-                    if (!shouldAdd) continue;
-
-                    // Thêm bản ghi mới
                     String newMaChiTiet = String.format("CTDGG%05d", nextNumber++);
                     ChiTietDotGiamGia chiTiet = new ChiTietDotGiamGia();
                     chiTiet.setMa(newMaChiTiet);
                     chiTiet.setIdDotGiamGia(dotGiamGia);
                     chiTiet.setIdChiTietSanPham(chiTietSanPham);
                     chiTiet.setGiaBanDau(giaBanDau);
-                    chiTiet.setGiaSauKhiGiam(giaSauKhiGiam);
+                    chiTiet.setGiaSauKhiGiam(finalGiaSauKhiGiam);
                     chiTiet.setDeleted(false);
                     repo2.save(chiTiet);
                     addedCTSP.add(key);
-                    System.out.println("Thêm giảm giá cho sản phẩm: " + idCTSPInGroup);
                 }
             }
-            System.out.println("Thêm tất cả chi tiết giảm giá thành công!");
         } catch (Exception e) {
             System.err.println("Lỗi khi thêm đợt giảm giá: " + e.getMessage());
             throw e;
@@ -220,36 +216,58 @@ public class dot_giam_gia_service {
     @Transactional
     public void deleteDotGiamGiaById(Integer id) {
         try {
+            // 1. Đánh dấu DotGiamGia là deleted
             repository.updateDotGiamGiaDeleted(id);
             System.out.println("Cập nhật trạng thái deleted cho DotGiamGia với ID: " + id);
 
+            // 2. Đánh dấu tất cả ChiTietDotGiamGia liên quan là deleted
             repo2.updateChiTietDotGiamGiaDeleted(id);
 
+            // 3. Lấy các ChiTietDotGiamGia vừa bị xóa
             List<ChiTietDotGiamGia> deletedRecords = repo2.findByIdDotGiamGiaIdAndDeleted(id, true);
 
+            // 4. Xử lý từng ChiTietSanPham bị ảnh hưởng
             for (ChiTietDotGiamGia deletedRecord : deletedRecords) {
                 ChiTietSanPham chiTietSanPham = deletedRecord.getIdChiTietSanPham();
                 DotGiamGia deletedDotGiamGia = deletedRecord.getIdDotGiamGia();
+                BigDecimal giaBanDau = deletedRecord.getGiaBanDau();
 
-                List<ChiTietDotGiamGia> otherRecords = repo2.findByIdChiTietSanPhamAndDeleted(chiTietSanPham, true);
+                // 5. Tìm các ChiTietDotGiamGia còn hiệu lực (chưa bị xóa)
+                List<ChiTietDotGiamGia> activeRecords = repo2.findByIdChiTietSanPhamAndDeleted(chiTietSanPham, false);
 
-                for (ChiTietDotGiamGia otherRecord : otherRecords) {
-                    DotGiamGia otherDotGiamGia = otherRecord.getIdDotGiamGia();
-                    if (!otherDotGiamGia.getId().equals(deletedDotGiamGia.getId()) && !otherDotGiamGia.getDeleted()) {
-                        if (isOverlapping3(
-                                otherDotGiamGia.getNgayBatDau(),
-                                otherDotGiamGia.getNgayKetThuc(),
-                                deletedDotGiamGia.getNgayBatDau(),
-                                deletedDotGiamGia.getNgayKetThuc())) {
-                            otherRecord.setDeleted(false);
-                            repo2.save(otherRecord);
-                            System.out.println("Khôi phục chi tiết giảm giá trong đợt " + otherDotGiamGia.getId() +
-                                    " cho idChiTietSanPham: " + chiTietSanPham.getId());
+                if (!activeRecords.isEmpty()) {
+                    // 6. Lấy DotGiamGia còn hiệu lực đầu tiên (hoặc logic khác nếu có nhiều)
+                    ChiTietDotGiamGia activeRecord = activeRecords.get(0);
+                    DotGiamGia activeDotGiamGia = activeRecord.getIdDotGiamGia();
+
+                    // 7. Kiểm tra xem có trùng thời gian không
+                    if (isOverlapping3(
+                            activeDotGiamGia.getNgayBatDau(),
+                            activeDotGiamGia.getNgayKetThuc(),
+                            deletedDotGiamGia.getNgayBatDau(),
+                            deletedDotGiamGia.getNgayKetThuc())) {
+                        // 8. Tính lại giaSauKhiGiam theo DotGiamGia còn lại
+                        BigDecimal newGiaSauKhiGiam;
+                        if ("Phần trăm".equals(activeDotGiamGia.getLoaiGiamGiaApDung())) {
+                            BigDecimal giamTheoPhanTram = giaBanDau.multiply(activeDotGiamGia.getGiaTriGiamGia())
+                                    .divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP);
+                            newGiaSauKhiGiam = giaBanDau.subtract(giamTheoPhanTram.min(activeDotGiamGia.getSoTienGiamToiDa()));
+                        } else { // Tiền mặt
+                            newGiaSauKhiGiam = giaBanDau.subtract(activeDotGiamGia.getSoTienGiamToiDa());
                         }
+                        newGiaSauKhiGiam = newGiaSauKhiGiam.max(BigDecimal.ZERO);
+
+                        // 9. Cập nhật bản ghi còn hiệu lực
+                        activeRecord.setGiaSauKhiGiam(newGiaSauKhiGiam);
+                        repo2.save(activeRecord);
+                        System.out.println("Cập nhật giá sau khi giảm cho idChiTietSanPham: " + chiTietSanPham.getId() +
+                                " theo DotGiamGia còn lại: " + activeDotGiamGia.getId());
                     }
+                } else {
+                    System.out.println("Không còn DotGiamGia hiệu lực cho idChiTietSanPham: " + chiTietSanPham.getId());
                 }
             }
-            System.out.println("Xóa và khôi phục (nếu cần) thành công cho DotGiamGia với ID: " + id);
+            System.out.println("Xóa và cập nhật (nếu cần) thành công cho DotGiamGia với ID: " + id);
         } catch (Exception e) {
             System.err.println("Lỗi khi xóa DotGiamGia: " + e.getMessage());
             throw e;
@@ -260,7 +278,6 @@ public class dot_giam_gia_service {
     private boolean isOverlapping3(Date start1, Date end1, Date start2, Date end2) {
         return !start1.after(end2) && !start2.after(end1);  // start1 <= end2 && start2 <= end1
     }
-
 
     public List<SanPham> getThatDongSanPham(Integer id) {
         return repository.getThatDongSanPham(id);
@@ -289,34 +306,29 @@ public class dot_giam_gia_service {
         try {
             DotGiamGia dotGiamGia = repository.findById(dotGiamGiaId)
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy đợt giảm giá với id: " + dotGiamGiaId));
-            BigDecimal maxDiscountAmountOld = dotGiamGia.getSoTienGiamToiDa();
-            LocalDate today = LocalDate.now();
+            Date today = Date.valueOf(LocalDate.now());
 
-            // Cập nhật thông tin DotGiamGia
             LocalDateTime ngayBatDauFormatted = dotGiamGiaDTO.getNgayBatDau().toInstant()
                     .atZone(ZoneId.systemDefault()).toLocalDate().atStartOfDay();
-            dotGiamGia.setNgayBatDau(new Date(Timestamp.valueOf(ngayBatDauFormatted).getTime()));
+            Date ngayBatDau = new Date(Timestamp.valueOf(ngayBatDauFormatted).getTime());
             LocalDateTime ngayKetThucFormatted = dotGiamGiaDTO.getNgayKetThuc().toInstant()
                     .atZone(ZoneId.systemDefault()).toLocalDate().atStartOfDay();
-            dotGiamGia.setNgayKetThuc(new Date(Timestamp.valueOf(ngayKetThucFormatted).getTime()));
+            Date ngayKetThuc = new Date(Timestamp.valueOf(ngayKetThucFormatted).getTime());
+
+            dotGiamGia.setNgayBatDau(ngayBatDau);
+            dotGiamGia.setNgayKetThuc(ngayKetThuc);
             dotGiamGia.setMa(dotGiamGiaDTO.getMa());
             dotGiamGia.setTenDotGiamGia(dotGiamGiaDTO.getTenDotGiamGia());
             dotGiamGia.setLoaiGiamGiaApDung(dotGiamGiaDTO.getLoaiGiamGiaApDung());
             dotGiamGia.setGiaTriGiamGia(dotGiamGiaDTO.getGiaTriGiamGia());
             dotGiamGia.setSoTienGiamToiDa(dotGiamGiaDTO.getSoTienGiamToiDa());
-            dotGiamGia.setTrangThai(ngayBatDauFormatted.toLocalDate().isAfter(today));
+            dotGiamGia.setTrangThai(ngayBatDau.after(today));
             repository.save(dotGiamGia);
 
             List<SanPham> dsSanPham = sanPhamRepository.findAllById(idSanPham);
-            Map<Integer, SanPham> sanPhamMap = dsSanPham.stream()
-                    .collect(Collectors.toMap(SanPham::getId, sp -> sp));
-
-            // Map các CTSP được chọn từ dsCTSP
             Map<Integer, viewCTSPDTO> selectedCTSPMap = dsCTSP.stream()
                     .filter(ctsp -> ctsp.getSelected() != null && ctsp.getSelected())
                     .collect(Collectors.toMap(ctsp -> ctsp.getCtsp().getId(), ctsp -> ctsp, (e, r) -> e));
-
-            // Lấy tất cả ChiTietSanPham theo idSanPham
             List<ChiTietSanPham> dsChiTietSanPham = chiTietSanPhamRepository.findAllByIdSanPhamIn(idSanPham);
 
             String maxMaChiTiet = repo2.findMaxMa();
@@ -327,7 +339,6 @@ public class dot_giam_gia_service {
             Set<String> addedCTSP = new HashSet<>();
             Set<Integer> selectedCTSPIds = selectedCTSPMap.keySet();
 
-            // Xóa bản ghi không được chọn khi cập nhật idDotGiamGia hiện tại
             List<ChiTietDotGiamGia> existingChiTietList = repo2.findByIdDotGiamGia(dotGiamGia);
             for (ChiTietDotGiamGia chiTiet : existingChiTietList) {
                 Integer idCTSP = chiTiet.getIdChiTietSanPham().getId();
@@ -337,7 +348,6 @@ public class dot_giam_gia_service {
                 }
             }
 
-            // Xử lý thêm/ cập nhật ChiTietDotGiamGia
             for (viewCTSPDTO ctspDTO : dsCTSP) {
                 if (ctspDTO.getSelected() == null || !ctspDTO.getSelected()) continue;
 
@@ -348,7 +358,6 @@ public class dot_giam_gia_service {
                         .orElse(null);
                 if (selectedChiTietSanPham == null) continue;
 
-                // Lấy tất cả ChiTietSanPham cùng idSanPham, idMauSac, idBoNhoTrong
                 List<ChiTietSanPham> matchingChiTietSanPhams = dsChiTietSanPham.stream()
                         .filter(ctsp -> ctsp.getIdSanPham().getId().equals(selectedChiTietSanPham.getIdSanPham().getId()) &&
                                 ctsp.getIdMauSac().getId().equals(selectedChiTietSanPham.getIdMauSac().getId()) &&
@@ -357,41 +366,68 @@ public class dot_giam_gia_service {
                         .collect(Collectors.toList());
 
                 BigDecimal giaBanDau = selectedChiTietSanPham.getGiaBan();
-                BigDecimal giaSauKhiGiam = ctspDTO.getGiaSauKhiGiam();
+                BigDecimal giaSauKhiGiamMoi = calculateGiaSauKhiGiam(giaBanDau, dotGiamGia.getGiaTriGiamGia(), dotGiamGia.getSoTienGiamToiDa());
 
                 for (ChiTietSanPham chiTietSanPham : matchingChiTietSanPhams) {
                     Integer idCTSPInGroup = chiTietSanPham.getId();
                     String key = idCTSPInGroup + "_" + giaBanDau;
                     if (addedCTSP.contains(key)) continue;
 
-                    // Kiểm tra idChiTietSanPham đã tồn tại trong đợt giảm giá ko
+                    List<ChiTietDotGiamGia> activeCtggList = repo2.findActiveChiTietDotGiamGiaByCtspId(idCTSPInGroup, today);
+                    BigDecimal finalGiaSauKhiGiam = giaSauKhiGiamMoi;
+
+                    if (!activeCtggList.isEmpty()) {
+                        boolean isOverlappingAndActive = false;
+                        List<DotGiamGia> overlappingDots = new ArrayList<>();
+                        overlappingDots.add(dotGiamGia);
+
+                        for (ChiTietDotGiamGia existingCtgg : activeCtggList) {
+                            DotGiamGia existingDot = existingCtgg.getIdDotGiamGia();
+                            if (!existingDot.getId().equals(dotGiamGia.getId()) &&
+                                    isOverlapping(dotGiamGia.getNgayBatDau(), dotGiamGia.getNgayKetThuc(),
+                                            existingDot.getNgayBatDau(), existingDot.getNgayKetThuc()) &&
+                                    today.compareTo(dotGiamGia.getNgayBatDau()) >= 0 &&
+                                    today.compareTo(existingDot.getNgayBatDau()) >= 0) {
+                                isOverlappingAndActive = true;
+                                overlappingDots.add(existingDot);
+                            }
+                        }
+
+                        if (isOverlappingAndActive) {
+                            BigDecimal avgGiaTriGiamGia = overlappingDots.stream()
+                                    .map(DotGiamGia::getGiaTriGiamGia)
+                                    .reduce(BigDecimal.ZERO, BigDecimal::add)
+                                    .divide(BigDecimal.valueOf(overlappingDots.size()), 2, RoundingMode.HALF_UP);
+                            BigDecimal avgSoTienGiamToiDa = overlappingDots.stream()
+                                    .map(DotGiamGia::getSoTienGiamToiDa)
+                                    .reduce(BigDecimal.ZERO, BigDecimal::add)
+                                    .divide(BigDecimal.valueOf(overlappingDots.size()), 2, RoundingMode.HALF_UP);
+                            finalGiaSauKhiGiam = calculateGiaSauKhiGiam(giaBanDau, avgGiaTriGiamGia, avgSoTienGiamToiDa);
+
+                            for (ChiTietDotGiamGia ctgg : activeCtggList) {
+                                if (!ctgg.getIdDotGiamGia().getId().equals(dotGiamGia.getId())) {
+                                    ctgg.setGiaSauKhiGiam(finalGiaSauKhiGiam);
+                                    repo2.save(ctgg);
+                                }
+                            }
+                        }
+                    }
+
                     List<ChiTietDotGiamGia> existingInOtherDot = repo2.findByIdChiTietSanPhamAndDeleted(chiTietSanPham, false);
                     boolean shouldAdd = true;
 
                     if (!existingInOtherDot.isEmpty()) {
                         for (ChiTietDotGiamGia existing : existingInOtherDot) {
                             if (!existing.getIdDotGiamGia().getId().equals(dotGiamGia.getId())) {
-                                if (existing.getIdDotGiamGia().getNgayKetThuc().equals(dotGiamGia.getNgayKetThuc())) {
-                                    if (giaSauKhiGiam.compareTo(existing.getGiaSauKhiGiam()) < 0) {
+                                if (isOverlapping(dotGiamGia.getNgayBatDau(), dotGiamGia.getNgayKetThuc(),
+                                        existing.getIdDotGiamGia().getNgayBatDau(), existing.getIdDotGiamGia().getNgayKetThuc())) {
+                                    if (finalGiaSauKhiGiam.compareTo(existing.getGiaSauKhiGiam()) < 0) {
                                         existing.setDeleted(true);
                                         repo2.save(existing);
-                                        System.out.println("Hủy chi tiết giảm giá cũ trong đợt " + existing.getIdDotGiamGia().getId() +
-                                                " vì giá mới thấp hơn cho idChiTietSanPham: " + idCTSPInGroup);
                                     } else {
                                         shouldAdd = false;
-                                        System.out.println("Không thêm chi tiết giảm giá cho đợt " + dotGiamGia.getId() +
-                                                " vì giá không thấp hơn đợt " + existing.getIdDotGiamGia().getId());
                                         continue;
                                     }
-                                } else if (isOverlapping2(
-                                        existing.getIdDotGiamGia().getNgayBatDau(),
-                                        existing.getIdDotGiamGia().getNgayKetThuc(),
-                                        dotGiamGia.getNgayBatDau(),
-                                        dotGiamGia.getNgayKetThuc())) {
-                                    existing.setDeleted(true);
-                                    repo2.save(existing);
-                                    System.out.println("Hủy chi tiết giảm giá cũ trong đợt " + existing.getIdDotGiamGia().getId() +
-                                            " do thời gian trùng lặp cho idChiTietSanPham: " + idCTSPInGroup);
                                 }
                             }
                         }
@@ -399,17 +435,15 @@ public class dot_giam_gia_service {
 
                     if (!shouldAdd) continue;
 
-                    // Thêm/ cập nhật bản ghi trong idDotGiamGia hiện tại
                     List<ChiTietDotGiamGia> deletedRecords = repo2.findByDotGiamGiaAndIdChiTietSanPhamAndGiaBanDauAndDeleted(
                             dotGiamGia, chiTietSanPham, giaBanDau, true);
                     if (!deletedRecords.isEmpty()) {
                         for (ChiTietDotGiamGia deletedRecord : deletedRecords) {
                             deletedRecord.setDeleted(false);
-                            deletedRecord.setGiaSauKhiGiam(giaSauKhiGiam);
+                            deletedRecord.setGiaSauKhiGiam(finalGiaSauKhiGiam);
                             repo2.save(deletedRecord);
                         }
                         addedCTSP.add(key);
-                        System.out.println("Khôi phục chi tiết giảm giá bị xóa cho chi tiết sản phẩm: " + idCTSPInGroup);
                         continue;
                     }
 
@@ -422,28 +456,14 @@ public class dot_giam_gia_service {
                         chiTiet.setIdDotGiamGia(dotGiamGia);
                         chiTiet.setIdChiTietSanPham(chiTietSanPham);
                         chiTiet.setGiaBanDau(giaBanDau);
-                        chiTiet.setGiaSauKhiGiam(giaSauKhiGiam);
+                        chiTiet.setGiaSauKhiGiam(finalGiaSauKhiGiam);
                         chiTiet.setDeleted(false);
                         repo2.save(chiTiet);
                         addedCTSP.add(key);
-                        System.out.println("Thêm mới chi tiết giảm giá cho chi tiết sản phẩm: " + idCTSPInGroup);
                     } else {
-                        boolean isDiscountLimitChanged = false;
                         for (ChiTietDotGiamGia existingChiTiet : existingChiTietListForCTSP) {
-                            BigDecimal maxDiscountAmountNew = dotGiamGiaDTO.getSoTienGiamToiDa();
-                            boolean isDiscountLimitUpdated = maxDiscountAmountNew.compareTo(maxDiscountAmountOld) != 0;
-                            if (isDiscountLimitUpdated) {
-                                BigDecimal expectedNewPrice = existingChiTiet.getGiaBanDau().subtract(maxDiscountAmountNew);
-                                existingChiTiet.setGiaSauKhiGiam(expectedNewPrice);
-                                isDiscountLimitChanged = true;
-                            } else if (existingChiTiet.getGiaSauKhiGiam().compareTo(giaSauKhiGiam) != 0) {
-                                existingChiTiet.setGiaSauKhiGiam(giaSauKhiGiam);
-                                isDiscountLimitChanged = true;
-                            }
-                        }
-                        if (isDiscountLimitChanged) {
-                            repo2.saveAll(existingChiTietListForCTSP);
-                            System.out.println("Cập nhật giá cho chi tiết sản phẩm tồn tại: " + idCTSPInGroup);
+                            existingChiTiet.setGiaSauKhiGiam(finalGiaSauKhiGiam);
+                            repo2.save(existingChiTiet);
                         }
                     }
                 }
@@ -455,9 +475,6 @@ public class dot_giam_gia_service {
         }
     }
 
-    private boolean isOverlapping2(Date start1, Date end1, Date start2, Date end2) {
-        return start1.before(end2) && start2.before(end1);
-    }
 
     public Page<DotGiamGia> timKiem(Pageable pageable, String maDGG, String tenDGG, String loaiGiamGiaApDung, BigDecimal giaTriGiamGia, BigDecimal soTienGiamToiDa, Date ngayBatDau, Date ngayKetThuc, Boolean trangThai, Boolean deleted) {
         return repository.timKiem(pageable, maDGG, tenDGG, loaiGiamGiaApDung, giaTriGiamGia, soTienGiamToiDa, ngayBatDau, ngayKetThuc, trangThai, deleted);
@@ -468,13 +485,57 @@ public class dot_giam_gia_service {
         updateStatusAutomatically();
     }
 
-    @Scheduled(cron = "0 0 0 * * *") // Chạy lúc 00:00
+    @Scheduled(cron = "0 0 0 * * *")
     @Transactional
     public void updateStatusAutomatically() {
         Date today = java.sql.Date.valueOf(LocalDate.now());
+
+        // Cập nhật trạng thái và xóa các DotGiamGia hết hạn
+        int deletedCount = repository.updateDeletedIfEndDatePassed(today);
+        if (deletedCount > 0) {
+            System.out.println("Đã đánh dấu " + deletedCount + " DotGiamGia là deleted.");
+            int deletedChiTietCount = repo2.updateDeletedChiTietDotGiamGia();
+            System.out.println("Đã đánh dấu " + deletedChiTietCount + " ChiTietDotGiamGia là deleted.");
+        }
         repository.updateStatusIfStartDatePassed(today);
-        repository.updateDeletedIfEndDatePassed(today);
-        repository.updateDeletedChiTietDotGiamGia();
+
+        // Cập nhật giá cho tất cả ChiTietSanPham
+        List<ChiTietSanPham> allCtsp = chiTietSanPhamRepository.findAll();
+        for (ChiTietSanPham ctsp : allCtsp) {
+            List<ChiTietDotGiamGia> activeCtggList = repo2.findActiveChiTietDotGiamGiaByCtspId(ctsp.getId(), today);
+
+            if (activeCtggList.isEmpty()) {
+                continue;
+            }
+
+            BigDecimal giaBanDau = activeCtggList.get(0).getGiaBanDau();
+            BigDecimal newGiaSauKhiGiam;
+
+            if (activeCtggList.size() >= 2) { // Có trùng lặp
+                BigDecimal avgGiaTriGiamGia = activeCtggList.stream()
+                        .map(ctgg -> ctgg.getIdDotGiamGia().getGiaTriGiamGia())
+                        .reduce(BigDecimal.ZERO, BigDecimal::add)
+                        .divide(BigDecimal.valueOf(activeCtggList.size()), 2, RoundingMode.HALF_UP);
+                BigDecimal avgSoTienGiamToiDa = activeCtggList.stream()
+                        .map(ctgg -> ctgg.getIdDotGiamGia().getSoTienGiamToiDa())
+                        .reduce(BigDecimal.ZERO, BigDecimal::add)
+                        .divide(BigDecimal.valueOf(activeCtggList.size()), 2, RoundingMode.HALF_UP);
+
+                newGiaSauKhiGiam = calculateGiaSauKhiGiam(giaBanDau, avgGiaTriGiamGia, avgSoTienGiamToiDa);
+                System.out.println("Cập nhật giá trung bình cho ChiTietSanPham " + ctsp.getId() + ": " + newGiaSauKhiGiam);
+            } else { // Chỉ có 1 đợt
+                ChiTietDotGiamGia activeCtgg = activeCtggList.get(0);
+                DotGiamGia activeDot = activeCtgg.getIdDotGiamGia();
+                newGiaSauKhiGiam = calculateGiaSauKhiGiam(giaBanDau, activeDot.getGiaTriGiamGia(), activeDot.getSoTienGiamToiDa());
+                System.out.println("Cập nhật giá cho ChiTietSanPham " + ctsp.getId() + " theo DotGiamGia " + activeDot.getId() + ": " + newGiaSauKhiGiam);
+            }
+
+            for (ChiTietDotGiamGia ctgg : activeCtggList) {
+                ctgg.setGiaSauKhiGiam(newGiaSauKhiGiam);
+                repo2.save(ctgg);
+            }
+        }
     }
+
 
 }

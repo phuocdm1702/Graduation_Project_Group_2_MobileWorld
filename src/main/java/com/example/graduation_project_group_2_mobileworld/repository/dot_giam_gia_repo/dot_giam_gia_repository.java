@@ -3,10 +3,7 @@ package com.example.graduation_project_group_2_mobileworld.repository.dot_giam_g
 import com.example.graduation_project_group_2_mobileworld.dto.dot_giam_gia.viewCTSPDTO;
 
 import com.example.graduation_project_group_2_mobileworld.dto.dot_giam_gia.viewSanPhamDTO;
-import com.example.graduation_project_group_2_mobileworld.entity.DotGiamGia;
-import com.example.graduation_project_group_2_mobileworld.entity.HeDieuHanh;
-import com.example.graduation_project_group_2_mobileworld.entity.NhaSanXuat;
-import com.example.graduation_project_group_2_mobileworld.entity.SanPham;
+import com.example.graduation_project_group_2_mobileworld.entity.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -131,23 +128,5 @@ public interface dot_giam_gia_repository extends JpaRepository<DotGiamGia, Integ
             """)
     int updateDeletedIfEndDatePassed(@Param("today") Date today);
 
-
-    @Modifying
-    @Transactional
-    @Query("""
-            UPDATE ChiTietDotGiamGia c
-            SET c.deleted = true
-            WHERE c.idDotGiamGia.id IN (
-                SELECT e.id FROM DotGiamGia e WHERE e.deleted = true
-            )
-            """)
-    int updateDeletedChiTietDotGiamGia();
-
-
-    @Query("SELECT d FROM DotGiamGia d WHERE d.ngayKetThuc < :today AND d.trangThai = true")
-    List<DotGiamGia> findByNgayKetThucBeforeAndTrangThaiTrue(@Param("today") LocalDate today);
-
-    @Query("SELECT d FROM DotGiamGia d WHERE d.ngayKetThuc < :today AND d.trangThai = true AND d.deleted = false")
-    List<DotGiamGia> findByNgayKetThucBeforeAndTrangThaiTrueAndDeletedFalse(@Param("today") LocalDate today);
 
 }

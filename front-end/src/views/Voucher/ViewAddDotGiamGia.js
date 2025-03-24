@@ -293,16 +293,7 @@ export const useDotGiamGia = () => {
     {
       key: "anh.duongDan",
       label: "Ảnh",
-      formatter: (value, item) => {
-        const duplicateCount = item.duplicateCtspCount || 0; // Lấy từ dữ liệu API
-        if (!value) return "N/A";
-        return `
-        <div class="image-wrapper">
-          <img src="${value}" alt="Ảnh" class="w-10 h-10 object-cover">
-          ${duplicateCount > 0 ? `<span class="duplicate-count">${duplicateCount}</span>` : ''}
-        </div>
-      `;
-      },
+      formatter: (value) => value ? `<img src="${value}" alt="Ảnh" class="w-10 h-10 object-cover">` : "N/A",
     },
     {
       key: "sp.tenSanPham_va_MauSac",
