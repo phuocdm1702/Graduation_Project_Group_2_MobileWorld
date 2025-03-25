@@ -296,8 +296,13 @@ export const useDotGiamGia = () => {
       formatter: (value) => value ? `<img src="${value}" alt="Ảnh" class="w-10 h-10 object-cover">` : "N/A",
     },
     {
+      key: "soLuongTrongDotGiamGiaKhac",
+      label: "Số lượng trùng",
+      formatter: (value, item) => item.soLuongTrongDotGiamGiaKhac !== undefined ? item.soLuongTrongDotGiamGiaKhac : "0",
+    },
+    {
       key: "sp.tenSanPham_va_MauSac",
-      label: "Tên sản phẩm & Màu sắc",
+      label: "Sản phẩm & Màu sắc",
       formatter: (value, item) => {
         const tenSanPham = item.sp?.tenSanPham ?? "Chưa có dữ liệu";
         const mauSac = item.ctsp?.idMauSac?.mauSac ?? "Chưa có dữ liệu";
@@ -306,7 +311,7 @@ export const useDotGiamGia = () => {
     },
     {
       key: "bnt.dungLuongBoNhoTrong",
-      label: "Dung lượng bộ nhớ",
+      label: "Bộ nhớ",
       formatter: (value) => value ?? "Chưa có dữ liệu",
     },
     {
@@ -314,31 +319,32 @@ export const useDotGiamGia = () => {
       label: "Đơn giá",
       formatter: (value) => value !== undefined ? value.toLocaleString() : "N/A",
     },
-    {
-      key: "soTienGiamToiDa",
-      label: "Số tiền giảm tối đa",
-      formatter: (value, item) => {
-        const loaiGiamGia = dotGiamGia.value.loaiGiamGiaApDung;
-        const giaTriGiam = parseFloat(dotGiamGia.value.giaTriGiamGia) || 0;
-        const soTienGiamToiDa = parseFloat(dotGiamGia.value.soTienGiamToiDa) || Infinity;
-        const giaBanDau = parseFloat(item.ctsp.giaBan) || 0;
-
-        if (loaiGiamGia === "Phần trăm") {
-          const soTienGiamThucTe = giaBanDau * (giaTriGiam / 100);
-          return Math.min(soTienGiamThucTe, soTienGiamToiDa).toLocaleString();
-        }
-        return soTienGiamToiDa.toLocaleString();
-      },
-    },
+    // {
+    //   key: "soTienGiamToiDa",
+    //   label: "Tiền giảm tối đa",
+    //   formatter: (value, item) => {
+    //     const loaiGiamGia = dotGiamGia.value.loaiGiamGiaApDung;
+    //     const giaTriGiam = parseFloat(dotGiamGia.value.giaTriGiamGia) || 0;
+    //     const soTienGiamToiDa = parseFloat(dotGiamGia.value.soTienGiamToiDa) || Infinity;
+    //     const giaBanDau = parseFloat(item.ctsp.giaBan) || 0;
+    //
+    //     if (loaiGiamGia === "Phần trăm") {
+    //       const soTienGiamThucTe = giaBanDau * (giaTriGiam / 100);
+    //       return Math.min(soTienGiamThucTe, soTienGiamToiDa).toLocaleString();
+    //     }
+    //     return soTienGiamToiDa.toLocaleString();
+    //   },
+    // },
     {
       key: "giaSauKhiGiam",
-      label: "Đơn giá sau giảm giá",
+      label: "Đơn giá sau giảm",
       formatter: (value) => value !== undefined ? value.toLocaleString() : "N/A",
     },
   ]);
 
   const getNestedValue2 = (obj, key) => {
     if (key === "index") return null;
+    if (key === "soLuongTrongDotGiamGiaKhac") return obj.soLuongTrongDotGiamGiaKhac; // Truy cập trực tiếp
     return key.split('.').reduce((o, k) => (o && o[k] !== undefined ? o[k] : 'N/A'), obj);
   };
 

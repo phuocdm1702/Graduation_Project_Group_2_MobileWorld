@@ -51,7 +51,36 @@ public interface dot_giam_gia_repository extends JpaRepository<DotGiamGia, Integ
     @Query("SELECT nsx FROM NhaSanXuat nsx WHERE nsx.deleted = false")
     List<NhaSanXuat> findAllNhaSanXuat();
 
-    @Query("SELECT new com.example.graduation_project_group_2_mobileworld.dto.dot_giam_gia.viewCTSPDTO(sp, ctsp, anh, bnt, ms) " +
+//    @Query("SELECT new com.example.graduation_project_group_2_mobileworld.dto.dot_giam_gia.viewCTSPDTO(sp, ctsp, anh, bnt, ms) " +
+//            "FROM SanPham sp " +
+//            "INNER JOIN ChiTietSanPham ctsp ON ctsp.idSanPham.id = sp.id " +
+//            "INNER JOIN AnhSanPham anh ON ctsp.idAnhSanPham.id = anh.id " +
+//            "INNER JOIN BoNhoTrong bnt ON ctsp.idBoNhoTrong.id = bnt.id " +
+//            "INNER JOIN MauSac ms ON ctsp.idMauSac.id = ms.id " +
+//            "WHERE sp.id IN :ids " +
+//            "AND (:idBoNhoTrongs IS NULL OR bnt.id IN :idBoNhoTrongs) " +
+//            "AND (:idMauSacs IS NULL OR ms.id IN :idMauSacs) " +
+//            "AND ctsp.deleted = false " +
+//            "AND ctsp.id IN (" +
+//            "    SELECT MIN(ctsp2.id) " +
+//            "    FROM ChiTietSanPham ctsp2 " +
+//            "    WHERE ctsp2.idSanPham.id = sp.id " +
+//            "    AND ctsp2.idMauSac.id = ms.id " +
+//            "    AND ctsp2.idBoNhoTrong.id = bnt.id " +
+//            "    AND ctsp2.deleted = false " +
+//            "    GROUP BY ctsp2.idSanPham.id, ctsp2.idMauSac.id, ctsp2.idBoNhoTrong.id" +
+//            ")")
+//    Page<viewCTSPDTO> getAllCTSP(@Param("ids") List<Integer> ids,
+//                                 @Param("idBoNhoTrongs") List<Integer> idBoNhoTrongs,
+//                                 @Param("idMauSacs") List<Integer> idMauSacs,
+//                                 Pageable pageable);
+
+    @Query("SELECT new com.example.graduation_project_group_2_mobileworld.dto.dot_giam_gia.viewCTSPDTO(sp, ctsp, anh, bnt, ms, " +
+            "(SELECT COUNT(ctdg) FROM ChiTietDotGiamGia ctdg " +
+            "WHERE ctdg.idChiTietSanPham.idSanPham.id = sp.id " +
+            "AND ctdg.idChiTietSanPham.idBoNhoTrong.id = bnt.id " +
+            "AND ctdg.idChiTietSanPham.idMauSac.id = ms.id " +
+            "AND ctdg.idDotGiamGia.deleted = false)) " +
             "FROM SanPham sp " +
             "INNER JOIN ChiTietSanPham ctsp ON ctsp.idSanPham.id = sp.id " +
             "INNER JOIN AnhSanPham anh ON ctsp.idAnhSanPham.id = anh.id " +

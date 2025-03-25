@@ -12,7 +12,8 @@ public class viewCTSPDTO {
     BoNhoTrong bnt;
     MauSac ms;
     BigDecimal giaSauKhiGiam;
-    private Boolean selected; // Thêm field selected để lưu trạng thái được chọn
+    private Boolean selected;
+    private Long soLuongTrongDotGiamGiaKhac;
 
     public viewCTSPDTO() {
     }
@@ -24,6 +25,32 @@ public class viewCTSPDTO {
         this.bnt = bnt;
         this.ms = ms;
         this.selected = true; // Mặc định là true khi khởi tạo, khớp với frontend
+    }
+
+    public viewCTSPDTO(SanPham sp, ChiTietSanPham ctsp, AnhSanPham anh, BoNhoTrong bnt, MauSac ms, Long soLuongTrongDotGiamGiaKhac) {
+        this.sp = sp;
+        this.ctsp = ctsp;
+        this.anh = anh;
+        this.bnt = bnt;
+        this.ms = ms;
+        this.soLuongTrongDotGiamGiaKhac = soLuongTrongDotGiamGiaKhac;
+    }
+
+    public viewCTSPDTO(SanPham sp, ChiTietSanPham ctsp, AnhSanPham anh, BoNhoTrong bnt, MauSac ms, int soLuongTrongDotGiamGiaKhac) {
+        this.sp = sp;
+        this.ctsp = ctsp;
+        this.anh = anh;
+        this.bnt = bnt;
+        this.ms = ms;
+        this.soLuongTrongDotGiamGiaKhac = (long) soLuongTrongDotGiamGiaKhac;
+    }
+
+    public Long getSoLuongTrongDotGiamGiaKhac() {
+        return soLuongTrongDotGiamGiaKhac;
+    }
+
+    public void setSoLuongTrongDotGiamGiaKhac(Long soLuongTrongDotGiamGiaKhac) {
+        this.soLuongTrongDotGiamGiaKhac = soLuongTrongDotGiamGiaKhac;
     }
 
     public SanPham getSp() {
