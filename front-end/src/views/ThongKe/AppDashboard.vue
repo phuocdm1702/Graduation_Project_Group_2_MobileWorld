@@ -1,78 +1,99 @@
 <template>
-  <div>
-    <!-- Thêm BreadcrumbWrapper -->
-    <BreadcrumbWrapper :breadcrumb-items="breadcrumbItems" />
+  <div class="p-6">
+    <BreadcrumbWrapper :breadcrumb-items="breadcrumbItems"/>
 
     <!-- Thống kê -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-      <div v-for="(stat, index) in statistics" :key="index" class="p-6 rounded-xl text-white" :class="stat.bgColor">
-        <h2 class="text-xl font-semibold">{{ stat.title }}</h2>
-        <p>Doanh thu đơn hàng: {{ stat.revenue }}</p>
-        <p>Sản phẩm đã bán: {{ stat.sold }}</p>
-        <p>Tổng số đơn hàng: {{ stat.orders }}</p>
+    <div v-if="statistics.length" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div
+        v-for="(stat, index) in statistics"
+        :key="index"
+        class="p-6 rounded-2xl shadow-lg text-white flex flex-col items-center text-center"
+        :class="stat.bgColor"
+      >
+        <h2 class="text-2xl font-semibold mb-2">{{ stat.title }}</h2>
+        <p class="text-lg">Doanh thu: <strong>{{ formatCurrency(stat.revenue) }}</strong></p>
+        <p class="text-lg">Sản phẩm đã bán: <strong>{{ stat.sold }}</strong></p>
+        <p class="text-lg">Tổng đơn hàng: <strong>{{ stat.orders }}</strong></p>
+      </div>
+    </div>
+    <div v-else class="text-center text-gray-500">Loading statistics...</div>
+
+    <!-- Bộ lọc -->
+    <div class="bg-white p-4 rounded-xl shadow-md mb-6">
+      <div class="flex flex-wrap items-center gap-4">
+        <label class="font-medium">Lọc theo:</label>
+        <select v-model="filterType" @change="fetchData" class="p-2 border rounded-md">
+          <option value="day">Ngày</option>
+          <option value="month">Tháng</option>
+          <option value="year">Năm</option>
+        </select>
+
+        <label class="text-gray-600">Từ:</label>
+        <input type="date" v-model="startDate" class="p-2 border rounded-md"/>
+        <label class="text-gray-600">Đến:</label>
+        <input type="date" v-model="endDate" class="p-2 border rounded-md"/>
+
+        <button
+          @click="fetchData"
+          class="p-2 bg-blue-500 hover:bg-blue-600 transition text-white font-medium rounded-lg shadow-md"
+        >
+          Lọc
+        </button>
       </div>
     </div>
 
     <!-- Bảng sản phẩm bán chạy -->
-    <div class="bg-white p-4 rounded-xl shadow-md">
-      <h2 class="text-lg font-semibold mb-4">Top Sản Phẩm Bán Chạy Tháng Này</h2>
-      <table class="w-full border-collapse border border-gray-200">
-        <thead class="bg-gray-100">
-        <tr>
-          <th class="border p-2">STT</th>
-          <th class="border p-2">Ảnh</th>
-          <th class="border p-2">Tên Sản Phẩm</th>
-          <th class="border p-2">Số Lượng</th>
-          <th class="border p-2">Giá Tiền</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr v-for="(product, index) in products" :key="index" class="text-center">
-          <td class="border p-2">{{ index + 1 }}</td>
-          <td class="border p-2"><img :src="product.image" class="h-12 w-12 rounded" /></td>
-          <td class="border p-2">{{ product.name }}</td>
-          <td class="border p-2">{{ product.sold }}</td>
-          <td class="border p-2">{{ product.price }}</td>
-        </tr>
-        </tbody>
-      </table>
-    </div>
+    <DynamicTable
+      :data="topProducts"
+      :columns="columns"
+      :get-nested-value="getNestedValue"
+    />
+
+    <!-- Phân trang -->
+    <footer v-if="totalPages > 1" class="bg-white shadow-lg rounded-lg p-4 flex justify-center items-center mt-4">
+      <Pagination
+        :current-page="currentPage"
+        :total-pages="totalPages"
+        @page-changed="changePage"
+      />
+    </footer>
+    <div v-else class="text-center mt-4 text-gray-500">Không có phân trang (tổng số trang: {{ totalPages }})</div>
   </div>
 </template>
 
+
 <script setup>
-import { ref, computed } from 'vue';
-import { useRoute } from 'vue-router';
-import BreadcrumbWrapper from '@/components/BreadcrumbWrapper.vue'; // Import BreadcrumbWrapper
+import BreadcrumbWrapper from '@/components/BreadcrumbWrapper.vue';
+import DynamicTable from '@/components/DynamicTable.vue';
+import Pagination from '@/components/Pagination.vue';
+import {ThongKeJs} from './js/ThongKe.js';
+import {computed} from 'vue';
+import {useRoute} from 'vue-router';
 
 const route = useRoute();
 
-// Dữ liệu thống kê
-const statistics = ref([
-  { title: "Hôm nay", revenue: "2.800.000 VND", sold: 15, orders: 5, bgColor: "bg-blue-500" },
-  { title: "Tuần này", revenue: "59.892.500 VND", sold: 256, orders: 40, bgColor: "bg-purple-500" },
-  { title: "Tháng này", revenue: "59.892.500 VND", sold: 256, orders: 40, bgColor: "bg-green-500" },
-  { title: "Năm nay", revenue: "59.892.500 VND", sold: 256, orders: 40, bgColor: "bg-teal-600" },
-]);
-
-// Dữ liệu sản phẩm bán chạy
-const products = ref([
-  { name: "Áo Phông Trẻ Em", sold: 145, price: "250.000 VND", image: "https://via.placeholder.com/50" },
-  { name: "Áo Phông Luxury", sold: 52, price: "500.000 VND", image: "https://via.placeholder.com/50" },
-  { name: "Áo Phông Luxury", sold: 19, price: "300.000 VND", image: "https://via.placeholder.com/50" }
-]);
-
-// Tính toán breadcrumb dựa trên meta của route
 const breadcrumbItems = computed(() => {
   if (typeof route.meta.breadcrumb === "function") {
     return route.meta.breadcrumb(route);
   }
-  return route.meta?.breadcrumb || ["Thống Kê"]; // Mặc định nếu không có breadcrumb
+  return route.meta?.breadcrumb || ["Thống Kê"];
 });
-</script>
 
-<style scoped>
-body {
-  background-color: #f8f9fa;
-}
-</style>
+const {
+  statistics,
+  formatCurrency,
+  topProducts,
+  columns,
+  filterType,
+  startDate,
+  endDate,
+  changePage,
+  fetchData,
+  currentPage,
+  totalPages
+} = ThongKeJs();
+
+const getNestedValue = (item, key) => {
+  return item[key];
+};
+</script>
