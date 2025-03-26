@@ -5,14 +5,12 @@ import com.example.graduation_project_group_2_mobileworld.dto.thongKe.TopSelling
 import com.example.graduation_project_group_2_mobileworld.service.thongKeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @CrossOrigin(origins = "http://localhost:3000")
 @RestController
@@ -21,7 +19,7 @@ public class thongKeController {
     @Autowired
     private thongKeService sr;
 
-    @GetMapping()
+    @GetMapping("/dashboard")
     public ResponseEntity<Map<String, Object>> hienThi(
             @RequestParam(required = false, defaultValue = "month") String filterType,
             @RequestParam(required = false) String startDate,
@@ -30,7 +28,7 @@ public class thongKeController {
             @RequestParam(defaultValue = "5") int size) {
         Map<String, Object> response = new HashMap<>();
 
-        // Dữ liệu thống kê
+        // Dữ liệu thống kê hiện tại
         Map<String, Object> ngay = sr.getThongKeTheoNgay();
         Map<String, Object> tuan = sr.getThongKeTheoTuan();
         Map<String, Object> thang = sr.getThongKeTheoThang();
@@ -68,6 +66,22 @@ public class thongKeController {
         response.put("totalPages", topProductsPage.getTotalPages());
         response.put("currentPage", topProductsPage.getNumber());
 
+        // Dữ liệu tăng trưởng (so sánh với kỳ trước)
+        Map<String, Object> growthData = sr.getGrowthData();
+        response.put("growthData", growthData);
+
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/order-status-stats")
+    public ResponseEntity<Map<String, Long>> getOrderStatusStats(
+            @RequestParam(defaultValue = "month") String filterType,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date date
+    ) {
+        if (date == null) {
+            date = new Date(); // Mặc định là ngày hiện tại nếu không truyền date
+        }
+        Map<String, Long> statusStats = sr.getOrderStatusStats(filterType, date);
+        return ResponseEntity.ok(statusStats);
     }
 }

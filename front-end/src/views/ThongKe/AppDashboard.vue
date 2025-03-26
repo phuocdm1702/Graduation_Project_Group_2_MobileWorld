@@ -1,74 +1,177 @@
 <template>
-  <div class="p-6">
-    <BreadcrumbWrapper :breadcrumb-items="breadcrumbItems"/>
+  <div class="container mx-auto p-6">
+    <!-- Breadcrumb -->
+    <BreadcrumbWrapper :breadcrumb-items="breadcrumbItems" class="mb-6" />
 
     <!-- Thống kê -->
-    <div v-if="statistics.length" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-      <div
-        v-for="(stat, index) in statistics"
-        :key="index"
-        class="p-6 rounded-2xl shadow-lg text-white flex flex-col items-center text-center"
-        :class="stat.bgColor"
-      >
-        <h2 class="text-2xl font-semibold mb-2">{{ stat.title }}</h2>
-        <p class="text-lg">Doanh thu: <strong>{{ formatCurrency(stat.revenue) }}</strong></p>
-        <p class="text-lg">Sản phẩm đã bán: <strong>{{ stat.sold }}</strong></p>
-        <p class="text-lg">Tổng đơn hàng: <strong>{{ stat.orders }}</strong></p>
-      </div>
-    </div>
-    <div v-else class="text-center text-gray-500">Loading statistics...</div>
-
-    <!-- Bộ lọc -->
-    <div class="bg-white p-4 rounded-xl shadow-md mb-6">
-      <div class="flex flex-wrap items-center gap-4">
-        <label class="font-medium">Lọc theo:</label>
-        <select v-model="filterType" @change="fetchData" class="p-2 border rounded-md">
-          <option value="day">Ngày</option>
-          <option value="month">Tháng</option>
-          <option value="year">Năm</option>
-        </select>
-
-        <label class="text-gray-600">Từ:</label>
-        <input type="date" v-model="startDate" class="p-2 border rounded-md"/>
-        <label class="text-gray-600">Đến:</label>
-        <input type="date" v-model="endDate" class="p-2 border rounded-md"/>
-
-        <button
-          @click="fetchData"
-          class="p-2 bg-blue-500 hover:bg-blue-600 transition text-white font-medium rounded-lg shadow-md"
+    <section class="mb-8">
+      <h2 class="text-2xl font-semibold mb-4">Thống Kê Tổng Quan</h2>
+      <div v-if="statistics.length" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div
+          v-for="(stat, index) in statistics"
+          :key="index"
+          class="p-6 rounded-xl text-white shadow-md transition-transform transform hover:scale-105"
+          :class="stat.bgColor"
         >
-          Lọc
-        </button>
+          <h3 class="text-xl font-semibold mb-2">{{ stat.title }}</h3>
+          <p class="text-sm">Doanh thu đơn hàng: {{ formatCurrency(stat.revenue) }}</p>
+          <p class="text-sm">Sản phẩm đã bán: {{ stat.sold }}</p>
+          <p class="text-sm">Tổng số đơn hàng: {{ stat.orders }}</p>
+        </div>
       </div>
-    </div>
+      <div v-else class="text-center text-gray-500">Đang tải thống kê...</div>
+    </section>
+    
 
     <!-- Bảng sản phẩm bán chạy -->
-    <DynamicTable
-      :data="topProducts"
-      :columns="columns"
-      :get-nested-value="getNestedValue"
-    />
-
-    <!-- Phân trang -->
-    <footer v-if="totalPages > 1" class="bg-white shadow-lg rounded-lg p-4 flex justify-center items-center mt-4">
-      <Pagination
-        :current-page="currentPage"
-        :total-pages="totalPages"
-        @page-changed="changePage"
+    <section class="mb-8">
+      <h2 class="text-2xl font-semibold mb-4">Sản Phẩm Bán Chạy</h2>
+      <section class="mb-2">
+        <div class="flex flex-col sm:flex-row items-center gap-4 bg-gray-50 p-4 rounded-lg shadow-sm">
+          <div class="flex items-center gap-2">
+            <label class="font-medium text-gray-700">Lọc theo:</label>
+            <select
+              v-model="filterType"
+              @change="fetchData"
+              class="p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            >
+              <option value="day">Ngày</option>
+              <option value="month">Tháng</option>
+              <option value="year">Năm</option>
+              <option value="custom">Tùy chọn</option>
+            </select>
+          </div>
+          <div v-if="filterType === 'custom'" class="flex items-center gap-2">
+            <label class="font-medium text-gray-700">Từ ngày:</label>
+            <input
+              type="date"
+              v-model="startDate"
+              class="p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            />
+            <label class="font-medium text-gray-700">Đến ngày:</label>
+            <input
+              type="date"
+              v-model="endDate"
+              class="p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            />
+            <button
+              @click="fetchData"
+              class="p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+            >
+              Lọc
+            </button>
+          </div>
+        </div>
+      </section>
+      <DynamicTable
+        :data="topProducts"
+        :columns="columnsTopProducts"
+        :get-nested-value="getNestedValue"
+        class="bg-white shadow-lg rounded-lg"
       />
-    </footer>
-    <div v-else class="text-center mt-4 text-gray-500">Không có phân trang (tổng số trang: {{ totalPages }})</div>
+      <footer
+        v-if="totalPages > 1"
+        class="bg-white shadow-lg rounded-lg p-4 flex justify-center items-center mt-4"
+      >
+        <Pagination
+          :current-page="currentPage"
+          :total-pages="totalPages"
+          @page-changed="changePage"
+        />
+      </footer>
+    </section>
+
+    <!-- Bảng tăng trưởng và Biểu đồ trạng thái đơn hàng -->
+    <section class="mb-8">
+      <div class="flex flex-col lg:flex-row gap-6">
+        <!-- Bảng tăng trưởng -->
+        <div class="flex-1 flex flex-col">
+          <h2 class="text-2xl font-semibold mb-4 text-center">Tốc Độ Tăng Trưởng Cửa Hàng</h2>
+          <div class="bg-white shadow-lg rounded-lg p-6 w-full flex-1 min-h-[400px] flex flex-col justify-between">
+            <div class="grid grid-cols-3 gap-4 py-3 border-b items-center text-center hover:bg-gray-50 transition-colors">
+              <span class="font-semibold text-gray-700">Doanh thu ngày:</span>
+              <span class="text-gray-900">{{ formatCurrency(growthData.doanhThuNgay) }}</span>
+              <span v-html="formatGrowth(growthData.growthDoanhThuNgay)" class="text-sm"></span>
+            </div>
+            <div class="grid grid-cols-3 gap-4 py-3 border-b items-center text-center hover:bg-gray-50 transition-colors">
+              <span class="font-semibold text-gray-700">Doanh thu tháng:</span>
+              <span class="text-gray-900">{{ formatCurrency(growthData.doanhThuThang) }}</span>
+              <span v-html="formatGrowth(growthData.growthDoanhThuThang)" class="text-sm"></span>
+            </div>
+            <div class="grid grid-cols-3 gap-4 py-3 border-b items-center text-center hover:bg-gray-50 transition-colors">
+              <span class="font-semibold text-gray-700">Doanh thu năm:</span>
+              <span class="text-gray-900">{{ formatCurrency(growthData.doanhThuNam) }}</span>
+              <span v-html="formatGrowth(growthData.growthDoanhThuNam)" class="text-sm"></span>
+            </div>
+            <div class="grid grid-cols-3 gap-4 py-3 border-b items-center text-center hover:bg-gray-50 transition-colors">
+              <span class="font-semibold text-gray-700">Sản phẩm tháng:</span>
+              <span class="text-gray-900">{{ growthData.sanPhamDaBanThang }} sản phẩm</span>
+              <span v-html="formatGrowth(growthData.growthSanPhamDaBanThang)" class="text-sm"></span>
+            </div>
+            <div class="grid grid-cols-3 gap-4 py-3 border-b items-center text-center hover:bg-gray-50 transition-colors">
+              <span class="font-semibold text-gray-700">Hóa đơn ngày:</span>
+              <span class="text-gray-900">{{ growthData.hoaDonTheoNgay }} hóa đơn</span>
+              <span v-html="formatGrowth(growthData.growthHoaDonTheoNgay)" class="text-sm"></span>
+            </div>
+            <div class="grid grid-cols-3 gap-4 py-3 items-center text-center hover:bg-gray-50 transition-colors">
+              <span class="font-semibold text-gray-700">Hóa đơn năm:</span>
+              <span class="text-gray-900">{{ growthData.hoaDonTheoNam }} hóa đơn</span>
+              <span v-html="formatGrowth(growthData.growthHoaDonTheoNam)" class="text-sm"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Biểu đồ trạng thái đơn hàng -->
+        <div class="flex-1 flex flex-col">
+          <h2 class="text-2xl font-semibold mb-4 text-center">Biểu Đồ Trạng Thái Đơn Hàng</h2>
+          <div class="bg-white shadow-lg rounded-lg p-6 w-full flex-1 min-h-[400px] flex flex-col justify-between">
+            <div class="flex justify-center mb-4">
+              <button
+                @click="chartFilterType = 'day'; fetchOrderStatusStats()"
+                :class="chartFilterType === 'day' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'"
+                class="px-3 py-1 rounded-l-lg border-r border-gray-300 hover:bg-blue-600 hover:text-white transition-colors text-sm"
+              >
+                Ngày
+              </button>
+              <button
+                @click="chartFilterType = 'week'; fetchOrderStatusStats()"
+                :class="chartFilterType === 'week' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'"
+                class="px-3 py-1 border-r border-gray-300 hover:bg-blue-600 hover:text-white transition-colors text-sm"
+              >
+                Tuần
+              </button>
+              <button
+                @click="chartFilterType = 'month'; fetchOrderStatusStats()"
+                :class="chartFilterType === 'month' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'"
+                class="px-3 py-1 border-r border-gray-300 hover:bg-blue-600 hover:text-white transition-colors text-sm"
+              >
+                Tháng
+              </button>
+              <button
+                @click="chartFilterType = 'year'; fetchOrderStatusStats()"
+                :class="chartFilterType === 'year' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'"
+                class="px-3 py-1 rounded-r-lg hover:bg-blue-600 hover:text-white transition-colors text-sm"
+              >
+                Năm
+              </button>
+            </div>
+            <div class="flex-1 flex justify-center items-center">
+              <canvas id="orderStatusChart" class="max-w-full max-h-full"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
   </div>
 </template>
-
 
 <script setup>
 import BreadcrumbWrapper from '@/components/BreadcrumbWrapper.vue';
 import DynamicTable from '@/components/DynamicTable.vue';
 import Pagination from '@/components/Pagination.vue';
-import {ThongKeJs} from './js/ThongKe.js';
-import {computed} from 'vue';
-import {useRoute} from 'vue-router';
+import { ThongKeJs } from './js/ThongKe.js';
+import { computed } from 'vue';
+import { useRoute } from 'vue-router';
 
 const route = useRoute();
 
@@ -82,13 +185,18 @@ const breadcrumbItems = computed(() => {
 const {
   statistics,
   formatCurrency,
+  formatGrowth,
   topProducts,
-  columns,
+  columnsTopProducts,
+  growthData,
+  orderStatusStats,
   filterType,
   startDate,
   endDate,
-  changePage,
+  chartFilterType,
   fetchData,
+  fetchOrderStatusStats,
+  changePage,
   currentPage,
   totalPages
 } = ThongKeJs();

@@ -76,13 +76,56 @@ public interface thongKeRepository extends JpaRepository<HoaDon, Integer> {
     );
 
 
+    @Query("SELECT c.idChiTietSanPham.id, COUNT(c.id) as soLuongBan " +
+            "FROM HoaDonChiTiet c " +
+            "JOIN c.hoaDon h " +
+            "WHERE (:startDate IS NULL OR h.createdAt >= :startDate) " +
+            "AND (:endDate IS NULL OR h.createdAt <= :endDate) " +
+            "GROUP BY c.idChiTietSanPham.id")
+    Page<Object[]> findTopSellingProducts(@Param("startDate") Date startDate, @Param("endDate") Date endDate, Pageable pageable);
 
-        @Query("SELECT c.idChiTietSanPham.id, COUNT(c.id) as soLuongBan " +
-                "FROM HoaDonChiTiet c " +
-                "JOIN c.hoaDon h " +
-                "WHERE (:startDate IS NULL OR h.createdAt >= :startDate) " +
-                "AND (:endDate IS NULL OR h.createdAt <= :endDate) " +
-                "GROUP BY c.idChiTietSanPham.id")
-        Page<Object[]> findTopSellingProducts(@Param("startDate") Date startDate, @Param("endDate") Date endDate, Pageable pageable);
+    @Query("SELECT new map(" +
+            "SUM(hd.tongTien) as doanhThu, " +
+            "COUNT(hdct.id) as sanPhamDaBan, " +
+            "COUNT(DISTINCT hd.id) as tongSoDonHang) " +
+            "FROM HoaDon hd " +
+            "JOIN hd.chiTietHoaDon hdct " +
+            "WHERE day(hd.createdAt) = day(:ngay) " +
+            "AND month(hd.createdAt) = month(:ngay) " +
+            "AND year(hd.createdAt) = year(:ngay)")
+    Map<String, Object> tangTruongTheoNgay(@Param("ngay") Date ngay);
 
+    @Query("SELECT new map(" +
+            "SUM(hd.tongTien) as doanhThu, " +
+            "COUNT(hdct.id) as sanPhamDaBan, " +
+            "COUNT(DISTINCT hd.id) as tongSoDonHang) " +
+            "FROM HoaDon hd " +
+            "JOIN hd.chiTietHoaDon hdct " +
+            "WHERE month(hd.createdAt) = month(:thang) " +
+            "AND year(hd.createdAt) = year(:thang)")
+    Map<String, Object> tangTruongTheoThang(@Param("thang") Date thang);
+
+    @Query("SELECT new map(" +
+            "SUM(hd.tongTien) as doanhThu, " +
+            "COUNT(hdct.id) as sanPhamDaBan, " +
+            "COUNT(DISTINCT hd.id) as tongSoDonHang) " +
+            "FROM HoaDon hd " +
+            "JOIN hd.chiTietHoaDon hdct " +
+            "WHERE year(hd.createdAt) = year(:nam)")
+    Map<String, Object> tangTruongTheoNam(@Param("nam") Date nam);
+
+
+    @Query("SELECT new map(hd.trangThai as trangThai, COUNT(hd.id) as soLuong) " +
+            "FROM HoaDon hd " +
+            "WHERE (:filterType = 'day' AND day(hd.createdAt) = day(:date) " +
+            "AND month(hd.createdAt) = month(:date) " +
+            "AND year(hd.createdAt) = year(:date)) " +
+            "OR (:filterType = 'month' AND month(hd.createdAt) = month(:date) " +
+            "AND year(hd.createdAt) = year(:date)) " +
+            "OR (:filterType = 'year' AND year(hd.createdAt) = year(:date)) " +
+            "GROUP BY hd.trangThai")
+    List<Map<String, Object>> thongKeTrangThaiDonHang(
+            @Param("filterType") String filterType,
+            @Param("date") Date date
+    );
 }
