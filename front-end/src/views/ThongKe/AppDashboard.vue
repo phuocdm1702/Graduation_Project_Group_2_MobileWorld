@@ -38,7 +38,7 @@
               <option value="day">Ngày</option>
               <option value="month">Tháng</option>
               <option value="year">Năm</option>
-              <option value="custom">Tùy chọn</option>
+              <option value="custom">Tùy chỉnh</option>
             </select>
           </div>
           <div v-if="filterType === 'custom'" class="flex items-center gap-2">
