@@ -4,13 +4,13 @@ import java.math.BigDecimal;
 
 public class SoLieuDTO {
     private BigDecimal doanhThu;
-    private BigDecimal sanPhamDaBan;
+    private Long sanPhamDaBan;
     private Integer tongSoDonHang;
 
     public SoLieuDTO() {
     }
 
-    public SoLieuDTO(BigDecimal doanhThu, BigDecimal sanPhamDaBan, Integer tongSoDonHang) {
+    public SoLieuDTO(BigDecimal doanhThu, Long sanPhamDaBan, Integer tongSoDonHang) {
         this.doanhThu = doanhThu;
         this.sanPhamDaBan = sanPhamDaBan;
         this.tongSoDonHang = tongSoDonHang;
@@ -24,11 +24,11 @@ public class SoLieuDTO {
         this.doanhThu = doanhThu;
     }
 
-    public BigDecimal getSanPhamDaBan() {
+    public Long getSanPhamDaBan() {
         return sanPhamDaBan;
     }
 
-    public void setSanPhamDaBan(BigDecimal sanPhamDaBan) {
+    public void setSanPhamDaBan(Long sanPhamDaBan) {
         this.sanPhamDaBan = sanPhamDaBan;
     }
 
