@@ -1,89 +1,129 @@
 <template>
-  <div class="flex items-center justify-center h-screen px-6 bg-gray-200">
-    <div class="w-full max-w-sm p-6 bg-white rounded-md shadow-md">
-      <div class="flex items-center justify-center">
-        <span class="text-2xl font-semibold text-orange-500">Mobile World</span>
+  <div class="flex items-center justify-center h-screen px-6 bg-gradient-to-r from-gray-100 to-gray-300">
+    <div class="w-full max-w-md p-8 bg-white rounded-xl shadow-lg">
+      <div class="flex items-center justify-center mb-6">
+        <img class="logo" src="../../../assets/Logo_Mobile_World_vector.png" alt="Logo">
       </div>
 
-      <form class="mt-4">
-        <label class="block">
-          <span class="text-sm text-gray-700">Email</span>
+      <h2 class="text-2xl font-semibold text-center text-gray-800 mb-6">Đăng Ký Tài Khoản</h2>
+
+      <form>
+        <label class="block mb-4">
+          <span class="text-sm font-medium text-gray-700">Email</span>
           <input
             type="email"
             class="
               block
               w-full
               mt-1
-              border-gray-200
+              px-4
+              py-2
+              bg-gray-50
+              border
+              border-gray-300
               rounded-md
-              focus:border-indigo-600
+              focus:border-orange-500
               focus:ring
-              focus:ring-opacity-40
-              focus:ring-indigo-500
+              focus:ring-orange-200
+              focus:ring-opacity-50
+              transition
+              duration-200
             "
+            placeholder="Nhập email của bạn"
           />
         </label>
 
-        <label class="block mt-3">
-          <span class="text-sm text-gray-700">Password</span>
+        <label class="block mb-6">
+          <span class="text-sm font-medium text-gray-700">Mật khẩu</span>
           <input
             type="password"
             class="
               block
               w-full
               mt-1
-              border-gray-200
+              px-4
+              py-2
+              bg-gray-50
+              border
+              border-gray-300
               rounded-md
-              focus:border-indigo-600
+              focus:border-orange-500
               focus:ring
-              focus:ring-opacity-40
-              focus:ring-indigo-500
+              focus:ring-orange-200
+              focus:ring-opacity-50
+              transition
+              duration-200
             "
-           
+            placeholder="Nhập mật khẩu"
           />
         </label>
 
-        <div class="flex items-center justify-between mt-4">
-          <div>
-            <router-link to="/dang-ky">
-              <a
-                class="block text-sm text-orange-500 fontme hover:underline"
-              >Đăng ký?</a
-              >
-            </router-link>
-          </div>
+        <label class="block mb-6">
+          <span class="text-sm font-medium text-gray-700">Mật khẩu</span>
+          <input
+            type="password"
+            class="
+              block
+              w-full
+              mt-1
+              px-4
+              py-2
+              bg-gray-50
+              border
+              border-gray-300
+              rounded-md
+              focus:border-orange-500
+              focus:ring
+              focus:ring-orange-200
+              focus:ring-opacity-50
+              transition
+              duration-200
+            "
+            placeholder="Xác nhận mật khẩu"
+          />
+        </label>
 
-          <div>
-            <a
-              class="block text-sm text-orange-500 fontme hover:underline"
-              href="#"
-            >Forgot your password?</a
-            >
-          </div>
-        </div>
-
-        <div class="mt-6">
+        <div>
           <button
             type="submit"
             class="
               w-full
               px-4
-              py-2
-              text-sm text-center text-white
+              py-3
+              text-sm
+              font-medium
+              text-white
               bg-orange-500
               rounded-md
-              focus:outline-none
               hover:bg-orange-600
+              focus:outline-none
+              focus:ring
+              focus:ring-orange-300
+              focus:ring-opacity-50
+              transition
+              duration-200
             "
           >
-            Sign in
+            Đăng Ký
           </button>
         </div>
       </form>
+
+      <p class="mt-4 text-center text-sm text-gray-600">
+        Đã có tài khoản?
+        <router-link to="/" class="text-orange-500 hover:underline">Đăng nhập</router-link>
+      </p>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-
 </script>
+
+<style scoped>
+.logo {
+  max-width: 100%;
+  width: 60%; 
+  height: auto;
+}
+</style>
