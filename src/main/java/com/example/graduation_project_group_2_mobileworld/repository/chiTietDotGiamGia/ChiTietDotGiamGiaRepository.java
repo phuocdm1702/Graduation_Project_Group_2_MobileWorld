@@ -10,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.sql.Date;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -20,11 +21,6 @@ public interface ChiTietDotGiamGiaRepository extends JpaRepository<ChiTietDotGia
     @Query("SELECT MAX(c.ma) FROM ChiTietDotGiamGia c")
     String findMaxMa();
 
-//    @Query("SELECT c FROM ChiTietDotGiamGia c WHERE c.idChiTietSanPham = :chiTietSanPham AND c.giaBanDau = :giaBanDau AND c.deleted = false")
-//    List<ChiTietDotGiamGia> findByIdChiTietSanPhamAndGiaBanDau(@Param("chiTietSanPham") ChiTietSanPham chiTietSanPham, @Param("giaBanDau") BigDecimal giaBanDau);
-//
-//    @Query("SELECT d FROM DotGiamGia d WHERE d.ngayKetThuc < :today AND d.trangThai = true")
-//    List<DotGiamGia> findByNgayKetThucBeforeAndTrangThaiTrue(@Param("today") LocalDate today);
 
     @Query("SELECT ctsp FROM ChiTietSanPham ctsp " +
             "JOIN ChiTietDotGiamGia ctdgg ON ctdgg.idChiTietSanPham.id = ctsp.id " +
@@ -64,4 +60,17 @@ public interface ChiTietDotGiamGiaRepository extends JpaRepository<ChiTietDotGia
     @Query("UPDATE ChiTietDotGiamGia ct SET ct.deleted = true WHERE ct.idDotGiamGia.id = :id")
     public void updateChiTietDotGiamGiaDeleted(@Param("id") Integer id);
 
+    @Modifying
+    @Transactional
+    @Query("UPDATE ChiTietDotGiamGia c SET c.deleted = true WHERE c.idDotGiamGia.id IN " +
+            "(SELECT e.id FROM DotGiamGia e WHERE e.deleted = true)")
+    int updateDeletedChiTietDotGiamGia();
+
+    @Query("SELECT c FROM ChiTietDotGiamGia c " +
+            "WHERE c.idChiTietSanPham.id = :ctspId " +
+            "AND c.idDotGiamGia.ngayBatDau <= :today " +
+            "AND c.idDotGiamGia.ngayKetThuc >= :today " +
+            "AND c.idDotGiamGia.deleted = false " +
+            "AND c.deleted = false")
+    List<ChiTietDotGiamGia> findActiveChiTietDotGiamGiaByCtspId(@Param("ctspId") Integer ctspId, @Param("today") Date today);
 }

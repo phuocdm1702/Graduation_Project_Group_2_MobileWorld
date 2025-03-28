@@ -1,8 +1,9 @@
-// @/views/Bill/HoaDon.js
 import { ref, onMounted, computed } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
 import { saveAs } from 'file-saver';
+import jsQR from 'jsqr';
+import QRCode from 'qrcode'; // Import the qrcode library
 
 export default function useHoaDonLineList() {
   const router = useRouter();
@@ -29,6 +30,14 @@ export default function useHoaDonLineList() {
   const showConfirmModal = ref(false);
   const confirmMessage = ref('');
   const confirmedAction = ref(null);
+
+  // QR Scanner variables
+  const showQrScanner = ref(false);
+  const qrResult = ref(null);
+  const videoElement = ref(null);
+  const canvasElement = ref(null);
+  let stream = null;
+  let animationFrameId = null;
 
   const totalPages = computed(() => Math.ceil(totalElements.value / pageSize.value));
 
@@ -80,8 +89,11 @@ export default function useHoaDonLineList() {
         <button class="text-blue-500 hover:text-blue-700 mr-2" onclick="window.viewUpdate(${item.id})">
           <i class="fa-solid fa-edit" style="color: #f97316;"></i>
         </button>
-        <button class="text-blue-500 hover:text-blue-700" onclick="window.printInvoice(${item.id})">
+        <button class="text-blue-500 hover:text-blue-700 mr-2" onclick="window.printInvoice(${item.id})">
           <i class="fa-solid fa-print" style="color: #f97316;"></i>
+        </button>
+        <button class="text-blue-500 hover:text-blue-700" onclick="window.downloadQrCode('${item.ma}')">
+          <i class="fa-solid fa-qrcode" style="color: #f97316;"></i>
         </button>
       `
     }
@@ -225,7 +237,7 @@ export default function useHoaDonLineList() {
       totalElements.value = 0;
     }
   };
-  
+
   const goToPage = (page) => {
     currentPage.value = page;
     if (isFiltering.value) {
@@ -248,16 +260,11 @@ export default function useHoaDonLineList() {
       const contentType = response.headers['content-type'];
       if (contentType === 'application/pdf') {
         const blob = response.data;
-
-        // Tạo URL tạm thời từ blob để hiển thị PDF
         const blobUrl = window.URL.createObjectURL(blob);
-
-        // Mở PDF trong một cửa sổ mới và gọi hộp thoại in
         const printWindow = window.open(blobUrl);
         if (printWindow) {
           printWindow.onload = () => {
-            printWindow.print(); // Mở hộp thoại in
-            // Tự động đóng cửa sổ sau khi in (tùy chọn)
+            printWindow.print();
             printWindow.onafterprint = () => {
               printWindow.close();
             };
@@ -267,8 +274,6 @@ export default function useHoaDonLineList() {
           console.error('Không thể mở cửa sổ in. Vui lòng kiểm tra trình chặn popup.');
           toast.value?.kshowToast('error', 'Không thể mở cửa sổ in!');
         }
-
-        // Giải phóng URL blob sau khi sử dụng
         window.URL.revokeObjectURL(blobUrl);
       } else {
         const text = await response.data.text();
@@ -286,67 +291,53 @@ export default function useHoaDonLineList() {
       toast.value?.kshowToast('error', errorMessage);
     }
   };
-  
-  // const printInvoice = async (id) => {
-  //   try {
-  //     const response = await axios.get(`http://localhost:8080/hoa-don/print/${id}`, {
-  //       responseType: 'blob',
-  //     });
-  //
-  //     const contentType = response.headers['content-type'];
-  //     if (contentType === 'application/pdf') {
-  //       const blob = response.data;
-  //       saveAs(blob, `hoa_don_${id}.pdf`);
-  //       toast.value?.kshowToast('success', 'In hóa đơn thành công!');
-  //     } else {
-  //       const text = await response.data.text();
-  //       console.error('Error response from server:', text);
-  //       toast.value?.kshowToast('error', text);
-  //     }
-  //   } catch (error) {
-  //     console.error('Lỗi khi in hóa đơn:', error);
-  //     let errorMessage = 'Không thể in hóa đơn!';
-  //     if (error.response && error.response.data) {
-  //       const text = await error.response.data.text();
-  //       console.error('Error response from server:', text);
-  //       errorMessage = text;
-  //     }
-  //     toast.value?.kshowToast('error', errorMessage);
-  //   }
-  // };
 
-  // Hàm exportExcel mới: Tạo liên kết tạm thời để trình duyệt hiển thị hộp thoại "Save As"
+  const downloadQrCode = async (ma) => {
+    try {
+      // Generate QR code as a data URL (PNG format)
+      const qrCodeDataUrl = await QRCode.toDataURL(ma, {
+        width: 300, // Set the size of the QR code
+        margin: 1,  // Margin around the QR code
+      });
+
+      // Convert the data URL to a Blob
+      const response = await fetch(qrCodeDataUrl);
+      const blob = await response.blob();
+
+      // Use file-saver to trigger the download with a custom filename
+      saveAs(blob, `QR_HoaDon_${ma}.png`);
+      toast.value?.kshowToast('success', 'Tải QR code thành công!');
+    } catch (error) {
+      console.error('Lỗi khi tải QR code:', error);
+      toast.value?.kshowToast('error', 'Không thể tải QR code!');
+    }
+  };
+
   const exportExcel = async () => {
     try {
       const response = await axios.get('http://localhost:8080/hoa-don/export-excel', {
         responseType: 'blob',
       });
 
-      // Tạo URL tạm thời từ blob
       const blob = response.data;
       const url = window.URL.createObjectURL(blob);
-
-      // Tạo một thẻ <a> ẩn để kích hoạt tải file
       const link = document.createElement('a');
       link.href = url;
 
-      // Lấy tên file từ header Content-Disposition (nếu có)
       const contentDisposition = response.headers['content-disposition'];
-      let filename = 'DanhSachHoaDon.xlsx'; // Tên mặc định nếu không lấy được từ header
+      let filename = 'DanhSachHoaDon.xlsx';
       if (contentDisposition) {
         const filenameMatch = contentDisposition.match(/filename="(.+)"/);
         if (filenameMatch && filenameMatch[1]) {
           filename = filenameMatch[1];
         }
       }
-      link.setAttribute('download', filename); // Đặt tên file
+      link.setAttribute('download', filename);
 
-      // Thêm thẻ <a> vào DOM, kích hoạt tải, và xóa thẻ
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
 
-      // Giải phóng URL blob
       window.URL.revokeObjectURL(url);
 
       toast.value?.kshowToast('success', 'Xuất Excel thành công!');
@@ -354,6 +345,109 @@ export default function useHoaDonLineList() {
       console.error('Lỗi khi xuất Excel:', error);
       toast.value?.kshowToast('error', 'Không thể xuất file Excel!');
     }
+  };
+
+  const onQrDecode = async (result) => {
+    console.log('Mã QR:', result);
+    qrResult.value = result;
+    showQrScanner.value = false;
+
+    try {
+      const response = await axios.get(`http://localhost:8080/hoa-don/QR-by-ma/${result}`);
+      if (response.data) {
+        const processedItem = {
+          ...response.data,
+          trangThaiFormatted: `<span class="px-3 py-1 inline-block text-white font-semibold rounded-full ${response.data.trangThai === 1 ? 'bg-green-500' : 'bg-yellow-500'}">${response.data.trangThai === 1 ? 'Hoàn thành' : 'Chờ xử lý'}</span>`
+        };
+        dataTable.value = [processedItem];
+        totalElements.value = 1;
+        toast.value?.kshowToast('success', 'Tìm thấy hóa đơn!');
+      }
+    } catch (error) {
+      console.error('Lỗi khi tìm hóa đơn:', error);
+      toast.value?.kshowToast('error', 'Không tìm thấy hóa đơn!');
+      dataTable.value = [];
+      totalElements.value = 0;
+    }
+  };
+
+  const onQrError = (error) => {
+    console.error('Lỗi quét QR:', error);
+    let errorMessage = 'Lỗi khi quét mã QR!';
+    if (error.name === 'NotAllowedError') {
+      errorMessage = 'Quyền truy cập camera bị từ chối. Vui lòng cấp quyền và thử lại.';
+    } else if (error.name === 'NotFoundError') {
+      errorMessage = 'Không tìm thấy camera trên thiết bị.';
+    } else if (error.name === 'NotReadableError') {
+      errorMessage = 'Camera đang được sử dụng bởi ứng dụng khác.';
+    }
+    toast.value?.kshowToast('error', errorMessage);
+  };
+
+  const startQrScanner = async () => {
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'environment' },
+      });
+      videoElement.value.srcObject = stream;
+
+      // Wait for the video metadata to load before playing and scanning
+      await new Promise((resolve) => {
+        videoElement.value.onloadedmetadata = () => {
+          resolve();
+        };
+      });
+
+      await videoElement.value.play();
+      scanQrCode();
+    } catch (error) {
+      onQrError(error);
+    }
+  };
+
+  const scanQrCode = () => {
+    // Ensure the video element has valid dimensions before proceeding
+    if (!videoElement.value || videoElement.value.videoWidth === 0 || videoElement.value.videoHeight === 0) {
+      console.warn('Video dimensions are not ready yet. Retrying...');
+      animationFrameId = requestAnimationFrame(scanQrCode);
+      return;
+    }
+
+    const context = canvasElement.value.getContext('2d');
+    canvasElement.value.width = videoElement.value.videoWidth;
+    canvasElement.value.height = videoElement.value.videoHeight;
+
+    const scan = () => {
+      if (videoElement.value.readyState === videoElement.value.HAVE_ENOUGH_DATA) {
+        context.drawImage(videoElement.value, 0, 0, canvasElement.value.width, canvasElement.value.height);
+        const imageData = context.getImageData(0, 0, canvasElement.value.width, canvasElement.value.height);
+        const code = jsQR(imageData.data, imageData.width, imageData.height);
+        if (code) {
+          onQrDecode(code.data);
+          stopQrScanner();
+          return;
+        }
+      }
+      animationFrameId = requestAnimationFrame(scan);
+    };
+    scan();
+  };
+
+  const stopQrScanner = () => {
+    if (stream) {
+      stream.getTracks().forEach(track => track.stop());
+      stream = null;
+    }
+    if (animationFrameId) {
+      cancelAnimationFrame(animationFrameId);
+      animationFrameId = null;
+    }
+    showQrScanner.value = false;
+  };
+
+  const openQrScanner = () => {
+    showQrScanner.value = true;
+    startQrScanner();
   };
 
   const confirmAction = (message, action) => {
@@ -386,9 +480,10 @@ export default function useHoaDonLineList() {
     }
   };
 
-  // Đăng ký các hàm toàn cục
+  // Expose functions to the global window object for table button clicks
   window.viewUpdate = viewUpdate;
-  window.printInvoice = printInvoice; // Đăng ký hàm printInvoice
+  window.printInvoice = printInvoice;
+  window.downloadQrCode = downloadQrCode; // Add downloadQrCode to window
 
   onMounted(() => {
     fetchOrderTypes();
@@ -398,7 +493,6 @@ export default function useHoaDonLineList() {
   const applyFilters = () => {
     fetchData();
   };
-
 
   return {
     toast,
@@ -426,5 +520,14 @@ export default function useHoaDonLineList() {
     maxRange,
     adjustMin,
     adjustMax,
+    showQrScanner,
+    qrResult,
+    onQrDecode,
+    onQrError,
+    openQrScanner,
+    stopQrScanner,
+    videoElement,
+    canvasElement,
+    downloadQrCode, // Expose to the component
   };
 }

@@ -52,4 +52,6 @@ public interface HoaDonRepository extends JpaRepository<HoaDon, Integer> {
             @Param("startDate") Timestamp startDate,
             @Param("endDate") Timestamp endDate,
             Pageable pageable);
+    @Query("SELECT hd FROM HoaDon hd WHERE hd.ma = :ma")
+    Optional<HoaDon> findByMa(@Param("ma") String ma);
 }

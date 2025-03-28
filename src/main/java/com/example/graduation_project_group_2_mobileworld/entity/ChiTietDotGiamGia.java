@@ -47,4 +47,16 @@ public class ChiTietDotGiamGia {
     @Column(name = "deleted", nullable = false)
     private Boolean deleted = false;
 
+    public ChiTietDotGiamGia() {
+    }
+
+    public ChiTietDotGiamGia(Integer id, DotGiamGia idDotGiamGia, ChiTietSanPham idChiTietSanPham, String ma, BigDecimal giaBanDau, BigDecimal giaSauKhiGiam, Boolean deleted) {
+        this.id = id;
+        this.idDotGiamGia = idDotGiamGia;
+        this.idChiTietSanPham = idChiTietSanPham;
+        this.ma = ma;
+        this.giaBanDau = giaBanDau;
+        this.giaSauKhiGiam = giaSauKhiGiam;
+        this.deleted = deleted;
+    }
 }

@@ -180,5 +180,10 @@ public class HoaDonService {
             exporter.export(response);
         }
     }
-
+    // Trong HoaDonService.java
+    public HoaDonDTO getHoaDonByMa(String ma) {
+        HoaDon hoaDon = hoaDonRepository.findByMa(ma)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy hóa đơn với mã: " + ma));
+        return toDTO(hoaDon);
+    }
 }

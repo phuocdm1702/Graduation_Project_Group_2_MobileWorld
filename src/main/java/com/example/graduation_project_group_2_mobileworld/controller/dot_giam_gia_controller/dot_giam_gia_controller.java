@@ -32,7 +32,7 @@ public class dot_giam_gia_controller {
     @Autowired
     private dot_giam_gia_service sr;
 
-    @GetMapping()
+    @GetMapping("/dot_giam_gia")
     public Page<DotGiamGia> hienThi(@RequestParam(defaultValue = "0") int page,
                                     @RequestParam(defaultValue = "5") int size,
                                     Model model) {
