@@ -5,7 +5,7 @@
         <span class="text-2xl font-semibold text-orange-500">Mobile World</span>
       </div>
 
-      <form class="mt-4" @submit.prevent="login">
+      <form class="mt-4">
         <label class="block">
           <span class="text-sm text-gray-700">Email</span>
           <input
@@ -21,7 +21,6 @@
               focus:ring-opacity-40
               focus:ring-indigo-500
             "
-            v-model="email"
           />
         </label>
 
@@ -40,7 +39,7 @@
               focus:ring-opacity-40
               focus:ring-indigo-500
             "
-            v-model="password"
+           
           />
         </label>
 
@@ -58,7 +57,7 @@
             <a
               class="block text-sm text-orange-500 fontme hover:underline"
               href="#"
-              >Forgot your password?</a
+            >Forgot your password?</a
             >
           </div>
         </div>
@@ -86,14 +85,5 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
-import { useRouter } from "vue-router";
 
-const router = useRouter();
-const email = ref("MobileWorld@mail.com");
-const password = ref("@#!@#asdf1231!_!@#");
-
-function login() {
-  router.push("/dashboard");
-}
 </script>
