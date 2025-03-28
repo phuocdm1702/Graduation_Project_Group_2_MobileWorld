@@ -1,7 +1,14 @@
 package com.example.graduation_project_group_2_mobileworld.service.PhieuGiamGia;
 
+import com.example.graduation_project_group_2_mobileworld.dto.khach_hang.KhachHangDTO;
+import com.example.graduation_project_group_2_mobileworld.dto.phieuGiamGiaDTO.KhPggDTO;
+import com.example.graduation_project_group_2_mobileworld.dto.phieuGiamGiaDTO.PhieuGiamGiaDTO;
+import com.example.graduation_project_group_2_mobileworld.entity.KhachHang;
 import com.example.graduation_project_group_2_mobileworld.entity.PhieuGiamGia;
+import com.example.graduation_project_group_2_mobileworld.entity.PhieuGiamGiaCaNhan;
+import com.example.graduation_project_group_2_mobileworld.repository.giam_gia.PhieuGiamGiaCaNhanRepository;
 import com.example.graduation_project_group_2_mobileworld.repository.giam_gia.PhieuGiamGiaRepository;
+import com.example.graduation_project_group_2_mobileworld.repository.khach_hang.KhachHangRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -11,6 +18,7 @@ import org.springframework.stereotype.Service;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class PhieuGiamGiaService {
@@ -18,9 +26,16 @@ public class PhieuGiamGiaService {
     @Autowired
     private PhieuGiamGiaRepository phieuGiamGiaRepository;
 
+    @Autowired
+    private KhachHangRepository khachHangRepository;
 
-    public PhieuGiamGiaService(PhieuGiamGiaRepository phieuGiamGiaRepository) {
+    private final PhieuGiamGiaCaNhanRepository phieuGiamGiaCaNhanRepository;
+
+
+    public PhieuGiamGiaService(PhieuGiamGiaRepository phieuGiamGiaRepository,
+                               PhieuGiamGiaCaNhanRepository phieuGiamGiaCaNhanRepository) {
         this.phieuGiamGiaRepository = phieuGiamGiaRepository;
+        this.phieuGiamGiaCaNhanRepository = phieuGiamGiaCaNhanRepository;
     }
 
     public Page<PhieuGiamGia> getPGG(Pageable pageable) {
@@ -152,6 +167,57 @@ public class PhieuGiamGiaService {
             return true;
         }
         return false;
+    }
+
+    public PhieuGiamGiaDTO getDetailPGG(Integer id) {
+        if (id == null || id <= 0) {
+            throw new IllegalArgumentException("ID không hợp lệ!");
+        }
+
+        Optional<PhieuGiamGia> detailPGG = phieuGiamGiaRepository.findById(id);
+        if (!detailPGG.isPresent()) {
+            throw new RuntimeException("Phiếu giảm giá không tồn tại!");
+        }
+
+        PhieuGiamGia pgg = detailPGG.get();
+
+        List<PhieuGiamGiaCaNhan> pggCNList = phieuGiamGiaCaNhanRepository.findByIdPhieuGiamGia(pgg);
+        List<KhachHang> allCustomers = khachHangRepository.findAll();
+
+        PhieuGiamGiaDTO pggDTO = new PhieuGiamGiaDTO();
+        pggDTO.setId(pgg.getId());
+        pggDTO.setMa(pgg.getMa());
+        pggDTO.setTenPhieuGiamGia(pgg.getTenPhieuGiamGia());
+        pggDTO.setLoaiPhieuGiamGia(pgg.getLoaiPhieuGiamGia());
+        pggDTO.setPhanTramGiamGia(pgg.getPhanTramGiamGia());
+        pggDTO.setSoTienGiamToiDa(pgg.getSoTienGiamToiDa());
+        pggDTO.setHoaDonToiThieu(pgg.getHoaDonToiThieu());
+        pggDTO.setSoLuongDung(pgg.getSoLuongDung());
+        pggDTO.setNgayBatDau(pgg.getNgayBatDau());
+        pggDTO.setNgayKetThuc(pgg.getNgayKetThuc());
+        pggDTO.setMoTa(pgg.getMoTa());
+        pggDTO.setTrangThai(pgg.getTrangThai() ? 1 : 0);
+        pggDTO.setRiengTu(pgg.getRiengTu() ? 1 : 0);
+
+        List<KhPggDTO> selectedCustomers = pggCNList.stream()
+                .map(pggCN -> {
+                    KhachHang kh = pggCN.getIdKhachHang();
+                    return new KhPggDTO(kh.getId(), kh.getMa(), kh.getTen(), kh.getNgaySinh());
+                })
+                .collect(Collectors.toList());
+        pggDTO.setSelectedCustomers(selectedCustomers);
+
+        List<Integer> customerIds = pggCNList.stream()
+                .map(pggCN -> pggCN.getIdKhachHang().getId())
+                .collect(Collectors.toList());
+        pggDTO.setCustomerIds(customerIds);
+
+        List<KhPggDTO> allCustomersDTO = allCustomers.stream()
+                .map(kh -> new KhPggDTO(kh.getId(), kh.getMa(), kh.getTen(), kh.getNgaySinh()))
+                .collect(Collectors.toList());
+        pggDTO.setAllCustomers(allCustomersDTO);
+
+        return pggDTO;
     }
 
     public void updatePGG(PhieuGiamGia editPGG) {

@@ -11,7 +11,7 @@ export default function usePhieuGiamGia() {
   const minOrder = ref(null);
   const valueFilter = ref(null);
   const currentPage = ref(0);
-  const pageSize = ref(10);
+  const pageSize = ref(11);
   const totalPages = ref(0);
 
   const baseURL = "http://localhost:8080/phieu-giam-gia";
@@ -107,11 +107,18 @@ export default function usePhieuGiamGia() {
 
   const filterPGG = async (page = 0) => {
     try {
+      // Helper function to format date safely
+      const formatDate = (dateValue) => {
+        if (!dateValue) return null; // Handle null or undefined
+        const date = dateValue instanceof Date ? dateValue : new Date(dateValue);
+        return isNaN(date.getTime()) ? null : date.toISOString().split("T")[0];
+      };
+
       const params = {
         loaiPhieuGiamGia: filterType.value || null,
         trangThai: filterStatus.value || null,
-        startDate: startDate.value ? startDate.value.toISOString().split("T")[0] : null,
-        endDate: endDate.value ? endDate.value.toISOString().split("T")[0] : null,
+        startDate: formatDate(startDate.value),
+        endDate: formatDate(endDate.value),
         minOrder: minOrder.value ? Number(minOrder.value) : null,
         valueFilter: valueFilter.value ? Number(valueFilter.value) : null,
         page,
