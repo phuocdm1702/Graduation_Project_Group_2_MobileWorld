@@ -13,6 +13,7 @@ import java.text.Normalizer;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class KhachHangServices {
@@ -28,7 +29,9 @@ public class KhachHangServices {
     }
 
     public List<KhachHang> getAllCustomers() {
-        return khachHangRepository.findAllActiveCustomers(); // Chỉ lấy khách hàng chưa bị xóa mềm
+        List<KhachHang> allCustomers = khachHangRepository.findAllActiveCustomers();
+        return allCustomers.stream()
+                .filter(kh -> !"KH00001".equals(kh.getMa())).collect(Collectors.toList());
     }
     public KhachHang findById(Integer id) {
         Optional<KhachHang> khachHang = khachHangRepository.findById(id);

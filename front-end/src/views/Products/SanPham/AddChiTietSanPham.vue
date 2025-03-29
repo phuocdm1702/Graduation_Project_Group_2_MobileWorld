@@ -33,7 +33,7 @@
               </select>
               <button
                 @click="openAddModal('heDieuHanh')"
-                class="ml-2 px-2 py-1 bg-green-500 text-white rounded-lg hover:bg-green-600 transition"
+                class="ml-2 px-2 py-1 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition"
               >
                 +
               </button>
@@ -49,7 +49,7 @@
               </select>
               <button
                 @click="openAddModal('manHinh')"
-                class="ml-2 px-2 py-1 bg-green-500 text-white rounded-lg hover:bg-green-600 transition"
+                class="ml-2 px-2 py-1 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition"
               >
                 +
               </button>
@@ -65,7 +65,7 @@
               </select>
               <button
                 @click="openAddModal('nhaSanXuat')"
-                class="ml-2 px-2 py-1 bg-green-500 text-white rounded-lg hover:bg-green-600 transition"
+                class="ml-2 px-2 py-1 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition"
               >
                 +
               </button>
@@ -87,7 +87,7 @@
               </select>
               <button
                 @click="openAddModal('cumCamera')"
-                class="ml-2 px-2 py-1 bg-green-500 text-white rounded-lg hover:bg-green-600 transition"
+                class="ml-2 px-2 py-1 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition"
               >
                 +
               </button>
@@ -99,11 +99,11 @@
                 class="w-3/5 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">Chọn Sim</option>
-                <option v-for="sim in simOptions" :key="sim.id" :value="sim.id">{{ sim.cacLoaiSimHoTro + " " + "(hỗ trợ " +sim.soLuongSimHoTro + " sim)" }}</option>
+                <option v-for="sim in simOptions" :key="sim.id" :value="sim.id">{{ sim.cacLoaiSimHoTro + " " + "(hỗ trợ " + sim.soLuongSimHoTro + " sim)" }}</option>
               </select>
               <button
                 @click="openAddModal('sim')"
-                class="ml-2 px-2 py-1 bg-green-500 text-white rounded-lg hover:bg-green-600 transition"
+                class="ml-2 px-2 py-1 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition"
               >
                 +
               </button>
@@ -115,18 +115,18 @@
                 class="w-3/5 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">Chọn Thiết Kế</option>
-                <option v-for="thietKe in thietKeOptions" :key="thietKe.id" :value="thietKe.id">{{ thietKe.chatLieuKhung + " " + "(" + thietKe.chatLieuMatLung + ")"}}</option>
+                <option v-for="thietKe in thietKeOptions" :key="thietKe.id" :value="thietKe.id">{{ thietKe.chatLieuKhung + " " + "(" + thietKe.chatLieuMatLung + ")" }}</option>
               </select>
               <button
                 @click="openAddModal('thietKe')"
-                class="ml-2 px-2 py-1 bg-green-500 text-white rounded-lg hover:bg-green-600 transition"
+                class="ml-2 px-2 py-1 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition"
               >
                 +
               </button>
             </div>
           </div>
 
-          <!-- Pin, CPU, GPU, Công Nghệ Mạng, Công Nghệ Sạc, Hỗ Trợ Công Nghệ Sạc, Chỉ Số Kháng Bụi Nước,Tình Trạng -->
+          <!-- Pin, CPU, GPU, Công Nghệ Mạng, Công Nghệ Sạc, Hỗ Trợ Công Nghệ Sạc, Chỉ Số Kháng Bụi Nước, Tình Trạng -->
           <div class="grid grid-cols-2 gap-6">
             <div class="flex items-center">
               <label class="w-36 text-sm font-medium text-gray-700">Pin</label>
@@ -139,7 +139,7 @@
               </select>
               <button
                 @click="openAddModal('pin')"
-                class="ml-2 px-2 py-1 bg-green-500 text-white rounded-lg hover:bg-green-600 transition"
+                class="ml-2 px-2 py-1 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition"
               >
                 +
               </button>
@@ -151,11 +151,11 @@
                 class="w-3/5 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">Chọn CPU</option>
-                <option v-for="cpu in cpuOptions" :key="cpu.id" :value="cpu.id">{{ cpu.tenCpu + " " + "(" + cpu.soNhan + "lõi)  " }}</option>
+                <option v-for="cpu in cpuOptions" :key="cpu.id" :value="cpu.id">{{ cpu.tenCpu + " " + "(" + cpu.soNhan + " lõi)" }}</option>
               </select>
               <button
                 @click="openAddModal('cpu')"
-                class="ml-2 px-2 py-1 bg-green-500 text-white rounded-lg hover:bg-green-600 transition"
+                class="ml-2 px-2 py-1 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition"
               >
                 +
               </button>
@@ -171,7 +171,7 @@
               </select>
               <button
                 @click="openAddModal('gpu')"
-                class="ml-2 px-2 py-1 bg-green-500 text-white rounded-lg hover:bg-green-600 transition"
+                class="ml-2 px-2 py-1 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition"
               >
                 +
               </button>
@@ -187,7 +187,7 @@
               </select>
               <button
                 @click="openAddModal('congNgheMang')"
-                class="ml-2 px-2 py-1 bg-green-500 text-white rounded-lg hover:bg-green-600 transition"
+                class="ml-2 px-2 py-1 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition"
               >
                 +
               </button>
@@ -203,7 +203,7 @@
               </select>
               <button
                 @click="openAddModal('congSac')"
-                class="ml-2 px-2 py-1 bg-green-500 text-white rounded-lg hover:bg-green-600 transition"
+                class="ml-2 px-2 py-1 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition"
               >
                 +
               </button>
@@ -221,7 +221,7 @@
               </select>
               <button
                 @click="openAddModal('hoTroCongNgheSac')"
-                class="ml-2 px-2 py-1 bg-green-500 text-white rounded-lg hover:bg-green-600 transition"
+                class="ml-2 px-2 py-1 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition"
               >
                 +
               </button>
@@ -237,7 +237,7 @@
               </select>
               <button
                 @click="openAddModal('chiSoKhangBuiVaNuoc')"
-                class="ml-2 px-2 py-1 bg-green-500 text-white rounded-lg hover:bg-green-600 transition"
+                class="ml-2 px-2 py-1 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition"
               >
                 +
               </button>
@@ -253,14 +253,14 @@
               </select>
               <button
                 @click="openAddModal('tinhTrang')"
-                class="ml-2 px-2 py-1 bg-green-500 text-white rounded-lg hover:bg-green-600 transition"
+                class="ml-2 px-2 py-1 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition"
               >
                 +
               </button>
             </div>
           </div>
 
-          <!-- Tiện Ích Đặc Biệt, Giá Bán -->
+          <!-- Tiện Ích Đặc Biệt -->
           <div class="grid grid-cols-1 gap-6">
             <div class="flex items-center">
               <label class="w-40 text-sm font-medium text-gray-700">Tiện Ích Đặc Biệt</label>
@@ -268,15 +268,6 @@
                 v-model="productData.tienIchDacBiet"
                 type="text"
                 placeholder="Nhập Tiện Ích Đặc Biệt"
-                class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <div class="flex items-center">
-              <label class="w-40 text-sm font-medium text-gray-700">Giá Bán</label>
-              <input
-                v-model="productData.giaBan"
-                type="text"
-                placeholder="Nhập Giá Bán"
                 class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
@@ -315,7 +306,7 @@
             </div>
             <button
               @click="openAddModal('ram')"
-              class="ml-2 px-2 py-1 bg-green-500 text-white rounded-lg hover:bg-green-600 transition"
+              class="ml-2 px-2 py-1 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition"
             >
               +
             </button>
@@ -348,7 +339,7 @@
             </div>
             <button
               @click="openAddModal('boNhoTrong')"
-              class="ml-2 px-2 py-1 bg-green-500 text-white rounded-lg hover:bg-green-600 transition"
+              class="ml-2 px-2 py-1 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition"
             >
               +
             </button>
@@ -359,55 +350,64 @@
             <label class="w-36 text-sm font-medium text-gray-700">Màu Sắc</label>
             <div class="w-3/5 relative">
               <button
-                @click="toggleDropdown('mauSac')"
+                @click="openColorModal"
                 class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-left"
               >
                 {{ currentVariant.selectedMauSacs.length > 0 ? currentVariant.selectedMauSacs.length + ' Màu đã chọn' : 'Chọn Màu Sắc' }}
               </button>
-              <div
-                v-if="dropdownOpen.mauSac"
-                class="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-48 overflow-y-auto"
-              >
-                <label v-for="mau in mauSacOptions" :key="mau.id" class="flex items-center p-2 hover:bg-gray-100">
-                  <input
-                    type="checkbox"
-                    :value="mau.id"
-                    v-model="currentVariant.selectedMauSacs"
-                    class="mr-2"
-                  />
-                  {{ mau.tenMau }}
-                </label>
-              </div>
             </div>
             <button
               @click="openAddModal('mauSac')"
-              class="ml-2 px-2 py-1 bg-green-500 text-white rounded-lg hover:bg-green-600 transition"
+              class="ml-2 px-2 py-1 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition"
             >
               +
             </button>
           </div>
         </div>
 
-        <!-- Nút thêm biến thể -->
-        <div class="mt-4 flex justify-end">
-          <button
-            @click="addVariant"
-            class="px-4 py-2 bg-orange-500 text-white font-semibold rounded-lg hover:bg-orange-600 transition"
-          >
-            Tạo biến thể sản phẩm
-          </button>
-        </div>
-
         <!-- Danh sách biến thể đã thêm (dưới dạng bảng) -->
         <div v-if="productVariants.length > 0" class="mt-6">
-          <!-- Nhóm các biến thể theo RAM và Bộ Nhớ Trong -->
           <div v-for="(group, groupIndex) in groupVariantsByRamAndRom" :key="groupIndex">
+            <div class="flex justify-between m-2">
             <h4 class="text-lg font-medium text-gray-600 mb-2">
               PHIÊN BẢN {{ group.ram }}/{{ group.rom }}
             </h4>
+              <div class="flex gap-2">
+                <!-- Giá Chung -->
+                <div class="flex items-center">
+                  <label class="w-36 text-sm font-medium text-gray-700">Giá Chung</label>
+                  <input
+                    v-model="commonPrice"
+                    type="text"
+                    placeholder="Nhập giá chung"
+                    class="w-3/5 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    @input="updateSelectedVariants"
+                  />
+                </div>
+
+                <!-- Số Lượng Chung -->
+                <div class="flex items-center">
+                  <label class="w-36 text-sm font-medium text-gray-700">Số Lượng Chung</label>
+                  <input
+                    v-model="commonQuantity"
+                    type="number"
+                    min="0"
+                    placeholder="Nhập số lượng chung"
+                    class="w-3/5 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    @input="updateSelectedVariants"
+                  />
+                </div>
+              </div>
+            </div>
             <table class="w-full border-collapse border border-gray-300">
               <thead>
               <tr class="bg-gray-100">
+                <th class="border border-gray-300 p-2 text-sm font-medium text-gray-700">
+                  <input
+                    type="checkbox"
+                    @change="toggleGroupSelection(group, $event.target.checked)"
+                  />
+                </th>
                 <th class="border border-gray-300 p-2 text-sm font-medium text-gray-700">STT</th>
                 <th class="border border-gray-300 p-2 text-sm font-medium text-gray-700">TÊN SẢN PHẨM</th>
                 <th class="border border-gray-300 p-2 text-sm font-medium text-gray-700">MÀU SẮC</th>
@@ -418,13 +418,21 @@
               </thead>
               <tbody>
               <tr v-for="(variant, variantIndex) in group.variants" :key="variantIndex">
+                <td class="border border-gray-300 p-2 text-center">
+                  <input
+                    type="checkbox"
+                    v-model="selectedVariants"
+                    :value="group.startIndex + variantIndex"
+                    @change="updateSelectedCount"
+                  />
+                </td>
                 <td class="border border-gray-300 p-2 text-center">{{ variantIndex + 1 }}</td>
                 <td class="border border-gray-300 p-2">{{ productData.id || 'N/A' }}</td>
                 <td class="border border-gray-300 p-2">
                   <div class="flex items-center">
                       <span
-                        class="w-6 h-6 mr-2 inline-block"
-                        :style="{ backgroundColor: mauSacOptions.find(mau => mau.id === variant.idMauSac)?.ma || '#000' }"
+                        class="w-12 h-6 mr-2 inline-block"
+                        :style="{ backgroundColor: getColorFromName(mauSacOptions.find(mau => mau.id === variant.idMauSac)?.tenMau) || '#000' }"
                       ></span>
                     {{ mauSacOptions.find(mau => mau.id === variant.idMauSac)?.tenMau || 'N/A' }}
                   </div>
@@ -434,36 +442,26 @@
                     v-model="variant.soLuong"
                     type="number"
                     min="0"
-                    class="w-20 p-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-center"
+                    class="w-full p-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-center"
                   />
                 </td>
                 <td class="border border-gray-300 p-2">
                   <input
                     v-model="variant.donGia"
                     type="text"
-                    class="w-32 p-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    class="w-full p-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </td>
                 <td class="border border-gray-300 p-2 flex justify-center gap-2">
-                  <label class="flex items-center">
-                    <input
-                      type="file"
-                      @change="handleVariantImageUpload($event, group.startIndex + variantIndex)"
-                      class="hidden"
-                    />
-                    <span class="text-sm text-gray-500 mr-2">
-                        {{ variantImages[group.startIndex + variantIndex]?.fileName || 'Choose File' }}
-                      </span>
-                    <button
-                      class="px-2 py-1 bg-red-500 text-white rounded-lg hover:bg-red-600 transition"
-                      @click="$event.target.parentElement.querySelector('input[type=file]').click()"
-                    >
-                      Upload
-                    </button>
-                  </label>
+                  <button
+                    @click="openImeiModal(group.startIndex + variantIndex)"
+                    class="px-2 py-1 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition"
+                  >
+                    Nhập
+                  </button>
                   <button
                     @click="removeVariant(group.startIndex + variantIndex)"
-                    class="px-2 py-1 bg-red-500 text-white rounded-lg hover:bg-red-600 transition"
+                    class="px-2 py-1 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition"
                   >
                     Xóa
                   </button>
@@ -475,53 +473,141 @@
         </div>
       </div>
 
-      <!-- Phần Thêm Ảnh -->
-      <div class="bg-white shadow-lg rounded-lg p-5 mb-4">
+      <!-- Phần Thêm Ảnh Tự Động -->
+      <div v-if="showImageSection && productVariants.length > 0" class="bg-white shadow-lg rounded-lg p-5 mb-4">
         <h3 class="text-lg font-medium text-gray-600 mb-4 text-center">THÊM ẢNH</h3>
-        <div class="grid grid-cols-1 gap-6">
-          <div class="flex items-center">
-            <label class="w-40 text-sm font-medium text-gray-700">Ảnh</label>
-            <input
-              type="file"
-              @change="handleImageUpload"
-              class="w-full p-2 border border-gray-300 rounded-lg"
-            />
+
+        <!-- Ảnh Chính -->
+        <div class="mb-6">
+          <h4 class="text-lg font-medium text-gray-600 mb-2">Ảnh Chính</h4>
+          <table class="w-full border-collapse border border-gray-300">
+            <thead>
+            <tr class="bg-gray-100">
+              <th class="border border-gray-300 p-2 text-sm font-medium text-gray-700">STT</th>
+              <th class="border border-gray-300 p-2 text-sm font-medium text-gray-700">LOẠI ẢNH</th>
+              <th class="border border-gray-300 p-2 text-sm font-medium text-gray-700">ẢNH</th>
+              <th class="border border-gray-300 p-2 text-sm font-medium text-gray-700">TẢI LÊN</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+              <td class="border border-gray-300 p-2 text-center">1</td>
+              <td class="border border-gray-300 p-2">Ảnh Trước</td>
+              <td class="border border-gray-300 p-2">
+                <div class="flex justify-center">
+                  <img
+                    v-if="mainImages.front.previewUrl"
+                    :src="mainImages.front.previewUrl"
+                    alt="Front Image Preview"
+                    class="w-16 h-16 object-cover rounded-lg border border-gray-300"
+                  />
+                </div>
+              </td>
+              <td class="border border-gray-300 p-2">
+                <input
+                  type="file"
+                  accept="image/*"
+                  @change="handleMainImageUpload($event, 'front')"
+                  class="p-2 border border-gray-300 rounded-lg w-full"
+                />
+              </td>
+            </tr>
+            <tr>
+              <td class="border border-gray-300 p-2 text-center">2</td>
+              <td class="border border-gray-300 p-2">Ảnh Sau</td>
+              <td class="border border-gray-300 p-2">
+                <div class="flex justify-center">
+                  <img
+                    v-if="mainImages.back.previewUrl"
+                    :src="mainImages.back.previewUrl"
+                    alt="Back Image Preview"
+                    class="w-16 h-16 object-cover rounded-lg border border-gray-300"
+                  />
+                </div>
+              </td>
+              <td class="border border-gray-300 p-2">
+                <input
+                  type="file"
+                  accept="image/*"
+                  @change="handleMainImageUpload($event, 'back')"
+                  class="p-2 border border-gray-300 rounded-lg w-full"
+                />
+              </td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Ảnh Theo Màu Sắc -->
+        <div v-if="uniqueColors.length > 0">
+          <h4 class="text-lg font-medium text-gray-600 mb-2">Ảnh Theo Màu Sắc</h4>
+          <div v-for="(color, colorIndex) in uniqueColors" :key="color.colorId" class="mb-6">
+            <h5 class="text-md font-medium text-gray-600 mb-2">
+              MÀU: {{ color.colorName }}
+            </h5>
+            <table class="w-full border-collapse border border-gray-300">
+              <thead>
+              <tr class="bg-gray-100">
+                <th class="border border-gray-300 p-2 text-sm font-medium text-gray-700">STT</th>
+                <th class="border border-gray-300 p-2 text-sm font-medium text-gray-700">TÊN MÀU</th>
+                <th class="border border-gray-300 p-2 text-sm font-medium text-gray-700">MÀU SẮC</th>
+                <th class="border border-gray-300 p-2 text-sm font-medium text-gray-700">ẢNH</th>
+                <th class="border border-gray-300 p-2 text-sm font-medium text-gray-700">TẢI LÊN</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr>
+                <td class="border border-gray-300 p-2 text-center">{{ colorIndex + 1 }}</td>
+                <td class="border border-gray-300 p-2">
+                  {{ color.colorName }}
+                </td>
+                <td class="border border-gray-300 p-2">
+                  <div class="flex items-center justify-center">
+                      <span
+                        class="w-16 h-8 inline-block"
+                        :style="{ backgroundColor: getColorFromName(color.colorName) || '#000' }"
+                      ></span>
+                  </div>
+                </td>
+                <td class="border border-gray-300 p-2">
+                  <div class="flex justify-center">
+                    <img
+                      v-if="colorImages[color.colorId]?.previewUrl"
+                      :src="colorImages[color.colorId].previewUrl"
+                      alt="Color Image Preview"
+                      class="w-16 h-16 object-cover rounded-lg border border-gray-300"
+                    />
+                  </div>
+                </td>
+                <td class="border border-gray-300 p-2">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    @change="handleColorImageUpload($event, color.colorId)"
+                    class="p-2 border border-gray-300 rounded-lg w-full"
+                  />
+                </td>
+              </tr>
+              </tbody>
+            </table>
           </div>
         </div>
-        <div class="mt-4 flex justify-end">
+
+        <!-- Nút chức năng -->
+        <div class="flex justify-end gap-2 mt-4">
           <button
-            @click="addImage"
+            @click="resetForm"
+            class="px-4 py-2 bg-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-400 transition"
+          >
+            Làm mới
+          </button>
+          <button
+            @click="handleSubmit"
             class="px-4 py-2 bg-orange-500 text-white font-semibold rounded-lg hover:bg-orange-600 transition"
           >
-            Tải lên ảnh
+            Lưu
           </button>
         </div>
-        <div v-for="(image, index) in productImages" :key="index" class="grid grid-cols-1 gap-6 mt-2">
-          <div class="flex items-center">
-            <input
-              :value="image.fileName || 'No file chosen'"
-              type="text"
-              class="w-full p-2 border border-gray-300 rounded-lg bg-gray-100"
-              readonly
-            />
-          </div>
-        </div>
-      </div>
-
-      <!-- Nút chức năng -->
-      <div class="flex justify-end gap-2 mt-4">
-        <button
-          @click="resetForm"
-          class="px-4 py-2 bg-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-400 transition"
-        >
-          Làm mới
-        </button>
-        <button
-          @click="handleSubmit"
-          class="px-4 py-2 bg-[#f97316] text-white font-semibold rounded-lg hover:bg-orange-600 transition"
-        >
-          Lưu
-        </button>
       </div>
 
       <!-- Form Modal -->
@@ -597,13 +683,13 @@
           <div v-if="currentAttribute === 'congNgheMang'" class="grid grid-cols-1 gap-4">
             <div>
               <label class="block text-sm font-medium text-gray-700">Tên Công Nghệ Mạng</label>
-              <input v-model="entityData.tenCongNghe" type="text" class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Nhập tên công nghệ mạng" />
+              <input v-model="entityData.tenCongNgheMang" type="text" class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Nhập tên công nghệ mạng" />
             </div>
           </div>
           <div v-if="currentAttribute === 'congSac'" class="grid grid-cols-1 gap-4">
             <div>
               <label class="block text-sm font-medium text-gray-700">Tên Cổng Sạc</label>
-              <input v-model="entityData.tenCongNghe" type="text" class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Nhập tên công nghệ sạc" />
+              <input v-model="entityData.congSac" type="text" class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Nhập tên cổng sạc" />
             </div>
           </div>
           <div v-if="currentAttribute === 'hoTroCongNgheSac'" class="grid grid-cols-1 gap-4">
@@ -614,14 +700,14 @@
           </div>
           <div v-if="currentAttribute === 'chiSoKhangBuiVaNuoc'" class="grid grid-cols-1 gap-4">
             <div>
-              <label class="block text-sm font-medium text-gray-700">Mã Chỉ Số Kháng Bụi Nước</label>
-              <input v-model="entityData.maChiSo" type="text" class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Nhập mã chỉ số kháng bụi nước" />
+              <label class="block text-sm font-medium text-gray-700">Tên Chỉ Số Kháng Bụi Nước</label>
+              <input v-model="entityData.tenChiSo" type="text" class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Nhập tên chỉ số kháng bụi nước" />
             </div>
           </div>
           <div v-if="currentAttribute === 'tinhTrang'" class="grid grid-cols-1 gap-4">
             <div>
               <label class="block text-sm font-medium text-gray-700">Tên Tình Trạng</label>
-              <input v-model="entityData.tenTinhTrang" type="text" class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Nhập tên tình trạng" />
+              <input v-model="entityData.loaiTinhTrang" type="text" class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Nhập tên tình trạng" />
             </div>
           </div>
           <div v-if="currentAttribute === 'ram'" class="grid grid-cols-1 gap-4">
@@ -671,7 +757,7 @@
                 v-model="entityData.ma"
                 type="text"
                 class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Nhập mã màu sắc"
+                placeholder="Nhập mã màu sắc (ví dụ: #000000 cho Đen)"
               />
             </div>
             <div>
@@ -690,24 +776,539 @@
               <input v-model="entityData.tienIchDacBiet" type="text" class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Nhập tiện ích đặc biệt" />
             </div>
           </div>
-          <div v-if="currentAttribute === 'giaBan'" class="grid grid-cols-1 gap-4">
-            <div>
-              <label class="block text-sm font-medium text-gray-700">Giá Bán</label>
-              <input v-model="entityData.giaBan" type="text" class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Nhập giá bán" />
-            </div>
-          </div>
         </template>
       </FormModal>
+
+      <!-- Color Selection Modal -->
+      <div v-if="showColorModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-lg p-6 w-1/2">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-medium text-gray-700">Chọn màu sắc</h3>
+            <button @click="closeColorModal" class="text-gray-500 hover:text-gray-700">
+              ✕
+            </button>
+          </div>
+          <div class="grid grid-cols-5 gap-4 mb-4">
+            <label
+              v-for="mau in mauSacOptions"
+              :key="mau.id"
+              class="flex items-center space-x-2"
+            >
+              <input
+                type="checkbox"
+                :value="mau.id"
+                v-model="currentVariant.selectedMauSacs"
+                class="form-checkbox h-5 w-5 text-blue-600"
+              />
+              <span
+                class="w-8 h-8 rounded border border-gray-300"
+                :style="{ backgroundColor: getColorFromName(mau.tenMau) || '#FFFFFF' }"
+              ></span>
+              <span class="text-sm text-gray-700">{{ mau.tenMau }}</span>
+            </label>
+          </div>
+          <div class="flex justify-between">
+            <button
+              @click="closeColorModal"
+              class="px-4 py-2 bg-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-400 transition"
+            >
+              Đóng
+            </button>
+            <button
+              @click="confirmColorSelection"
+              class="px-4 py-2 bg-orange-500 text-white font-semibold rounded-lg hover:bg-orange-600 transition"
+            >
+              Xác nhận
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- IMEI Input Modal -->
+      <div v-if="showImeiModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-lg p-6 w-1/2">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-medium text-gray-700">Nhập IMEI</h3>
+            <button @click="closeImeiModal" class="text-gray-500 hover:text-gray-700">
+              ✕
+            </button>
+          </div>
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-2">Nhập IMEI (mỗi IMEI trên một dòng)</label>
+            <textarea
+              v-model="imeiInput"
+              rows="5"
+              class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Nhập IMEI, mỗi IMEI trên một dòng..."
+            ></textarea>
+          </div>
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-2">Hoặc nhập từ file Excel</label>
+            <input
+              type="file"
+              accept=".xlsx, .xls"
+              @change="handleExcelImport"
+              class="w-full p-2 border border-gray-300 rounded-lg"
+            />
+          </div>
+          <div class="flex justify-between">
+            <button
+              @click="closeImeiModal"
+              class="px-4 py-2 bg-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-400 transition"
+            >
+              Đóng
+            </button>
+            <button
+              @click="saveImei"
+              class="px-4 py-2 bg-orange-500 text-white font-semibold rounded-lg hover:bg-orange-600 transition"
+            >
+              Lưu
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
-import { defineComponent, computed } from 'vue';
+import { defineComponent, computed, ref } from 'vue';
 import ToastNotification from '@/components/ToastNotification.vue';
 import FormModal from '@/components/FormModal.vue';
 import BreadcrumbWrapper from '@/components/BreadcrumbWrapper.vue';
-import addProductLogic from './addProductLogic.js';
+import { ref as logicRef, onMounted, computed as logicComputed } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
+import axios from 'axios';
+
+const addProductLogic = () => {
+  const router = useRouter();
+  const route = useRoute();
+  const toast = logicRef(null);
+  const showFormModal = logicRef(false);
+  const currentAttribute = logicRef('');
+  const productData = logicRef({
+    id: '',
+    idHeDieuHanh: '',
+    idManHinh: '',
+    idNhaSanXuat: '',
+    idCumCamera: '',
+    idSim: '',
+    idThietKe: '',
+    idPin: '',
+    idCpu: '',
+    idGpu: '',
+    idCongNgheMang: '',
+    idCongSac: '',
+    idHoTroCongNgheSac: '',
+    idChiSoKhangBuiVaNuoc: '',
+    idLoaiTinhTrang: '',
+    tienIchDacBiet: '',
+    giaBan: '',
+  });
+
+  const productVariants = logicRef([]);
+  const currentVariant = logicRef({
+    selectedRams: [],
+    selectedBoNhoTrongs: [],
+    selectedMauSacs: [],
+  });
+
+  const productImages = logicRef([]);
+  const currentImage = logicRef({
+    file: null,
+    fileName: '',
+  });
+
+  const variantImages = logicRef({});
+
+  const heDieuHanhOptions = logicRef([]);
+  const manHinhOptions = logicRef([]);
+  const nhaSanXuatOptions = logicRef([]);
+  const cumCameraOptions = logicRef([]);
+  const simOptions = logicRef([]);
+  const thietKeOptions = logicRef([]);
+  const pinOptions = logicRef([]);
+  const cpuOptions = logicRef([]);
+  const gpuOptions = logicRef([]);
+  const congNgheMangOptions = logicRef([]);
+  const congSacOptions = logicRef([]);
+  const hoTroCongNgheSacOptions = logicRef([]);
+  const chiSoKhangBuiVaNuocOptions = logicRef([]);
+  const tinhTrangOptions = logicRef([]);
+  const ramOptions = logicRef([]);
+  const boNhoTrongOptions = logicRef([]);
+  const mauSacOptions = logicRef([]);
+
+  const dropdownOpen = logicRef({
+    ram: false,
+    boNhoTrong: false,
+    mauSac: false,
+  });
+
+  const breadcrumbItems = logicComputed(() => {
+    if (typeof route.meta.breadcrumb === "function") {
+      return route.meta.breadcrumb(route);
+    }
+    return route.meta?.breadcrumb || ["Thêm Sản Phẩm"];
+  });
+
+  const fetchOptions = async () => {
+    try {
+      const [
+        heDieuHanhRes,
+        manHinhRes,
+        nhaSanXuatRes,
+        cumCameraRes,
+        simRes,
+        thietKeRes,
+        pinRes,
+        cpuRes,
+        gpuRes,
+        congNgheMangRes,
+        congSacRes,
+        hoTroCongNgheSacRes,
+        chiSoKhangBuiVaNuocRes,
+        tinhTrangRes,
+        ramRes,
+        boNhoTrongRes,
+        mauSacRes,
+      ] = await Promise.all([
+        axios.get('http://localhost:8080/api/he-dieu-hanh'),
+        axios.get('http://localhost:8080/api/man-hinh'),
+        axios.get('http://localhost:8080/api/nha-san-xuat'),
+        axios.get('http://localhost:8080/api/cum-camera/details'),
+        axios.get('http://localhost:8080/api/sim'),
+        axios.get('http://localhost:8080/api/thiet-ke'),
+        axios.get('http://localhost:8080/api/pin'),
+        axios.get('http://localhost:8080/api/cpu'),
+        axios.get('http://localhost:8080/api/gpu'),
+        axios.get('http://localhost:8080/api/cong-nghe-mang'),
+        axios.get('http://localhost:8080/api/cong-sac'),
+        axios.get('http://localhost:8080/api/ho-tro-cong-nghe-sac/details'),
+        axios.get('http://localhost:8080/api/chi-so-khang-bui-va-nuoc'),
+        axios.get('http://localhost:8080/api/tinh-trang'),
+        axios.get('http://localhost:8080/api/ram'),
+        axios.get('http://localhost:8080/api/bo-nho-trong'),
+        axios.get('http://localhost:8080/api/mau-sac'),
+      ]);
+
+      heDieuHanhOptions.value = heDieuHanhRes.data.content;
+      manHinhOptions.value = manHinhRes.data.content;
+      nhaSanXuatOptions.value = nhaSanXuatRes.data.content;
+      cumCameraOptions.value = cumCameraRes.data.content;
+      simOptions.value = simRes.data.content;
+      thietKeOptions.value = thietKeRes.data.content;
+      pinOptions.value = pinRes.data.content;
+      cpuOptions.value = cpuRes.data.content;
+      gpuOptions.value = gpuRes.data.content;
+      congNgheMangOptions.value = congNgheMangRes.data.content;
+      congSacOptions.value = congSacRes.data.content;
+      hoTroCongNgheSacOptions.value = hoTroCongNgheSacRes.data.content;
+      chiSoKhangBuiVaNuocOptions.value = chiSoKhangBuiVaNuocRes.data.content;
+      tinhTrangOptions.value = tinhTrangRes.data.content;
+      ramOptions.value = ramRes.data.content;
+      boNhoTrongOptions.value = boNhoTrongRes.data.content;
+      mauSacOptions.value = mauSacRes.data.content;
+    } catch (error) {
+      if (toast.value) {
+        toast.value?.kshowToast('error', 'Lỗi khi tải danh sách tùy chọn!');
+      }
+      console.error('Fetch options error:', error);
+    }
+  };
+
+  const toggleDropdown = (type) => {
+    dropdownOpen.value[type] = !dropdownOpen.value[type];
+    Object.keys(dropdownOpen.value).forEach((key) => {
+      if (key !== type) {
+        dropdownOpen.value[key] = false;
+      }
+    });
+  };
+
+  const handleImageUpload = (event) => {
+    currentImage.value.file = event.target.files[0];
+    currentImage.value.fileName = event.target.files[0] ? event.target.files[0].name : 'No file chosen';
+  };
+
+  const handleVariantImageUpload = (event, index) => {
+    const file = event.target.files[0];
+    if (file) {
+      variantImages.value[index] = {
+        file,
+        fileName: file.name,
+      };
+    }
+  };
+
+  const addVariant = () => {
+    if (
+      currentVariant.value.selectedRams.length === 0 ||
+      currentVariant.value.selectedBoNhoTrongs.length === 0 ||
+      currentVariant.value.selectedMauSacs.length === 0
+    ) {
+      if (toast.value) {
+        toast.value?.kshowToast('error', 'Vui lòng chọn ít nhất một RAM, một Bộ Nhớ Trong và một Màu Sắc!');
+      }
+      return;
+    }
+
+    const newVariants = [];
+    currentVariant.value.selectedRams.forEach((ramId) => {
+      currentVariant.value.selectedBoNhoTrongs.forEach((boNhoId) => {
+        currentVariant.value.selectedMauSacs.forEach((mauSacId) => {
+          newVariants.push({
+            idRam: ramId,
+            idBoNhoTrong: boNhoId,
+            idMauSac: mauSacId,
+            soLuong: 0,
+            donGia: productData.value.giaBan || '',
+          });
+        });
+      });
+    });
+
+    productVariants.value.push(...newVariants);
+    currentVariant.value = {
+      selectedRams: [],
+      selectedBoNhoTrongs: [],
+      selectedMauSacs: [],
+    };
+  };
+
+  const removeVariant = (index) => {
+    productVariants.value.splice(index, 1);
+    delete variantImages.value[index];
+  };
+
+  const addImage = () => {
+    if (currentImage.value.file) {
+      productImages.value.push({ ...currentImage.value });
+      currentImage.value = { file: null, fileName: '' };
+    } else {
+      if (toast.value) {
+        toast.value?.kshowToast('error', 'Vui lòng chọn file ảnh!');
+      }
+    }
+  };
+
+  const handleSubmit = async () => {
+    if (
+      !productData.value.id ||
+      !productData.value.giaBan ||
+      Object.values(productData.value).some((val) => val === '')
+    ) {
+      if (toast.value) {
+        toast.value?.kshowToast('error', 'Vui lòng nhập đầy đủ thông tin sản phẩm!');
+      }
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('productData', JSON.stringify(productData.value));
+    productVariants.value.forEach((variant, index) => {
+      formData.append(`variants[${index}]`, JSON.stringify(variant));
+      if (variantImages.value[index]?.file) {
+        formData.append(`variantImages[${index}]`, variantImages.value[index].file);
+      }
+    });
+    productImages.value.forEach((image, index) => {
+      formData.append(`images[${index}][file]`, image.file);
+    });
+
+    try {
+      await axios.post('http://localhost:8080/api/chi-tiet-san-pham', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      if (toast.value) {
+        toast.value?.kshowToast('success', 'Thêm mới thành công!');
+      }
+      await router.push('/san-pham');
+    } catch (error) {
+      if (toast.value) {
+        toast.value?.kshowToast('error', 'Lỗi khi lưu dữ liệu: ' + (error.response?.data?.error || error.message));
+      }
+      console.error('Save error:', error);
+    }
+  };
+
+  const resetForm = () => {
+    productData.value = {
+      id: '',
+      idHeDieuHanh: '',
+      idManHinh: '',
+      idNhaSanXuat: '',
+      idCumCamera: '',
+      idSim: '',
+      idThietKe: '',
+      idPin: '',
+      idCpu: '',
+      idGpu: '',
+      idCongNgheMang: '',
+      idCongSac: '',
+      idHoTroCongNgheSac: '',
+      idChiSoKhangBuiVaNuoc: '',
+      idLoaiTinhTrang: '',
+      tienIchDacBiet: '',
+      giaBan: '',
+    };
+    productVariants.value = [];
+    productImages.value = [];
+    variantImages.value = {};
+    currentVariant.value = { selectedRams: [], selectedBoNhoTrongs: [], selectedMauSacs: [] };
+    currentImage.value = { file: null, fileName: '' };
+  };
+
+  const openAddModal = (attribute) => {
+    currentAttribute.value = attribute;
+    showFormModal.value = true;
+  };
+
+  const handleAddAttribute = async (data) => {
+    try {
+      let response;
+      switch (currentAttribute.value) {
+        case 'id':
+          break;
+        case 'heDieuHanh':
+          response = await axios.post('http://localhost:8080/api/he-dieu-hanhs', { tenHeDieuHanh: data.tenHeDieuHanh });
+          heDieuHanhOptions.value.push(response.data);
+          break;
+        case 'manHinh':
+          response = await axios.post('http://localhost:8080/api/man-hinhs', { kichThuoc: data.kichThuoc });
+          manHinhOptions.value.push(response.data);
+          break;
+        case 'nhaSanXuat':
+          response = await axios.post('http://localhost:8080/api/nha-san-xuats', { tenNhaSanXuat: data.tenNhaSanXuat });
+          nhaSanXuatOptions.value.push(response.data);
+          break;
+        case 'cumCamera':
+          response = await axios.post('http://localhost:8080/api/cum-cameras', { tenCamera: data.tenCamera });
+          cumCameraOptions.value.push(response.data);
+          break;
+        case 'sim':
+          response = await axios.post('http://localhost:8080/api/sims', { loaiSim: data.loaiSim });
+          simOptions.value.push(response.data);
+          break;
+        case 'thietKe':
+          response = await axios.post('http://localhost:8080/api/thiet-kes', { tenThietKe: data.tenThietKe });
+          thietKeOptions.value.push(response.data);
+          break;
+        case 'pin':
+          response = await axios.post('http://localhost:8080/api/pins', { dungLuong: data.dungLuong });
+          pinOptions.value.push(response.data);
+          break;
+        case 'cpu':
+          response = await axios.post('http://localhost:8080/api/cpus', { tenCpu: data.tenCpu });
+          cpuOptions.value.push(response.data);
+          break;
+        case 'gpu':
+          response = await axios.post('http://localhost:8080/api/gpus', { tenGpu: data.tenGpu });
+          gpuOptions.value.push(response.data);
+          break;
+        case 'congNgheMang':
+          response = await axios.post('http://localhost:8080/api/cong-nghe-mangs', { tenCongNgheMang: data.tenCongNgheMang });
+          congNgheMangOptions.value.push(response.data);
+          break;
+        case 'congSac':
+          response = await axios.post('http://localhost:8080/api/cong-sacs', { congSac: data.congSac });
+          congSacOptions.value.push(response.data);
+          break;
+        case 'hoTroCongNgheSac':
+          response = await axios.post('http://localhost:8080/api/ho-tro-cong-nghe-sacs', { ten: data.ten });
+          hoTroCongNgheSacOptions.value.push(response.data);
+          break;
+        case 'chiSoKhangBuiVaNuoc':
+          response = await axios.post('http://localhost:8080/api/chi-so-khang-bui-va-nuocs', { tenChiSo: data.tenChiSo });
+          chiSoKhangBuiVaNuocOptions.value.push(response.data);
+          break;
+        case 'tinhTrang':
+          response = await axios.post('http://localhost:8080/api/tinh-trangs', { loaiTinhTrang: data.loaiTinhTrang });
+          tinhTrangOptions.value.push(response.data);
+          break;
+        case 'ram':
+          response = await axios.post('http://localhost:8080/api/ram', { ma: data.ma, dungLuong: data.dungLuong });
+          ramOptions.value.push(response.data);
+          break;
+        case 'boNhoTrong':
+          response = await axios.post('http://localhost:8080/api/bo-nho-trong', { ma: data.ma, dungLuong: data.dungLuong });
+          boNhoTrongOptions.value.push(response.data);
+          break;
+        case 'mauSac':
+          response = await axios.post('http://localhost:8080/api/mau-sac', { ma: data.ma, tenMau: data.tenMau });
+          mauSacOptions.value.push(response.data);
+          break;
+        case 'tienIchDacBiet':
+          productData.value.tienIchDacBiet = data.tienIchDacBiet;
+          break;
+        case 'giaBan':
+          productData.value.giaBan = data.giaBan;
+          break;
+      }
+      if (toast.value) {
+        toast.value?.kshowToast('success', `Thêm ${currentAttribute.value} thành công!`);
+      }
+    } catch (error) {
+      if (toast.value) {
+        toast.value?.kshowToast('error', 'Lỗi khi thêm thuộc tính: ' + (error.response?.data?.error || error.message));
+      }
+      console.error('Add attribute error:', error);
+    }
+    closeFormModal();
+  };
+
+  const closeFormModal = () => {
+    showFormModal.value = false;
+    currentAttribute.value = '';
+  };
+
+  onMounted(() => {
+    fetchOptions();
+  });
+
+  return {
+    toast,
+    showFormModal,
+    currentAttribute,
+    productData,
+    productVariants,
+    currentVariant,
+    productImages,
+    currentImage,
+    variantImages,
+    heDieuHanhOptions,
+    manHinhOptions,
+    nhaSanXuatOptions,
+    cumCameraOptions,
+    simOptions,
+    thietKeOptions,
+    pinOptions,
+    cpuOptions,
+    gpuOptions,
+    congNgheMangOptions,
+    congSacOptions,
+    hoTroCongNgheSacOptions,
+    chiSoKhangBuiVaNuocOptions,
+    tinhTrangOptions,
+    ramOptions,
+    boNhoTrongOptions,
+    mauSacOptions,
+    breadcrumbItems,
+    dropdownOpen,
+    fetchOptions,
+    toggleDropdown,
+    handleImageUpload,
+    handleVariantImageUpload,
+    addVariant,
+    removeVariant,
+    addImage,
+    handleSubmit,
+    resetForm,
+    openAddModal,
+    handleAddAttribute,
+    closeFormModal,
+  };
+};
 
 export default defineComponent({
   name: 'AddProduct',
@@ -719,7 +1320,201 @@ export default defineComponent({
   setup() {
     const logic = addProductLogic();
 
-    // Nhóm các biến thể theo RAM và Bộ Nhớ Trong
+    // State for color selection modal
+    const showColorModal = ref(false);
+    const showImeiModal = ref(false);
+    const showImageSection = ref(false);
+    const imeiInput = ref('');
+    const currentVariantIndex = ref(null);
+    const variantImeis = ref({});
+    const mainImages = ref({
+      front: { file: null, fileName: '', previewUrl: '' },
+      back: { file: null, fileName: '', previewUrl: '' },
+    });
+    const colorImages = ref({});
+
+    // New state for common inputs and selection
+    const commonPrice = ref('');
+    const commonQuantity = ref('');
+    const selectedVariants = ref([]);
+
+    const openColorModal = () => {
+      showColorModal.value = true;
+    };
+
+    const closeColorModal = () => {
+      showColorModal.value = false;
+    };
+
+    const confirmColorSelection = () => {
+      logic.addVariant();
+      showImageSection.value = true;
+      closeColorModal();
+    };
+
+    const openImeiModal = (index) => {
+      currentVariantIndex.value = index;
+      imeiInput.value = variantImeis.value[index]?.join('\n') || '';
+      showImeiModal.value = true;
+    };
+
+    const closeImeiModal = () => {
+      showImeiModal.value = false;
+      imeiInput.value = '';
+      currentVariantIndex.value = null;
+    };
+
+    const saveImei = () => {
+      const imeis = imeiInput.value
+        .split('\n')
+        .map(imei => imei.trim())
+        .filter(imei => imei.length > 0);
+      variantImeis.value[currentVariantIndex.value] = imeis;
+      closeImeiModal();
+    };
+
+    const handleExcelImport = (event) => {
+      const file = event.target.files[0];
+      if (!file) return;
+      const mockImeis = ['123456789012345', '678901234567890'];
+      imeiInput.value = mockImeis.join('\n');
+    };
+
+    const vietnameseToEnglishColorMap = {
+      'đen': 'black',
+      'bạc': 'silver',
+      'cam': 'orange',
+      'đỏ': 'red',
+      'vàng': 'yellow',
+      'gold': 'gold',
+      'xanh': 'green',
+      'trắng': 'white',
+      'hồng': 'pink',
+      'tím': 'purple',
+      'xám': 'gray',
+      'nâu': 'brown',
+      'lam': 'blue',
+      'xanh lam': 'blue',
+      'xanh lá': 'green',
+      'xanh dương': 'blue',
+    };
+
+    const colorNameToHex = {
+      'black': '#000000',
+      'silver': '#C0C0C0',
+      'orange': '#FFA500',
+      'red': '#FF0000',
+      'yellow': '#FFFF00',
+      'gold': '#FFD700',
+      'green': '#008000',
+      'white': '#FFFFFF',
+      'pink': '#FF69B4',
+      'purple': '#800080',
+      'gray': '#808080',
+      'brown': '#A52A2A',
+      'blue': '#0000FF',
+    };
+
+    const hashStringToColor = (str) => {
+      let hash = 0;
+      for (let i = 0; i < str.length; i++) {
+        hash = str.charCodeAt(i) + ((hash << 5) - hash);
+      }
+      const r = (hash & 0xFF0000) >> 16;
+      const g = (hash & 0x00FF00) >> 8;
+      const b = hash & 0x0000FF;
+      return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).padStart(6, '0')}`;
+    };
+
+    const getColorFromName = (colorName) => {
+      if (!colorName) return '#FFFFFF';
+      const normalizedName = colorName.toLowerCase().trim();
+      const englishColorName = vietnameseToEnglishColorMap[normalizedName] || normalizedName;
+      if (colorNameToHex[englishColorName]) {
+        return colorNameToHex[englishColorName];
+      }
+      return hashStringToColor(colorName);
+    };
+
+    const handleMainImageUpload = (event, type) => {
+      const file = event.target.files[0];
+      if (file) {
+        if (mainImages.value[type].previewUrl) {
+          URL.revokeObjectURL(mainImages.value[type].previewUrl);
+        }
+        mainImages.value[type] = {
+          file,
+          fileName: file.name,
+          previewUrl: URL.createObjectURL(file),
+        };
+      }
+    };
+
+    const handleColorImageUpload = (event, colorId) => {
+      const file = event.target.files[0];
+      if (file) {
+        if (colorImages.value[colorId]?.previewUrl) {
+          URL.revokeObjectURL(colorImages.value[colorId].previewUrl);
+        }
+        colorImages.value[colorId] = {
+          file,
+          fileName: file.name,
+          previewUrl: URL.createObjectURL(file),
+        };
+      }
+    };
+
+    const resetForm = () => {
+      Object.values(mainImages.value).forEach(image => {
+        if (image.previewUrl) {
+          URL.revokeObjectURL(image.previewUrl);
+        }
+      });
+      mainImages.value = {
+        front: { file: null, fileName: '', previewUrl: '' },
+        back: { file: null, fileName: '', previewUrl: '' },
+      };
+
+      Object.values(colorImages.value).forEach(image => {
+        if (image?.previewUrl) {
+          URL.revokeObjectURL(image.previewUrl);
+        }
+      });
+      colorImages.value = {};
+
+      logic.resetForm();
+      showImageSection.value = false;
+      commonPrice.value = '';
+      commonQuantity.value = '';
+      selectedVariants.value = [];
+    };
+
+    const updateSelectedVariants = () => {
+      selectedVariants.value.forEach(index => {
+        if (logic.productVariants.value[index]) {
+          logic.productVariants.value[index].donGia = commonPrice.value;
+          logic.productVariants.value[index].soLuong = commonQuantity.value;
+        }
+      });
+    };
+
+    const toggleGroupSelection = (group, isChecked) => {
+      const groupIndices = group.variants.map((_, i) => group.startIndex + i);
+      if (isChecked) {
+        selectedVariants.value = [...new Set([...selectedVariants.value, ...groupIndices])];
+      } else {
+        selectedVariants.value = selectedVariants.value.filter(index => !groupIndices.includes(index));
+      }
+      updateSelectedVariants();
+    };
+
+    const updateSelectedCount = () => {
+      selectedVariants.value = selectedVariants.value.filter(index =>
+        index >= 0 && index < logic.productVariants.value.length
+      );
+      updateSelectedVariants();
+    };
+
     const groupVariantsByRamAndRom = computed(() => {
       const grouped = [];
       const seen = new Set();
@@ -752,80 +1547,54 @@ export default defineComponent({
       return grouped;
     });
 
+    const uniqueColors = computed(() => {
+      const seen = new Set();
+      const colors = [];
+
+      logic.productVariants.value.forEach(variant => {
+        const colorId = variant.idMauSac;
+        const colorName = logic.mauSacOptions.value.find(mau => mau.id === colorId)?.tenMau || 'N/A';
+
+        if (!seen.has(colorId)) {
+          seen.add(colorId);
+          colors.push({
+            colorId,
+            colorName,
+          });
+        }
+      });
+
+      return colors;
+    });
+
     return {
       ...logic,
       groupVariantsByRamAndRom,
+      uniqueColors,
+      showColorModal,
+      openColorModal,
+      closeColorModal,
+      confirmColorSelection,
+      showImeiModal,
+      openImeiModal,
+      closeImeiModal,
+      saveImei,
+      imeiInput,
+      handleExcelImport,
+      getColorFromName,
+      showImageSection,
+      mainImages,
+      handleMainImageUpload,
+      colorImages,
+      handleColorImageUpload,
+      resetForm,
+      commonPrice,
+      commonQuantity,
+      selectedVariants,
+      updateSelectedVariants,
+      toggleGroupSelection,
+      updateSelectedCount,
     };
   },
 });
 </script>
-
-<style scoped>
-.input-field {
-  @apply w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm;
-}
-
-input[type="color"] {
-  height: 2rem;
-  padding: 0;
-  cursor: pointer;
-}
-
-/* Đảm bảo dropdown hiển thị đúng */
-.relative {
-  position: relative;
-}
-
-/* Tùy chỉnh giao diện dropdown */
-.absolute {
-  position: absolute;
-}
-
-/* Tùy chỉnh checkbox */
-input[type="checkbox"] {
-  accent-color: #3b82f6; /* Màu xanh cho checkbox */
-}
-
-/* Tùy chỉnh hover cho các mục trong dropdown */
-.hover\:bg-gray-100:hover {
-  background-color: #f3f4f6;
-}
-
-/* Tùy chỉnh bảng */
-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-th, td {
-  border: 1px solid #d1d5db;
-  padding: 8px;
-  text-align: center;
-}
-
-th {
-  background-color: #f3f4f6;
-  font-weight: 500;
-}
-
-tbody tr:nth-child(odd) {
-  background-color: #ffffff;
-}
-
-tbody tr:nth-child(even) {
-  background-color: #f9fafb;
-}
-
-input[type="number"],
-input[type="text"] {
-  width: 100%;
-  padding: 4px;
-  border: 1px solid #d1d5db;
-  border-radius: 4px;
-  text-align: center;
-}
-
-button {
-  transition: all 0.2s ease-in-out;
-}
-</style>

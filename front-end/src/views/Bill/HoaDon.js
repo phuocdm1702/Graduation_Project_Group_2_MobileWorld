@@ -121,7 +121,8 @@ export default function useHoaDonLineList() {
       const res = await axios.get("http://localhost:8080/hoa-don/home", {
         params: {
           page: currentPage.value,
-          size: pageSize.value
+          size: pageSize.value,
+          withCredentials: true, // Thêm dòng này
         }
       });
 

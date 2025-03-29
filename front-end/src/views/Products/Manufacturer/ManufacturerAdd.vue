@@ -4,27 +4,30 @@
     <BreadcrumbWrapper :breadcrumb-items="breadcrumbItems" />
 
     <div class="mt-2 mx-auto">
+      <h2 class="bg-white shadow-lg rounded-lg p-5 mb-2 mt-2 text-2xl font-semibold text-gray-700">
+        Thêm Mới Nhà Sản Xuất
+      </h2>
       <ToastNotification ref="toast" />
 
       <!-- Form thêm mới -->
       <div class="bg-white shadow-lg rounded-lg p-5 mb-4 mt-4">
         <div class="grid grid-cols-1 gap-6">
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Mã dòng sản phẩm</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Mã nhà sản xuất</label>
             <input
-              v-model.trim="productLine.ma"
+              v-model.trim="manufacturer.ma"
               type="text"
-              placeholder="Nhập mã dòng sản phẩm"
+              placeholder="Nhập mã nhà sản xuất"
               class="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-[var(--ring-color)] focus:border-transparent transition-all duration-200"
               required
             />
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Tên dòng sản phẩm</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Tên nhà sản xuất</label>
             <input
-              v-model.trim="productLine.dongSanPham"
+              v-model.trim="manufacturer.nhaSanXuat"
               type="text"
-              placeholder="Nhập tên dòng sản phẩm"
+              placeholder="Nhập tên nhà sản xuất"
               class="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-[var(--ring-color)] focus:border-transparent transition-all duration-200"
               required
             />
@@ -65,7 +68,7 @@ import { useRouter, useRoute } from 'vue-router';
 import ToastNotification from '@/components/ToastNotification.vue';
 import ConfirmModal from '@/components/ConfirmModal.vue';
 import BreadcrumbWrapper from '@/components/BreadcrumbWrapper.vue'; // Import BreadcrumbWrapper
-import useProductLineList from '@/views/Products/Brand/ProductLine/ProductLine.js';
+import useNhaSanXuat from '@/views/Products/Manufacturer/Manufacturer.js';
 
 const router = useRouter();
 const route = useRoute();
@@ -76,25 +79,25 @@ const breadcrumbItems = computed(() => {
   if (typeof route.meta.breadcrumb === "function") {
     return route.meta.breadcrumb(route);
   }
-  return route.meta?.breadcrumb || ["Quản Lý Dòng Sản Phẩm", "Thêm Mới Dòng Sản Phẩm"]; // Mặc định cho trang thêm mới
+  return route.meta?.breadcrumb || ["Quản Lý Nhà Sản Xuất", "Thêm Mới Nhà Sản Xuất"]; // Mặc định cho trang thêm mới
 });
 
 const {
-  productLine,
+  manufacturer,
   checkDuplicate,
-  saveProductLine,
+  saveManufacturer,
   showConfirmModal,
   confirmMessage,
   confirmAction,
   executeConfirmedAction,
   closeConfirmModal,
-} = useProductLineList();
+} = useNhaSanXuat();
 
-productLine.value = { id: null, ma: '', dongSanPham: '' }; // Đặt lại dữ liệu mặc định
+manufacturer.value = { id: null, ma: '', nhaSanXuat: '' }; // Đặt lại dữ liệu mặc định
 
 const handleSubmit = async () => {
-  const { ma, dongSanPham } = productLine.value;
-  if (!ma || !dongSanPham) {
+  const { ma, nhaSanXuat } = manufacturer.value;
+  if (!ma || !nhaSanXuat) {
     if (toast.value) {
       toast.value?.kshowToast('error', 'Vui lòng nhập đầy đủ thông tin!');
     }
@@ -103,25 +106,25 @@ const handleSubmit = async () => {
 
   if (await checkDuplicate('ma', ma)) {
     if (toast.value) {
-      toast.value?.kshowToast('error', 'Mã dòng sản phẩm đã tồn tại!');
+      toast.value?.kshowToast('error', 'Mã nhà sản xuất đã tồn tại!');
     }
     return;
   }
-  if (await checkDuplicate('dongSanPham', dongSanPham)) {
+  if (await checkDuplicate('nhaSanXuat', nhaSanXuat)) {
     if (toast.value) {
-      toast.value?.kshowToast('error', 'Tên dòng sản phẩm đã tồn tại!');
+      toast.value?.kshowToast('error', 'Tên nhà sản xuất đã tồn tại!');
     }
     return;
   }
 
-  confirmAction('Bạn có chắc chắn muốn thêm dòng sản phẩm này?', async () => {
-    await saveProductLine();
-    await router.push('/product-line'); // Quay lại danh sách sau khi lưu thành công
+  confirmAction('Bạn có chắc chắn muốn thêm nhà sản xuất này?', async () => {
+    await saveManufacturer();
+    router.push('/manufacturer'); // Quay lại danh sách sau khi lưu thành công
   });
 };
 
 const goBack = () => {
-  router.push('/product-line'); // Quay lại danh sách
+  router.push('/manufacturer'); // Quay lại danh sách
 };
 </script>
 

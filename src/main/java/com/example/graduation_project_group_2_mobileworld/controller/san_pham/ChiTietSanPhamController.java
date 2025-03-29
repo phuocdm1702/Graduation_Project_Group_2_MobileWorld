@@ -23,7 +23,7 @@ public class ChiTietSanPhamController {
     private ChiTietSanPhamService chiTietSanPhamService;
 
     @Autowired
-    private ObjectMapper objectMapper; // Để parse JSON từ String
+    private ObjectMapper objectMapper;
 
     @PostMapping(consumes = "multipart/form-data")
     public ResponseEntity<?> createChiTietSanPham(

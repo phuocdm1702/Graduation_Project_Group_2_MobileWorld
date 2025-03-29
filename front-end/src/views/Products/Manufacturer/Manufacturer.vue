@@ -6,10 +6,8 @@
     <div class="mt-2 mx-auto">
       <ToastNotification ref="toast" />
 
-      <!-- Form lọc -->
       <div
         class="bg-white shadow-lg rounded-lg p-5 mb-2 mt-2 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-        <!-- Ô tìm kiếm -->
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">Tìm kiếm</label>
           <input
@@ -20,21 +18,18 @@
           />
         </div>
 
-        <!-- Dropdown chọn dòng sản phẩm -->
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Tên dòng sản phẩm</label>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Tên nhà sản xuất</label>
           <select
-            v-model="searchDongSanPham"
+            v-model="searchNhaSanXuat"
             class="input-field"
           >
             <option value="">Tất cả</option>
-            <option v-for="name in uniqueDongSanPhamList" :key="name" :value="name">{{ name }}</option>
+            <option v-for="name in uniqueNhaSanXuatList" :key="name" :value="name">{{ name }}</option>
           </select>
         </div>
 
-        <!-- Nút chức năng -->
         <div class="flex justify-end w-full col-span-full gap-2">
-          <!-- Button Đặt lại -->
           <button
             @click="resetFilters"
             class="flex items-center gap-2 px-4 py-2 bg-[#f97316] text-white font-semibold rounded-lg shadow-md hover:bg-orange-600 transition"
@@ -61,48 +56,13 @@
         </div>
       </div>
 
-      <!-- Nút xóa các dòng sản phẩm đã chọn -->
-      <div v-if="selectedProducts.length" class="bg-white shadow-lg rounded-lg p-5 mb-4 mt-4 flex justify-end">
-        <button
-          @click="confirmDeleteSelected"
-          class="flex items-center gap-2 px-4 py-2 bg-red-500 text-white font-semibold rounded-lg shadow-md hover:bg-red-600 transition"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-               stroke="currentColor" class="w-5 h-5 mr-1">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
-          </svg>
-          Xóa {{ selectedProducts.length }} dòng sản phẩm đã chọn
-        </button>
-      </div>
-
-      <!-- Bảng danh sách dòng sản phẩm -->
+      <!-- Bảng danh sách nhà sản xuất -->
       <DynamicTable
         class="dynamic-table"
-        :data="productLines"
+        :data="manufacturers"
         :columns="columns"
         :get-nested-value="getNestedValue"
-        :selected-products="selectedProducts"
-        @toggle-select="toggleSelect"
-      >
-        <!-- Slot để render checkbox "Chọn tất cả" trong tiêu đề cột select -->
-        <template #header-select>
-          <input
-            type="checkbox"
-            class="w-4 h-4 rounded"
-            :checked="isAllSelected"
-            @change="toggleSelectAll"
-          >
-        </template>
-        <!-- Slot để render checkbox trong các dòng -->
-        <template #cell-select="{ item }">
-          <input
-            type="checkbox"
-            class="w-4 h-4 rounded"
-            :checked="selectedProducts.includes(item.id)"
-            @change="toggleSelect(item.id)"
-          >
-        </template>
-      </DynamicTable>
+      />
 
       <!-- Phân trang -->
       <footer class="bg-white shadow-lg rounded-lg p-4 flex justify-center items-center mt-2">
@@ -127,95 +87,75 @@
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-import useProductLineList from '@/views/Products/Brand/ProductLine/ProductLine.js';
+import useNhaSanXuat from './Manufacturer.js';
 import ToastNotification from '@/components/ToastNotification.vue';
 import Pagination from '@/components/Pagination.vue';
 import ConfirmModal from '@/components/ConfirmModal.vue';
 import DynamicTable from '@/components/DynamicTable.vue';
-import BreadcrumbWrapper from '@/components/BreadcrumbWrapper.vue'; // Import BreadcrumbWrapper
+import BreadcrumbWrapper from '@/components/BreadcrumbWrapper.vue';
 import axios from 'axios';
 
 const router = useRouter();
 const route = useRoute();
 
-// Tính toán breadcrumb dựa trên meta của route
 const breadcrumbItems = computed(() => {
   if (typeof route.meta.breadcrumb === "function") {
     return route.meta.breadcrumb(route);
   }
-  return route.meta?.breadcrumb || ["Quản Lý Dòng Sản Phẩm"]; // Mặc định nếu không có breadcrumb
+  return route.meta?.breadcrumb || ["Quản Lý Nhà Sản Xuất"];
 });
 
 const {
   toast,
-  productLines,
+  manufacturers,
   searchKeyword,
-  searchDongSanPham,
+  searchNhaSanXuat,
   currentPage,
   pageSize,
-  selectedProducts,
   isSearching,
   showConfirmModal,
   confirmMessage,
   totalPages,
   fetchData,
   goToPage,
-  searchProductLine,
+  searchManufacturer,
   resetSearch,
-  checkDuplicate,
   confirmDelete,
-  confirmDeleteSelected,
   confirmAction,
   executeConfirmedAction,
   closeConfirmModal,
-  toggleSelectAll,
-} = useProductLineList();
+} = useNhaSanXuat();
 
 const navigateToAddPage = () => {
-  router.push('/product-line/add');
+  router.push('/manufacturer/add');
 };
 
 const getNestedValue = (obj, path) => {
   return path.split('.').reduce((acc, part) => acc && acc[part], obj);
 };
 
-const uniqueDongSanPhamList = ref([]);
+const uniqueNhaSanXuatList = ref([]);
 
-const fetchProductLineNames = async () => {
+const fetchManufacturerNames = async () => {
   try {
-    const { data } = await axios.get('http://localhost:8080/api/dong-san-pham/all-names');
-    uniqueDongSanPhamList.value = data;
+    const { data } = await axios.get('http://localhost:8080/api/nha-san-xuat/all-names');
+    uniqueNhaSanXuatList.value = data;
   } catch (error) {
-    console.error('Error fetching product line names:', error);
+    console.error('Error fetching manufacturer names:', error);
   }
 };
 
 const resetFilters = () => {
   searchKeyword.value = '';
-  searchDongSanPham.value = '';
+  searchNhaSanXuat.value = '';
   resetSearch();
 };
 
-// Logic để kiểm tra trạng thái của checkbox "Chọn tất cả"
-const isAllSelected = computed(() => {
-  if (productLines.value.length === 0) return false;
-  return productLines.value.every(item => selectedProducts.value.includes(item.id));
-});
-
-// Hàm xử lý sự kiện toggle select cho từng dòng
-const toggleSelect = (id) => {
-  if (selectedProducts.value.includes(id)) {
-    selectedProducts.value = selectedProducts.value.filter(selectedId => selectedId !== id);
-  } else {
-    selectedProducts.value.push(id);
-  }
-};
-
-watch([searchKeyword, searchDongSanPham], () => {
+watch([searchKeyword, searchNhaSanXuat], () => {
   currentPage.value = 0;
-  if (searchKeyword.value || searchDongSanPham.value) {
+  if (searchKeyword.value || searchNhaSanXuat.value) {
     isSearching.value = true;
-    searchProductLine();
+    searchManufacturer();
   } else {
     isSearching.value = false;
     fetchData();
@@ -224,10 +164,6 @@ watch([searchKeyword, searchDongSanPham], () => {
 
 const columns = [
   {
-    key: 'select',
-    label: '', // Không cần cung cấp label nữa vì slot sẽ xử lý
-  },
-  {
     key: '#',
     label: '#',
     formatter: (value, item, index) => {
@@ -235,7 +171,7 @@ const columns = [
     },
   },
   { key: 'ma', label: 'Mã' },
-  { key: 'dongSanPham', label: 'Tên Dòng Sản Phẩm' },
+  { key: 'nhaSanXuat', label: 'Tên Nhà Sản Xuất' },
   {
     key: 'trangThai',
     label: 'Trạng Thái',
@@ -266,7 +202,7 @@ const columns = [
 
 const handleCustomEvents = () => {
   document.addEventListener('openEditModal', (event) => {
-    router.push(`/product-line/edit/${event.detail.id}`);
+    router.push(`/manufacturer/edit/${event.detail.id}`);
   });
   document.addEventListener('confirmDelete', (event) => {
     confirmDelete(event.detail);
@@ -275,10 +211,9 @@ const handleCustomEvents = () => {
 
 onMounted(() => {
   fetchData();
-  fetchProductLineNames();
+  fetchManufacturerNames();
+  handleCustomEvents();
 });
-
-handleCustomEvents();
 </script>
 
 <style scoped>

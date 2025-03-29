@@ -12,7 +12,7 @@ import PhieuBaoHanh from "../views/BaoHanh/PhieuBaoHanh.vue";
 
 // View Login
 import Login from "../views/LoginView/AppLogin.vue";
-
+import DangKy from "@/views/LoginView/DangKy/DangKy.vue";
 // Đơn hàng
 import LichSuHD from "../views/Bill/LichSuHoaDon.vue";
 import HoaDon from "../views/Bill/HoaDon.vue";
@@ -33,12 +33,12 @@ import ProductDetails from "../views/Products/SanPham/ChiTietSanPham.vue";
 import ProductDetailAdd from "@/views/Products/SanPham/AddChiTietSanPham.vue";
 
 // Thương hiệu
-import Manufacturer from "../views/Products/Brand/Manufacturer/Manufacturer.vue";
-import ProductLine from "../views/Products/Brand/ProductLine/ProductLine.vue";
-import ProductLineAdd from "@/views/Products/Brand/ProductLine/ProductLineAdd.vue";
-import ProductLineEdit from "@/views/Products/Brand/ProductLine/ProductLineEdit.vue";
-import ManufacturerAdd from "@/views/Products/Brand/Manufacturer/ManufacturerAdd.vue";
-import ManufacturerEdit from "@/views/Products/Brand/Manufacturer/ManufacturerEdit.vue";
+import Manufacturer from "../views/Products/Manufacturer/Manufacturer.vue";
+import ProductLine from "../views/Products/Manufacturer/ProductLine/ProductLine.vue";
+import ProductLineAdd from "@/views/Products/Manufacturer/ProductLine/ProductLineAdd.vue";
+import ProductLineEdit from "@/views/Products/Manufacturer/ProductLine/ProductLineEdit.vue";
+import ManufacturerAdd from "@/views/Products/Manufacturer/ManufacturerAdd.vue";
+import ManufacturerEdit from "@/views/Products/Manufacturer/ManufacturerEdit.vue";
 
 // Màn hình
 import Display from "../views/Products/Screen/ManHinh.vue";
@@ -241,24 +241,6 @@ const routes: Array<RouteRecordRaw> = [
     component: ManufacturerEdit,
     meta: { breadcrumb: (route: any) => ["Sản phẩm", "Nhà Sản Xuất", `Cập nhật Nhà Sản Xuất #${route.params.id}`] },
   },
-  {
-    path: "/productLines",
-    name: "productLines",
-    component: ProductLine,
-    meta: { breadcrumb: ["Sản phẩm", "Dòng sản phẩm"] },
-  },
-  {
-    path: "/productLines/add",
-    name: "productLines-add",
-    component: ProductLineAdd,
-    meta: { breadcrumb: ["Sản phẩm", "Dòng sản phẩm", "Thêm dòng sản phẩm"] },
-  },
-  {
-    path: "/productLines/edit/:id",
-    name: "productLines-edit",
-    component: ProductLineEdit,
-    meta: { breadcrumb: (route: any) => ["Sản phẩm", "Dòng sản phẩm", `Cập nhật dòng sản phẩm #${route.params.id}`] },
-  },
 
 // Màn hình
   {
@@ -421,6 +403,13 @@ const routes: Array<RouteRecordRaw> = [
     path: "/:pathMatch(.*)*",
     component: NotFound,
     meta: { breadcrumb: ["Không tìm thấy"] },
+  },
+  //DangKy
+  {
+    path: "/dang-ky",
+    name: "DangKy",
+    component: DangKy,
+    meta: { layout: "empty", breadcrumb: [] },
   },
 ];
 
