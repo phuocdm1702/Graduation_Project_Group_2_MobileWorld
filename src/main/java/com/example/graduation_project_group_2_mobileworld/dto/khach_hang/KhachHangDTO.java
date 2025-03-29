@@ -5,6 +5,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import java.util.Date;
 
 public class KhachHangDTO {
+    private Integer id;
     private String ma;
     private String tenKH;
     private Date ngaySinh;
@@ -13,7 +14,43 @@ public class KhachHangDTO {
     private String quan;
     private String phuong;
     private String diaChiCuThe;
+    private String cccd;
+    private String email;
+    private String soDienThoai;
+    private String userName;
+    private Boolean gioiTinh;
+    private Date createdAt;
+    private Boolean macDinh;
 
+    // Constructor mặc định
+    public KhachHangDTO() {
+    }
+
+    // Constructor với id
+    public KhachHangDTO(Integer id, String ma, String tenKH, Date ngaySinh) {
+        this.id = id;
+        this.ma = ma;
+        this.tenKH = tenKH;
+        this.ngaySinh = ngaySinh;
+    }
+
+    // Constructor cũ (giữ lại để tương thích)
+    public KhachHangDTO(String ma, String tenKH, Date ngaySinh) {
+        this.ma = ma;
+        this.tenKH = tenKH;
+        this.ngaySinh = ngaySinh;
+    }
+
+    // Getter và Setter cho id
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    // Các getter/setter khác giữ nguyên
     public Date getCreatedAt() {
         return createdAt;
     }
@@ -21,13 +58,6 @@ public class KhachHangDTO {
     public void setCreatedAt(Date createdAt) {
         this.createdAt = createdAt;
     }
-
-    private String cccd;
-    private String email;
-    private String soDienThoai;
-    private String userName;
-    private Boolean gioiTinh;
-    private Date createdAt;
 
     public Boolean getMacDinh() {
         return macDinh;
@@ -37,7 +67,6 @@ public class KhachHangDTO {
         this.macDinh = macDinh;
     }
 
-    private Boolean macDinh;
     public Boolean getGioiTinh() {
         return gioiTinh;
     }
@@ -52,9 +81,6 @@ public class KhachHangDTO {
 
     public void setUserName(String userName) {
         this.userName = userName;
-    }
-
-    public KhachHangDTO() {
     }
 
     public String getMa() {
@@ -88,8 +114,6 @@ public class KhachHangDTO {
     public void setNgaySinh(Date ngaySinh) {
         this.ngaySinh = ngaySinh;
     }
-
-
 
     public String getThanhPho() {
         return thanhPho;

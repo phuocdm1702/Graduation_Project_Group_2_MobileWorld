@@ -183,7 +183,7 @@
 .dynamic-table th:nth-child(6), /* Số tiền giảm tối đa */
 .dynamic-table th:nth-child(8) { /* Hóa đơn tối thiểu */
   max-width: 80px; /* Thu nhỏ chiều rộng hơn */
-  line-height: 1.1; /* Giảm khoảng cách dòng để nhãn vừa khít */
+  line-height: 1.1; 
 }
 
 /* Giữ nguyên các cột khác */

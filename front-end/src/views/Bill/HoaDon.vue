@@ -1,8 +1,6 @@
-<!-- HoaDon.vue -->
 <template>
   <div class="mt-2 mx-auto">
     <ToastNotification ref="toast"/>
-    <!-- Sử dụng BreadcrumbWrapper thay vì PathRouter trực tiếp -->
     <BreadcrumbWrapper :breadcrumb-items="breadcrumbItems" />
 
     <section>
@@ -99,7 +97,10 @@
             <i class="fa fa-file-excel text-white text-lg"></i>
             Xuất Excel
           </button>
-          <button class="flex items-center gap-2 px-4 py-2 bg-[#f97316] text-white font-semibold rounded-lg shadow-md hover:bg-orange-600 transition">
+          <button
+            @click="openQrScanner"
+            class="flex items-center gap-2 px-4 py-2 bg-[#f97316] text-white font-semibold rounded-lg shadow-md hover:bg-orange-600 transition"
+          >
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M3 3h4v4H3z"></path>
               <path d="M17 3h4v4h-4z"></path>
@@ -120,6 +121,20 @@
               Tạo Hóa Đơn
             </button>
           </RouterLink>
+        </div>
+      </div>
+
+      <!-- QR Scanner Modal -->
+      <div v-if="showQrScanner" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+        <div class="bg-white p-4 rounded-lg">
+          <video ref="videoElement" class="w-64 h-64"></video>
+          <canvas ref="canvasElement" style="display: none;"></canvas>
+          <button
+            @click="stopQrScanner"
+            class="mt-4 bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded w-full"
+          >
+            Đóng
+          </button>
         </div>
       </div>
     </section>
@@ -151,7 +166,7 @@
 </template>
 
 <script setup>
-import { computed } from "vue";
+import { computed, onUnmounted } from "vue";
 import { useRoute } from "vue-router";
 import useHoaDonLineList from "@/views/Bill/HoaDon.js";
 import DynamicTable from "@/components/DynamicTable.vue";
@@ -159,7 +174,7 @@ import Pagination from "@/components/Pagination.vue";
 import StatusBar from "@/components/statusBar.vue";
 import ToastNotification from '@/components/ToastNotification.vue';
 import ConfirmModal from '@/components/ConfirmModal.vue';
-import BreadcrumbWrapper from '@/components/BreadcrumbWrapper.vue'; // Import BreadcrumbWrapper
+import BreadcrumbWrapper from '@/components/BreadcrumbWrapper.vue';
 
 const {
   toast,
@@ -186,18 +201,26 @@ const {
   minRange,
   maxRange,
   adjustMin,
-  adjustMax
+  adjustMax,
+  showQrScanner,
+  openQrScanner,
+  stopQrScanner,
+  videoElement,
+  canvasElement,
+  downloadQrCode, // Import the downloadQrCode function
 } = useHoaDonLineList();
 
-// Lấy route hiện tại
 const route = useRoute();
 
-// Tính toán breadcrumb dựa trên meta của route
 const breadcrumbItems = computed(() => {
   if (typeof route.meta.breadcrumb === "function") {
     return route.meta.breadcrumb(route);
   }
-  return route.meta?.breadcrumb || ["Quản lý hóa đơn"]; // Mặc định nếu không có breadcrumb
+  return route.meta?.breadcrumb || ["Quản lý hóa đơn"];
+});
+
+onUnmounted(() => {
+  stopQrScanner();
 });
 </script>
 
@@ -215,7 +238,7 @@ const breadcrumbItems = computed(() => {
 .range-slider {
   position: relative;
   width: 100%;
-  height: 20px; /* Chiều cao của thanh trượt */
+  height: 20px;
 }
 
 .range-input {
@@ -226,27 +249,27 @@ const breadcrumbItems = computed(() => {
   height: 100%;
   margin: 0;
   padding: 0;
-  background: none; /* Xóa nền mặc định */
-  -webkit-appearance: none; /* Loại bỏ kiểu mặc định của Webkit */
-  pointer-events: none; /* Đảm bảo sự kiện chỉ áp dụng cho thumb */
+  background: none;
+  -webkit-appearance: none;
+  pointer-events: none;
 }
 
 .range-input::-webkit-slider-runnable-track {
   width: 100%;
-  height: 6px; /* Độ dày của thanh trượt */
-  background: #ddd; /* Màu nền của thanh trượt */
+  height: 6px;
+  background: #ddd;
   border-radius: 3px;
 }
 
 .range-input::-webkit-slider-thumb {
-  height: 16px; /* Chiều cao của nút trượt */
-  width: 16px; /* Chiều rộng của nút trượt */
+  height: 16px;
+  width: 16px;
   border-radius: 50%;
-  background: #007bff; /* Màu của nút trượt */
+  background: #007bff;
   cursor: pointer;
   -webkit-appearance: none;
-  margin-top: -5px; /* Căn giữa nút trượt trên thanh */
-  pointer-events: auto; /* Cho phép tương tác với nút trượt */
+  margin-top: -5px;
+  pointer-events: auto;
 }
 
 .range-input::-moz-range-track {
@@ -264,12 +287,11 @@ const breadcrumbItems = computed(() => {
   cursor: pointer;
 }
 
-/* Đảm bảo thanh min và max hiển thị đúng */
 .range-min {
-  z-index: 2; /* Thanh min ở trên */
+  z-index: 2;
 }
 
 .range-max {
-  z-index: 1; /* Thanh max ở dưới */
+  z-index: 1;
 }
 </style>

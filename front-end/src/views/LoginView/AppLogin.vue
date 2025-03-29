@@ -1,108 +1,122 @@
 <template>
-  <div class="flex items-center justify-center h-screen px-6 bg-gray-200">
-    <div class="w-full max-w-sm p-6 bg-white rounded-md shadow-md">
-      <div class="flex items-center justify-center">
-        <span class="text-2xl font-semibold text-orange-500">Mobile World</span>
+  <div class="min-h-screen flex items-center justify-center bg-gray-100 px-4 py-12">
+    <div class="w-full max-w-md bg-white rounded-lg shadow-lg p-8">
+      <!-- Header -->
+      <div class="mb-8 text-center">
+        <h1 class="text-2xl font-semibold text-gray-800">Đăng nhập</h1>
       </div>
 
-      <form class="mt-4" @submit.prevent="login">
-        <label class="block">
-          <span class="text-sm text-gray-700">Email</span>
+      <!-- Form -->
+      <form @submit.prevent="login" class="space-y-6">
+        <!-- Username Field -->
+        <div class="space-y-2">
+          <label class="block text-sm font-medium text-gray-700">
+            Tên đăng nhập
+          </label>
           <input
-            type="email"
-            class="
-              block
-              w-full
-              mt-1
-              border-gray-200
-              rounded-md
-              focus:border-indigo-600
-              focus:ring
-              focus:ring-opacity-40
-              focus:ring-indigo-500
-            "
-            v-model="email"
+            v-model="tenDangNhap"
+            type="text"
+            placeholder="Nhập tên đăng nhập"
+            class="w-full px-4 py-2 border border-gray-300 rounded-md 
+                  focus:ring-2 focus:ring-orange-500 focus:border-orange-500 
+                  transition duration-200 ease-in-out"
           />
-        </label>
+        </div>
 
-        <label class="block mt-3">
-          <span class="text-sm text-gray-700">Password</span>
+        <!-- Password Field -->
+        <div class="space-y-2">
+          <label class="block text-sm font-medium text-gray-700">
+            Mật khẩu
+          </label>
           <input
+            v-model="matKhau"
             type="password"
-            class="
-              block
-              w-full
-              mt-1
-              border-gray-200
-              rounded-md
-              focus:border-indigo-600
-              focus:ring
-              focus:ring-opacity-40
-              focus:ring-indigo-500
-            "
-            v-model="password"
+            placeholder="Nhập mật khẩu"
+            class="w-full px-4 py-2 border border-gray-300 rounded-md 
+                  focus:ring-2 focus:ring-orange-500 focus:border-orange-500 
+                  transition duration-200 ease-in-out"
           />
-        </label>
-
-        <div class="flex items-center justify-between mt-4">
-          <div>
-            <label class="inline-flex items-center">
-              <input
-                type="checkbox"
-                class="
-                  text-indigo-600
-                  border-gray-200
-                  rounded-md
-                  focus:border-indigo-600
-                  focus:ring
-                  focus:ring-opacity-40
-                  focus:ring-indigo-500
-                "
-              />
-              <span class="mx-2 text-sm text-gray-600">Remember me</span>
-            </label>
-          </div>
-
-          <div>
-            <a
-              class="block text-sm text-orange-500 fontme hover:underline"
-              href="#"
-              >Forgot your password?</a
-            >
-          </div>
         </div>
 
-        <div class="mt-6">
-          <button
-            type="submit"
-            class="
-              w-full
-              px-4
-              py-2
-              text-sm text-center text-white
-              bg-orange-500
-              rounded-md
-              focus:outline-none
-              hover:bg-orange-600
-            "
+        <!-- Navigation Links -->
+        <div class="flex items-center justify-between text-sm">
+          <router-link
+            to="/dang-ky"
+            class="text-orange-500 hover:text-orange-600 font-medium 
+                  transition-colors duration-200"
           >
-            Sign in
-          </button>
+            Đăng ký
+          </router-link>
+          <a
+            href="#"
+            class="text-orange-500 hover:text-orange-600 font-medium 
+                  transition-colors duration-200"
+          >
+            Quên mật khẩu?
+          </a>
         </div>
+
+        <!-- Submit Button -->
+        <button
+          type="submit"
+          class="w-full py-3 px-4 bg-orange-500 text-white rounded-md
+                hover:bg-orange-600 focus:ring-2 focus:ring-orange-500 
+                focus:ring-offset-2 transition duration-200 ease-in-out
+                font-medium"
+        >
+          Đăng nhập
+        </button>
+
+        <!-- Error Message -->
+        <transition name="fade">
+          <p
+            v-if="error"
+            class="text-sm text-red-500 text-center bg-red-50 p-2 rounded-md"
+          >
+            {{ error }}
+          </p>
+        </transition>
       </form>
+
+      <!-- Confirm Modal -->
+      <ConfirmModal
+        :show="showConfirmModal"
+        :message="confirmMessage"
+        @confirm="executeConfirmedAction"
+        @cancel="closeConfirmModal"
+      />
     </div>
   </div>
 </template>
 
-<script setup lang="ts">
-import { ref } from "vue";
-import { useRouter } from "vue-router";
+<script setup>
+import useLogin from "@/views/LoginView/Login.js";
+import ConfirmModal from "@/components/ConfirmModal.vue";
 
-const router = useRouter();
-const email = ref("MobileWorld@mail.com");
-const password = ref("@#!@#asdf1231!_!@#");
-
-function login() {
-  router.push("/dashboard");
-}
+const {
+  tenDangNhap,
+  matKhau,
+  error,
+  showConfirmModal,
+  confirmMessage,
+  login,
+  executeConfirmedAction,
+  closeConfirmModal,
+} = useLogin();
 </script>
+
+<style scoped>
+input:focus {
+  outline: none;
+}
+
+/* Animation cho error message */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+</style>

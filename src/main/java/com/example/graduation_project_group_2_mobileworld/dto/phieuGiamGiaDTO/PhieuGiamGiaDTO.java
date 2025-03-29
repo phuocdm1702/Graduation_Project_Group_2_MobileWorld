@@ -1,10 +1,12 @@
 package com.example.graduation_project_group_2_mobileworld.dto.phieuGiamGiaDTO;
 
+import com.example.graduation_project_group_2_mobileworld.dto.khach_hang.KhachHangDTO;
+
 import java.util.Date;
 import java.util.List;
 
 public class PhieuGiamGiaDTO {
-
+    private Integer id;
     private String ma;
     private String tenPhieuGiamGia;
     private String loaiPhieuGiamGia;
@@ -17,13 +19,14 @@ public class PhieuGiamGiaDTO {
     private Integer trangThai;
     private Integer riengTu;
     private String moTa;
-    private List<Integer> customerIds;
+    private List<KhPggDTO> selectedCustomers;
+    private List<KhPggDTO> allCustomers;
+    private List<Integer> customerIds; // Thêm trường customerIds
 
     public PhieuGiamGiaDTO() {
-
     }
 
-    public PhieuGiamGiaDTO(String ma, String tenPhieuGiamGia, String loaiPhieuGiamGia, Double phanTramGiamGia, Double soTienGiamToiDa, Double hoaDonToiThieu, Integer soLuongDung, Date ngayBatDau, Date ngayKetThuc, Integer trangThai, Integer riengTu, String moTa, List<Integer> customerIds) {
+    public PhieuGiamGiaDTO(String ma, String tenPhieuGiamGia, String loaiPhieuGiamGia, Double phanTramGiamGia, Double soTienGiamToiDa, Double hoaDonToiThieu, Integer soLuongDung, Date ngayBatDau, Date ngayKetThuc, Integer trangThai, Integer riengTu, String moTa, List<KhPggDTO> selectedCustomers, List<KhPggDTO> allCustomers, List<Integer> customerIds) {
         this.ma = ma;
         this.tenPhieuGiamGia = tenPhieuGiamGia;
         this.loaiPhieuGiamGia = loaiPhieuGiamGia;
@@ -36,9 +39,30 @@ public class PhieuGiamGiaDTO {
         this.trangThai = trangThai;
         this.riengTu = riengTu;
         this.moTa = moTa;
+        this.selectedCustomers = selectedCustomers;
+        this.allCustomers = allCustomers;
         this.customerIds = customerIds;
     }
 
+    // Getter và Setter cho customerIds
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public List<Integer> getCustomerIds() {
+        return customerIds;
+    }
+
+    public void setCustomerIds(List<Integer> customerIds) {
+        this.customerIds = customerIds;
+    }
+
+    // Các getter/setter khác giữ nguyên
     public String getMa() {
         return ma;
     }
@@ -135,13 +159,19 @@ public class PhieuGiamGiaDTO {
         this.moTa = moTa;
     }
 
-    public List<Integer> getCustomerIds() {
-        return customerIds;
+    public List<KhPggDTO> getSelectedCustomers() {
+        return selectedCustomers;
     }
 
-    public void setCustomerIds(List<Integer> customerIds) {
-        this.customerIds = customerIds;
+    public void setSelectedCustomers(List<KhPggDTO> selectedCustomers) {
+        this.selectedCustomers = selectedCustomers;
     }
 
+    public List<KhPggDTO> getAllCustomers() {
+        return allCustomers;
+    }
 
+    public void setAllCustomers(List<KhPggDTO> allCustomers) {
+        this.allCustomers = allCustomers;
+    }
 }

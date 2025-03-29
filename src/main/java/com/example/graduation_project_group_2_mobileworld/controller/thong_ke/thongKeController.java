@@ -36,22 +36,22 @@ public class thongKeController {
 
         SoLieuDTO ngayDTO = new SoLieuDTO(
                 (BigDecimal) ngay.get("doanhThu"),
-                (BigDecimal) ngay.get("sanPhamDaBan"),
+                (Long) ngay.get("sanPhamDaBan"),
                 ((Long) ngay.get("tongSoDonHang")).intValue()
         );
         SoLieuDTO tuanDTO = new SoLieuDTO(
                 (BigDecimal) tuan.get("doanhThu"),
-                (BigDecimal) tuan.get("sanPhamDaBan"),
+                (Long) tuan.get("sanPhamDaBan"),
                 ((Long) tuan.get("tongSoDonHang")).intValue()
         );
         SoLieuDTO thangDTO = new SoLieuDTO(
                 (BigDecimal) thang.get("doanhThu"),
-                (BigDecimal) thang.get("sanPhamDaBan"),
+                (Long) thang.get("sanPhamDaBan"),
                 ((Long) thang.get("tongSoDonHang")).intValue()
         );
         SoLieuDTO namDTO = new SoLieuDTO(
                 (BigDecimal) nam.get("doanhThu"),
-                (BigDecimal) nam.get("sanPhamDaBan"),
+                (Long) nam.get("sanPhamDaBan"),
                 ((Long) nam.get("tongSoDonHang")).intValue()
         );
 

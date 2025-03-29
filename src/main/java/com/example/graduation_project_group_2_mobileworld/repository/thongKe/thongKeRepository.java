@@ -18,12 +18,12 @@ public interface thongKeRepository extends JpaRepository<HoaDon, Integer> {
     //Ngày hôm nay
     @Query("SELECT " +
             "SUM(hd.tongTienSauGiam) as doanhThu, " +
-            "SUM(hdct.gia * (CASE WHEN hdct.idImelDaBan IS NOT NULL THEN 1 ELSE 0 END)) as sanPhamDaBan, " +
+            "COUNT(hdct.idChiTietSanPham) as sanPhamDaBan, " +
             "COUNT(DISTINCT hd.id) as tongSoDonHang " +
             "FROM HoaDon hd " +
             "LEFT JOIN hd.chiTietHoaDon hdct " +
             "WHERE hd.ngayThanhToan >= :ngayHienTai " +
-//            "AND hd.trangThai = 1 " + // Giả sử 1 là trạng thái hoàn thành
+//            "AND hd.trangThai = 1 " +
             "AND hd.deleted = false")
     Map<String, Object> thongKeTheoNgay(
             @Param("ngayHienTai") Date ngayHienTai
@@ -32,7 +32,7 @@ public interface thongKeRepository extends JpaRepository<HoaDon, Integer> {
     // 2. Tuần hiện tại
     @Query("SELECT " +
             "SUM(hd.tongTienSauGiam) as doanhThu, " +
-            "SUM(hdct.gia * (CASE WHEN hdct.idImelDaBan IS NOT NULL THEN 1 ELSE 0 END)) as sanPhamDaBan, " +
+            "COUNT(hdct.idChiTietSanPham) as sanPhamDaBan, " +
             "COUNT(DISTINCT hd.id) as tongSoDonHang " +
             "FROM HoaDon hd " +
             "LEFT JOIN hd.chiTietHoaDon hdct " +
@@ -48,7 +48,7 @@ public interface thongKeRepository extends JpaRepository<HoaDon, Integer> {
     // 3. Tháng hiện tại
     @Query("SELECT " +
             "SUM(hd.tongTienSauGiam) as doanhThu, " +
-            "SUM(hdct.gia * (CASE WHEN hdct.idImelDaBan IS NOT NULL THEN 1 ELSE 0 END)) as sanPhamDaBan, " +
+            "COUNT(hdct.idChiTietSanPham) as sanPhamDaBan, " +
             "COUNT(DISTINCT hd.id) as tongSoDonHang " +
             "FROM HoaDon hd " +
             "LEFT JOIN hd.chiTietHoaDon hdct " +
@@ -64,7 +64,7 @@ public interface thongKeRepository extends JpaRepository<HoaDon, Integer> {
     // Năm hiện tại
     @Query("SELECT " +
             "SUM(hd.tongTienSauGiam) as doanhThu, " +
-            "SUM(hdct.gia * (CASE WHEN hdct.idImelDaBan IS NOT NULL THEN 1 ELSE 0 END)) as sanPhamDaBan, " +
+            "COUNT(hdct.idChiTietSanPham) as sanPhamDaBan, " +
             "COUNT(DISTINCT hd.id) as tongSoDonHang " +
             "FROM HoaDon hd " +
             "LEFT JOIN hd.chiTietHoaDon hdct " +
