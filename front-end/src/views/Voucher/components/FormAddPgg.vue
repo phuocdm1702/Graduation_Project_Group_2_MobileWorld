@@ -397,13 +397,8 @@ const validateForm = () => {
 };
 
 const submitForm = async () => {
-  
   if (!validateForm()) {
-    if (toast.value && toast.value.kshowToast) {
-      toast.value.kshowToast('warning', 'Vui lòng kiểm tra lại thông tin');
-    } else {
-      console.error("Toast component is not available or kshowToast is not defined");
-    }
+    toast.value.kshowToast('warning', 'Vui lòng kiểm tra lại thông tin');
     return;
   }
 
@@ -411,8 +406,8 @@ const submitForm = async () => {
     ma: ma.value,
     tenPhieuGiamGia: tenPhieuGiamGia.value,
     loaiPhieuGiamGia: loaiPhieuGiamGia.value,
-    phanTramGiamGia: phanTramGiamGia.value,
-    soTienGiamToiDa: soTienGiamToiDa.value,
+    phanTramGiamGia: phanTramGiamGia.value || null,
+    soTienGiamToiDa: soTienGiamToiDa.value || null,
     hoaDonToiThieu: hoaDonToiThieu.value,
     soLuongDung: soLuongDung.value,
     ngayBatDau: ngayBatDau.value ? new Date(ngayBatDau.value).toISOString() : null,
@@ -423,24 +418,18 @@ const submitForm = async () => {
     customerIds: riengTu.value ? selectedCustomers.value : [],
   };
 
-  console.log("Dữ liệu gửi lên:", newPgg);
+  console.log("Dữ liệu gửi lên:", JSON.stringify(newPgg, null, 2));
 
   try {
-    const response = await axios.post(`${baseURL}/addPhieuGiamGia`, newPgg);
-    console.log("Response: ", response);
-    if (toast.value && toast.value.kshowToast) {
-      toast.value.kshowToast('success', 'Thêm phiếu giảm giá thành công!');
-    } else {
-      console.error("Toast component is not available or kshowToast is not defined");
-    }
+    const baseURL = "http://localhost:8080";
+    const response = await axios.post(`${baseURL}/add-phieu-giam-gia/addPhieuGiamGia`, newPgg);
+    console.log("Response: ", response.data);
+    toast.value.kshowToast('success', 'Thêm phiếu giảm giá thành công!');
     await router.push("/phieu-giam-gia");
   } catch (error) {
-    console.error("Lỗi khi thêm phiếu giảm giá:", error);
-    if (toast.value && toast.value.kshowToast) {
-      toast.value.kshowToast('error', 'Thêm thất bại, vui lòng thử lại!');
-    } else {
-      console.error("Toast component is not available or kshowToast is not defined");
-    }
+    console.error("Lỗi khi thêm phiếu giảm giá:", error.response?.data || error.message);
+    const errorMsg = error.response?.data?.message || 'Thêm thất bại, vui lòng thử lại!';
+    toast.value.kshowToast('error', errorMsg);
   }
 };
 

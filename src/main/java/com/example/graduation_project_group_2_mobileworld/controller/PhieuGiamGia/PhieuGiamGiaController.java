@@ -1,5 +1,6 @@
 package com.example.graduation_project_group_2_mobileworld.controller.PhieuGiamGia;
 
+import com.example.graduation_project_group_2_mobileworld.dto.phieuGiamGiaDTO.PhieuGiamGiaDTO;
 import com.example.graduation_project_group_2_mobileworld.entity.PhieuGiamGia;
 import com.example.graduation_project_group_2_mobileworld.service.PhieuGiamGia.PhieuGiamGiaService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +9,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -73,21 +75,16 @@ public class PhieuGiamGiaController {
         }
     }
 
-    @PutMapping("/update-trang-thai/{id}")
-    public ResponseEntity<String> updateTrangThai(@PathVariable Integer id, @RequestBody Map<String, Boolean> request) {
+
+    @GetMapping("/{id}")
+    public ResponseEntity<PhieuGiamGiaDTO> getDetail(@PathVariable Integer id) {
         try {
-            Boolean trangThai = request.get("trangThai");
-            if (trangThai == null) {
-                return ResponseEntity.badRequest().body("Trạng thái không được để trống!");
-            }
-            boolean success = phieuGiamGiaService.updateTrangThai(id, trangThai);
-            if (success) {
-                return ResponseEntity.ok("Cập nhật trạng thái thành công!");
-            } else {
-                return ResponseEntity.badRequest().body("Phiếu giảm giá không tồn tại!");
-            }
+            PhieuGiamGiaDTO dto = phieuGiamGiaService.getDetailPGG(id);
+            return ResponseEntity.ok(dto);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(null);
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body("Có lỗi xảy ra khi cập nhật trạng thái!");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
     }
 

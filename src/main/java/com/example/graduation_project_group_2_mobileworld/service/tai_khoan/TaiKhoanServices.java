@@ -23,4 +23,12 @@ public class TaiKhoanServices {
         Optional<TaiKhoan> tk = taiKhoanRepository.findById(idTK);
         return tk != null ? tk.get().getEmail() : null;
     }
+
+    public TaiKhoan login(String tenDangNhap, String matKhau) {
+        TaiKhoan tk = taiKhoanRepository.findByTenDangNhap(tenDangNhap);
+        if (tk != null && tk.getMatKhau().equals(matKhau)) {
+            return tk; // Trả về tài khoản nếu mật khẩu khớp
+        }
+        return null; // Trả về null nếu không khớp
+    }
 }

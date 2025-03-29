@@ -17,6 +17,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -57,7 +58,13 @@ public class HoaDonController {
             @RequestParam(required = false) Long minAmount,
             @RequestParam(required = false) Long maxAmount,
             @RequestParam(required = false) String startDate,
-            @RequestParam(required = false) String endDate) {
+            @RequestParam(required = false) String endDate,
+            Authentication authentication) {
+        if (authentication != null && authentication.isAuthenticated()) {
+            System.out.println("Authenticated user: " + authentication.getName());
+        } else {
+            System.out.println("No authenticated user");
+        }
         return ResponseEntity.ok(hoaDonService.getHoaDonWithFilters(page, size, keyword, loaiDon, minAmount, maxAmount, startDate, endDate));
     }
 
