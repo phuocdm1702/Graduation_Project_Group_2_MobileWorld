@@ -1,24 +1,12 @@
 <template>
   <div>
-    <!-- Thêm BreadcrumbWrapper -->
     <BreadcrumbWrapper :breadcrumb-items="breadcrumbItems" />
-
     <div class="mt-2 mx-auto">
-<!--      <h2 class="bg-white shadow-lg rounded-lg p-5 mb-2 mt-2 text-2xl font-semibold text-gray-700">-->
-<!--        Quản Lý Công Nghệ Màn Hình-->
-<!--      </h2>-->
       <ToastNotification ref="toast" />
-
-      <!-- Search Section -->
       <div class="bg-white shadow-lg rounded-lg p-5 mb-2 mt-2 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-4">
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">Tìm kiếm</label>
-          <input
-            v-model.trim="searchKeyword"
-            type="text"
-            placeholder="Tìm kiếm theo mã, tên hoặc chuẩn màn hình..."
-            class="input-field"
-          />
+          <input v-model.trim="searchKeyword" type="text" placeholder="Tìm kiếm theo mã, tên hoặc chuẩn màn hình..." class="input-field" />
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">Tên Công Nghệ</label>
@@ -35,19 +23,13 @@
           </select>
         </div>
         <div class="flex justify-end w-full col-span-full gap-2">
-          <button
-            @click="resetSearch"
-            class="flex items-center gap-2 px-4 py-2 bg-[#f97316] text-white font-semibold rounded-lg shadow-md hover:bg-orange-600 transition"
-          >
+          <button @click="resetSearch" class="flex items-center gap-2 px-4 py-2 bg-[#f97316] text-white font-semibold rounded-lg shadow-md hover:bg-orange-600 transition">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
               <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
             </svg>
             Đặt lại
           </button>
-          <button
-            @click="navigateToAddPage"
-            class="flex items-center gap-2 px-4 py-2 bg-[#f97316] text-white font-semibold rounded-lg shadow-md hover:bg-orange-600 transition"
-          >
+          <button @click="navigateToAddPage" class="flex items-center gap-2 px-4 py-2 bg-[#f97316] text-white font-semibold rounded-lg shadow-md hover:bg-orange-600 transition">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-1">
               <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
             </svg>
@@ -55,50 +37,11 @@
           </button>
         </div>
       </div>
-
-      <!-- Nút xóa nhiều -->
-      <div v-if="selectedCongNgheManHinh.length" class="bg-white shadow-lg rounded-lg p-5 mb-4 mt-4 flex justify-end">
-        <button @click="confirmDeleteSelected" class="flex items-center gap-2 px-4 py-2 bg-red-500 text-white font-semibold rounded-lg shadow-md hover:bg-red-600 transition">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-1">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
-          </svg>
-          Xóa {{ selectedCongNgheManHinh.length }} công nghệ màn hình đã chọn
-        </button>
-      </div>
-
-      <!-- DynamicTable -->
-      <DynamicTable
-        class="dynamic-table"
-        :data="congNgheManHinhs"
-        :columns="columns"
-        :get-nested-value="getNestedValue"
-        :selected-products="selectedCongNgheManHinh"
-        @toggle-select="toggleSelect"
-      >
-        <template #header-select>
-          <input type="checkbox" class="w-4 h-4 rounded" :checked="isAllSelected" @change="toggleSelectAll">
-        </template>
-        <template #cell-select="{ item }">
-          <input type="checkbox" class="w-4 h-4 rounded" :checked="selectedCongNgheManHinh.includes(item.id)" @change="toggleSelect(item.id)">
-        </template>
-      </DynamicTable>
-
-      <!-- Pagination -->
+      <DynamicTable class="dynamic-table" :data="congNgheManHinhs" :columns="columns" :get-nested-value="getNestedValue"></DynamicTable>
       <footer class="bg-white shadow-lg rounded-lg p-4 flex justify-center items-center mt-2">
-        <Pagination
-          :current-page="currentPage"
-          :total-pages="totalPages"
-          @page-changed="goToPage"
-        />
+        <Pagination :current-page="currentPage + 1" :total-pages="totalPages" @page-changed="goToPage" />
       </footer>
-
-      <!-- Confirm Modal -->
-      <ConfirmModal
-        :show="showConfirmModal"
-        :message="confirmMessage"
-        @confirm="executeConfirmedAction"
-        @cancel="closeConfirmModal"
-      />
+      <ConfirmModal :show="showConfirmModal" :message="confirmMessage" @confirm="executeConfirmedAction" @cancel="closeConfirmModal" />
     </div>
   </div>
 </template>
@@ -106,12 +49,12 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-import useCongNgheManHinh from '@/views/Products/Screen/useCongNgheManHinh';
 import ToastNotification from '@/components/ToastNotification.vue';
 import Pagination from '@/components/Pagination.vue';
 import ConfirmModal from '@/components/ConfirmModal.vue';
 import DynamicTable from '@/components/DynamicTable.vue';
-import BreadcrumbWrapper from '@/components/BreadcrumbWrapper.vue'; // Import BreadcrumbWrapper
+import BreadcrumbWrapper from '@/components/BreadcrumbWrapper.vue';
+import CongNgheManHinh from '@/views/Products/Screen/CongNgheManHinh'; // Sửa đường dẫn
 
 const router = useRouter();
 const route = useRoute();
@@ -127,7 +70,6 @@ const {
   currentPage,
   pageSize,
   totalItems,
-  selectedCongNgheManHinh,
   isSearching,
   showConfirmModal,
   confirmMessage,
@@ -137,42 +79,28 @@ const {
   searchCongNgheManHinh: searchCongNgheManHinhFunc,
   resetSearch,
   deleteCongNgheManHinh,
-  deleteSelectedCongNgheManHinh,
   confirmAction,
-  confirmDeleteSelected,
   executeConfirmedAction,
   closeConfirmModal,
-  isAllSelected,
-  toggleSelectAll,
-} = useCongNgheManHinh(toast);
+} = CongNgheManHinh(toast);
 
-// Tính toán breadcrumb dựa trên meta của route
 const breadcrumbItems = computed(() => {
   if (typeof route.meta.breadcrumb === "function") {
     return route.meta.breadcrumb(route);
   }
-  return route.meta?.breadcrumb || ["Quản Lý Công Nghệ Màn Hình"]; // Mặc định nếu không có breadcrumb
+  return route.meta?.breadcrumb || ["Quản Lý Công Nghệ Màn Hình"];
 });
 
 const navigateToAddPage = () => {
-  router.push('/man-hinh/cong-nghe/add');
+  router.push('/screens/technology/add');
 };
 
 const getNestedValue = (obj, path) => {
   return path.split('.').reduce((acc, part) => acc && acc[part], obj);
 };
 
-const toggleSelect = (id) => {
-  if (selectedCongNgheManHinh.value.includes(id)) {
-    selectedCongNgheManHinh.value = selectedCongNgheManHinh.value.filter((selectedId) => selectedId !== id);
-  } else {
-    selectedCongNgheManHinh.value.push(id);
-  }
-};
-
 const columns = [
-  { key: 'select', label: '' },
-  { key: '#', label: '#', formatter: (value, item, index) => (currentPage.value - 1) * pageSize.value + index + 1 },
+  { key: '#', label: '#', formatter: (value, item, index) => (currentPage.value * pageSize.value) + index + 1 },
   { key: 'ma', label: 'Mã' },
   { key: 'congNgheManHinh', label: 'Tên' },
   { key: 'chuanManHinh', label: 'Chuẩn màn hình' },
@@ -197,9 +125,15 @@ const columns = [
 
 const handleCustomEvents = () => {
   document.addEventListener('openEditModal', (event) => {
-    router.push(`/man-hinh/cong-nghe/edit/${event.detail.id}`);
+    console.log('Open Edit Modal with item:', event.detail);
+    if (event.detail && event.detail.id) {
+      router.push(`/screens/technology/edit/${event.detail.id}`);
+    } else {
+      console.error('Invalid item data:', event.detail);
+    }
   });
   document.addEventListener('confirmDelete', (event) => {
+    console.log('Confirm Delete with id:', event.detail);
     confirmAction('Bạn có chắc chắn muốn xóa công nghệ màn hình này?', () => deleteCongNgheManHinh(event.detail));
   });
 };

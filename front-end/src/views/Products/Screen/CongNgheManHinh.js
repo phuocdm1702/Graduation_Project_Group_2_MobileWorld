@@ -1,18 +1,17 @@
 import { ref, computed, watch } from 'vue';
 import axios from 'axios';
 
-export default function useCongNgheManHinh(toastRef) {
+export default function CongNgheManHinh(toastRef) {
   const toast = ref(null);
   const congNgheManHinhs = ref([]);
   const congNgheManHinh = ref({ id: null, ma: '', congNgheManHinh: '', chuanManHinh: '' });
   const searchKeyword = ref('');
-  const searchCongNgheManHinh = ref(''); // Biến lọc theo tên công nghệ
-  const searchChuanManHinh = ref('');   // Biến lọc theo chuẩn màn hình
+  const searchCongNgheManHinh = ref('');
+  const searchChuanManHinh = ref('');
   const currentPage = ref(0);
   const pageSize = ref(5);
   const totalItems = ref(0);
-  const selectedCongNgheManHinh = ref([]);
-  const isSearching = ref(false);
+  const isSearching = ref(false); // Đã khai báo ở đây
   const showConfirmModal = ref(false);
   const confirmMessage = ref('');
   const confirmedAction = ref(null);
@@ -21,7 +20,6 @@ export default function useCongNgheManHinh(toastRef) {
     toast.value = toastRef.value;
   }
 
-  // Dữ liệu cứng cho combobox
   const congNgheManHinhData = [
     "OLED", "AMOLED", "Super AMOLED", "Dynamic AMOLED", "IPS LCD", "TFT LCD", "Mini-LED", "Micro-LED", "QLED"
   ];
@@ -33,19 +31,14 @@ export default function useCongNgheManHinh(toastRef) {
 
   const totalPages = computed(() => Math.ceil(totalItems.value / pageSize.value));
 
-  const isAllSelected = computed(() => {
-    if (congNgheManHinhs.value.length === 0) return false;
-    return congNgheManHinhs.value.every((item) => selectedCongNgheManHinh.value.includes(item.id));
-  });
-
   const fetchData = async () => {
     try {
       const { data } = await axios.get('http://localhost:8080/api/cong-nghe-man-hinh', {
         params: { page: currentPage.value, size: pageSize.value },
       });
       console.log('Fetch data:', data);
-      congNgheManHinhs.value = data.content;
-      totalItems.value = data.totalElements;
+      congNgheManHinhs.value = data.content || [];
+      totalItems.value = data.totalElements || 0;
     } catch (error) {
       if (toast.value) toast.value.showToast('error', 'Không thể tải dữ liệu!');
       console.error('Fetch error:', error);
@@ -55,7 +48,7 @@ export default function useCongNgheManHinh(toastRef) {
   const goToPage = async (page) => {
     if (page < 1) page = 1;
     if (page > totalPages.value) page = totalPages.value || 1;
-    currentPage.value = page;
+    currentPage.value = page - 1; // 0-based index cho API
     if (isSearching.value) {
       await searchCongNgheManHinhFunc();
     } else {
@@ -70,7 +63,7 @@ export default function useCongNgheManHinh(toastRef) {
 
     if (!keyword && !congNgheManHinhFilter && !chuanManHinhFilter) {
       isSearching.value = false;
-      currentPage.value = 1;
+      currentPage.value = 0;
       await fetchData();
       return;
     }
@@ -87,8 +80,8 @@ export default function useCongNgheManHinh(toastRef) {
         },
       });
       console.log('Search result:', data);
-      congNgheManHinhs.value = data.content;
-      totalItems.value = data.totalElements;
+      congNgheManHinhs.value = data.content || [];
+      totalItems.value = data.totalElements || 0;
     } catch (error) {
       if (toast.value) toast.value.showToast('error', 'Lỗi tìm kiếm!');
       console.error('Search error:', error);
@@ -99,7 +92,7 @@ export default function useCongNgheManHinh(toastRef) {
     searchKeyword.value = '';
     searchCongNgheManHinh.value = '';
     searchChuanManHinh.value = '';
-    currentPage.value = 1;
+    currentPage.value = 0;
     isSearching.value = false;
     fetchData();
   };
@@ -140,31 +133,11 @@ export default function useCongNgheManHinh(toastRef) {
     }
   };
 
-  const deleteSelectedCongNgheManHinh = async () => {
-    try {
-      await axios.delete('http://localhost:8080/api/cong-nghe-man-hinh/bulk', {
-        data: { ids: selectedCongNgheManHinh.value },
-      });
-      if (toast.value) toast.value.showToast('success', 'Xóa thành công!');
-      totalItems.value -= selectedCongNgheManHinh.value.length;
-      if (totalItems.value > 0 && currentPage.value >= totalPages.value) currentPage.value = totalPages.value - 1;
-      else if (totalItems.value <= 0) currentPage.value = 1;
-      selectedCongNgheManHinh.value = [];
-      if (isSearching.value) await searchCongNgheManHinhFunc();
-      else await fetchData();
-    } catch (error) {
-      if (toast.value) toast.value.showToast('error', 'Lỗi khi xóa nhiều công nghệ màn hình!');
-      console.error('Bulk delete error:', error);
-    }
-  };
-
   const confirmAction = (message, action) => {
     confirmMessage.value = message;
     confirmedAction.value = action;
     showConfirmModal.value = true;
   };
-
-  const confirmDeleteSelected = () => confirmAction(`Bạn có chắc chắn muốn xóa ${selectedCongNgheManHinh.value.length} công nghệ màn hình đã chọn?`, deleteSelectedCongNgheManHinh);
 
   const executeConfirmedAction = () => {
     if (confirmedAction.value) confirmedAction.value();
@@ -176,16 +149,8 @@ export default function useCongNgheManHinh(toastRef) {
     confirmedAction.value = null;
   };
 
-  const toggleSelectAll = () => {
-    if (isAllSelected.value) {
-      selectedCongNgheManHinh.value = [];
-    } else {
-      selectedCongNgheManHinh.value = congNgheManHinhs.value.map((item) => item.id);
-    }
-  };
-
   watch([searchKeyword, searchCongNgheManHinh, searchChuanManHinh], () => {
-    currentPage.value = 1;
+    currentPage.value = 0;
     if (searchKeyword.value || searchCongNgheManHinh.value || searchChuanManHinh.value) {
       isSearching.value = true;
       searchCongNgheManHinhFunc();
@@ -195,7 +160,7 @@ export default function useCongNgheManHinh(toastRef) {
     }
   });
 
-  fetchData(); // Tải dữ liệu mặc định khi khởi tạo
+  fetchData();
 
   return {
     toast,
@@ -209,8 +174,7 @@ export default function useCongNgheManHinh(toastRef) {
     currentPage,
     pageSize,
     totalItems,
-    selectedCongNgheManHinh,
-    isSearching,
+    isSearching, // Thêm isSearching vào return
     showConfirmModal,
     confirmMessage,
     totalPages,
@@ -221,12 +185,8 @@ export default function useCongNgheManHinh(toastRef) {
     saveCongNgheManHinh,
     updateCongNgheManHinh,
     deleteCongNgheManHinh,
-    deleteSelectedCongNgheManHinh,
     confirmAction,
-    confirmDeleteSelected,
     executeConfirmedAction,
     closeConfirmModal,
-    isAllSelected,
-    toggleSelectAll,
   };
 }

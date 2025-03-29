@@ -4,7 +4,6 @@ import com.example.graduation_project_group_2_mobileworld.entity.NhaSanXuat;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -16,7 +15,6 @@ import java.util.Optional;
 public interface NhaSanXuatRepository extends JpaRepository<NhaSanXuat, Integer> {
 
     List<NhaSanXuat> findByDeletedFalse();
-
     Page<NhaSanXuat> findByDeletedFalse(Pageable pageable);
 
     Optional<NhaSanXuat> findByIdAndDeletedFalse(Integer id);
@@ -32,10 +30,6 @@ public interface NhaSanXuatRepository extends JpaRepository<NhaSanXuat, Integer>
 
     @Query("SELECT COUNT(n) > 0 FROM NhaSanXuat n WHERE n.nhaSanXuat = :nhaSanXuat AND n.deleted = false AND n.id != :excludeId")
     boolean existsByNhaSanXuatAndDeletedFalse(@Param("nhaSanXuat") String nhaSanXuat, @Param("excludeId") Integer excludeId);
-
-    @Modifying
-    @Query("UPDATE NhaSanXuat n SET n.deleted = true WHERE n.id IN :ids AND n.deleted = false")
-    int softDeleteByIds(@Param("ids") List<Integer> ids);
 
     @Query("SELECT COUNT(n) > 0 FROM NhaSanXuat n WHERE n.ma = :ma AND n.deleted = true")
     boolean existsByMaAndDeletedTrue(@Param("ma") String ma);

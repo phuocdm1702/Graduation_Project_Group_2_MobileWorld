@@ -18,7 +18,6 @@ export default function useManHinh(toastRef) {
   const currentPage = ref(0);
   const pageSize = ref(5);
   const totalItems = ref(0);
-  const selectedManHinh = ref([]);
   const isSearching = ref(false);
   const showConfirmModal = ref(false);
   const confirmMessage = ref('');
@@ -182,26 +181,7 @@ export default function useManHinh(toastRef) {
     }
   };
 
-  const deleteSelectedManHinh = async () => {
-    try {
-      await axios.delete('http://localhost:8080/api/man-hinh/bulk', {
-        data: { ids: selectedManHinh.value },
-      });
-      if (toast.value?.showToast) toast.value.showToast('success', 'Xóa thành công!');
-      totalItems.value -= selectedManHinh.value.length;
-      if (totalItems.value > 0 && currentPage.value >= totalPages.value) currentPage.value = totalPages.value - 1;
-      else if (totalItems.value <= 0) currentPage.value = 0;
-      selectedManHinh.value = [];
-      if (isSearching.value) await searchManHinh();
-      else await fetchData();
-    } catch (error) {
-      if (toast.value?.showToast) toast.value.showToast('error', 'Lỗi khi xóa nhiều màn hình!');
-      console.error('Bulk delete error:', error);
-    }
-  };
-
   const confirmDelete = (id) => confirmAction('Bạn có chắc chắn muốn xóa màn hình này?', () => deleteManHinh(id));
-  const confirmDeleteSelected = () => confirmAction(`Bạn có chắc chắn muốn xóa ${selectedManHinh.value.length} màn hình đã chọn?`, deleteSelectedManHinh);
   const confirmAction = (message, action) => {
     confirmMessage.value = message;
     confirmedAction.value = action;
@@ -214,13 +194,6 @@ export default function useManHinh(toastRef) {
   const closeConfirmModal = () => {
     showConfirmModal.value = false;
     confirmedAction.value = null;
-  };
-  const toggleSelectAll = () => {
-    if (manHinhs.value.every(item => selectedManHinh.value.includes(item.id))) {
-      selectedManHinh.value = [];
-    } else {
-      selectedManHinh.value = manHinhs.value.map(item => item.id);
-    }
   };
 
   watch([searchKeyword, searchKieuManHinh, searchIdCongNgheManHinh, searchKichThuoc, searchDoPhanGiai, searchDoSangToiDa, searchTanSoQuet], () => {
@@ -249,7 +222,6 @@ export default function useManHinh(toastRef) {
     currentPage,
     pageSize,
     totalItems,
-    selectedManHinh,
     isSearching,
     showConfirmModal,
     confirmMessage,
@@ -263,12 +235,9 @@ export default function useManHinh(toastRef) {
     saveManHinh,
     updateManHinh,
     deleteManHinh,
-    deleteSelectedManHinh,
     confirmDelete,
-    confirmDeleteSelected,
     confirmAction,
     executeConfirmedAction,
     closeConfirmModal,
-    toggleSelectAll,
   };
 }

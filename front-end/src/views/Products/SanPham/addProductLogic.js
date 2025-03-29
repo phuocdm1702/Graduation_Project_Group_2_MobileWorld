@@ -30,20 +30,19 @@ export default function addProductLogic() {
 
   const productVariants = ref([]);
   const currentVariant = ref({
-    selectedRams: [], // Danh sách RAM được chọn
-    selectedBoNhoTrongs: [], // Danh sách ROM được chọn
-    selectedMauSacs: [], // Danh sách Màu Sắc được chọn
+    selectedRams: [],
+    selectedBoNhoTrongs: [],
+    selectedMauSacs: [],
   });
 
-  const productImages = ref([]); // Danh sách ảnh chung
+  const productImages = ref([]);
   const currentImage = ref({
     file: null,
     fileName: '',
   });
 
-  const variantImages = ref({}); // Danh sách ảnh cho từng biến thể (key là index của biến thể)
+  const variantImages = ref({});
 
-  // Danh sách tùy chọn từ API
   const heDieuHanhOptions = ref([]);
   const manHinhOptions = ref([]);
   const nhaSanXuatOptions = ref([]);
@@ -176,7 +175,6 @@ export default function addProductLogic() {
       return;
     }
 
-    // Tạo tổ hợp từ các RAM, ROM, và Màu Sắc đã chọn
     const newVariants = [];
     currentVariant.value.selectedRams.forEach((ramId) => {
       currentVariant.value.selectedBoNhoTrongs.forEach((boNhoId) => {
@@ -185,17 +183,14 @@ export default function addProductLogic() {
             idRam: ramId,
             idBoNhoTrong: boNhoId,
             idMauSac: mauSacId,
-            soLuong: 0, // Số lượng mặc định
-            donGia: productData.value.giaBan || '', // Đơn giá mặc định từ giá bán sản phẩm
+            soLuong: 0,
+            donGia: productData.value.giaBan || '',
           });
         });
       });
     });
 
-    // Thêm các biến thể mới vào danh sách
     productVariants.value.push(...newVariants);
-
-    // Reset form sau khi thêm
     currentVariant.value = {
       selectedRams: [],
       selectedBoNhoTrongs: [],
