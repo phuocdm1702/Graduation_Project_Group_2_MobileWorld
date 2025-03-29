@@ -1,8 +1,12 @@
 package com.example.graduation_project_group_2_mobileworld.controller.tai_khoan;
 
+import com.example.graduation_project_group_2_mobileworld.dto.nhan_vien.NhanVienDTO;
+import com.example.graduation_project_group_2_mobileworld.dto.tai_khoan.TaiKhoanDTO;
+import com.example.graduation_project_group_2_mobileworld.entity.NhanVien;
 import com.example.graduation_project_group_2_mobileworld.entity.TaiKhoan;
 import com.example.graduation_project_group_2_mobileworld.service.tai_khoan.TaiKhoanServices;
 import jakarta.servlet.http.HttpSession;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,6 +25,15 @@ public class TaiKhoanController {
         return taiKhoanServices.add(taiKhoan);
     }
 
+    @PostMapping("/addTk")
+    public ResponseEntity<?> addNhanVien(@RequestBody TaiKhoanDTO taiKhoanDTO) {
+        try {
+            TaiKhoan tk = taiKhoanServices.addTK(taiKhoanDTO);
+            return new ResponseEntity<>(tk, HttpStatus.CREATED);
+        } catch (Exception e) {
+            return new ResponseEntity<>("Lỗi khi thêm nhân viên: " + e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
     @PostMapping("/login")
     public ResponseEntity<TaiKhoan> login(@RequestBody TaiKhoan taiKhoan) {
         TaiKhoan tk = taiKhoanServices.login(taiKhoan.getTenDangNhap(), taiKhoan.getMatKhau());

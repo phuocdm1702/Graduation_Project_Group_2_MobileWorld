@@ -5,6 +5,8 @@ public class TaiKhoanDTO {
     private String email;
     private String sdt;
     private String userName;
+    private String matKhau;
+    private String tenDangNhap;
 
     public TaiKhoanDTO() {
     }
@@ -31,5 +33,21 @@ public class TaiKhoanDTO {
 
     public void setUserName(String userName) {
         this.userName = userName;
+    }
+
+    public String getMatKhau() {
+        return matKhau;
+    }
+
+    public void setMatKhau(String matKhau) {
+        this.matKhau = matKhau;
+    }
+
+    public String getTenDangNhap() {
+        return tenDangNhap;
+    }
+
+    public void setTenDangNhap(String tenDangNhap) {
+        this.tenDangNhap = tenDangNhap;
     }
 }
