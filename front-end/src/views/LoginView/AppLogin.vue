@@ -7,9 +7,9 @@
 
       <form class="mt-4" @submit.prevent="login">
         <label class="block">
-          <span class="text-sm text-gray-700">Email</span>
+          <span class="text-sm text-gray-700">Tên đăng nhập</span>
           <input
-            type="email"
+            type="text"
             class="
               block
               w-full
@@ -21,12 +21,12 @@
               focus:ring-opacity-40
               focus:ring-indigo-500
             "
-            v-model="email"
+            v-model="tenDangNhap"
           />
         </label>
 
         <label class="block mt-3">
-          <span class="text-sm text-gray-700">Password</span>
+          <span class="text-sm text-gray-700">Mật khẩu</span>
           <input
             type="password"
             class="
@@ -40,26 +40,19 @@
               focus:ring-opacity-40
               focus:ring-indigo-500
             "
-            v-model="password"
+            v-model="matKhau"
           />
         </label>
 
         <div class="flex items-center justify-between mt-4">
           <div>
             <router-link to="/dang-ky">
-              <a
-                class="block text-sm text-orange-500 fontme hover:underline"
-              >Đăng ký?</a
-              >
+              <a class="block text-sm text-orange-500 fontme hover:underline">Đăng ký?</a>
             </router-link>
           </div>
 
           <div>
-            <a
-              class="block text-sm text-orange-500 fontme hover:underline"
-              href="#"
-              >Forgot your password?</a
-            >
+            <a class="block text-sm text-orange-500 fontme hover:underline" href="#">Forgot your password?</a>
           </div>
         </div>
 
@@ -80,20 +73,34 @@
             Sign in
           </button>
         </div>
+
+        <!-- Hiển thị thông báo lỗi nếu có -->
+        <p v-if="error" class="mt-2 text-sm text-red-500">{{ error }}</p>
       </form>
+
+      <!-- Component ConfirmModal -->
+      <ConfirmModal
+        :show="showConfirmModal"
+        :message="confirmMessage"
+        @confirm="executeConfirmedAction"
+        @cancel="closeConfirmModal"
+      />
     </div>
   </div>
 </template>
 
-<script setup lang="ts">
-import { ref } from "vue";
-import { useRouter } from "vue-router";
+<script setup>
+import useLogin from "@/views/LoginView/Login.js"; // Điều chỉnh đường dẫn nếu cần
+import ConfirmModal from "@/components/ConfirmModal.vue"; // Điều chỉnh đường dẫn tới ConfirmModal
 
-const router = useRouter();
-const email = ref("MobileWorld@mail.com");
-const password = ref("@#!@#asdf1231!_!@#");
-
-function login() {
-  router.push("/dashboard");
-}
+const {
+  tenDangNhap,
+  matKhau,
+  error,
+  showConfirmModal,
+  confirmMessage,
+  login,
+  executeConfirmedAction,
+  closeConfirmModal,
+} = useLogin();
 </script>
