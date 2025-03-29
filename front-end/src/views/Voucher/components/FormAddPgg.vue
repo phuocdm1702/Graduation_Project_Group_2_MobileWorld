@@ -134,6 +134,7 @@
             <th class="p-3 text-left font-semibold">Chọn</th>
             <th class="p-3 text-left font-semibold">Mã KH</th>
             <th class="p-3 text-left font-semibold">Tên Khách Hàng</th>
+            <th class="p-3 text-left font-semibold">Giới tính</th>
             <th class="p-3 text-left font-semibold">Ngày sinh</th>
           </tr>
           </thead>
@@ -149,7 +150,9 @@
             </td>
             <td class="p-3">{{ customer.ma }}</td>
             <td class="p-3">{{ customer.ten }}</td>
+            <td class="p-3">{{ customer.gioiTinh == "1" ? "Nam" : "Nữ" }}</td>
             <td class="p-3">{{ new Date(customer.ngaySinh).toLocaleDateString('vi-VN') }}</td>
+            
           </tr>
           </tbody>
         </table>
@@ -163,6 +166,7 @@
             <tr class="bg-gray-100 sticky top-0">
               <th class="p-3 text-left font-semibold">Mã KH</th>
               <th class="p-3 text-left font-semibold">Tên Khách Hàng</th>
+              <th class="p-3 text-left font-semibold">Giới tính</th>
               <th class="p-3 text-left font-semibold">Ngày sinh</th>
               <th class="p-3 text-left font-semibold">Hành động</th>
             </tr>
@@ -174,6 +178,7 @@
             <tr v-else v-for="customer in selectedCustomerDetails" :key="customer.id" class="border-b hover:bg-gray-50">
               <td class="p-3">{{ customer.ma }}</td>
               <td class="p-3">{{ customer.ten }}</td>
+              <td class="p-3">{{ customer.gioiTinh == "1" ? "Nam" : "Nữ" }}</td>
               <td class="p-3">{{ new Date(customer.ngaySinh).toLocaleDateString('vi-VN') }}</td>
               <td class="p-3">
                 <button
