@@ -6,11 +6,10 @@ export default function useImel() {
   const imels = ref([]);
   const imel = ref({ id: null, ma: '', imel: '' });
   const searchKeyword = ref('');
-  const searchImel = ref(''); // Biến ref cho dropdown lọc theo tên Imel
+  const searchImel = ref('');
   const currentPage = ref(0);
   const pageSize = ref(5);
   const totalItems = ref(0);
-  const selectedImels = ref([]);
   const isSearching = ref(false);
   const showConfirmModal = ref(false);
   const confirmMessage = ref('');
@@ -18,14 +17,9 @@ export default function useImel() {
 
   const totalPages = computed(() => Math.ceil(totalItems.value / pageSize.value));
 
-  const isAllSelected = computed(() => {
-    if (imels.value.length === 0) return false;
-    return imels.value.every(item => selectedImels.value.includes(item.id));
-  });
-
   const fetchData = async () => {
     try {
-      const { data } = await axios.get('http://localhost:8080/api/imel', {
+      const { data } = await axios.get('http://localhost:8080/imel', {
         params: { page: currentPage.value, size: pageSize.value },
       });
       imels.value = data.content;
@@ -41,13 +35,13 @@ export default function useImel() {
   const goToPage = async (page) => {
     currentPage.value = page;
     if (isSearching.value) {
-      await searchImels(); // Sử dụng hàm đã đổi tên
+      await searchImels();
     } else {
       await fetchData();
     }
   };
 
-  const searchImels = async () => { // Đổi tên hàm thành searchImels
+  const searchImels = async () => {
     const keyword = searchKeyword.value.replace(/\s+/g, '').trim();
     const imelFilter = searchImel.value || '';
     if (!keyword && !imelFilter) {
@@ -58,7 +52,7 @@ export default function useImel() {
     }
     isSearching.value = true;
     try {
-      const { data } = await axios.get('http://localhost:8080/api/imel/search', {
+      const { data } = await axios.get('http://localhost:8080/imel/search', {
         params: {
           keyword: keyword || undefined,
           imel: imelFilter || undefined,
@@ -86,7 +80,7 @@ export default function useImel() {
 
   const checkDuplicate = async (field, value, excludeId = null) => {
     try {
-      const { data } = await axios.get(`http://localhost:8080/api/imel/exists/${field}`, {
+      const { data } = await axios.get(`http://localhost:8080/imel/exists/${field}`, {
         params: { [field]: value, excludeId },
       });
       return data;
@@ -107,7 +101,7 @@ export default function useImel() {
       return;
     }
     try {
-      const response = await axios.post('http://localhost:8080/api/imel', imel.value);
+      const response = await axios.post('http://localhost:8080/imel', imel.value);
       if (toast.value) {
         toast.value?.kshowToast('success', 'Thêm mới thành công!');
       }
@@ -149,7 +143,7 @@ export default function useImel() {
       return;
     }
     try {
-      const response = await axios.put(`http://localhost:8080/api/imel/${id}`, imel.value);
+      const response = await axios.put(`http://localhost:8080/imel/${id}`, imel.value);
       if (toast.value) {
         toast.value?.kshowToast('success', 'Cập nhật thành công!');
       }
@@ -167,7 +161,7 @@ export default function useImel() {
 
   const deleteImel = async (id) => {
     try {
-      await axios.delete(`http://localhost:8080/api/imel/${id}`);
+      await axios.delete(`http://localhost:8080/imel/${id}`);
       if (toast.value) {
         toast.value?.kshowToast('success', 'Xóa thành công!');
       }
@@ -178,7 +172,7 @@ export default function useImel() {
         currentPage.value = 0;
       }
       if (isSearching.value) {
-        await searchImels(); // Sử dụng hàm đã đổi tên
+        await searchImels();
       } else {
         await fetchData();
       }
@@ -190,40 +184,8 @@ export default function useImel() {
     }
   };
 
-  const deleteSelectedImels = async () => {
-    try {
-      await axios.delete('http://localhost:8080/api/imel/bulk', {
-        data: { ids: selectedImels.value },
-      });
-      if (toast.value) {
-        toast.value?.kshowToast('success', 'Xóa thành công!');
-      }
-      totalItems.value -= selectedImels.value.length;
-      if (totalItems.value > 0 && currentPage.value >= totalPages.value) {
-        currentPage.value = totalPages.value - 1;
-      } else if (totalItems.value <= 0) {
-        currentPage.value = 0;
-      }
-      selectedImels.value = [];
-      if (isSearching.value) {
-        await searchImels(); // Sử dụng hàm đã đổi tên
-      } else {
-        await fetchData();
-      }
-    } catch (error) {
-      if (toast.value) {
-        toast.value?.kshowToast('error', 'Lỗi khi xóa nhiều Imel!');
-      }
-      console.error('Bulk delete error:', error);
-    }
-  };
-
   const confirmDelete = (id) => {
     confirmAction('Bạn có chắc chắn muốn xóa Imel này?', () => deleteImel(id));
-  };
-
-  const confirmDeleteSelected = () => {
-    confirmAction(`Bạn có chắc chắn muốn xóa ${selectedImels.value.length} Imel đã chọn?`, deleteSelectedImels);
   };
 
   const confirmAction = (message, action) => {
@@ -244,18 +206,9 @@ export default function useImel() {
     confirmedAction.value = null;
   };
 
-  const toggleSelectAll = () => {
-    if (isAllSelected.value) {
-      selectedImels.value = [];
-    } else {
-      selectedImels.value = imels.value.map(item => item.id);
-    }
-  };
-
-  // Theo dõi thay đổi của searchKeyword và searchImel để tự động tìm kiếm
   watch([searchKeyword, searchImel], () => {
-    currentPage.value = 0; // Reset về trang đầu khi thay đổi bộ lọc
-    searchImels(); // Gọi hàm tìm kiếm đã đổi tên
+    currentPage.value = 0;
+    searchImels();
   });
 
   onMounted(fetchData);
@@ -269,26 +222,21 @@ export default function useImel() {
     currentPage,
     pageSize,
     totalItems,
-    selectedImels,
     isSearching,
     showConfirmModal,
     confirmMessage,
     totalPages,
-    isAllSelected,
     fetchData,
     goToPage,
-    searchImels, // Xuất hàm đã đổi tên
+    searchImels,
     resetSearch,
     checkDuplicate,
     saveImel,
     updateImel,
     deleteImel,
-    deleteSelectedImels,
     confirmDelete,
-    confirmDeleteSelected,
     confirmAction,
     executeConfirmedAction,
     closeConfirmModal,
-    toggleSelectAll,
   };
 }

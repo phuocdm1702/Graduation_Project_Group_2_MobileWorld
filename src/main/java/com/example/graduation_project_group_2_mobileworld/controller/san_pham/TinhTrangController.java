@@ -10,7 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/tinh-trang")
+@RequestMapping("/tinh-trang")
 @CrossOrigin(origins = "http://localhost:3000", allowedHeaders = "*")
 public class TinhTrangController {
     private final TinhTrangService service;

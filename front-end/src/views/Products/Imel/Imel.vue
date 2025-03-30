@@ -61,48 +61,13 @@
         </div>
       </div>
 
-      <!-- Nút xóa các Imel đã chọn -->
-      <div v-if="selectedImels.length" class="bg-white shadow-lg rounded-lg p-5 mb-4 mt-4 flex justify-end">
-        <button
-          @click="confirmDeleteSelected"
-          class="flex items-center gap-2 px-4 py-2 bg-red-500 text-white font-semibold rounded-lg shadow-md hover:bg-red-600 transition"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-               stroke="currentColor" class="w-5 h-5 mr-1">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
-          </svg>
-          Xóa {{ selectedImels.length }} Imel đã chọn
-        </button>
-      </div>
-
       <!-- Bảng danh sách Imel -->
       <DynamicTable
         class="dynamic-table"
         :data="imels"
         :columns="columns"
         :get-nested-value="getNestedValue"
-        :selected-products="selectedImels"
-        @toggle-select="toggleSelect"
-      >
-        <!-- Slot để render checkbox "Chọn tất cả" trong tiêu đề cột select -->
-        <template #header-select>
-          <input
-            type="checkbox"
-            class="w-4 h-4 rounded"
-            :checked="isAllSelected"
-            @change="toggleSelectAll"
-          >
-        </template>
-        <!-- Slot để render checkbox trong các dòng -->
-        <template #cell-select="{ item }">
-          <input
-            type="checkbox"
-            class="w-4 h-4 rounded"
-            :checked="selectedImels.includes(item.id)"
-            @change="toggleSelect(item.id)"
-          >
-        </template>
-      </DynamicTable>
+      />
 
       <!-- Phân trang -->
       <footer class="bg-white shadow-lg rounded-lg p-4 flex justify-center items-center mt-2">
@@ -132,18 +97,17 @@ import ToastNotification from '@/components/ToastNotification.vue';
 import Pagination from '@/components/Pagination.vue';
 import ConfirmModal from '@/components/ConfirmModal.vue';
 import DynamicTable from '@/components/DynamicTable.vue';
-import BreadcrumbWrapper from '@/components/BreadcrumbWrapper.vue'; // Import BreadcrumbWrapper
+import BreadcrumbWrapper from '@/components/BreadcrumbWrapper.vue';
 import axios from 'axios';
 
 const router = useRouter();
 const route = useRoute();
 
-// Tính toán breadcrumb dựa trên meta của route
 const breadcrumbItems = computed(() => {
   if (typeof route.meta.breadcrumb === "function") {
     return route.meta.breadcrumb(route);
   }
-  return route.meta?.breadcrumb || ["Quản Lý Imel"]; // Mặc định nếu không có breadcrumb
+  return route.meta?.breadcrumb || ["Quản Lý Imel"];
 });
 
 const {
@@ -153,22 +117,18 @@ const {
   searchImel,
   currentPage,
   pageSize,
-  selectedImels,
   isSearching,
   showConfirmModal,
   confirmMessage,
   totalPages,
-  isAllSelected,
   fetchData,
   goToPage,
   searchImels,
   resetSearch,
   confirmDelete,
-  confirmDeleteSelected,
   confirmAction,
   executeConfirmedAction,
   closeConfirmModal,
-  toggleSelectAll,
 } = useImel();
 
 const navigateToAddPage = () => {
@@ -196,14 +156,6 @@ const resetFilters = () => {
   resetSearch();
 };
 
-const toggleSelect = (id) => {
-  if (selectedImels.value.includes(id)) {
-    selectedImels.value = selectedImels.value.filter(selectedId => selectedId !== id);
-  } else {
-    selectedImels.value.push(id);
-  }
-};
-
 watch([searchKeyword, searchImel], () => {
   currentPage.value = 0;
   if (searchKeyword.value || searchImel.value) {
@@ -216,10 +168,6 @@ watch([searchKeyword, searchImel], () => {
 });
 
 const columns = [
-  {
-    key: 'select',
-    label: '',
-  },
   {
     key: '#',
     label: '#',

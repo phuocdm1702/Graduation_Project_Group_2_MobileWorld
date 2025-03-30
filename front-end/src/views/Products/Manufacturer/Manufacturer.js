@@ -10,7 +10,6 @@ export default function useNhaSanXuat() {
   const currentPage = ref(0);
   const pageSize = ref(5);
   const totalItems = ref(0);
-  const selectedManufacturers = ref([]);
   const isSearching = ref(false);
   const showConfirmModal = ref(false);
   const confirmMessage = ref('');
@@ -18,15 +17,9 @@ export default function useNhaSanXuat() {
 
   const totalPages = computed(() => Math.ceil(totalItems.value / pageSize.value));
 
-  // Logic để kiểm tra trạng thái của checkbox "Chọn tất cả"
-  const isAllSelected = computed(() => {
-    if (manufacturers.value.length === 0) return false;
-    return manufacturers.value.every(item => selectedManufacturers.value.includes(item.id));
-  });
-
   const fetchData = async () => {
     try {
-      const { data } = await axios.get('http://localhost:8080/api/nha-san-xuat', {
+      const { data } = await axios.get('http://localhost:8080/nha-san-xuat', {
         params: { page: currentPage.value, size: pageSize.value },
       });
       manufacturers.value = data.content;
@@ -59,7 +52,7 @@ export default function useNhaSanXuat() {
     }
     isSearching.value = true;
     try {
-      const { data } = await axios.get('http://localhost:8080/api/nha-san-xuat/search', {
+      const { data } = await axios.get('http://localhost:8080/nha-san-xuat/search', {
         params: {
           keyword: keyword || undefined,
           nhaSanXuat: nhaSanXuatFilter || undefined,
@@ -87,7 +80,7 @@ export default function useNhaSanXuat() {
 
   const checkDuplicate = async (field, value, excludeId = null) => {
     try {
-      const { data } = await axios.get(`http://localhost:8080/api/nha-san-xuat/exists/${field}`, {
+      const { data } = await axios.get(`http://localhost:8080/nha-san-xuat/exists/${field}`, {
         params: { [field]: value, excludeId },
       });
       return data;
@@ -108,7 +101,7 @@ export default function useNhaSanXuat() {
       return;
     }
     try {
-      const response = await axios.post('http://localhost:8080/api/nha-san-xuat', manufacturer.value);
+      const response = await axios.post('http://localhost:8080/nha-san-xuat', manufacturer.value);
       if (toast.value) {
         toast.value?.kshowToast('success', 'Thêm mới thành công!');
       }
@@ -150,7 +143,7 @@ export default function useNhaSanXuat() {
       return;
     }
     try {
-      const response = await axios.put(`http://localhost:8080/api/nha-san-xuat/${id}`, manufacturer.value);
+      const response = await axios.put(`http://localhost:8080/nha-san-xuat/${id}`, manufacturer.value);
       if (toast.value) {
         toast.value?.kshowToast('success', 'Cập nhật thành công!');
       }
@@ -168,7 +161,7 @@ export default function useNhaSanXuat() {
 
   const deleteManufacturer = async (id) => {
     try {
-      await axios.delete(`http://localhost:8080/api/nha-san-xuat/${id}`);
+      await axios.delete(`http://localhost:8080/nha-san-xuat/${id}`);
       if (toast.value) {
         toast.value?.kshowToast('success', 'Xóa thành công!');
       }
@@ -191,40 +184,8 @@ export default function useNhaSanXuat() {
     }
   };
 
-  const deleteSelectedManufacturers = async () => {
-    try {
-      await axios.delete('http://localhost:8080/api/nha-san-xuat/bulk', {
-        data: { ids: selectedManufacturers.value },
-      });
-      if (toast.value) {
-        toast.value?.kshowToast('success', 'Xóa thành công!');
-      }
-      totalItems.value -= selectedManufacturers.value.length;
-      if (totalItems.value > 0 && currentPage.value >= totalPages.value) {
-        currentPage.value = totalPages.value - 1;
-      } else if (totalItems.value <= 0) {
-        currentPage.value = 0;
-      }
-      selectedManufacturers.value = [];
-      if (isSearching.value) {
-        await searchManufacturer();
-      } else {
-        await fetchData();
-      }
-    } catch (error) {
-      if (toast.value) {
-        toast.value?.kshowToast('error', 'Lỗi khi xóa nhiều nhà sản xuất!');
-      }
-      console.error('Bulk delete error:', error);
-    }
-  };
-
   const confirmDelete = (id) => {
     confirmAction('Bạn có chắc chắn muốn xóa nhà sản xuất này?', () => deleteManufacturer(id));
-  };
-
-  const confirmDeleteSelected = () => {
-    confirmAction(`Bạn có chắc chắn muốn xóa ${selectedManufacturers.value.length} nhà sản xuất đã chọn?`, deleteSelectedManufacturers);
   };
 
   const confirmAction = (message, action) => {
@@ -245,14 +206,6 @@ export default function useNhaSanXuat() {
     confirmedAction.value = null;
   };
 
-  const toggleSelectAll = () => {
-    if (isAllSelected.value) {
-      selectedManufacturers.value = [];
-    } else {
-      selectedManufacturers.value = manufacturers.value.map(item => item.id);
-    }
-  };
-
   onMounted(fetchData);
 
   return {
@@ -264,12 +217,10 @@ export default function useNhaSanXuat() {
     currentPage,
     pageSize,
     totalItems,
-    selectedManufacturers,
     isSearching,
     showConfirmModal,
     confirmMessage,
     totalPages,
-    isAllSelected,
     fetchData,
     goToPage,
     searchManufacturer,
@@ -278,12 +229,9 @@ export default function useNhaSanXuat() {
     saveManufacturer,
     updateManufacturer,
     deleteManufacturer,
-    deleteSelectedManufacturers,
     confirmDelete,
-    confirmDeleteSelected,
     confirmAction,
     executeConfirmedAction,
     closeConfirmModal,
-    toggleSelectAll,
   };
 }

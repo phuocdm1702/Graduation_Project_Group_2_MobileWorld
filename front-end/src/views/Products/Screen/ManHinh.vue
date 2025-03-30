@@ -4,9 +4,6 @@
     <BreadcrumbWrapper :breadcrumb-items="breadcrumbItems" />
 
     <div class="mt-2 mx-auto">
-<!--      <h2 class="bg-white shadow-lg rounded-lg p-5 mb-2 mt-2 text-2xl font-semibold text-gray-700">-->
-<!--        Quản Lý Màn Hình-->
-<!--      </h2>-->
       <ToastNotification ref="toastRef" />
       <div class="bg-white shadow-lg rounded-lg p-5 mb-2 mt-2 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-4">
         <div>
@@ -71,22 +68,7 @@
         </div>
       </div>
 
-      <div v-if="selectedManHinh.length" class="bg-white shadow-lg rounded-lg p-5 mb-4 mt-4 flex justify-end">
-        <button @click="confirmDeleteSelected" class="flex items-center gap-2 px-4 py-2 bg-red-500 text-white font-semibold rounded-lg shadow-md hover:bg-red-600 transition">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-1">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
-          </svg>
-          Xóa {{ selectedManHinh.length }} màn hình đã chọn
-        </button>
-      </div>
-
-      <DynamicTable class="dynamic-table" :data="manHinhs" :columns="columns" :get-nested-value="getNestedValue" :selected-products="selectedManHinh" @toggle-select="toggleSelect">
-        <template #header-select>
-          <input type="checkbox" class="w-4 h-4 rounded" :checked="isAllSelected" @change="toggleSelectAll">
-        </template>
-        <template #cell-select="{ item }">
-          <input type="checkbox" class="w-4 h-4 rounded" :checked="selectedManHinh.includes(item.id)" @change="toggleSelect(item.id)">
-        </template>
+      <DynamicTable class="dynamic-table" :data="manHinhs" :columns="columns" :get-nested-value="getNestedValue">
       </DynamicTable>
 
       <footer class="bg-white shadow-lg rounded-lg p-4 flex justify-center items-center mt-2">
@@ -101,12 +83,12 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-import useManHinh from './useManHinh.js';
+import useManHinh from './ManHinh.js';
 import ToastNotification from '@/components/ToastNotification.vue';
 import Pagination from '@/components/Pagination.vue';
 import ConfirmModal from '@/components/ConfirmModal.vue';
 import DynamicTable from '@/components/DynamicTable.vue';
-import BreadcrumbWrapper from '@/components/BreadcrumbWrapper.vue'; // Import BreadcrumbWrapper
+import BreadcrumbWrapper from '@/components/BreadcrumbWrapper.vue';
 import axios from 'axios';
 
 const router = useRouter();
@@ -127,7 +109,6 @@ const {
   currentPage,
   pageSize,
   totalItems,
-  selectedManHinh,
   isSearching,
   showConfirmModal,
   confirmMessage,
@@ -138,16 +119,12 @@ const {
   searchManHinh,
   resetSearch,
   deleteManHinh,
-  deleteSelectedManHinh,
   confirmDelete,
-  confirmDeleteSelected,
   confirmAction,
   executeConfirmedAction,
   closeConfirmModal,
-  toggleSelectAll,
 } = useManHinh(toastRef);
 
-// Dữ liệu cứng cho các combobox
 const kichThuocData = [
   "6.1 inches", "6.1 inches", "6.1 inches", "6.9 inches", "6.2 inches", "6.7 inches", "6.8 inches",
   "6.1 inches", "6.8 inches", "6.7 inches", "6.7 inches", "6.6 inches", "7.6 inches", "6.3 inches",
@@ -183,25 +160,22 @@ const kieuManHinhData = [
   "dynamic island", "dynamic island", "đục lỗ", "đục lỗ", "đục lỗ"
 ];
 
-// Loại bỏ giá trị trùng lặp và sắp xếp
 const uniqueKichThuocList = ref([...new Set(kichThuocData)].sort());
 const uniqueDoPhanGiaiList = ref([...new Set(doPhanGiaiData)].sort());
 const uniqueDoSangToiDaList = ref([...new Set(doSangToiDaData)].sort((a, b) => parseInt(a) - parseInt(b)));
 const uniqueTanSoQuetList = ref([...new Set(tanSoQuetData)].sort((a, b) => parseInt(a) - parseInt(b)));
 const uniqueKieuManHinhList = ref([...new Set(kieuManHinhData)].sort());
 
-// Tính toán breadcrumb dựa trên meta của route
 const breadcrumbItems = computed(() => {
   if (typeof route.meta.breadcrumb === "function") {
     return route.meta.breadcrumb(route);
   }
-  return route.meta?.breadcrumb || ["Quản Lý Màn Hình"]; // Mặc định nếu không có breadcrumb
+  return route.meta?.breadcrumb || ["Quản Lý Màn Hình"];
 });
 
 onMounted(() => {
   fetchCongNgheManHinhs();
   fetchData();
-  // Không cần fetchKieuManHinhNames nữa vì dùng dữ liệu cứng
 });
 
 const resetFilters = () => {
@@ -216,26 +190,12 @@ const getNestedValue = (obj, path) => {
   return path.split('.').reduce((acc, part) => acc && acc[part], obj);
 };
 
-const isAllSelected = computed(() => {
-  if (manHinhs.value.length === 0) return false;
-  return manHinhs.value.every(item => selectedManHinh.value.includes(item.id));
-});
-
-const toggleSelect = (id) => {
-  if (selectedManHinh.value.includes(id)) {
-    selectedManHinh.value = selectedManHinh.value.filter(selectedId => selectedId !== id);
-  } else {
-    selectedManHinh.value.push(id);
-  }
-};
-
 const getCongNgheManHinhName = (id) => {
   const congNghe = congNgheManHinhs.value.find(c => c.id === id);
   return congNghe ? congNghe.congNgheManHinh : 'Không xác định';
 };
 
 const columns = [
-  { key: 'select', label: '' },
   {
     key: '#',
     label: '#',
@@ -278,7 +238,7 @@ const columns = [
 
 const handleCustomEvents = () => {
   document.addEventListener('openEditModal', (event) => {
-    router.push(`/screen/edit/${event.detail.id}`);
+    router.push(`/screens/edit/${event.detail.id}`);
   });
   document.addEventListener('confirmDelete', (event) => {
     confirmDelete(event.detail);

@@ -78,7 +78,7 @@ import { useRouter, useRoute } from 'vue-router';
 import ToastNotification from '@/components/ToastNotification.vue';
 import ConfirmModal from '@/components/ConfirmModal.vue';
 import BreadcrumbWrapper from '@/components/BreadcrumbWrapper.vue'; // Import BreadcrumbWrapper
-import useCongNgheManHinh from './useCongNgheManHinh.js';
+import useCongNgheManHinh from './CongNgheManHinh.js';
 
 const router = useRouter();
 const route = useRoute(); // Thêm useRoute để lấy thông tin route hiện tại
@@ -107,12 +107,12 @@ const breadcrumbItems = computed(() => {
 const handleFormSubmit = () => {
   confirmAction('Bạn có chắc chắn muốn thêm công nghệ màn hình này?', async () => {
     await saveCongNgheManHinh();
-    router.push('/cong-nghe-man-hinh'); // Quay lại danh sách sau khi thêm
+    router.push('/screens/technology'); // Quay lại danh sách sau khi thêm
   });
 };
 
 const goBack = () => {
-  router.push('/cong-nghe-man-hinh');
+  router.push('/screens/technology');
 };
 
 onMounted(() => {
