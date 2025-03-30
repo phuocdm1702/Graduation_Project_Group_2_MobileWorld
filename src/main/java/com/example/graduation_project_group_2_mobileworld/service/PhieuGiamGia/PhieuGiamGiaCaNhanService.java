@@ -5,6 +5,7 @@ import com.example.graduation_project_group_2_mobileworld.entity.PhieuGiamGiaCaN
 import com.example.graduation_project_group_2_mobileworld.repository.giam_gia.PhieuGiamGiaCaNhanRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -23,8 +24,14 @@ public class PhieuGiamGiaCaNhanService {
         return phieuGiamGiaCaNhanRepository.findAll();
     }
 
+    @Transactional
     public PhieuGiamGiaCaNhan addPGGCN(PhieuGiamGiaCaNhan phieuGiamGiaCaNhan) {
         return phieuGiamGiaCaNhanRepository.save(phieuGiamGiaCaNhan);
+    }
+
+    @Transactional
+    public void deleteByPhieuGiamGiaId(Integer phieuGiamGiaId) {
+        phieuGiamGiaCaNhanRepository.deleteByIdPhieuGiamGia(phieuGiamGiaId);
     }
 
 

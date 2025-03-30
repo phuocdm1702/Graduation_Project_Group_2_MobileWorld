@@ -224,8 +224,8 @@ public class PhieuGiamGiaService {
         return pggDTO;
     }
 
-    public void updatePGG(PhieuGiamGia editPGG) {
-        phieuGiamGiaRepository.save(editPGG);
+    public PhieuGiamGia updatePGG(PhieuGiamGia editPGG) {
+        return phieuGiamGiaRepository.save(editPGG);
     }
 
 }
