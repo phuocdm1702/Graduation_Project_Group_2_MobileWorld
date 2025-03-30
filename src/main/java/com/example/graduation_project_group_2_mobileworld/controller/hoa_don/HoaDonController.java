@@ -49,7 +49,7 @@ public class HoaDonController {
 //        return ResponseEntity.ok(hoaDonService.getHoaDonWithPagination(page, size));
 //    }
 
-    @GetMapping("/home")
+    @GetMapping("/quan-ly-hoa-don")
     public ResponseEntity<Page<HoaDonDTO>> getAllHoaDon(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,

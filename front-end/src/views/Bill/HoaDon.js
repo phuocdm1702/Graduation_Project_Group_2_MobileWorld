@@ -119,7 +119,7 @@ export default function useHoaDonLineList() {
                                       
   const fetchInitialData = async () => {
     try {
-      const res = await axios.get("http://localhost:8080/hoa-don/home", {
+      const res = await axios.get("http://localhost:8080/hoa-don/quan-ly-hoa-don", {
         params: {
           page: currentPage.value,
           size: pageSize.value,
@@ -195,7 +195,7 @@ export default function useHoaDonLineList() {
         endDate: endDate.value || null
       };
 
-      const res = await axios.get("http://localhost:8080/hoa-don/home", { params });
+      const res = await axios.get("http://localhost:8080/hoa-don/quan-ly-hoa-don", { params });
       let filteredData = res.data.content || [];
       totalElements.value = res.data.totalElements || 0;
 
