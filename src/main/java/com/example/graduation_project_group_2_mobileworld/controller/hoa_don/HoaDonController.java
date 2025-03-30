@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.List;
 
 @CrossOrigin(origins = "http://localhost:3000")
@@ -49,7 +50,7 @@ public class HoaDonController {
 //        return ResponseEntity.ok(hoaDonService.getHoaDonWithPagination(page, size));
 //    }
 
-    @GetMapping("/quan-ly-hoa-don")
+    @GetMapping("/home")
     public ResponseEntity<Page<HoaDonDTO>> getAllHoaDon(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -66,6 +67,12 @@ public class HoaDonController {
             System.out.println("No authenticated user");
         }
         return ResponseEntity.ok(hoaDonService.getHoaDonWithFilters(page, size, keyword, loaiDon, minAmount, maxAmount, startDate, endDate));
+    }
+
+    @GetMapping("/order-types")
+    public ResponseEntity<List<String>> getOrderTypes() {
+        List<String> orderTypes = Arrays.asList("Online", "Trực tiếp");
+        return ResponseEntity.ok(orderTypes);
     }
 
     @GetMapping("/detail/{id}")

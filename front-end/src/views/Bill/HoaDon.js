@@ -105,21 +105,26 @@ export default function useHoaDonLineList() {
 
   const fetchOrderTypes = async () => {
     try {
-      const res = await axios.get("http://localhost:8080/hoa-don");
-      orderTypes.value = res.data || [];
+      const res = await axios.get("http://localhost:8080/hoa-don/order-types");
+      console.log("Danh sách loại đơn từ API:", res.data);
+      orderTypes.value = res.data.map((type) => ({
+        value: type.toLowerCase(), // Chuẩn hóa giá trị để lọc
+        label: type,
+      }));
     } catch (error) {
       console.error("Lỗi khi lấy danh sách loại đơn:", error);
       toast.value?.kshowToast("error", "Không thể tải danh sách loại đơn!");
+      // Giá trị mặc định nếu API lỗi
       orderTypes.value = [
         { value: "online", label: "Online" },
-        { value: "trực tiếp", label: "Trực tiếp" }
+        { value: "trực tiếp", label: "Trực tiếp" },
       ];
     }
   };
                                       
   const fetchInitialData = async () => {
     try {
-      const res = await axios.get("http://localhost:8080/hoa-don/quan-ly-hoa-don", {
+      const res = await axios.get("http://localhost:8080/hoa-don/home", {
         params: {
           page: currentPage.value,
           size: pageSize.value,
@@ -195,7 +200,7 @@ export default function useHoaDonLineList() {
         endDate: endDate.value || null
       };
 
-      const res = await axios.get("http://localhost:8080/hoa-don/quan-ly-hoa-don", { params });
+      const res = await axios.get("http://localhost:8080/hoa-don/home", { params });
       let filteredData = res.data.content || [];
       totalElements.value = res.data.totalElements || 0;
 
