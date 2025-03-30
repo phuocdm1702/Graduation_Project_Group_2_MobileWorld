@@ -452,7 +452,6 @@ const productCategories = [
   { name: "Nhà Sản Xuất", path: "/manufacturer", route: "manufacturer" },
   { name: "Imel", path: "/imel", route: "imel" },
   { name: "Imel Đã bán", path: "/imel-sold", route: "imelSold" },
-  { name: "Dòng Sản Phẩm", path: "/productLines", route: "productLines" },
   { name: "Màn Hình", path: "/screens", route: "screens" },
   { name: "Công Nghệ Màn Hình", path: "/screens/technology", route: "screenTechnology" },
   { name: "RAM", path: "/ram", route: "ram" },
@@ -469,5 +468,4 @@ const productCategories = [
   { name: "Hỗ Trợ Sạc", path: "/charging/support", route: "chargingSupport" },
   { name: "Cổng Sạc", path: "/charging/port", route: "chargingPort" },
 ];
-
 </script>

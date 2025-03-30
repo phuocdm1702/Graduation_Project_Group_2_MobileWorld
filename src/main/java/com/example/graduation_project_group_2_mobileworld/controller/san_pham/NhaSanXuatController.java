@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/nha-san-xuat")
+@RequestMapping("/nha-san-xuat")
 @CrossOrigin(
         origins = "http://localhost:3000",
         methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.OPTIONS},
@@ -85,20 +85,6 @@ public class NhaSanXuatController {
         try {
             service.deleteNhaSanXuat(id);
             return ResponseEntity.ok(Map.of("message", "Xóa thành công!"));
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
-        }
-    }
-
-    @DeleteMapping("/bulk")
-    public ResponseEntity<?> deleteMultiple(@RequestBody Map<String, List<Integer>> request) {
-        List<Integer> ids = request.get("ids");
-        if (ids == null || ids.isEmpty()) {
-            return ResponseEntity.badRequest().body(Map.of("error", "Danh sách ID không hợp lệ!"));
-        }
-        try {
-            service.deleteMultipleNhaSanXuat(ids);
-            return ResponseEntity.ok(Map.of("message", "Xóa " + ids.size() + " nhà sản xuất thành công!"));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }

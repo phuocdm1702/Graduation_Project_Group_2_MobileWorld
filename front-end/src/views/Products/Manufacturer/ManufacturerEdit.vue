@@ -4,12 +4,9 @@
     <BreadcrumbWrapper :breadcrumb-items="breadcrumbItems" />
 
     <div class="mt-2 mx-auto">
-      <h2 class="bg-white shadow-lg rounded-lg p-5 mb-2 mt-2 text-2xl font-semibold text-gray-700">
-        Thêm Mới Nhà Sản Xuất
-      </h2>
       <ToastNotification ref="toast" />
 
-      <!-- Form thêm mới -->
+      <!-- Form chỉnh sửa -->
       <div class="bg-white shadow-lg rounded-lg p-5 mb-4 mt-4">
         <div class="grid grid-cols-1 gap-6">
           <div>
@@ -46,7 +43,7 @@
             @click="handleSubmit"
             class="px-4 py-2 bg-[#f97316] text-white font-semibold rounded-lg shadow-md hover:bg-orange-600 transition"
           >
-            Thêm
+            Lưu
           </button>
         </div>
       </div>
@@ -63,29 +60,31 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import ToastNotification from '@/components/ToastNotification.vue';
 import ConfirmModal from '@/components/ConfirmModal.vue';
 import BreadcrumbWrapper from '@/components/BreadcrumbWrapper.vue'; // Import BreadcrumbWrapper
-import useNhaSanXuat from '@/views/Products/Brand/Manufacturer/Manufacturer.js';
+import useNhaSanXuat from '@/views/Products/Manufacturer/Manufacturer.js';
+import axios from 'axios';
 
 const router = useRouter();
 const route = useRoute();
 const toast = ref(null);
+const originalMa = ref(''); // Lưu trữ mã gốc
 
 // Tính toán breadcrumb dựa trên meta của route
 const breadcrumbItems = computed(() => {
   if (typeof route.meta.breadcrumb === "function") {
     return route.meta.breadcrumb(route);
   }
-  return route.meta?.breadcrumb || ["Quản Lý Nhà Sản Xuất", "Thêm Mới Nhà Sản Xuất"]; // Mặc định cho trang thêm mới
+  return route.meta?.breadcrumb || ["Quản Lý Nhà Sản Xuất", "Chỉnh Sửa Nhà Sản Xuất"]; // Mặc định cho trang chỉnh sửa
 });
 
 const {
   manufacturer,
   checkDuplicate,
-  saveManufacturer,
+  updateManufacturer,
   showConfirmModal,
   confirmMessage,
   confirmAction,
@@ -93,38 +92,59 @@ const {
   closeConfirmModal,
 } = useNhaSanXuat();
 
-manufacturer.value = { id: null, ma: '', nhaSanXuat: '' }; // Đặt lại dữ liệu mặc định
+const fetchManufacturer = async (id) => {
+  try {
+    const { data } = await axios.get(`http://localhost:8080/api/nha-san-xuat/${id}`);
+    manufacturer.value = data;
+    originalMa.value = data.ma; // Lưu mã gốc
+  } catch (error) {
+    if (toast.value) {
+      toast.value?.kshowToast('error', 'Không thể tải dữ liệu nhà sản xuất!');
+    }
+    console.error('Fetch error:', error);
+  }
+};
+
+onMounted(() => {
+  const id = route.params.id;
+  if (id) {
+    fetchManufacturer(id);
+  }
+});
 
 const handleSubmit = async () => {
-  const { ma, nhaSanXuat } = manufacturer.value;
-  if (!ma || !nhaSanXuat) {
+  const { id, ma, nhaSanXuat } = manufacturer.value;
+  if (!id || !ma || !nhaSanXuat) {
     if (toast.value) {
-      toast.value?.kshowToast('error', 'Vui lòng nhập đầy đủ thông tin!');
+      toast.value?.kshowToast('error', 'Dữ liệu không hợp lệ! Vui lòng kiểm tra lại.');
     }
     return;
   }
 
-  if (await checkDuplicate('ma', ma)) {
+  // Chỉ kiểm tra trùng lặp mã nếu mã đã thay đổi
+  if (ma !== originalMa.value && (await checkDuplicate('ma', ma, id))) {
     if (toast.value) {
       toast.value?.kshowToast('error', 'Mã nhà sản xuất đã tồn tại!');
     }
     return;
   }
-  if (await checkDuplicate('nhaSanXuat', nhaSanXuat)) {
+
+  // Kiểm tra trùng lặp tên nhà sản xuất
+  if (await checkDuplicate('nhaSanXuat', nhaSanXuat, id)) {
     if (toast.value) {
       toast.value?.kshowToast('error', 'Tên nhà sản xuất đã tồn tại!');
     }
     return;
   }
 
-  confirmAction('Bạn có chắc chắn muốn thêm nhà sản xuất này?', async () => {
-    await saveManufacturer();
-    router.push('/manufacturer'); // Quay lại danh sách sau khi lưu thành công
+  confirmAction('Bạn có chắc chắn muốn cập nhật nhà sản xuất này?', async () => {
+    await updateManufacturer();
+    router.push('/manufacturer');
   });
 };
 
 const goBack = () => {
-  router.push('/manufacturer'); // Quay lại danh sách
+  router.push('/manufacturer');
 };
 </script>
 

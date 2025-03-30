@@ -102,14 +102,6 @@ public class NhaSanXuatService {
                 );
     }
 
-    @Transactional
-    public void deleteMultipleNhaSanXuat(List<Integer> ids) {
-        int updatedCount = repository.softDeleteByIds(ids);
-        if (updatedCount == 0) {
-            throw new RuntimeException("Không tìm thấy nhà sản xuất nào để xóa!");
-        }
-    }
-
     public Page<NhaSanXuatDTO> searchNhaSanXuat(String keyword, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         List<NhaSanXuat> allResults = repository.findByDeletedFalse()

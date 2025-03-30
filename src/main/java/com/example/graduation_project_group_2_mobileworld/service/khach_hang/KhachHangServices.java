@@ -211,7 +211,7 @@ public class KhachHangServices {
             throw new RuntimeException("Không tìm thấy khách hàng với ID: " + id);
         }
         KhachHang khachHang = optionalKhachHang.get();
-        khachHang.setDeleted(!khachHang.isDeleted()); // Toggle trạng thái
+        khachHang.setDeleted(!khachHang.getDeleted()); // Toggle trạng thái
         return khachHangRepository.save(khachHang);
     }
 

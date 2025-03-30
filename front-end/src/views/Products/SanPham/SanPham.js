@@ -50,7 +50,7 @@ export default function sanPham(toast) {
   // Fetch product details
   const fetchData = async () => {
     try {
-      const { data } = await axios.get('http://localhost:8080/api/san-pham', {
+      const { data } = await axios.get('http://localhost:8080/san-pham', {
         params: { page: currentPage.value, size: pageSize.value },
       });
       productDetails.value = data.content;
@@ -65,9 +65,9 @@ export default function sanPham(toast) {
   const fetchOptions = async () => {
     try {
       const [nhaSanXuatRes, heDieuHanhRes, manHinhRes] = await Promise.all([
-        axios.get('http://localhost:8080/api/nha-san-xuat'),
-        axios.get('http://localhost:8080/api/he-dieu-hanh'),
-        axios.get('http://localhost:8080/api/man-hinh'),
+        axios.get('http://localhost:8080/nha-san-xuat'),
+        axios.get('http://localhost:8080/he-dieu-hanh'),
+        axios.get('http://localhost:8080/man-hinh'),
       ]);
       nhaSanXuatOptions.value = nhaSanXuatRes.data.content || nhaSanXuatRes.data || [];
       heDieuHanhOptions.value = heDieuHanhRes.data.content || heDieuHanhRes.data || [];
@@ -94,7 +94,7 @@ export default function sanPham(toast) {
     const filters = { ...searchFilters.value };
 
     try {
-      const { data } = await axios.get('http://localhost:8080/api/san-pham/search', {
+      const { data } = await axios.get('http://localhost:8080/san-pham/search', {
         params: {
           keyword: keyword || undefined,
           idNhaSanXuat: searchFilters.value.idNhaSanXuat || undefined,
@@ -141,7 +141,7 @@ export default function sanPham(toast) {
   // Delete single product
   const deleteProductDetail = async (id) => {
     try {
-      await axios.delete(`http://localhost:8080/api/san-pham/${id}`);
+      await axios.delete(`http://localhost:8080/san-pham/${id}`);
       toast.value?.kshowToast('success', 'Xóa thành công!');
       totalItems.value -= 1;
       adjustPageAfterDelete();
@@ -155,7 +155,7 @@ export default function sanPham(toast) {
   // Delete selected products
   const deleteSelectedProducts = async () => {
     try {
-      await axios.delete('http://localhost:8080/api/san-pham/bulk', {
+      await axios.delete('http://localhost:8080/san-pham/bulk', {
         data: { ids: selectedProducts.value },
       });
       toast.value?.kshowToast('success', 'Xóa thành công!');

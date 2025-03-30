@@ -16,8 +16,8 @@ public class PhieuGiamGiaDTO {
     private Integer soLuongDung;
     private Date ngayBatDau;
     private Date ngayKetThuc;
-    private Integer trangThai;
-    private Integer riengTu;
+    private Boolean trangThai;
+    private Boolean riengTu;
     private String moTa;
     private List<KhPggDTO> selectedCustomers;
     private List<KhPggDTO> allCustomers;
@@ -26,7 +26,7 @@ public class PhieuGiamGiaDTO {
     public PhieuGiamGiaDTO() {
     }
 
-    public PhieuGiamGiaDTO(String ma, String tenPhieuGiamGia, String loaiPhieuGiamGia, Double phanTramGiamGia, Double soTienGiamToiDa, Double hoaDonToiThieu, Integer soLuongDung, Date ngayBatDau, Date ngayKetThuc, Integer trangThai, Integer riengTu, String moTa, List<KhPggDTO> selectedCustomers, List<KhPggDTO> allCustomers, List<Integer> customerIds) {
+    public PhieuGiamGiaDTO(String ma, String tenPhieuGiamGia, String loaiPhieuGiamGia, Double phanTramGiamGia, Double soTienGiamToiDa, Double hoaDonToiThieu, Integer soLuongDung, Date ngayBatDau, Date ngayKetThuc, Boolean trangThai, Boolean riengTu, String moTa, List<KhPggDTO> selectedCustomers, List<KhPggDTO> allCustomers, List<Integer> customerIds) {
         this.ma = ma;
         this.tenPhieuGiamGia = tenPhieuGiamGia;
         this.loaiPhieuGiamGia = loaiPhieuGiamGia;
@@ -135,19 +135,19 @@ public class PhieuGiamGiaDTO {
         this.ngayKetThuc = ngayKetThuc;
     }
 
-    public Integer getTrangThai() {
+    public Boolean getTrangThai() {
         return trangThai;
     }
 
-    public void setTrangThai(Integer trangThai) {
+    public void setTrangThai(Boolean trangThai) {
         this.trangThai = trangThai;
     }
 
-    public Integer getRiengTu() {
+    public Boolean getRiengTu() {
         return riengTu;
     }
 
-    public void setRiengTu(Integer riengTu) {
+    public void setRiengTu(Boolean riengTu) {
         this.riengTu = riengTu;
     }
 

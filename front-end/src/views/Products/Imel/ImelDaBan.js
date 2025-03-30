@@ -12,7 +12,7 @@ export default function useImelDaBan() {
 
   const fetchData = async () => {
     try {
-      const { data } = await axios.get('http://localhost:8080/api/imel-da-ban', {
+      const { data } = await axios.get('http://localhost:8080/imel-da-ban', {
         params: { page: currentPage.value, size: pageSize.value },
       });
       imelDaBans.value = data.content;
