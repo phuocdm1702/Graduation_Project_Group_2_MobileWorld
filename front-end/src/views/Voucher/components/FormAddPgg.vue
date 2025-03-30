@@ -152,7 +152,7 @@
             <td class="p-3">{{ customer.ten }}</td>
             <td class="p-3">{{ customer.gioiTinh == "1" ? "Nam" : "Nữ" }}</td>
             <td class="p-3">{{ new Date(customer.ngaySinh).toLocaleDateString('vi-VN') }}</td>
-            
+
           </tr>
           </tbody>
         </table>

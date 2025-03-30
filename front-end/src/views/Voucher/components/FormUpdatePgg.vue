@@ -325,13 +325,22 @@ const updatePGG = async () => {
   if (!validateForm()) {
     return;
   }
+  const formatDateForBackend = (dateStr) => {
+    const date = new Date(dateStr);
+    return date.toISOString().split('T')[0];
+  };
+
   const payload = {
     ...editingVoucher.value,
+    ngayBatDau: formatDateForBackend(editingVoucher.value.ngayBatDau),
+    ngayKetThuc: formatDateForBackend(editingVoucher.value.ngayKetThuc),
     customerIds: selectedCustomers.value
   };
   try {
     await axios.put(`${baseURL}/update-phieu-giam-gia/${route.params.id}`, payload);
-    router.push("/phieu-giam-gia");
+    setTimeout(() => {
+      router.push("/phieu-giam-gia");
+    }, 1500);
   } catch (error) {
     console.log("Cập nhật thất bại!", error);
     if (error.response) {

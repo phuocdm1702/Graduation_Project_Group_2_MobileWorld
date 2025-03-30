@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -43,12 +44,20 @@ public class AddKhachHangPGGController {
     @GetMapping("/data-kh")
     public List<KhachHang> fetchDataKH() {
         List<KhachHang> listKH = khachHangService.getAllCustomers();
+        if (listKH == null) {
+            System.out.println("Danh sách khách hàng trả về null, trả về mảng rỗng");
+            return Collections.emptyList();
+        }
         return listKH;
     }
 
     @GetMapping("/search-kh")
     public ResponseEntity<?> searchKHAddPgg(@RequestParam("keyword") String keyword) {
         List<KhachHang> listSearch = khachHangService.searchFormAddPgg(keyword);
+        if (listSearch == null) {
+            System.out.println("Danh sách tìm kiếm trả về null, trả về mảng rỗng");
+            return ResponseEntity.ok(Collections.emptyList());
+        }
         return ResponseEntity.ok(listSearch);
     }
 
@@ -107,5 +116,4 @@ public class AddKhachHangPGGController {
 
         return ResponseEntity.ok(savePgg);
     }
-
 }
