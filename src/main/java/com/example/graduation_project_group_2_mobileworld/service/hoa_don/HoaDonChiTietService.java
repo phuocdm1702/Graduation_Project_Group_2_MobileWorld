@@ -38,6 +38,8 @@ public class HoaDonChiTietService {
                 hoaDonChiTiet.getGhiChu(),
                 hoaDonChiTiet.getId(),
                 hoaDonChiTiet.getMa(),
+                hoaDonChiTiet.getMa(),
+                hoaDonChiTiet.getMa(),
                 hoaDonChiTiet.getMa()
         );
     }

@@ -10,7 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/cong-nghe-mang")
+@RequestMapping("/cong-nghe-mang")
 @CrossOrigin(origins = "http://localhost:3000", allowedHeaders = "*")
 public class CongNgheMangController {
     private final CongNgheMangService congNgheMangService;

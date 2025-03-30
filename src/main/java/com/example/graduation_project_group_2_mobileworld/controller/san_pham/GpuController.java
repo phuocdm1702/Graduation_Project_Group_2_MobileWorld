@@ -10,7 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/gpu")
+@RequestMapping("/gpu")
 @CrossOrigin(origins = "http://localhost:3000", allowedHeaders = "*")
 public class GpuController {
     private final GpuService gpuService;

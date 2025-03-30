@@ -19,7 +19,7 @@ export default function useImel() {
 
   const fetchData = async () => {
     try {
-      const { data } = await axios.get('http://localhost:8080/api/imel', {
+      const { data } = await axios.get('http://localhost:8080/imel', {
         params: { page: currentPage.value, size: pageSize.value },
       });
       imels.value = data.content;
@@ -52,7 +52,7 @@ export default function useImel() {
     }
     isSearching.value = true;
     try {
-      const { data } = await axios.get('http://localhost:8080/api/imel/search', {
+      const { data } = await axios.get('http://localhost:8080/imel/search', {
         params: {
           keyword: keyword || undefined,
           imel: imelFilter || undefined,
@@ -80,7 +80,7 @@ export default function useImel() {
 
   const checkDuplicate = async (field, value, excludeId = null) => {
     try {
-      const { data } = await axios.get(`http://localhost:8080/api/imel/exists/${field}`, {
+      const { data } = await axios.get(`http://localhost:8080/imel/exists/${field}`, {
         params: { [field]: value, excludeId },
       });
       return data;
@@ -101,7 +101,7 @@ export default function useImel() {
       return;
     }
     try {
-      const response = await axios.post('http://localhost:8080/api/imel', imel.value);
+      const response = await axios.post('http://localhost:8080/imel', imel.value);
       if (toast.value) {
         toast.value?.kshowToast('success', 'Thêm mới thành công!');
       }
@@ -143,7 +143,7 @@ export default function useImel() {
       return;
     }
     try {
-      const response = await axios.put(`http://localhost:8080/api/imel/${id}`, imel.value);
+      const response = await axios.put(`http://localhost:8080/imel/${id}`, imel.value);
       if (toast.value) {
         toast.value?.kshowToast('success', 'Cập nhật thành công!');
       }
@@ -161,7 +161,7 @@ export default function useImel() {
 
   const deleteImel = async (id) => {
     try {
-      await axios.delete(`http://localhost:8080/api/imel/${id}`);
+      await axios.delete(`http://localhost:8080/imel/${id}`);
       if (toast.value) {
         toast.value?.kshowToast('success', 'Xóa thành công!');
       }

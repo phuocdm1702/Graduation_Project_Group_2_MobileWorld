@@ -4,17 +4,23 @@ import com.example.graduation_project_group_2_mobileworld.dto.tai_khoan.TaiKhoan
 import com.example.graduation_project_group_2_mobileworld.entity.QuyenHan;
 import com.example.graduation_project_group_2_mobileworld.entity.TaiKhoan;
 import com.example.graduation_project_group_2_mobileworld.repository.tai_khoan.TaiKhoanRepository;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
 
 public class TaiKhoanServices {
     private final TaiKhoanRepository taiKhoanRepository;
-
-    public TaiKhoanServices(TaiKhoanRepository taiKhoanRepository) {
+    private final JavaMailSenderImpl mailSender;
+    private final Map<String, String> otpStorage = new HashMap<>();
+    public TaiKhoanServices(TaiKhoanRepository taiKhoanRepository, JavaMailSenderImpl mailSender) {
         this.taiKhoanRepository = taiKhoanRepository;
+        this.mailSender = mailSender;
     }
 
     public String MaTaiKhoan() {
@@ -44,16 +50,59 @@ public class TaiKhoanServices {
         return null; // Trả về null nếu không khớp
     }
 
-    public TaiKhoan addTK(TaiKhoanDTO taiKhoanDTO) {
+    private String RandomSDT() {
+        return String.valueOf((int) (Math.random() * 900000) + 100000);
+    }
+
+    public String requestOTP(TaiKhoanDTO taiKhoanDTO) {
+        // Kiểm tra email trùng
+        if (taiKhoanRepository.findByEmail(taiKhoanDTO.getEmail()).isPresent()) {
+            throw new RuntimeException("Email đã được sử dụng!");
+        }
+        if (taiKhoanRepository.findBytenDangNhap(taiKhoanDTO.getTenDangNhap()).isPresent()) {
+            throw new RuntimeException("Tên đăng nhập đã được sử dụng!");
+        }
+
+        String otp = RandomSDT();
+        otpStorage.put(taiKhoanDTO.getEmail(), otp);
+        sendOTP(taiKhoanDTO.getEmail(), otp);
+        return "OTP đã được gửi đến email của bạn!";
+    }
+
+    private void sendOTP(String email, String otp) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(email);
+        message.setSubject("Mã OTP Xác Nhận Đăng Ký");
+        message.setText("Mã OTP của bạn là: " + otp + "\nVui lòng sử dụng mã này để hoàn tất đăng ký.");
+        mailSender.send(message);
+    }
+
+    public TaiKhoan addTK(TaiKhoanDTO taiKhoanDTO,String otp) {
+        String storedOtp = otpStorage.get(taiKhoanDTO.getEmail());
+        if (storedOtp == null || !storedOtp.equals(otp)) {
+            throw new RuntimeException("Mã OTP không hợp lệ hoặc đã hết hạn!");
+        }
+
+        if (taiKhoanRepository.findByEmail(taiKhoanDTO.getEmail()).isPresent()) {
+            throw new RuntimeException("Email đã được sử dụng!");
+        }
+        if (taiKhoanRepository.findBytenDangNhap(taiKhoanDTO.getTenDangNhap()).isPresent()) {
+            throw new RuntimeException("Tên đăng nhập đã được sử dụng!");
+        }
+
+        otpStorage.remove(taiKhoanDTO.getEmail());
+
         QuyenHan quyenHan = new QuyenHan();
         quyenHan.setId(2);
-        //taikhoan
-        TaiKhoan taiKhoan1 = new TaiKhoan();
-        taiKhoan1.setIdQuyenHan(quyenHan);
-        taiKhoan1.setMa(MaTaiKhoan());
-        taiKhoan1.setTenDangNhap(taiKhoanDTO.getTenDangNhap());
-        taiKhoan1.setMatKhau(taiKhoanDTO.getMatKhau());
-        taiKhoan1.setDeleted(false);
-        return taiKhoanRepository.save(taiKhoan1);
+
+        TaiKhoan taiKhoan = new TaiKhoan();
+        taiKhoan.setIdQuyenHan(quyenHan);
+        taiKhoan.setMa(MaTaiKhoan());
+        taiKhoan.setTenDangNhap(taiKhoanDTO.getTenDangNhap());
+        taiKhoan.setMatKhau(taiKhoanDTO.getMatKhau());
+        taiKhoan.setEmail(taiKhoanDTO.getEmail());
+        taiKhoan.setDeleted(false);
+
+        return taiKhoanRepository.save(taiKhoan);
     }
 }

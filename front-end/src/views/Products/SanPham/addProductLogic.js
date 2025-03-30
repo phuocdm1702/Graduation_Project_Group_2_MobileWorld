@@ -95,23 +95,23 @@ export default function addProductLogic() {
         boNhoTrongRes,
         mauSacRes,
       ] = await Promise.all([
-        axios.get('http://localhost:8080/api/he-dieu-hanh'),
-        axios.get('http://localhost:8080/api/man-hinh'),
-        axios.get('http://localhost:8080/api/nha-san-xuat'),
-        axios.get('http://localhost:8080/api/cum-camera/details'),
-        axios.get('http://localhost:8080/api/sim'),
-        axios.get('http://localhost:8080/api/thiet-ke'),
-        axios.get('http://localhost:8080/api/pin'),
-        axios.get('http://localhost:8080/api/cpu'),
-        axios.get('http://localhost:8080/api/gpu'),
-        axios.get('http://localhost:8080/api/cong-nghe-mang'),
-        axios.get('http://localhost:8080/api/cong-sac'),
-        axios.get('http://localhost:8080/api/ho-tro-cong-nghe-sac/details'),
-        axios.get('http://localhost:8080/api/chi-so-khang-bui-va-nuoc'),
-        axios.get('http://localhost:8080/api/tinh-trang'),
-        axios.get('http://localhost:8080/api/ram'),
-        axios.get('http://localhost:8080/api/bo-nho-trong'),
-        axios.get('http://localhost:8080/api/mau-sac'),
+        axios.get('http://localhost:8080/he-dieu-hanh'),
+        axios.get('http://localhost:8080/man-hinh'),
+        axios.get('http://localhost:8080/nha-san-xuat'),
+        axios.get('http://localhost:8080/cum-camera/details'),
+        axios.get('http://localhost:8080/sim'),
+        axios.get('http://localhost:8080/thiet-ke'),
+        axios.get('http://localhost:8080/pin'),
+        axios.get('http://localhost:8080/cpu'),
+        axios.get('http://localhost:8080/gpu'),
+        axios.get('http://localhost:8080/cong-nghe-mang'),
+        axios.get('http://localhost:8080/cong-sac'),
+        axios.get('http://localhost:8080/ho-tro-cong-nghe-sac/details'),
+        axios.get('http://localhost:8080/chi-so-khang-bui-va-nuoc'),
+        axios.get('http://localhost:8080/tinh-trang'),
+        axios.get('http://localhost:8080/ram'),
+        axios.get('http://localhost:8080/bo-nho-trong'),
+        axios.get('http://localhost:8080/mau-sac'),
       ]);
 
       heDieuHanhOptions.value = heDieuHanhRes.data.content;
@@ -226,31 +226,59 @@ export default function addProductLogic() {
       return;
     }
 
-    const formData = new FormData();
-    formData.append('productData', JSON.stringify(productData.value));
-    productVariants.value.forEach((variant, index) => {
-      formData.append(`variants[${index}]`, JSON.stringify(variant));
-      if (variantImages.value[index]?.file) {
-        formData.append(`variantImages[${index}]`, variantImages.value[index].file);
-      }
-    });
+    const formData = new FormData();// Thay đổi cách thêm dữ liệu vào FormData
+    formData.append('dto', JSON.stringify({
+      tenSanPham: productData.value.tenSanPham,
+      idNhaSanXuat: productData.value.idNhaSanXuat,
+      idPin: productData.value.idPin,
+      idManHinh: productData.value.idManHinh,
+      idCpu: productData.value.idCpu,
+      idGpu: productData.value.idGpu,
+      idCumCamera: productData.value.idCumCamera,
+      idHeDieuHanh: productData.value.idHeDieuHanh,
+      idThietKe: productData.value.idThietKe,
+      idSim: productData.value.idSim,
+      idCongSac: productData.value.idCongSac,
+      idHoTroCongNgheSac: productData.value.idHoTroCongNgheSac,
+      idCongNgheMang: productData.value.idCongNgheMang,
+      idChiSoKhangBuiVaNuoc: productData.value.idChiSoKhangBuiVaNuoc || null,
+      tienIchDacBiet: productData.value.tienIchDacBiet,
+      giaBan: productVariants.value[0].donGia, // Lấy giá từ biến thể đầu tiên
+      createdBy: 'admin', // Thay bằng ID người dùng thực tế
+      updatedBy: 'admin', // Thay bằng ID người dùng thực tế
+      variants: productVariants.value.map(variant => ({
+        idImel: variant.idImel,
+        idMauSac: variant.idMauSac,
+        idRam: variant.idRam,
+        idBoNhoTrong: variant.idBoNhoTrong,
+        idLoaiTinhTrang: variant.idLoaiTinhTrang,
+        imageIndex: variant.imageIndex,
+        soLuong: variant.soLuong,
+        donGia: variant.donGia
+      }))
+    }));
+
+    // Thêm ảnh vào FormData
     productImages.value.forEach((image, index) => {
-      formData.append(`images[${index}][file]`, image.file);
+      formData.append('images', image.file);
     });
 
     try {
-      await axios.post('http://localhost:8080/api/chi-tiet-san-pham', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
+      const response = await axios.post('http://localhost:8080/chi-tiet-san-pham', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
       });
+
       if (toast.value) {
-        toast.value?.kshowToast('success', 'Thêm mới thành công!');
+        toast.value?.kshowToast('success', 'Thêm sản phẩm thành công!');
       }
       await router.push('/san-pham');
     } catch (error) {
+      console.error('Error:', error);
       if (toast.value) {
-        toast.value?.kshowToast('error', 'Lỗi khi lưu dữ liệu: ' + (error.response?.data?.error || error.message));
+        toast.value?.kshowToast('error', 'Lỗi khi lưu dữ liệu: ' + (error.response?.data?.message || error.message));
       }
-      console.error('Save error:', error);
     }
   };
 
@@ -293,71 +321,71 @@ export default function addProductLogic() {
         case 'id':
           break;
         case 'heDieuHanh':
-          response = await axios.post('http://localhost:8080/api/he-dieu-hanhs', { tenHeDieuHanh: data.tenHeDieuHanh });
+          response = await axios.post('http://localhost:8080/he-dieu-hanhs', { tenHeDieuHanh: data.tenHeDieuHanh });
           heDieuHanhOptions.value.push(response.data);
           break;
         case 'manHinh':
-          response = await axios.post('http://localhost:8080/api/man-hinhs', { kichThuoc: data.kichThuoc });
+          response = await axios.post('http://localhost:8080/man-hinhs', { kichThuoc: data.kichThuoc });
           manHinhOptions.value.push(response.data);
           break;
         case 'nhaSanXuat':
-          response = await axios.post('http://localhost:8080/api/nha-san-xuats', { tenNhaSanXuat: data.tenNhaSanXuat });
+          response = await axios.post('http://localhost:8080/nha-san-xuats', { tenNhaSanXuat: data.tenNhaSanXuat });
           nhaSanXuatOptions.value.push(response.data);
           break;
         case 'cumCamera':
-          response = await axios.post('http://localhost:8080/api/cum-cameras', { tenCamera: data.tenCamera });
+          response = await axios.post('http://localhost:8080/cum-cameras', { tenCamera: data.tenCamera });
           cumCameraOptions.value.push(response.data);
           break;
         case 'sim':
-          response = await axios.post('http://localhost:8080/api/sims', { loaiSim: data.loaiSim });
+          response = await axios.post('http://localhost:8080/sims', { loaiSim: data.loaiSim });
           simOptions.value.push(response.data);
           break;
         case 'thietKe':
-          response = await axios.post('http://localhost:8080/api/thiet-kes', { tenThietKe: data.tenThietKe });
+          response = await axios.post('http://localhost:8080/thiet-kes', { tenThietKe: data.tenThietKe });
           thietKeOptions.value.push(response.data);
           break;
         case 'pin':
-          response = await axios.post('http://localhost:8080/api/pins', { dungLuong: data.dungLuong });
+          response = await axios.post('http://localhost:8080/pins', { dungLuong: data.dungLuong });
           pinOptions.value.push(response.data);
           break;
         case 'cpu':
-          response = await axios.post('http://localhost:8080/api/cpus', { tenCpu: data.tenCpu });
+          response = await axios.post('http://localhost:8080/cpus', { tenCpu: data.tenCpu });
           cpuOptions.value.push(response.data);
           break;
         case 'gpu':
-          response = await axios.post('http://localhost:8080/api/gpus', { tenGpu: data.tenGpu });
+          response = await axios.post('http://localhost:8080/gpus', { tenGpu: data.tenGpu });
           gpuOptions.value.push(response.data);
           break;
         case 'congNgheMang':
-          response = await axios.post('http://localhost:8080/api/cong-nghe-mangs', { tenCongNgheMang: data.tenCongNgheMang });
+          response = await axios.post('http://localhost:8080/cong-nghe-mangs', { tenCongNgheMang: data.tenCongNgheMang });
           congNgheMangOptions.value.push(response.data);
           break;
         case 'congSac':
-          response = await axios.post('http://localhost:8080/api/cong-sacs', { congSac: data.congSac });
+          response = await axios.post('http://localhost:8080/cong-sacs', { congSac: data.congSac });
           congSacOptions.value.push(response.data);
           break;
         case 'hoTroCongNgheSac':
-          response = await axios.post('http://localhost:8080/api/ho-tro-cong-nghe-sacs', { ten: data.ten });
+          response = await axios.post('http://localhost:8080/ho-tro-cong-nghe-sacs', { ten: data.ten });
           hoTroCongNgheSacOptions.value.push(response.data);
           break;
         case 'chiSoKhangBuiVaNuoc':
-          response = await axios.post('http://localhost:8080/api/chi-so-khang-bui-va-nuocs', { tenChiSo: data.tenChiSo });
+          response = await axios.post('http://localhost:8080/chi-so-khang-bui-va-nuocs', { tenChiSo: data.tenChiSo });
           chiSoKhangBuiVaNuocOptions.value.push(response.data);
           break;
         case 'tinhTrang':
-          response = await axios.post('http://localhost:8080/api/tinh-trangs', { loaiTinhTrang: data.loaiTinhTrang });
+          response = await axios.post('http://localhost:8080/tinh-trangs', { loaiTinhTrang: data.loaiTinhTrang });
           tinhTrangOptions.value.push(response.data);
           break;
         case 'ram':
-          response = await axios.post('http://localhost:8080/api/ram', { ma: data.ma, dungLuong: data.dungLuong });
+          response = await axios.post('http://localhost:8080/ram', { ma: data.ma, dungLuong: data.dungLuong });
           ramOptions.value.push(response.data);
           break;
         case 'boNhoTrong':
-          response = await axios.post('http://localhost:8080/api/bo-nho-trong', { ma: data.ma, dungLuong: data.dungLuong });
+          response = await axios.post('http://localhost:8080/bo-nho-trong', { ma: data.ma, dungLuong: data.dungLuong });
           boNhoTrongOptions.value.push(response.data);
           break;
         case 'mauSac':
-          response = await axios.post('http://localhost:8080/api/mau-sac', { ma: data.ma, tenMau: data.tenMau });
+          response = await axios.post('http://localhost:8080/mau-sac', { ma: data.ma, tenMau: data.tenMau });
           mauSacOptions.value.push(response.data);
           break;
         case 'tienIchDacBiet':
