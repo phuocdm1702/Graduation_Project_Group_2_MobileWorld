@@ -19,7 +19,6 @@ import java.util.Optional;
 @RequestMapping("/khach-hang")
 @CrossOrigin(origins = {"http://localhost:3000", "http://localhost:8080"})
 public class KhachHangController {
-
     private final KhachHangServices khachHangServices;
     private final DiaChiKhachHangServices diachiservices;
     @Autowired
