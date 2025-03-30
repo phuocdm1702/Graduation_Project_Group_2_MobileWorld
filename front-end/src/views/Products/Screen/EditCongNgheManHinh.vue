@@ -73,7 +73,7 @@ import { useRouter, useRoute } from 'vue-router';
 import ToastNotification from '@/components/ToastNotification.vue';
 import ConfirmModal from '@/components/ConfirmModal.vue';
 import BreadcrumbWrapper from '@/components/BreadcrumbWrapper.vue';
-import useCongNgheManHinh from './useCongNgheManHinh.js';
+import useCongNgheManHinh from './CongNgheManHinh.js';
 import axios from 'axios';
 
 const router = useRouter();
@@ -105,7 +105,7 @@ const fetchCongNgheManHinh = async (id) => {
   } catch (error) {
     if (toast.value) toast.value?.kshowToast('error', 'Không thể tải dữ liệu!');
     console.error('Fetch error:', error);
-    router.push('/man-hinh/cong-nghe');
+    router.push('/screens/technology');
   }
 };
 
@@ -113,20 +113,20 @@ const handleFormSubmit = () => {
   confirmAction('Bạn có chắc chắn muốn cập nhật công nghệ màn hình này?', async () => {
     try {
       await updateCongNgheManHinh();
-      await router.push('/cong-nghe-man-hinh');
+      await router.push('/screens/technology');
     } catch (error) {
       console.error('Error during update or navigation:', error);
-      if (toast.value) toast.value.kshowToast('error', 'Không thể lưu hoặc chuyển trang!');
+      if (toast.value) toast.value?.kshowToast('error', 'Không thể lưu hoặc chuyển trang!');
     }
   });
 };
 
 const goBack = async () => {
   try {
-    await router.push('/man-hinh/cong-nghe');
+    await router.push('/screens/technology');
   } catch (error) {
     console.error('Navigation error:', error);
-    if (toast.value) toast.value.kshowToast('error', 'Không thể quay lại!');
+    if (toast.value) toast.value?.kshowToast('error', 'Không thể quay lại!');
   }
 };
 

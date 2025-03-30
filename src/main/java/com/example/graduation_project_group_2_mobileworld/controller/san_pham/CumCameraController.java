@@ -8,7 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/cum-camera")
+@RequestMapping("/cum-camera")
 @CrossOrigin(origins = "http://localhost:3000", allowedHeaders = "*")
 public class CumCameraController {
     private final CumCameraService cumCameraService;

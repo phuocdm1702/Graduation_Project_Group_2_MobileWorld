@@ -124,7 +124,7 @@ import { useRouter, useRoute } from 'vue-router';
 import ToastNotification from '@/components/ToastNotification.vue';
 import ConfirmModal from '@/components/ConfirmModal.vue';
 import BreadcrumbWrapper from '@/components/BreadcrumbWrapper.vue'; // Import BreadcrumbWrapper
-import useManHinh from './useManHinh.js';
+import useManHinh from './ManHinh.js';
 import axios from 'axios';
 
 const router = useRouter();

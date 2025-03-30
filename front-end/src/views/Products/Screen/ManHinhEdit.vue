@@ -4,9 +4,6 @@
     <BreadcrumbWrapper :breadcrumb-items="breadcrumbItems" />
 
     <div class="mt-2 mx-auto">
-<!--      <h2 class="bg-white shadow-lg rounded-lg p-5 mb-2 mt-2 text-2xl font-semibold text-gray-700">-->
-<!--        Chỉnh Sửa Màn Hình-->
-<!--      </h2>-->
       <ToastNotification ref="toast" />
 
       <!-- Form chỉnh sửa -->
@@ -118,7 +115,7 @@ import { useRouter, useRoute } from 'vue-router';
 import ToastNotification from '@/components/ToastNotification.vue';
 import ConfirmModal from '@/components/ConfirmModal.vue';
 import BreadcrumbWrapper from '@/components/BreadcrumbWrapper.vue'; // Import BreadcrumbWrapper
-import useManHinh from './useManHinh.js';
+import useManHinh from './ManHinh.js';
 import axios from 'axios';
 
 const router = useRouter();
@@ -208,12 +205,12 @@ const handleSubmit = async () => {
 
   confirmAction('Bạn có chắc chắn muốn cập nhật màn hình này?', async () => {
     await updateManHinh();
-    router.push('/screen');
+    router.push('/screens');
   });
 };
 
 const goBack = () => {
-  router.push('/screen');
+  router.push('/screens');
 };
 </script>
 

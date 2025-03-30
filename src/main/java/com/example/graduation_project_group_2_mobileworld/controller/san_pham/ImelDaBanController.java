@@ -7,7 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/imel-da-ban")
+@RequestMapping("/imel-da-ban")
 @CrossOrigin(origins = "http://localhost:3000")
 public class ImelDaBanController {
 

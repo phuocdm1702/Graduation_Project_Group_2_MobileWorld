@@ -8,7 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/ram")
+@RequestMapping("/ram")
 @CrossOrigin(origins = "http://localhost:3000", allowedHeaders = "*")
 public class RamController {
 

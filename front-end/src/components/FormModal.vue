@@ -24,7 +24,7 @@
           </button>
           <button
             type="submit"
-            class="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-lg transition-all duration-200 font-medium flex items-center"
+            class="bg-orange-500 hover:bg-orange-600 text-white px-5 py-2 rounded-lg transition-all duration-200 font-medium flex items-center"
           >
             <i class="fa-solid fa-save mr-2"></i> Thêm mới
           </button>
@@ -53,7 +53,7 @@ const props = defineProps({
   },
   iconColor: {
     type: String,
-    default: 'text-green-500',
+    default: 'text-orange-500',
   },
 });
 

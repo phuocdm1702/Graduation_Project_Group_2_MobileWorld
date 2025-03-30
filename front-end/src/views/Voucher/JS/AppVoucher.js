@@ -11,7 +11,7 @@ export default function usePhieuGiamGia() {
   const minOrder = ref(null);
   const valueFilter = ref(null);
   const currentPage = ref(0);
-  const pageSize = ref(11);
+  const pageSize = ref(10);
   const totalPages = ref(0);
 
   const baseURL = "http://localhost:8080/phieu-giam-gia";
@@ -26,7 +26,8 @@ export default function usePhieuGiamGia() {
         text: "Chưa diễn ra",
         isActive: false,
         cssClass: "badge-pending",
-        isToggleDisabled: true, // Vô hiệu hóa ToggleSwitch
+        isToggleDisabled: true,
+        isHiddenToggle: true,
       };
     } else if (endDate >= currentDate) {
       if (item.trangThai) {
@@ -34,14 +35,16 @@ export default function usePhieuGiamGia() {
           text: "Không hoạt động",
           isActive: true,
           cssClass: "badge-inactive",
-          isToggleDisabled: false, // Cho phép bật/tắt
+          isToggleDisabled: false,
+          isHiddenToggle: false,
         };
       } else {
         return {
           text: "Đang diễn ra",
           isActive: false,
           cssClass: "badge-active",
-          isToggleDisabled: false, // Cho phép bật/tắt
+          isToggleDisabled: false,
+          isHiddenToggle: false,
         };
       }
     }
@@ -107,9 +110,8 @@ export default function usePhieuGiamGia() {
 
   const filterPGG = async (page = 0) => {
     try {
-      // Helper function to format date safely
       const formatDate = (dateValue) => {
-        if (!dateValue) return null; // Handle null or undefined
+        if (!dateValue) return null;
         const date = dateValue instanceof Date ? dateValue : new Date(dateValue);
         return isNaN(date.getTime()) ? null : date.toISOString().split("T")[0];
       };
@@ -143,10 +145,20 @@ export default function usePhieuGiamGia() {
       }
       const newStatus = !item.trangThai;
       await axios.put(`${baseURL}/update-trang-thai/${item.id}`, { trangThai: newStatus });
-      item.trangThai = newStatus; // Cập nhật trạng thái gốc
-      const displayStatus = computeDisplayStatus(item);
-      item.displayStatus = displayStatus;
-      console.log(`Toggled ${item.ma}: trangThai = ${item.trangThai}, displayStatus = ${item.displayStatus.text}`);
+
+      // Tìm index của item trong mảng vouchers
+      const index = vouchers.value.findIndex(v => v.id === item.id);
+      if (index !== -1) {
+        // Cập nhật trạng thái gốc
+        vouchers.value[index].trangThai = newStatus;
+        // Tính toán lại displayStatus
+        const displayStatus = computeDisplayStatus(vouchers.value[index]);
+        vouchers.value[index].displayStatus = displayStatus;
+
+        // Gán lại mảng để đảm bảo reactivity
+        vouchers.value = [...vouchers.value];
+        console.log(`Toggled ${item.ma}: trangThai = ${newStatus}, displayStatus = ${displayStatus.text}`);
+      }
     } catch (error) {
       console.error("Lỗi khi cập nhật trạng thái:", error);
       console.log("Response từ server:", error.response?.data);
@@ -161,10 +173,22 @@ export default function usePhieuGiamGia() {
     },
     { key: "ma", label: "Mã" },
     { key: "tenPhieuGiamGia", label: "Tên Phiếu" },
-    { key: "phanTramGiamGia", label: "% Giảm Giá", formatter: (value) => `${value}%` },
+    {
+      key: "phanTramGiamGia",
+      label: "% Giảm Giá",
+      formatter: (value, item) => {
+        if (item.loaiPhieuGiamGia === "Phần trăm") {
+          return value ? `${value}%` : "N/A";
+        } else if (item.loaiPhieuGiamGia === "Tiền mặt" && item.soTienGiamToiDa && item.hoaDonToiThieu) {
+          const percent = (item.soTienGiamToiDa / item.hoaDonToiThieu) * 100;
+          return `${percent.toFixed(1)}%`;
+        }
+        return "N/A";
+      },
+    },
     {
       key: "soTienGiamToiDa",
-      label: "Số Tiền Giảm TĐ",
+      label: "Giảm Tối Đa",
       formatter: (value, item) => {
         if (item.loaiPhieuGiamGia === "Phần trăm") {
           const phanTramGiamGia = item.phanTramGiamGia || 0;
@@ -176,14 +200,13 @@ export default function usePhieuGiamGia() {
       },
     },
     { key: "soLuongDung", label: "Số lượng" },
-    { key: "hoaDonToiThieu", 
-      label: "Hóa\nĐơn\nTối\nThiểu", 
-      formatter: (value, item) => {
-        return value.toLocaleString("vi-VN") + " VND";
-      }
+    {
+      key: "hoaDonToiThieu",
+      label: "Hóa\nĐơn\nTối\nThiểu",
+      formatter: (value) => value.toLocaleString("vi-VN") + " VND",
     },
-    { key: "ngayBatDau", label: "Ngày\nBĐ", formatter: (value) => new Date(value).toLocaleDateString("vi-VN") },
-    { key: "ngayKetThuc", label: "Ngày\nKT", formatter: (value) => new Date(value).toLocaleDateString("vi-VN") },
+    { key: "ngayBatDau", label: "Bắt đầu", formatter: (value) => new Date(value).toLocaleDateString("vi-VN") },
+    { key: "ngayKetThuc", label: "Kết thúc", formatter: (value) => new Date(value).toLocaleDateString("vi-VN") },
     { key: "displayStatus", label: "Trạng thái", cellSlot: "trangThaiPGG" },
     { key: "actions", label: "Hành động", cellSlot: "actionsSlot" },
   ]);

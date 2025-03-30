@@ -10,7 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/pin")
+@RequestMapping("/pin")
 @CrossOrigin(origins = "http://localhost:3000", allowedHeaders = "*")
 public class PinController {
     private final PinService pinService;
