@@ -11,6 +11,8 @@
 	<parameter name="tienGiam" class="java.lang.Double"/>
 	<parameter name="phanTramGiam" class="java.lang.Double"/>
 	<parameter name="logoQrImage" class="java.awt.Image"/> <!-- Tham số cho hình ảnh kết hợp Logo + QR -->
+	<parameter name="hinhThucThanhToan" class="java.lang.String"/>
+
 
 	<queryString language="sql"><![CDATA[]]></queryString>
 	<field name="stt" class="java.lang.Integer"/>
@@ -355,14 +357,14 @@ Số điện thoại: 0123 456 789 | Email: contact@mobileworld.vn
 				<textElement textAlignment="Right">
 					<font fontName="DejaVu Sans" size="10" isBold="true"/>
 				</textElement>
-				<text><![CDATA[Tổng tiền:]]></text>
+				<text><![CDATA[Hình thức thanh toán:]]></text>
 			</staticText>
-			<textField pattern="#,##0 đ">
+			<textField>
 				<reportElement x="600" y="10" width="150" height="20"/>
 				<textElement textAlignment="Right">
 					<font fontName="DejaVu Sans" size="10"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{tongTien}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{hinhThucThanhToan}]]></textFieldExpression>
 			</textField>
 
 			<staticText>
@@ -370,14 +372,14 @@ Số điện thoại: 0123 456 789 | Email: contact@mobileworld.vn
 				<textElement textAlignment="Right">
 					<font fontName="DejaVu Sans" size="10" isBold="true"/>
 				</textElement>
-				<text><![CDATA[Giảm giá:]]></text>
+				<text><![CDATA[Tổng tiền:]]></text>
 			</staticText>
 			<textField pattern="#,##0 đ">
 				<reportElement x="600" y="35" width="150" height="20"/>
 				<textElement textAlignment="Right">
 					<font fontName="DejaVu Sans" size="10"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{tienGiam} != null ? $P{tienGiam} : 0]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{tongTien}]]></textFieldExpression>
 			</textField>
 
 			<staticText>
@@ -385,10 +387,25 @@ Số điện thoại: 0123 456 789 | Email: contact@mobileworld.vn
 				<textElement textAlignment="Right">
 					<font fontName="DejaVu Sans" size="10" isBold="true"/>
 				</textElement>
+				<text><![CDATA[Giảm giá:]]></text>
+			</staticText>
+			<textField pattern="#,##0 đ">
+				<reportElement x="600" y="60" width="150" height="20"/>
+				<textElement textAlignment="Right">
+					<font fontName="DejaVu Sans" size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{tienGiam} != null ? $P{tienGiam} : 0]]></textFieldExpression>
+			</textField>
+
+			<staticText>
+				<reportElement x="440" y="85" width="150" height="20"/>
+				<textElement textAlignment="Right">
+					<font fontName="DejaVu Sans" size="10" isBold="true"/>
+				</textElement>
 				<text><![CDATA[Phần trăm giảm:]]></text>
 			</staticText>
 			<textField pattern="0.00%">
-				<reportElement x="600" y="60" width="150" height="20"/>
+				<reportElement x="600" y="85" width="150" height="20"/>
 				<textElement textAlignment="Right">
 					<font fontName="DejaVu Sans" size="10"/>
 				</textElement>
@@ -396,18 +413,18 @@ Số điện thoại: 0123 456 789 | Email: contact@mobileworld.vn
 			</textField>
 
 			<line>
-				<reportElement x="440" y="85" width="310" height="1"/>
+				<reportElement x="440" y="110" width="310" height="1"/>
 			</line>
 
 			<staticText>
-				<reportElement x="440" y="90" width="150" height="20"/>
+				<reportElement x="440" y="115" width="150" height="20"/>
 				<textElement textAlignment="Right">
 					<font fontName="DejaVu Sans" size="10" isBold="true"/>
 				</textElement>
 				<text><![CDATA[Thành tiền:]]></text>
 			</staticText>
 			<textField pattern="#,##0 đ">
-				<reportElement x="600" y="90" width="150" height="20"/>
+				<reportElement x="600" y="115" width="150" height="20"/>
 				<textElement textAlignment="Right">
 					<font fontName="DejaVu Sans" size="10" isBold="true"/>
 				</textElement>

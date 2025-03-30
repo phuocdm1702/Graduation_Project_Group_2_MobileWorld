@@ -1,5 +1,6 @@
 package com.example.graduation_project_group_2_mobileworld.service.hoa_don;
 
+import com.example.graduation_project_group_2_mobileworld.dto.hinh_thuc_thanh_toan.HinhThucThanhToanDTO;
 import com.example.graduation_project_group_2_mobileworld.dto.hoa_don.HoaDonChiTietDTO;
 import com.example.graduation_project_group_2_mobileworld.dto.hoa_don.HoaDonDTO;
 import com.google.zxing.BarcodeFormat;
@@ -60,6 +61,22 @@ public class InHoaDonPDF {
                 parameters.put("ngayBan", hoaDon.getNgayTao() != null ? dateFormat.format(hoaDon.getNgayTao()) : "N/A");
                 parameters.put("soDienThoai", hoaDon.getSoDienThoaiKhachHang() != null ? hoaDon.getSoDienThoaiKhachHang() : "N/A");
                 parameters.put("diaChi", hoaDon.getDiaChiKhachHang() != null ? hoaDon.getDiaChiKhachHang() : "N/A");
+
+                // Xử lý hình thức thanh toán từ List<HinhThucThanhToanDTO>
+                String hinhThucThanhToanStr = "N/A";
+                if (hoaDon.getHinhThucThanhToan() != null && !hoaDon.getHinhThucThanhToan().isEmpty()) {
+                    List<String> paymentMethods = new ArrayList<>();
+                    for (HinhThucThanhToanDTO httt : hoaDon.getHinhThucThanhToan()) {
+                        // Giả sử HinhThucThanhToanDTO có phương thức getTenPhuongThuc() để lấy tên phương thức
+                        String method = (httt.getIdPhuongThucThanhToan() != null && httt.getIdPhuongThucThanhToan().getKieuThanhToan() != null)
+                                ? httt.getIdPhuongThucThanhToan().getKieuThanhToan()
+                                : "Không xác định";
+                        paymentMethods.add(method);
+                    }
+                    hinhThucThanhToanStr = String.join(", ", paymentMethods); // Nối các phương thức nếu có nhiều
+                }
+                parameters.put("hinhThucThanhToan", hinhThucThanhToanStr);
+
                 parameters.put("tongTien", hoaDon.getTongTien() != null ? hoaDon.getTongTien() : BigDecimal.ZERO);
                 parameters.put("tongTienSauGiam", hoaDon.getTongTienSauGiam() != null ? hoaDon.getTongTienSauGiam() : BigDecimal.ZERO);
 
@@ -87,19 +104,13 @@ public class InHoaDonPDF {
                     int stt = 1;
                     for (HoaDonChiTietDTO chiTiet : chiTietList) {
                         HoaDonChiTietDTO chiTietWithStt = new HoaDonChiTietDTO();
-                        //STT
                         chiTietWithStt.setStt(stt++);
-                        //Tên sản phẩm
                         chiTietWithStt.setTenSanPham(chiTiet.getIdChiTietSanPham() != null && chiTiet.getIdChiTietSanPham().getIdSanPham() != null
                                 ? chiTiet.getIdChiTietSanPham().getIdSanPham().getTenSanPham() : "N/A");
-                        //Imel
                         chiTietWithStt.setImel(chiTiet.getIdImelDaBan() != null ? chiTiet.getIdImelDaBan().getImel() : "N/A");
-                        //Màu sắc
                         chiTietWithStt.setMauSac(chiTiet.getIdChiTietSanPham() != null && chiTiet.getIdChiTietSanPham().getIdMauSac() != null
                                 ? chiTiet.getIdChiTietSanPham().getIdMauSac().getMauSac() : "N/A");
-                        //Bộ nhớ trong
                         chiTietWithStt.setBoNho(chiTiet.getIdChiTietSanPham() != null ? chiTiet.getIdChiTietSanPham().getIdBoNhoTrong().getDungLuongBoNhoTrong() : "N/A");
-                        //Giá bán
                         chiTietWithStt.setGia(chiTiet.getGia() != null ? chiTiet.getGia() : BigDecimal.ZERO);
 
                         chiTietListWithStt.add(chiTietWithStt);
@@ -126,78 +137,80 @@ public class InHoaDonPDF {
 
     // Tạo mã QR với logo lớn hơn và rõ hơn
     private BufferedImage generateQRWithLogo(String maHoaDon) throws Exception {
-        // Tạo mã QR với mức sửa lỗi cao (H - 30%)
+        // Chuẩn bị nội dung QR (mã hóa đơn)
         String qrCodeText = maHoaDon != null ? maHoaDon : "N/A";
         int qrSize = 250; // Kích thước QR 250x250
         QRCodeWriter qrCodeWriter = new QRCodeWriter();
 
-        // Thêm hint cho mức sửa lỗi và viền trắng
+        // Cấu hình QR với mức sửa lỗi cao và viền trắng
         Map<EncodeHintType, Object> hints = new HashMap<>();
         hints.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.H); // Mức sửa lỗi cao (30%)
-        hints.put(EncodeHintType.MARGIN, 2); // Thêm viền trắng (quiet zone) để tăng khả năng quét
+        hints.put(EncodeHintType.MARGIN, 4); // Viền trắng tiêu chuẩn
+        hints.put(EncodeHintType.CHARACTER_SET, "UTF-8"); // Hỗ trợ ký tự tiếng Việt
 
+        // Tạo BitMatrix cho QR
         BitMatrix bitMatrix = qrCodeWriter.encode(qrCodeText, BarcodeFormat.QR_CODE, qrSize, qrSize, hints);
 
-        // Tính toán kích thước logo và vùng trắng
-        int logoSize = qrSize / 3; // 83px với QR 250x250 (khoảng 33% kích thước QR)
-        int padding = 1; // Giảm padding xuống mức tối thiểu
-        int whiteAreaSize = logoSize + padding; // Vùng trắng chỉ lớn hơn logo 1px ở mỗi bên (tổng 2px)
-        int whiteAreaXOffset = (qrSize - whiteAreaSize) / 2;
-        int whiteAreaYOffset = (qrSize - whiteAreaSize) / 2;
+        // Kích thước logo là 25% (62px với QR 250x250)
+        int logoSize = qrSize / 4; // 25% kích thước QR
+        int padding = 1; // Padding nhỏ để giữ dữ liệu QR
+        int whiteAreaSize = logoSize + padding * 2; // Vùng trắng bao quanh logo
+        // Đặt logo ở chính giữa QR
+        int whiteAreaXOffset = (qrSize - whiteAreaSize) / 2; // Căn giữa theo chiều ngang
+        int whiteAreaYOffset = (qrSize - whiteAreaSize) / 2; // Căn giữa theo chiều dọc
 
-        // Xóa các chấm QR trong vùng trắng hình tròn
+        // Xóa dữ liệu QR trong vùng trắng hình tròn ở giữa
         for (int x = 0; x < qrSize; x++) {
             for (int y = 0; y < qrSize; y++) {
                 int centerX = whiteAreaXOffset + whiteAreaSize / 2;
                 int centerY = whiteAreaYOffset + whiteAreaSize / 2;
                 double distance = Math.sqrt(Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2));
                 if (distance <= whiteAreaSize / 2) {
-                    bitMatrix.unset(x, y); // Xóa chấm QR tại vị trí này
+                    bitMatrix.unset(x, y); // Xóa chấm QR trong vùng logo
                 }
             }
         }
 
-        // Tạo BufferedImage từ BitMatrix đã chỉnh sửa
+        // Tạo hình ảnh QR từ BitMatrix (QR và vùng trắng trên cùng một layer)
         BufferedImage qrImage = new BufferedImage(qrSize, qrSize, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2dQr = qrImage.createGraphics();
+        g2dQr.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+        // Vẽ QR với vùng trắng
         for (int x = 0; x < qrSize; x++) {
             for (int y = 0; y < qrSize; y++) {
                 qrImage.setRGB(x, y, bitMatrix.get(x, y) ? Color.BLACK.getRGB() : Color.WHITE.getRGB());
             }
         }
-
         // Tải logo
         ClassPathResource logoResource = new ClassPathResource("static/images/Logo_Mobile_World_vector.png");
         BufferedImage logoImage = ImageIO.read(logoResource.getInputStream());
 
-        // Tạo một hình ảnh mới cho logo với nền tròn (đen giống Zalo)
+        // Tạo logo với nền tròn
         BufferedImage circularLogo = new BufferedImage(logoSize, logoSize, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2dCircular = circularLogo.createGraphics();
-
-        // Vẽ nền tròn màu đen
         g2dCircular.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        g2dCircular.setColor(Color.BLACK);
+        g2dCircular.setColor(Color.BLACK); // Nền đen để logo nổi bật
         g2dCircular.fillOval(0, 0, logoSize, logoSize);
 
-        // Điều chỉnh kích thước logo và vẽ lên nền tròn
-        int logoInnerSize = (int) (logoSize * 0.8); // Logo nhỏ hơn một chút so với nền tròn (80% đường kính)
+        // Tăng kích thước logo bên trong nền tròn lên 90% để rõ hơn
+        int logoInnerSize = (int) (logoSize * 0.9); // 90% để logo gọn và rõ
         int logoInnerOffset = (logoSize - logoInnerSize) / 2;
         g2dCircular.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
         g2dCircular.drawImage(logoImage, logoInnerOffset, logoInnerOffset, logoInnerSize, logoInnerSize, null);
         g2dCircular.dispose();
 
-        // Tính toán vị trí để đặt logo (căn giữa)
-        int xOffset = (qrSize - logoSize) / 2;
-        int yOffset = (qrSize - logoSize) / 2;
+        // Căn logo ở chính giữa QR
+        int xOffset = (qrSize - logoSize) / 2; // Căn giữa theo chiều ngang
+        int yOffset = (qrSize - logoSize) / 2; // Căn giữa theo chiều dọc
 
-        // Vẽ vùng trắng hình tròn và đặt logo lên
-        Graphics2D g2dQr = qrImage.createGraphics();
-        g2dQr.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        g2dQr.setColor(Color.WHITE);
-        g2dQr.fillOval(whiteAreaXOffset, whiteAreaYOffset, whiteAreaSize, whiteAreaSize);
-
-        // Vẽ logo tròn lên vùng trắng
-        g2dQr.drawImage(circularLogo, xOffset, yOffset, null);
+        // Vẽ logo lên QR (trên cùng một layer)
+        g2dQr.drawImage(circularLogo, xOffset, yOffset, null); // Vẽ logo trực tiếp
         g2dQr.dispose();
+
+        // Lưu ảnh QR để kiểm tra (tuỳ chọn)
+        // ImageIO.write(qrImage, "PNG", new File("qr_test_" + qrCodeText + ".png"));
+        logger.info("Generated QR code with logo for maHoaDon: {}", qrCodeText);
 
         return qrImage;
     }
