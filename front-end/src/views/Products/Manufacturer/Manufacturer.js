@@ -19,7 +19,7 @@ export default function useNhaSanXuat() {
 
   const fetchData = async () => {
     try {
-      const { data } = await axios.get('http://localhost:8080/api/nha-san-xuat', {
+      const { data } = await axios.get('http://localhost:8080/nha-san-xuat', {
         params: { page: currentPage.value, size: pageSize.value },
       });
       manufacturers.value = data.content;
@@ -52,7 +52,7 @@ export default function useNhaSanXuat() {
     }
     isSearching.value = true;
     try {
-      const { data } = await axios.get('http://localhost:8080/api/nha-san-xuat/search', {
+      const { data } = await axios.get('http://localhost:8080/nha-san-xuat/search', {
         params: {
           keyword: keyword || undefined,
           nhaSanXuat: nhaSanXuatFilter || undefined,
@@ -80,7 +80,7 @@ export default function useNhaSanXuat() {
 
   const checkDuplicate = async (field, value, excludeId = null) => {
     try {
-      const { data } = await axios.get(`http://localhost:8080/api/nha-san-xuat/exists/${field}`, {
+      const { data } = await axios.get(`http://localhost:8080/nha-san-xuat/exists/${field}`, {
         params: { [field]: value, excludeId },
       });
       return data;
@@ -101,7 +101,7 @@ export default function useNhaSanXuat() {
       return;
     }
     try {
-      const response = await axios.post('http://localhost:8080/api/nha-san-xuat', manufacturer.value);
+      const response = await axios.post('http://localhost:8080/nha-san-xuat', manufacturer.value);
       if (toast.value) {
         toast.value?.kshowToast('success', 'Thêm mới thành công!');
       }
@@ -143,7 +143,7 @@ export default function useNhaSanXuat() {
       return;
     }
     try {
-      const response = await axios.put(`http://localhost:8080/api/nha-san-xuat/${id}`, manufacturer.value);
+      const response = await axios.put(`http://localhost:8080/nha-san-xuat/${id}`, manufacturer.value);
       if (toast.value) {
         toast.value?.kshowToast('success', 'Cập nhật thành công!');
       }
@@ -161,7 +161,7 @@ export default function useNhaSanXuat() {
 
   const deleteManufacturer = async (id) => {
     try {
-      await axios.delete(`http://localhost:8080/api/nha-san-xuat/${id}`);
+      await axios.delete(`http://localhost:8080/nha-san-xuat/${id}`);
       if (toast.value) {
         toast.value?.kshowToast('success', 'Xóa thành công!');
       }

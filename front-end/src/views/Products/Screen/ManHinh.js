@@ -31,7 +31,7 @@ export default function useManHinh(toastRef) {
 
   const fetchCongNgheManHinhs = async () => {
     try {
-      const { data } = await axios.get('http://localhost:8080/api/cong-nghe-man-hinh', {
+      const { data } = await axios.get('http://localhost:8080/cong-nghe-man-hinh', {
         params: { page: 0, size: 100 },
       });
       congNgheManHinhs.value = data.content;
@@ -43,7 +43,7 @@ export default function useManHinh(toastRef) {
 
   const fetchData = async () => {
     try {
-      const { data } = await axios.get('http://localhost:8080/api/man-hinh', {
+      const { data } = await axios.get('http://localhost:8080/man-hinh', {
         params: { page: currentPage.value, size: pageSize.value },
       });
       manHinhs.value = data.content;
@@ -78,7 +78,7 @@ export default function useManHinh(toastRef) {
 
     isSearching.value = true;
     try {
-      const { data } = await axios.get('http://localhost:8080/api/man-hinh/search', {
+      const { data } = await axios.get('http://localhost:8080/man-hinh/search', {
         params: {
           keyword: keyword || undefined,
           kieuManHinh: kieuManHinhFilter || undefined,
@@ -116,7 +116,7 @@ export default function useManHinh(toastRef) {
     try {
       const endpoint = field === 'kieuManHinh' ? 'kieu-man-hinh' : 'ma';
       const paramName = field;
-      const { data } = await axios.get(`http://localhost:8080/api/man-hinh/exists/${endpoint}`, {
+      const { data } = await axios.get(`http://localhost:8080/man-hinh/exists/${endpoint}`, {
         params: { [paramName]: value, ...(excludeId && { excludeId }) },
       });
       return data;
@@ -138,7 +138,7 @@ export default function useManHinh(toastRef) {
       return;
     }
     try {
-      const response = await axios.post('http://localhost:8080/api/man-hinh', manHinh.value);
+      const response = await axios.post('http://localhost:8080/man-hinh', manHinh.value);
       if (toast.value?.showToast) toast.value.showToast('success', 'Thêm mới thành công!');
       manHinhs.value.unshift(response.data);
       totalItems.value += 1;
@@ -156,7 +156,7 @@ export default function useManHinh(toastRef) {
       return;
     }
     try {
-      const response = await axios.put(`http://localhost:8080/api/man-hinh/${id}`, manHinh.value);
+      const response = await axios.put(`http://localhost:8080/man-hinh/${id}`, manHinh.value);
       if (toast.value?.showToast) toast.value.showToast('success', 'Cập nhật thành công!');
       const index = manHinhs.value.findIndex((i) => i.id === id);
       if (index !== -1) manHinhs.value[index] = response.data;
@@ -168,7 +168,7 @@ export default function useManHinh(toastRef) {
 
   const deleteManHinh = async (id) => {
     try {
-      await axios.delete(`http://localhost:8080/api/man-hinh/${id}`);
+      await axios.delete(`http://localhost:8080/man-hinh/${id}`);
       if (toast.value?.showToast) toast.value.showToast('success', 'Xóa thành công!');
       totalItems.value -= 1;
       if (totalItems.value > 0 && currentPage.value >= totalPages.value) currentPage.value = totalPages.value - 1;

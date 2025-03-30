@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/cong-nghe-man-hinh")
+@RequestMapping("/cong-nghe-man-hinh")
 @CrossOrigin(origins = "http://localhost:3000")
 public class CongNgheManHinhController {
 

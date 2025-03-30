@@ -1,19 +1,19 @@
 <template>
   <div>
     <!-- Thêm BreadcrumbWrapper -->
-    <BreadcrumbWrapper :breadcrumb-items="breadcrumbItems" />
+    <BreadcrumbWrapper :breadcrumb-items="breadcrumbItems"/>
 
     <div class="mt-2 mx-auto">
-      <ToastNotification ref="toast" />
+      <ToastNotification ref="toast"/>
 
       <!-- Phần Thêm Sản Phẩm -->
       <div class="bg-white shadow-lg rounded-lg p-5 mb-4">
         <h3 class="text-lg font-medium text-gray-600 mb-4 text-center">THÊM SẢN PHẨM</h3>
         <div class="grid grid-cols-1 gap-6">
           <div class="flex items-center">
-            <label class="w-40 text-sm font-medium text-gray-700">Sản Phẩm</label>
+            <label class="w-40 text-sm font-medium text-gray-700">Tên Sản Phẩm</label>
             <input
-              v-model="productData.id"
+              v-model="productData.tenSanPham"
               type="text"
               placeholder="Nhập Tên sản phẩm"
               class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -29,7 +29,10 @@
                 class="w-3/5 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">Chọn Hệ Điều Hành</option>
-                <option v-for="he in heDieuHanhOptions" :key="he.id" :value="he.id">{{ he.heDieuHanh + " " + he.phienBan }}</option>
+                <option v-for="he in heDieuHanhOptions" :key="he.id" :value="he.id">{{
+                    he.heDieuHanh + " " + he.phienBan
+                  }}
+                </option>
               </select>
               <button
                 @click="openAddModal('heDieuHanh')"
@@ -45,7 +48,9 @@
                 class="w-3/5 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">Chọn Màn Hình</option>
-                <option v-for="man in manHinhOptions" :key="man.id" :value="man.id">{{ man.kichThuoc + " " + man.doPhanGiai }}</option>
+                <option v-for="man in manHinhOptions" :key="man.id" :value="man.id">
+                  {{ man.kichThuoc + " " + man.doPhanGiai }}
+                </option>
               </select>
               <button
                 @click="openAddModal('manHinh')"
@@ -99,7 +104,9 @@
                 class="w-3/5 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">Chọn Sim</option>
-                <option v-for="sim in simOptions" :key="sim.id" :value="sim.id">{{ sim.cacLoaiSimHoTro + " " + "(hỗ trợ " + sim.soLuongSimHoTro + " sim)" }}</option>
+                <option v-for="sim in simOptions" :key="sim.id" :value="sim.id">
+                  {{ sim.cacLoaiSimHoTro + " " + "(hỗ trợ " + sim.soLuongSimHoTro + " sim)" }}
+                </option>
               </select>
               <button
                 @click="openAddModal('sim')"
@@ -115,7 +122,9 @@
                 class="w-3/5 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">Chọn Thiết Kế</option>
-                <option v-for="thietKe in thietKeOptions" :key="thietKe.id" :value="thietKe.id">{{ thietKe.chatLieuKhung + " " + "(" + thietKe.chatLieuMatLung + ")" }}</option>
+                <option v-for="thietKe in thietKeOptions" :key="thietKe.id" :value="thietKe.id">
+                  {{ thietKe.chatLieuKhung + " " + "(" + thietKe.chatLieuMatLung + ")" }}
+                </option>
               </select>
               <button
                 @click="openAddModal('thietKe')"
@@ -135,7 +144,9 @@
                 class="w-3/5 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">Chọn Pin</option>
-                <option v-for="pin in pinOptions" :key="pin.id" :value="pin.id">{{ pin.loaiPin + " " + "(" + pin.dungLuongPin + ")" }}</option>
+                <option v-for="pin in pinOptions" :key="pin.id" :value="pin.id">
+                  {{ pin.loaiPin + " " + "(" + pin.dungLuongPin + ")" }}
+                </option>
               </select>
               <button
                 @click="openAddModal('pin')"
@@ -151,7 +162,9 @@
                 class="w-3/5 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">Chọn CPU</option>
-                <option v-for="cpu in cpuOptions" :key="cpu.id" :value="cpu.id">{{ cpu.tenCpu + " " + "(" + cpu.soNhan + " lõi)" }}</option>
+                <option v-for="cpu in cpuOptions" :key="cpu.id" :value="cpu.id">
+                  {{ cpu.tenCpu + " " + "(" + cpu.soNhan + " lõi)" }}
+                </option>
               </select>
               <button
                 @click="openAddModal('cpu')"
@@ -183,7 +196,9 @@
                 class="w-3/5 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">Chọn Công Nghệ Mạng</option>
-                <option v-for="congNghe in congNgheMangOptions" :key="congNghe.id" :value="congNghe.id">{{ congNghe.tenCongNgheMang }}</option>
+                <option v-for="congNghe in congNgheMangOptions" :key="congNghe.id" :value="congNghe.id">
+                  {{ congNghe.tenCongNgheMang }}
+                </option>
               </select>
               <button
                 @click="openAddModal('congNgheMang')"
@@ -199,7 +214,10 @@
                 class="w-3/5 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">Chọn Cổng Sạc</option>
-                <option v-for="congSac in congSacOptions" :key="congSac.id" :value="congSac.id">{{ congSac.congSac }}</option>
+                <option v-for="congSac in congSacOptions" :key="congSac.id" :value="congSac.id">{{
+                    congSac.congSac
+                  }}
+                </option>
               </select>
               <button
                 @click="openAddModal('congSac')"
@@ -233,7 +251,10 @@
                 class="w-3/5 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">Chọn Chỉ Số Kháng Bụi Nước</option>
-                <option v-for="chiSo in chiSoKhangBuiVaNuocOptions" :key="chiSo.id" :value="chiSo.id">{{ chiSo.tenChiSo }}</option>
+                <option v-for="chiSo in chiSoKhangBuiVaNuocOptions" :key="chiSo.id" :value="chiSo.id">{{
+                    chiSo.tenChiSo
+                  }}
+                </option>
               </select>
               <button
                 @click="openAddModal('chiSoKhangBuiVaNuoc')"
@@ -249,7 +270,9 @@
                 class="w-3/5 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">Chọn Tình Trạng</option>
-                <option v-for="tinhTrang in tinhTrangOptions" :key="tinhTrang.id" :value="tinhTrang.id">{{ tinhTrang.loaiTinhTrang }}</option>
+                <option v-for="tinhTrang in tinhTrangOptions" :key="tinhTrang.id" :value="tinhTrang.id">
+                  {{ tinhTrang.loaiTinhTrang }}
+                </option>
               </select>
               <button
                 @click="openAddModal('tinhTrang')"
@@ -260,7 +283,7 @@
             </div>
           </div>
 
-          <!-- Tiện Ích Đặc Biệt -->
+          <!-- Tiện Ích Đặc Biệt-->
           <div class="grid grid-cols-1 gap-6">
             <div class="flex items-center">
               <label class="w-40 text-sm font-medium text-gray-700">Tiện Ích Đặc Biệt</label>
@@ -287,7 +310,9 @@
                 @click="toggleDropdown('ram')"
                 class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-left"
               >
-                {{ currentVariant.selectedRams.length > 0 ? currentVariant.selectedRams.length + ' RAM đã chọn' : 'Chọn RAM' }}
+                {{
+                  currentVariant.selectedRams.length > 0 ? currentVariant.selectedRams.length + ' RAM đã chọn' : 'Chọn RAM'
+                }}
               </button>
               <div
                 v-if="dropdownOpen.ram"
@@ -320,13 +345,16 @@
                 @click="toggleDropdown('boNhoTrong')"
                 class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-left"
               >
-                {{ currentVariant.selectedBoNhoTrongs.length > 0 ? currentVariant.selectedBoNhoTrongs.length + ' ROM đã chọn' : 'Chọn Bộ Nhớ Trong' }}
+                {{
+                  currentVariant.selectedBoNhoTrongs.length > 0 ? currentVariant.selectedBoNhoTrongs.length + ' ROM đã chọn' : 'Chọn Bộ Nhớ Trong'
+                }}
               </button>
               <div
                 v-if="dropdownOpen.boNhoTrong"
                 class="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-48 overflow-y-auto"
               >
-                <label v-for="boNho in boNhoTrongOptions" :key="boNho.id" class="flex items-center p-2 hover:bg-gray-100">
+                <label v-for="boNho in boNhoTrongOptions" :key="boNho.id"
+                       class="flex items-center p-2 hover:bg-gray-100">
                   <input
                     type="checkbox"
                     :value="boNho.id"
@@ -353,7 +381,9 @@
                 @click="openColorModal"
                 class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-left"
               >
-                {{ currentVariant.selectedMauSacs.length > 0 ? currentVariant.selectedMauSacs.length + ' Màu đã chọn' : 'Chọn Màu Sắc' }}
+                {{
+                  currentVariant.selectedMauSacs.length > 0 ? currentVariant.selectedMauSacs.length + ' Màu đã chọn' : 'Chọn Màu Sắc'
+                }}
               </button>
             </div>
             <button
@@ -365,36 +395,44 @@
           </div>
         </div>
 
-        <!-- Danh sách biến thể đã thêm (dưới dạng bảng) -->
+        <!-- Danh sách biến thể đã thêm -->
         <div v-if="productVariants.length > 0" class="mt-6">
           <div v-for="(group, groupIndex) in groupVariantsByRamAndRom" :key="groupIndex">
-            <div class="flex justify-between m-2">
-            <h4 class="text-lg font-medium text-gray-600 mb-2">
-              PHIÊN BẢN {{ group.ram }}/{{ group.rom }}
-            </h4>
+            <div class="flex justify-between m-2 items-center">
+              <div class="flex items-center">
+                <input
+                  type="checkbox"
+                  v-model="allSelected[group.groupKey]"
+                  @change="toggleAllVariants(group, $event.target.checked)"
+                  class="mr-2"
+                />
+                <h4 class="text-lg font-medium text-gray-600">
+                  PHIÊN BẢN {{ group.ram }}/{{ group.rom }}
+                </h4>
+              </div>
               <div class="flex gap-2">
-                <!-- Giá Chung -->
+                <!-- Giá Chung cho nhóm -->
                 <div class="flex items-center">
                   <label class="w-36 text-sm font-medium text-gray-700">Giá Chung</label>
                   <input
-                    v-model="commonPrice"
+                    v-model="groupCommonValues[group.groupKey].price"
                     type="text"
                     placeholder="Nhập giá chung"
                     class="w-3/5 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    @input="updateSelectedVariants"
+                    @input="updateSelectedVariants(group)"
                   />
                 </div>
 
-                <!-- Số Lượng Chung -->
+                <!-- Số Lượng Chung cho nhóm -->
                 <div class="flex items-center">
                   <label class="w-36 text-sm font-medium text-gray-700">Số Lượng Chung</label>
                   <input
-                    v-model="commonQuantity"
+                    v-model="groupCommonValues[group.groupKey].quantity"
                     type="number"
                     min="0"
                     placeholder="Nhập số lượng chung"
                     class="w-3/5 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    @input="updateSelectedVariants"
+                    @input="updateSelectedVariants(group)"
                   />
                 </div>
               </div>
@@ -405,6 +443,7 @@
                 <th class="border border-gray-300 p-2 text-sm font-medium text-gray-700">
                   <input
                     type="checkbox"
+                    v-model="allSelected[group.groupKey]"
                     @change="toggleGroupSelection(group, $event.target.checked)"
                   />
                 </th>
@@ -423,11 +462,11 @@
                     type="checkbox"
                     v-model="selectedVariants"
                     :value="group.startIndex + variantIndex"
-                    @change="updateSelectedCount"
+                    @change="updateSelectedCount(group)"
                   />
                 </td>
                 <td class="border border-gray-300 p-2 text-center">{{ variantIndex + 1 }}</td>
-                <td class="border border-gray-300 p-2">{{ productData.id || 'N/A' }}</td>
+                <td class="border border-gray-300 p-2">{{ productData.tenSanPham || 'N/A' }}</td>
                 <td class="border border-gray-300 p-2">
                   <div class="flex items-center">
                       <span
@@ -542,9 +581,7 @@
         <div v-if="uniqueColors.length > 0">
           <h4 class="text-lg font-medium text-gray-600 mb-2">Ảnh Theo Màu Sắc</h4>
           <div v-for="(color, colorIndex) in uniqueColors" :key="color.colorId" class="mb-6">
-            <h5 class="text-md font-medium text-gray-600 mb-2">
-              MÀU: {{ color.colorName }}
-            </h5>
+            <h5 class="text-md font-medium text-gray-600 mb-2">MÀU: {{ color.colorName }}</h5>
             <table class="w-full border-collapse border border-gray-300">
               <thead>
               <tr class="bg-gray-100">
@@ -558,9 +595,7 @@
               <tbody>
               <tr>
                 <td class="border border-gray-300 p-2 text-center">{{ colorIndex + 1 }}</td>
-                <td class="border border-gray-300 p-2">
-                  {{ color.colorName }}
-                </td>
+                <td class="border border-gray-300 p-2">{{ color.colorName }}</td>
                 <td class="border border-gray-300 p-2">
                   <div class="flex items-center justify-center">
                       <span
@@ -620,94 +655,221 @@
         @close="closeFormModal"
       >
         <template #default="{ entityData }">
-          <div v-if="currentAttribute === 'id'" class="grid grid-cols-1 gap-4">
-            <div>
-              <label class="block text-sm font-medium text-gray-700">ID Sản Phẩm</label>
-              <input v-model="entityData.id" type="text" class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Nhập ID sản phẩm" />
-            </div>
-          </div>
           <div v-if="currentAttribute === 'heDieuHanh'" class="grid grid-cols-1 gap-4">
             <div>
               <label class="block text-sm font-medium text-gray-700">Tên Hệ Điều Hành</label>
-              <input v-model="entityData.tenHeDieuHanh" type="text" class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Nhập tên hệ điều hành" />
+              <input
+                v-model="entityData.heDieuHanh"
+                type="text"
+                class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Nhập tên hệ điều hành"
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Phiên Bản</label>
+              <input
+                v-model="entityData.phienBan"
+                type="text"
+                class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Nhập phiên bản"
+              />
             </div>
           </div>
           <div v-if="currentAttribute === 'manHinh'" class="grid grid-cols-1 gap-4">
             <div>
               <label class="block text-sm font-medium text-gray-700">Kích Thước Màn Hình</label>
-              <input v-model="entityData.kichThuoc" type="text" class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Nhập kích thước màn hình" />
+              <input
+                v-model="entityData.kichThuoc"
+                type="text"
+                class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Nhập kích thước màn hình"
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Độ Phân Giải</label>
+              <input
+                v-model="entityData.doPhanGiai"
+                type="text"
+                class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Nhập độ phân giải"
+              />
             </div>
           </div>
           <div v-if="currentAttribute === 'nhaSanXuat'" class="grid grid-cols-1 gap-4">
             <div>
               <label class="block text-sm font-medium text-gray-700">Tên Nhà Sản Xuất</label>
-              <input v-model="entityData.tenNhaSanXuat" type="text" class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Nhập tên nhà sản xuất" />
+              <input
+                v-model="entityData.nhaSanXuat"
+                type="text"
+                class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Nhập tên nhà sản xuất"
+              />
             </div>
           </div>
           <div v-if="currentAttribute === 'cumCamera'" class="grid grid-cols-1 gap-4">
             <div>
-              <label class="block text-sm font-medium text-gray-700">Tên Cụm Camera</label>
-              <input v-model="entityData.tenCamera" type="text" class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Nhập tên cụm camera" />
+              <label class="block text-sm font-medium text-gray-700">Camera Trước</label>
+              <input
+                v-model="entityData.cameraTruoc"
+                type="text"
+                class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Nhập thông số camera trước"
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Camera Sau</label>
+              <input
+                v-model="entityData.cameraSau"
+                type="text"
+                class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Nhập thông số camera sau"
+              />
             </div>
           </div>
           <div v-if="currentAttribute === 'sim'" class="grid grid-cols-1 gap-4">
             <div>
-              <label class="block text-sm font-medium text-gray-700">Loại Sim</label>
-              <input v-model="entityData.loaiSim" type="text" class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Nhập loại sim" />
+              <label class="block text-sm font-medium text-gray-700">Các Loại Sim Hỗ Trợ</label>
+              <input
+                v-model="entityData.cacLoaiSimHoTro"
+                type="text"
+                class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Nhập loại sim"
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Số Lượng Sim Hỗ Trợ</label>
+              <input
+                v-model="entityData.soLuongSimHoTro"
+                type="number"
+                class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Nhập số lượng sim"
+              />
             </div>
           </div>
           <div v-if="currentAttribute === 'thietKe'" class="grid grid-cols-1 gap-4">
             <div>
-              <label class="block text-sm font-medium text-gray-700">Tên Thiết Kế</label>
-              <input v-model="entityData.tenThietKe" type="text" class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Nhập tên thiết kế" />
+              <label class="block text-sm font-medium text-gray-700">Chất Liệu Khung</label>
+              <input
+                v-model="entityData.chatLieuKhung"
+                type="text"
+                class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Nhập chất liệu khung"
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Chất Liệu Mặt Lưng</label>
+              <input
+                v-model="entityData.chatLieuMatLung"
+                type="text"
+                class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Nhập chất liệu mặt lưng"
+              />
             </div>
           </div>
           <div v-if="currentAttribute === 'pin'" class="grid grid-cols-1 gap-4">
             <div>
+              <label class="block text-sm font-medium text-gray-700">Loại Pin</label>
+              <input
+                v-model="entityData.loaiPin"
+                type="text"
+                class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Nhập loại pin"
+              />
+            </div>
+            <div>
               <label class="block text-sm font-medium text-gray-700">Dung Lượng Pin</label>
-              <input v-model="entityData.dungLuong" type="text" class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Nhập dung lượng pin" />
+              <input
+                v-model="entityData.dungLuongPin"
+                type="text"
+                class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Nhập dung lượng pin"
+              />
             </div>
           </div>
           <div v-if="currentAttribute === 'cpu'" class="grid grid-cols-1 gap-4">
             <div>
               <label class="block text-sm font-medium text-gray-700">Tên CPU</label>
-              <input v-model="entityData.tenCpu" type="text" class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Nhập tên CPU" />
+              <input
+                v-model="entityData.tenCpu"
+                type="text"
+                class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Nhập tên CPU"
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Số Nhân</label>
+              <input
+                v-model="entityData.soNhan"
+                type="number"
+                class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Nhập số nhân"
+              />
             </div>
           </div>
           <div v-if="currentAttribute === 'gpu'" class="grid grid-cols-1 gap-4">
             <div>
               <label class="block text-sm font-medium text-gray-700">Tên GPU</label>
-              <input v-model="entityData.tenGpu" type="text" class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Nhập tên GPU" />
+              <input
+                v-model="entityData.tenGpu"
+                type="text"
+                class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Nhập tên GPU"
+              />
             </div>
           </div>
           <div v-if="currentAttribute === 'congNgheMang'" class="grid grid-cols-1 gap-4">
             <div>
               <label class="block text-sm font-medium text-gray-700">Tên Công Nghệ Mạng</label>
-              <input v-model="entityData.tenCongNgheMang" type="text" class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Nhập tên công nghệ mạng" />
+              <input
+                v-model="entityData.tenCongNgheMang"
+                type="text"
+                class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Nhập tên công nghệ mạng"
+              />
             </div>
           </div>
           <div v-if="currentAttribute === 'congSac'" class="grid grid-cols-1 gap-4">
             <div>
               <label class="block text-sm font-medium text-gray-700">Tên Cổng Sạc</label>
-              <input v-model="entityData.congSac" type="text" class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Nhập tên cổng sạc" />
+              <input
+                v-model="entityData.congSac"
+                type="text"
+                class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Nhập tên cổng sạc"
+              />
             </div>
           </div>
           <div v-if="currentAttribute === 'hoTroCongNgheSac'" class="grid grid-cols-1 gap-4">
             <div>
               <label class="block text-sm font-medium text-gray-700">Tên Hỗ Trợ Công Nghệ Sạc</label>
-              <input v-model="entityData.ten" type="text" class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Nhập tên hỗ trợ công nghệ sạc" />
+              <input
+                v-model="entityData.tenCongNgheSac"
+                type="text"
+                class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Nhập tên hỗ trợ công nghệ sạc"
+              />
             </div>
           </div>
           <div v-if="currentAttribute === 'chiSoKhangBuiVaNuoc'" class="grid grid-cols-1 gap-4">
             <div>
               <label class="block text-sm font-medium text-gray-700">Tên Chỉ Số Kháng Bụi Nước</label>
-              <input v-model="entityData.tenChiSo" type="text" class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Nhập tên chỉ số kháng bụi nước" />
+              <input
+                v-model="entityData.tenChiSo"
+                type="text"
+                class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Nhập tên chỉ số kháng bụi nước"
+              />
             </div>
           </div>
           <div v-if="currentAttribute === 'tinhTrang'" class="grid grid-cols-1 gap-4">
             <div>
               <label class="block text-sm font-medium text-gray-700">Tên Tình Trạng</label>
-              <input v-model="entityData.loaiTinhTrang" type="text" class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Nhập tên tình trạng" />
+              <input
+                v-model="entityData.loaiTinhTrang"
+                type="text"
+                class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Nhập tên tình trạng"
+              />
             </div>
           </div>
           <div v-if="currentAttribute === 'ram'" class="grid grid-cols-1 gap-4">
@@ -770,12 +932,6 @@
               />
             </div>
           </div>
-          <div v-if="currentAttribute === 'tienIchDacBiet'" class="grid grid-cols-1 gap-4">
-            <div>
-              <label class="block text-sm font-medium text-gray-700">Tiện Ích Đặc Biệt</label>
-              <input v-model="entityData.tienIchDacBiet" type="text" class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Nhập tiện ích đặc biệt" />
-            </div>
-          </div>
         </template>
       </FormModal>
 
@@ -784,16 +940,10 @@
         <div class="bg-white rounded-lg shadow-lg p-6 w-1/2">
           <div class="flex justify-between items-center mb-4">
             <h3 class="text-lg font-medium text-gray-700">Chọn màu sắc</h3>
-            <button @click="closeColorModal" class="text-gray-500 hover:text-gray-700">
-              ✕
-            </button>
+            <button @click="closeColorModal" class="text-gray-500 hover:text-gray-700">✕</button>
           </div>
           <div class="grid grid-cols-5 gap-4 mb-4">
-            <label
-              v-for="mau in mauSacOptions"
-              :key="mau.id"
-              class="flex items-center space-x-2"
-            >
+            <label v-for="mau in mauSacOptions" :key="mau.id" class="flex items-center space-x-2">
               <input
                 type="checkbox"
                 :value="mau.id"
@@ -829,9 +979,7 @@
         <div class="bg-white rounded-lg shadow-lg p-6 w-1/2">
           <div class="flex justify-between items-center mb-4">
             <h3 class="text-lg font-medium text-gray-700">Nhập IMEI</h3>
-            <button @click="closeImeiModal" class="text-gray-500 hover:text-gray-700">
-              ✕
-            </button>
+            <button @click="closeImeiModal" class="text-gray-500 hover:text-gray-700">✕</button>
           </div>
           <div class="mb-4">
             <label class="block text-sm font-medium text-gray-700 mb-2">Nhập IMEI (mỗi IMEI trên một dòng)</label>
@@ -880,261 +1028,21 @@ import { ref as logicRef, onMounted, computed as logicComputed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import axios from 'axios';
 
-const addProductLogic = () => {
-  const router = useRouter();
-  const route = useRoute();
-  const toast = logicRef(null);
-  const showFormModal = logicRef(false);
-  const currentAttribute = logicRef('');
-  const productData = logicRef({
-    id: '',
-    idHeDieuHanh: '',
-    idManHinh: '',
-    idNhaSanXuat: '',
-    idCumCamera: '',
-    idSim: '',
-    idThietKe: '',
-    idPin: '',
-    idCpu: '',
-    idGpu: '',
-    idCongNgheMang: '',
-    idCongSac: '',
-    idHoTroCongNgheSac: '',
-    idChiSoKhangBuiVaNuoc: '',
-    idLoaiTinhTrang: '',
-    tienIchDacBiet: '',
-    giaBan: '',
-  });
-
-  const productVariants = logicRef([]);
-  const currentVariant = logicRef({
-    selectedRams: [],
-    selectedBoNhoTrongs: [],
-    selectedMauSacs: [],
-  });
-
-  const productImages = logicRef([]);
-  const currentImage = logicRef({
-    file: null,
-    fileName: '',
-  });
-
-  const variantImages = logicRef({});
-
-  const heDieuHanhOptions = logicRef([]);
-  const manHinhOptions = logicRef([]);
-  const nhaSanXuatOptions = logicRef([]);
-  const cumCameraOptions = logicRef([]);
-  const simOptions = logicRef([]);
-  const thietKeOptions = logicRef([]);
-  const pinOptions = logicRef([]);
-  const cpuOptions = logicRef([]);
-  const gpuOptions = logicRef([]);
-  const congNgheMangOptions = logicRef([]);
-  const congSacOptions = logicRef([]);
-  const hoTroCongNgheSacOptions = logicRef([]);
-  const chiSoKhangBuiVaNuocOptions = logicRef([]);
-  const tinhTrangOptions = logicRef([]);
-  const ramOptions = logicRef([]);
-  const boNhoTrongOptions = logicRef([]);
-  const mauSacOptions = logicRef([]);
-
-  const dropdownOpen = logicRef({
-    ram: false,
-    boNhoTrong: false,
-    mauSac: false,
-  });
-
-  const breadcrumbItems = logicComputed(() => {
-    if (typeof route.meta.breadcrumb === "function") {
-      return route.meta.breadcrumb(route);
-    }
-    return route.meta?.breadcrumb || ["Thêm Sản Phẩm"];
-  });
-
-  const fetchOptions = async () => {
-    try {
-      const [
-        heDieuHanhRes,
-        manHinhRes,
-        nhaSanXuatRes,
-        cumCameraRes,
-        simRes,
-        thietKeRes,
-        pinRes,
-        cpuRes,
-        gpuRes,
-        congNgheMangRes,
-        congSacRes,
-        hoTroCongNgheSacRes,
-        chiSoKhangBuiVaNuocRes,
-        tinhTrangRes,
-        ramRes,
-        boNhoTrongRes,
-        mauSacRes,
-      ] = await Promise.all([
-        axios.get('http://localhost:8080/api/he-dieu-hanh'),
-        axios.get('http://localhost:8080/api/man-hinh'),
-        axios.get('http://localhost:8080/api/nha-san-xuat'),
-        axios.get('http://localhost:8080/api/cum-camera/details'),
-        axios.get('http://localhost:8080/api/sim'),
-        axios.get('http://localhost:8080/api/thiet-ke'),
-        axios.get('http://localhost:8080/api/pin'),
-        axios.get('http://localhost:8080/api/cpu'),
-        axios.get('http://localhost:8080/api/gpu'),
-        axios.get('http://localhost:8080/api/cong-nghe-mang'),
-        axios.get('http://localhost:8080/api/cong-sac'),
-        axios.get('http://localhost:8080/api/ho-tro-cong-nghe-sac/details'),
-        axios.get('http://localhost:8080/api/chi-so-khang-bui-va-nuoc'),
-        axios.get('http://localhost:8080/api/tinh-trang'),
-        axios.get('http://localhost:8080/api/ram'),
-        axios.get('http://localhost:8080/api/bo-nho-trong'),
-        axios.get('http://localhost:8080/api/mau-sac'),
-      ]);
-
-      heDieuHanhOptions.value = heDieuHanhRes.data.content;
-      manHinhOptions.value = manHinhRes.data.content;
-      nhaSanXuatOptions.value = nhaSanXuatRes.data.content;
-      cumCameraOptions.value = cumCameraRes.data.content;
-      simOptions.value = simRes.data.content;
-      thietKeOptions.value = thietKeRes.data.content;
-      pinOptions.value = pinRes.data.content;
-      cpuOptions.value = cpuRes.data.content;
-      gpuOptions.value = gpuRes.data.content;
-      congNgheMangOptions.value = congNgheMangRes.data.content;
-      congSacOptions.value = congSacRes.data.content;
-      hoTroCongNgheSacOptions.value = hoTroCongNgheSacRes.data.content;
-      chiSoKhangBuiVaNuocOptions.value = chiSoKhangBuiVaNuocRes.data.content;
-      tinhTrangOptions.value = tinhTrangRes.data.content;
-      ramOptions.value = ramRes.data.content;
-      boNhoTrongOptions.value = boNhoTrongRes.data.content;
-      mauSacOptions.value = mauSacRes.data.content;
-    } catch (error) {
-      if (toast.value) {
-        toast.value?.kshowToast('error', 'Lỗi khi tải danh sách tùy chọn!');
-      }
-      console.error('Fetch options error:', error);
-    }
-  };
-
-  const toggleDropdown = (type) => {
-    dropdownOpen.value[type] = !dropdownOpen.value[type];
-    Object.keys(dropdownOpen.value).forEach((key) => {
-      if (key !== type) {
-        dropdownOpen.value[key] = false;
-      }
-    });
-  };
-
-  const handleImageUpload = (event) => {
-    currentImage.value.file = event.target.files[0];
-    currentImage.value.fileName = event.target.files[0] ? event.target.files[0].name : 'No file chosen';
-  };
-
-  const handleVariantImageUpload = (event, index) => {
-    const file = event.target.files[0];
-    if (file) {
-      variantImages.value[index] = {
-        file,
-        fileName: file.name,
-      };
-    }
-  };
-
-  const addVariant = () => {
-    if (
-      currentVariant.value.selectedRams.length === 0 ||
-      currentVariant.value.selectedBoNhoTrongs.length === 0 ||
-      currentVariant.value.selectedMauSacs.length === 0
-    ) {
-      if (toast.value) {
-        toast.value?.kshowToast('error', 'Vui lòng chọn ít nhất một RAM, một Bộ Nhớ Trong và một Màu Sắc!');
-      }
-      return;
-    }
-
-    const newVariants = [];
-    currentVariant.value.selectedRams.forEach((ramId) => {
-      currentVariant.value.selectedBoNhoTrongs.forEach((boNhoId) => {
-        currentVariant.value.selectedMauSacs.forEach((mauSacId) => {
-          newVariants.push({
-            idRam: ramId,
-            idBoNhoTrong: boNhoId,
-            idMauSac: mauSacId,
-            soLuong: 0,
-            donGia: productData.value.giaBan || '',
-          });
-        });
-      });
-    });
-
-    productVariants.value.push(...newVariants);
-    currentVariant.value = {
-      selectedRams: [],
-      selectedBoNhoTrongs: [],
-      selectedMauSacs: [],
-    };
-  };
-
-  const removeVariant = (index) => {
-    productVariants.value.splice(index, 1);
-    delete variantImages.value[index];
-  };
-
-  const addImage = () => {
-    if (currentImage.value.file) {
-      productImages.value.push({ ...currentImage.value });
-      currentImage.value = { file: null, fileName: '' };
-    } else {
-      if (toast.value) {
-        toast.value?.kshowToast('error', 'Vui lòng chọn file ảnh!');
-      }
-    }
-  };
-
-  const handleSubmit = async () => {
-    if (
-      !productData.value.id ||
-      !productData.value.giaBan ||
-      Object.values(productData.value).some((val) => val === '')
-    ) {
-      if (toast.value) {
-        toast.value?.kshowToast('error', 'Vui lòng nhập đầy đủ thông tin sản phẩm!');
-      }
-      return;
-    }
-
-    const formData = new FormData();
-    formData.append('productData', JSON.stringify(productData.value));
-    productVariants.value.forEach((variant, index) => {
-      formData.append(`variants[${index}]`, JSON.stringify(variant));
-      if (variantImages.value[index]?.file) {
-        formData.append(`variantImages[${index}]`, variantImages.value[index].file);
-      }
-    });
-    productImages.value.forEach((image, index) => {
-      formData.append(`images[${index}][file]`, image.file);
-    });
-
-    try {
-      await axios.post('http://localhost:8080/api/chi-tiet-san-pham', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
-      if (toast.value) {
-        toast.value?.kshowToast('success', 'Thêm mới thành công!');
-      }
-      await router.push('/san-pham');
-    } catch (error) {
-      if (toast.value) {
-        toast.value?.kshowToast('error', 'Lỗi khi lưu dữ liệu: ' + (error.response?.data?.error || error.message));
-      }
-      console.error('Save error:', error);
-    }
-  };
-
-  const resetForm = () => {
-    productData.value = {
-      id: '',
+export default defineComponent({
+  name: 'AddProduct',
+  components: {
+    ToastNotification,
+    FormModal,
+    BreadcrumbWrapper,
+  },
+  setup() {
+    const router = useRouter();
+    const route = useRoute();
+    const toast = logicRef(null);
+    const showFormModal = logicRef(false);
+    const currentAttribute = logicRef('');
+    const productData = ref({
+      tenSanPham: '',
       idHeDieuHanh: '',
       idManHinh: '',
       idNhaSanXuat: '',
@@ -1150,177 +1058,164 @@ const addProductLogic = () => {
       idChiSoKhangBuiVaNuoc: '',
       idLoaiTinhTrang: '',
       tienIchDacBiet: '',
-      giaBan: '',
+      createdBy: 'admin', // Thay bằng ID người dùng thực tế
+      updatedBy: 'admin'  // Thay bằng ID người dùng thực tế
+    });
+
+    const productVariants = logicRef([]);
+    const currentVariant = logicRef({
+      selectedRams: [],
+      selectedBoNhoTrongs: [],
+      selectedMauSacs: [],
+    });
+
+    const heDieuHanhOptions = logicRef([]);
+    const manHinhOptions = logicRef([]);
+    const nhaSanXuatOptions = logicRef([]);
+    const cumCameraOptions = logicRef([]);
+    const simOptions = logicRef([]);
+    const thietKeOptions = logicRef([]);
+    const pinOptions = logicRef([]);
+    const cpuOptions = logicRef([]);
+    const gpuOptions = logicRef([]);
+    const congNgheMangOptions = logicRef([]);
+    const congSacOptions = logicRef([]);
+    const hoTroCongNgheSacOptions = logicRef([]);
+    const chiSoKhangBuiVaNuocOptions = logicRef([]);
+    const tinhTrangOptions = logicRef([]);
+    const ramOptions = logicRef([]);
+    const boNhoTrongOptions = logicRef([]);
+    const mauSacOptions = logicRef([]);
+
+    const dropdownOpen = logicRef({
+      ram: false,
+      boNhoTrong: false,
+      mauSac: false,
+    });
+
+    const breadcrumbItems = logicComputed(() => {
+      if (typeof route.meta.breadcrumb === 'function') {
+        return route.meta.breadcrumb(route);
+      }
+      return route.meta?.breadcrumb || ['Thêm Sản Phẩm'];
+    });
+
+    const fetchOptions = async () => {
+      try {
+        const [
+          heDieuHanhRes,
+          manHinhRes,
+          nhaSanXuatRes,
+          cumCameraRes,
+          simRes,
+          thietKeRes,
+          pinRes,
+          cpuRes,
+          gpuRes,
+          congNgheMangRes,
+          congSacRes,
+          hoTroCongNgheSacRes,
+          chiSoKhangBuiVaNuocRes,
+          tinhTrangRes,
+          ramRes,
+          boNhoTrongRes,
+          mauSacRes,
+        ] = await Promise.all([
+          axios.get('http://localhost:8080/he-dieu-hanh'),
+          axios.get('http://localhost:8080/man-hinh'),
+          axios.get('http://localhost:8080/nha-san-xuat'),
+          axios.get('http://localhost:8080/cum-camera/details'),
+          axios.get('http://localhost:8080/sim'),
+          axios.get('http://localhost:8080/thiet-ke'),
+          axios.get('http://localhost:8080/pin'),
+          axios.get('http://localhost:8080/cpu'),
+          axios.get('http://localhost:8080/gpu'),
+          axios.get('http://localhost:8080/cong-nghe-mang'),
+          axios.get('http://localhost:8080/cong-sac'),
+          axios.get('http://localhost:8080/ho-tro-cong-nghe-sac/details'),
+          axios.get('http://localhost:8080/chi-so-khang-bui-va-nuoc'),
+          axios.get('http://localhost:8080/tinh-trang'),
+          axios.get('http://localhost:8080/ram'),
+          axios.get('http://localhost:8080/bo-nho-trong'),
+          axios.get('http://localhost:8080/mau-sac'),
+        ]);
+
+        heDieuHanhOptions.value = heDieuHanhRes.data.content || [];
+        manHinhOptions.value = manHinhRes.data.content || [];
+        nhaSanXuatOptions.value = nhaSanXuatRes.data.content || [];
+        cumCameraOptions.value = cumCameraRes.data.content || [];
+        simOptions.value = simRes.data.content || [];
+        thietKeOptions.value = thietKeRes.data.content || [];
+        pinOptions.value = pinRes.data.content || [];
+        cpuOptions.value = cpuRes.data.content || [];
+        gpuOptions.value = gpuRes.data.content || [];
+        congNgheMangOptions.value = congNgheMangRes.data.content || [];
+        congSacOptions.value = congSacRes.data.content || [];
+        hoTroCongNgheSacOptions.value = hoTroCongNgheSacRes.data.content || [];
+        chiSoKhangBuiVaNuocOptions.value = chiSoKhangBuiVaNuocRes.data.content || [];
+        tinhTrangOptions.value = tinhTrangRes.data.content || [];
+        ramOptions.value = ramRes.data.content || [];
+        boNhoTrongOptions.value = boNhoTrongRes.data.content || [];
+        mauSacOptions.value = mauSacRes.data.content || [];
+      } catch (error) {
+        if (toast.value) {
+          toast.value?.kshowToast('error', 'Lỗi khi tải danh sách tùy chọn!');
+        }
+        console.error('Fetch options error:', error);
+      }
     };
-    productVariants.value = [];
-    productImages.value = [];
-    variantImages.value = {};
-    currentVariant.value = { selectedRams: [], selectedBoNhoTrongs: [], selectedMauSacs: [] };
-    currentImage.value = { file: null, fileName: '' };
-  };
 
-  const openAddModal = (attribute) => {
-    currentAttribute.value = attribute;
-    showFormModal.value = true;
-  };
+    const toggleDropdown = (type) => {
+      dropdownOpen.value[type] = !dropdownOpen.value[type];
+      Object.keys(dropdownOpen.value).forEach((key) => {
+        if (key !== type) {
+          dropdownOpen.value[key] = false;
+        }
+      });
+    };
 
-  const handleAddAttribute = async (data) => {
-    try {
-      let response;
-      switch (currentAttribute.value) {
-        case 'id':
-          break;
-        case 'heDieuHanh':
-          response = await axios.post('http://localhost:8080/api/he-dieu-hanhs', { tenHeDieuHanh: data.tenHeDieuHanh });
-          heDieuHanhOptions.value.push(response.data);
-          break;
-        case 'manHinh':
-          response = await axios.post('http://localhost:8080/api/man-hinhs', { kichThuoc: data.kichThuoc });
-          manHinhOptions.value.push(response.data);
-          break;
-        case 'nhaSanXuat':
-          response = await axios.post('http://localhost:8080/api/nha-san-xuats', { tenNhaSanXuat: data.tenNhaSanXuat });
-          nhaSanXuatOptions.value.push(response.data);
-          break;
-        case 'cumCamera':
-          response = await axios.post('http://localhost:8080/api/cum-cameras', { tenCamera: data.tenCamera });
-          cumCameraOptions.value.push(response.data);
-          break;
-        case 'sim':
-          response = await axios.post('http://localhost:8080/api/sims', { loaiSim: data.loaiSim });
-          simOptions.value.push(response.data);
-          break;
-        case 'thietKe':
-          response = await axios.post('http://localhost:8080/api/thiet-kes', { tenThietKe: data.tenThietKe });
-          thietKeOptions.value.push(response.data);
-          break;
-        case 'pin':
-          response = await axios.post('http://localhost:8080/api/pins', { dungLuong: data.dungLuong });
-          pinOptions.value.push(response.data);
-          break;
-        case 'cpu':
-          response = await axios.post('http://localhost:8080/api/cpus', { tenCpu: data.tenCpu });
-          cpuOptions.value.push(response.data);
-          break;
-        case 'gpu':
-          response = await axios.post('http://localhost:8080/api/gpus', { tenGpu: data.tenGpu });
-          gpuOptions.value.push(response.data);
-          break;
-        case 'congNgheMang':
-          response = await axios.post('http://localhost:8080/api/cong-nghe-mangs', { tenCongNgheMang: data.tenCongNgheMang });
-          congNgheMangOptions.value.push(response.data);
-          break;
-        case 'congSac':
-          response = await axios.post('http://localhost:8080/api/cong-sacs', { congSac: data.congSac });
-          congSacOptions.value.push(response.data);
-          break;
-        case 'hoTroCongNgheSac':
-          response = await axios.post('http://localhost:8080/api/ho-tro-cong-nghe-sacs', { ten: data.ten });
-          hoTroCongNgheSacOptions.value.push(response.data);
-          break;
-        case 'chiSoKhangBuiVaNuoc':
-          response = await axios.post('http://localhost:8080/api/chi-so-khang-bui-va-nuocs', { tenChiSo: data.tenChiSo });
-          chiSoKhangBuiVaNuocOptions.value.push(response.data);
-          break;
-        case 'tinhTrang':
-          response = await axios.post('http://localhost:8080/api/tinh-trangs', { loaiTinhTrang: data.loaiTinhTrang });
-          tinhTrangOptions.value.push(response.data);
-          break;
-        case 'ram':
-          response = await axios.post('http://localhost:8080/api/ram', { ma: data.ma, dungLuong: data.dungLuong });
-          ramOptions.value.push(response.data);
-          break;
-        case 'boNhoTrong':
-          response = await axios.post('http://localhost:8080/api/bo-nho-trong', { ma: data.ma, dungLuong: data.dungLuong });
-          boNhoTrongOptions.value.push(response.data);
-          break;
-        case 'mauSac':
-          response = await axios.post('http://localhost:8080/api/mau-sac', { ma: data.ma, tenMau: data.tenMau });
-          mauSacOptions.value.push(response.data);
-          break;
-        case 'tienIchDacBiet':
-          productData.value.tienIchDacBiet = data.tienIchDacBiet;
-          break;
-        case 'giaBan':
-          productData.value.giaBan = data.giaBan;
-          break;
+    const addVariant = () => {
+      if (
+        currentVariant.value.selectedRams.length === 0 ||
+        currentVariant.value.selectedBoNhoTrongs.length === 0 ||
+        currentVariant.value.selectedMauSacs.length === 0
+      ) {
+        if (toast.value) {
+          toast.value?.kshowToast('error', 'Vui lòng chọn ít nhất một RAM, một Bộ Nhớ Trong và một Màu Sắc!');
+        }
+        return;
       }
-      if (toast.value) {
-        toast.value?.kshowToast('success', `Thêm ${currentAttribute.value} thành công!`);
-      }
-    } catch (error) {
-      if (toast.value) {
-        toast.value?.kshowToast('error', 'Lỗi khi thêm thuộc tính: ' + (error.response?.data?.error || error.message));
-      }
-      console.error('Add attribute error:', error);
-    }
-    closeFormModal();
-  };
 
-  const closeFormModal = () => {
-    showFormModal.value = false;
-    currentAttribute.value = '';
-  };
+      const newVariants = [];
+      currentVariant.value.selectedRams.forEach((ramId) => {
+        currentVariant.value.selectedBoNhoTrongs.forEach((boNhoId) => {
+          currentVariant.value.selectedMauSacs.forEach((mauSacId) => {
+            newVariants.push({
+              idRam: ramId,
+              idBoNhoTrong: boNhoId,
+              idMauSac: mauSacId,
+              idImel: 1,
+              idLoaiTinhTrang: productData.value.idLoaiTinhTrang,
+              soLuong: 0,
+              donGia: '', // Để trống, người dùng sẽ nhập trong bảng biến thể
+              imageIndex: null,
+            });
+          });
+        });
+      });
 
-  onMounted(() => {
-    fetchOptions();
-  });
+      productVariants.value.push(...newVariants);
+      currentVariant.value = {
+        selectedRams: [],
+        selectedBoNhoTrongs: [],
+        selectedMauSacs: [],
+      };
+    };
 
-  return {
-    toast,
-    showFormModal,
-    currentAttribute,
-    productData,
-    productVariants,
-    currentVariant,
-    productImages,
-    currentImage,
-    variantImages,
-    heDieuHanhOptions,
-    manHinhOptions,
-    nhaSanXuatOptions,
-    cumCameraOptions,
-    simOptions,
-    thietKeOptions,
-    pinOptions,
-    cpuOptions,
-    gpuOptions,
-    congNgheMangOptions,
-    congSacOptions,
-    hoTroCongNgheSacOptions,
-    chiSoKhangBuiVaNuocOptions,
-    tinhTrangOptions,
-    ramOptions,
-    boNhoTrongOptions,
-    mauSacOptions,
-    breadcrumbItems,
-    dropdownOpen,
-    fetchOptions,
-    toggleDropdown,
-    handleImageUpload,
-    handleVariantImageUpload,
-    addVariant,
-    removeVariant,
-    addImage,
-    handleSubmit,
-    resetForm,
-    openAddModal,
-    handleAddAttribute,
-    closeFormModal,
-  };
-};
+    const removeVariant = (index) => {
+      productVariants.value.splice(index, 1);
+    };
 
-export default defineComponent({
-  name: 'AddProduct',
-  components: {
-    ToastNotification,
-    FormModal,
-    BreadcrumbWrapper,
-  },
-  setup() {
-    const logic = addProductLogic();
-
-    // State for color selection modal
     const showColorModal = ref(false);
     const showImeiModal = ref(false);
     const showImageSection = ref(false);
@@ -1328,15 +1223,23 @@ export default defineComponent({
     const currentVariantIndex = ref(null);
     const variantImeis = ref({});
     const mainImages = ref({
-      front: { file: null, fileName: '', previewUrl: '' },
-      back: { file: null, fileName: '', previewUrl: '' },
+      front: {file: null, fileName: '', previewUrl: ''},
+      back: {file: null, fileName: '', previewUrl: ''},
     });
     const colorImages = ref({});
-
-    // New state for common inputs and selection
-    const commonPrice = ref('');
-    const commonQuantity = ref('');
     const selectedVariants = ref([]);
+    const allSelected = ref({});
+    const groupCommonValues = ref({});
+
+    const openAddModal = (attribute) => {
+      currentAttribute.value = attribute;
+      showFormModal.value = true;
+    };
+
+    const closeFormModal = () => {
+      showFormModal.value = false;
+      currentAttribute.value = '';
+    };
 
     const openColorModal = () => {
       showColorModal.value = true;
@@ -1347,9 +1250,18 @@ export default defineComponent({
     };
 
     const confirmColorSelection = () => {
-      logic.addVariant();
+      addVariant();
       showImageSection.value = true;
       closeColorModal();
+
+      groupVariantsByRamAndRom.value.forEach((group) => {
+        const groupKey = `${group.ram}/${group.rom}`;
+        if (!(groupKey in allSelected.value)) {
+          allSelected.value[groupKey] = true;
+          groupCommonValues.value[groupKey] = {price: '', quantity: ''};
+          toggleAllVariants(group, true);
+        }
+      });
     };
 
     const openImeiModal = (index) => {
@@ -1367,8 +1279,8 @@ export default defineComponent({
     const saveImei = () => {
       const imeis = imeiInput.value
         .split('\n')
-        .map(imei => imei.trim())
-        .filter(imei => imei.length > 0);
+        .map((imei) => imei.trim())
+        .filter((imei) => imei.length > 0);
       variantImeis.value[currentVariantIndex.value] = imeis;
       closeImeiModal();
     };
@@ -1376,64 +1288,49 @@ export default defineComponent({
     const handleExcelImport = (event) => {
       const file = event.target.files[0];
       if (!file) return;
+      // Giả lập đọc file Excel (cần thư viện như XLSX để xử lý thực tế)
       const mockImeis = ['123456789012345', '678901234567890'];
       imeiInput.value = mockImeis.join('\n');
     };
 
-    const vietnameseToEnglishColorMap = {
-      'đen': 'black',
-      'bạc': 'silver',
-      'cam': 'orange',
-      'đỏ': 'red',
-      'vàng': 'yellow',
-      'gold': 'gold',
-      'xanh': 'green',
-      'trắng': 'white',
-      'hồng': 'pink',
-      'tím': 'purple',
-      'xám': 'gray',
-      'nâu': 'brown',
-      'lam': 'blue',
-      'xanh lam': 'blue',
-      'xanh lá': 'green',
-      'xanh dương': 'blue',
-    };
-
-    const colorNameToHex = {
-      'black': '#000000',
-      'silver': '#C0C0C0',
-      'orange': '#FFA500',
-      'red': '#FF0000',
-      'yellow': '#FFFF00',
-      'gold': '#FFD700',
-      'green': '#008000',
-      'white': '#FFFFFF',
-      'pink': '#FF69B4',
-      'purple': '#800080',
-      'gray': '#808080',
-      'brown': '#A52A2A',
-      'blue': '#0000FF',
-    };
-
-    const hashStringToColor = (str) => {
-      let hash = 0;
-      for (let i = 0; i < str.length; i++) {
-        hash = str.charCodeAt(i) + ((hash << 5) - hash);
-      }
-      const r = (hash & 0xFF0000) >> 16;
-      const g = (hash & 0x00FF00) >> 8;
-      const b = hash & 0x0000FF;
-      return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).padStart(6, '0')}`;
-    };
-
     const getColorFromName = (colorName) => {
+      const vietnameseToEnglishColorMap = {
+        đen: 'black',
+        bạc: 'silver',
+        cam: 'orange',
+        đỏ: 'red',
+        vàng: 'yellow',
+        gold: 'gold',
+        xanh: 'green',
+        trắng: 'white',
+        hồng: 'pink',
+        tím: 'purple',
+        xám: 'gray',
+        nâu: 'brown',
+        lam: 'blue',
+        'xanh lam': 'blue',
+        'xanh lá': 'green',
+        'xanh dương': 'blue',
+      };
+      const colorNameToHex = {
+        black: '#000000',
+        silver: '#C0C0C0',
+        orange: '#FFA500',
+        red: '#FF0000',
+        yellow: '#FFFF00',
+        gold: '#FFD700',
+        green: '#008000',
+        white: '#FFFFFF',
+        pink: '#FF69B4',
+        purple: '#800080',
+        gray: '#808080',
+        brown: '#A52A2A',
+        blue: '#0000FF',
+      };
       if (!colorName) return '#FFFFFF';
       const normalizedName = colorName.toLowerCase().trim();
       const englishColorName = vietnameseToEnglishColorMap[normalizedName] || normalizedName;
-      if (colorNameToHex[englishColorName]) {
-        return colorNameToHex[englishColorName];
-      }
-      return hashStringToColor(colorName);
+      return colorNameToHex[englishColorName] || '#FFFFFF';
     };
 
     const handleMainImageUpload = (event, type) => {
@@ -1464,8 +1361,142 @@ export default defineComponent({
       }
     };
 
+    const handleSubmit = async () => {
+      // Validate product data
+      const requiredFields = [
+        'tenSanPham', 'idHeDieuHanh', 'idManHinh', 'idNhaSanXuat',
+        'idCumCamera', 'idSim', 'idThietKe', 'idPin', 'idCpu',
+        'idGpu', 'idCongNgheMang', 'idCongSac', 'idHoTroCongNgheSac',
+        'idLoaiTinhTrang'
+      ];
+
+      const missingFields = requiredFields.filter(field => !productData.value[field]);
+
+      if (missingFields.length > 0) {
+        if (toast.value) {
+          toast.value?.kshowToast('error', `Vui lòng nhập đầy đủ thông tin. Thiếu các trường: ${missingFields.join(', ')}`);
+        }
+        return;
+      }
+
+      // Validate variants
+      if (productVariants.value.length === 0) {
+        if (toast.value) {
+          toast.value?.kshowToast('error', 'Vui lòng thêm ít nhất một biến thể sản phẩm');
+        }
+        return;
+      }
+
+      // Validate images
+      const allImages = [];
+      if (mainImages.value.front.file) allImages.push(mainImages.value.front.file);
+      if (mainImages.value.back.file) allImages.push(mainImages.value.back.file);
+      Object.values(colorImages.value).forEach((image) => {
+        if (image.file) allImages.push(image.file);
+      });
+
+      if (allImages.length === 0) {
+        if (toast.value) {
+          toast.value?.kshowToast('error', 'Vui lòng tải lên ít nhất một ảnh');
+        }
+        return;
+      }
+
+      // Prepare variants with image indexes
+      productVariants.value.forEach((variant, index) => {
+        const colorImage = colorImages.value[variant.idMauSac];
+        if (colorImage && colorImage.file) {
+          variant.imageIndex = allImages.indexOf(colorImage.file);
+        } else {
+          variant.imageIndex = 0; // Default to first image
+        }
+      });
+
+      // Prepare FormData
+      const formData = new FormData();
+
+      // Add product data as JSON
+      formData.append('dto', JSON.stringify({
+        tenSanPham: productData.value.tenSanPham,
+        idNhaSanXuat: productData.value.idNhaSanXuat,
+        idPin: productData.value.idPin,
+        idManHinh: productData.value.idManHinh,
+        idCpu: productData.value.idCpu,
+        idGpu: productData.value.idGpu,
+        idCumCamera: productData.value.idCumCamera,
+        idHeDieuHanh: productData.value.idHeDieuHanh,
+        idThietKe: productData.value.idThietKe,
+        idSim: productData.value.idSim,
+        idCongSac: productData.value.idCongSac,
+        idHoTroCongNgheSac: productData.value.idHoTroCongNgheSac,
+        idCongNgheMang: productData.value.idCongNgheMang,
+        idChiSoKhangBuiVaNuoc: productData.value.idChiSoKhangBuiVaNuoc || null,
+        tienIchDacBiet: productData.value.tienIchDacBiet,
+        giaBan: productVariants.value[0].donGia, // Use price from first variant
+        createdAt: new Date().toISOString(),
+        createdBy: 1, // Replace with actual user ID
+        updatedAt: new Date().toISOString(),
+        updatedBy: 1, // Replace with actual user ID
+        variants: productVariants.value.map(variant => ({
+          idImel: variant.idImel || 1, // Default IMEL if not provided
+          idMauSac: variant.idMauSac,
+          idRam: variant.idRam,
+          idBoNhoTrong: variant.idBoNhoTrong,
+          idLoaiTinhTrang: variant.idLoaiTinhTrang,
+          imageIndex: variant.imageIndex,
+          soLuong: variant.soLuong,
+          donGia: variant.donGia
+        }))
+      }));
+
+      // Add images
+      allImages.forEach((image) => {
+        formData.append('images', image);
+      });
+
+      try {
+        const response = await axios.post('http://localhost:8080/chi-tiet-san-pham', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+
+        if (response.data) {
+          const { sanPhamId, chiTietSanPhamIds, anhSanPhamIds } = response.data.data;
+          if (toast.value) {
+            toast.value?.kshowToast(
+              'success',
+              `Thêm sản phẩm thành công! ID: ${sanPhamId}, ${chiTietSanPhamIds.length} biến thể, ${anhSanPhamIds.length} ảnh`
+            );
+          }
+          await router.push('/products');
+        }
+      } catch (error) {
+        console.error('Error details:', {
+          message: error.message,
+          response: error.response?.data,
+          stack: error.stack
+        });
+
+        let errorMessage = 'Lỗi khi lưu dữ liệu';
+        if (error.response) {
+          if (error.response.data?.message) {
+            errorMessage += ': ' + error.response.data.message;
+          } else if (error.response.data?.error) {
+            errorMessage += ': ' + error.response.data.error;
+          }
+        } else {
+          errorMessage += ': ' + error.message;
+        }
+
+        if (toast.value) {
+          toast.value?.kshowToast('error', errorMessage);
+        }
+      }
+    };
+
     const resetForm = () => {
-      Object.values(mainImages.value).forEach(image => {
+      Object.values(mainImages.value).forEach((image) => {
         if (image.previewUrl) {
           URL.revokeObjectURL(image.previewUrl);
         }
@@ -1474,26 +1505,65 @@ export default defineComponent({
         front: { file: null, fileName: '', previewUrl: '' },
         back: { file: null, fileName: '', previewUrl: '' },
       };
-
-      Object.values(colorImages.value).forEach(image => {
+      Object.values(colorImages.value).forEach((image) => {
         if (image?.previewUrl) {
           URL.revokeObjectURL(image.previewUrl);
         }
       });
       colorImages.value = {};
-
-      logic.resetForm();
+      productData.value = {
+        tenSanPham: '',
+        idHeDieuHanh: '',
+        idManHinh: '',
+        idNhaSanXuat: '',
+        idCumCamera: '',
+        idSim: '',
+        idThietKe: '',
+        idPin: '',
+        idCpu: '',
+        idGpu: '',
+        idCongNgheMang: '',
+        idCongSac: '',
+        idHoTroCongNgheSac: '',
+        idChiSoKhangBuiVaNuoc: '',
+        idLoaiTinhTrang: '',
+        tienIchDacBiet: '',
+        createdBy: 'admin',
+        updatedBy: 'admin',
+        updatedAt: new Date().toISOString(),
+      };
+      productVariants.value = [];
+      currentVariant.value = { selectedRams: [], selectedBoNhoTrongs: [], selectedMauSacs: [] };
       showImageSection.value = false;
-      commonPrice.value = '';
-      commonQuantity.value = '';
       selectedVariants.value = [];
+      allSelected.value = {};
+      groupCommonValues.value = {};
     };
 
-    const updateSelectedVariants = () => {
-      selectedVariants.value.forEach(index => {
-        if (logic.productVariants.value[index]) {
-          logic.productVariants.value[index].donGia = commonPrice.value;
-          logic.productVariants.value[index].soLuong = commonQuantity.value;
+    const updateSelectedVariants = (group) => {
+      const groupKey = `${group.ram}/${group.rom}`;
+      const commonPrice = groupCommonValues.value[groupKey].price;
+      const commonQuantity = groupCommonValues.value[groupKey].quantity;
+
+      const groupIndices = group.variants.map((_, i) => group.startIndex + i);
+      const selectedInGroup = selectedVariants.value.filter((index) => groupIndices.includes(index));
+      if (selectedInGroup.length === 0 && group.variants.length > 0) {
+        selectedVariants.value = [...new Set([...selectedVariants.value, ...groupIndices])];
+        if (toast.value) {
+          toast.value.kshowToast('info', `Không có biến thể nào được chọn trong ${groupKey}, áp dụng cho tất cả biến thể trong nhóm.`);
+        }
+      }
+
+      selectedVariants.value.forEach((index) => {
+        if (index >= group.startIndex && index < group.startIndex + group.variants.length) {
+          if (productVariants.value[index]) {
+            if (commonPrice !== '') {
+              productVariants.value[index].donGia = commonPrice;
+            }
+            if (commonQuantity !== '') {
+              productVariants.value[index].soLuong = commonQuantity;
+            }
+          }
         }
       });
     };
@@ -1503,16 +1573,26 @@ export default defineComponent({
       if (isChecked) {
         selectedVariants.value = [...new Set([...selectedVariants.value, ...groupIndices])];
       } else {
-        selectedVariants.value = selectedVariants.value.filter(index => !groupIndices.includes(index));
+        selectedVariants.value = selectedVariants.value.filter((index) => !groupIndices.includes(index));
       }
-      updateSelectedVariants();
+      const groupKey = `${group.ram}/${group.rom}`;
+      allSelected.value[groupKey] = isChecked;
+      updateSelectedVariants(group);
     };
 
-    const updateSelectedCount = () => {
-      selectedVariants.value = selectedVariants.value.filter(index =>
-        index >= 0 && index < logic.productVariants.value.length
-      );
-      updateSelectedVariants();
+    const toggleAllVariants = (group, isChecked) => {
+      const groupKey = `${group.ram}/${group.rom}`;
+      allSelected.value[groupKey] = isChecked;
+      toggleGroupSelection(group, isChecked);
+    };
+
+    const updateSelectedCount = (group) => {
+      selectedVariants.value = selectedVariants.value.filter((index) => index >= 0 && index < productVariants.value.length);
+      const groupIndices = group.variants.map((_, i) => group.startIndex + i);
+      const selectedInGroup = selectedVariants.value.filter((index) => groupIndices.includes(index));
+      const groupKey = `${group.ram}/${group.rom}`;
+      allSelected.value[groupKey] = selectedInGroup.length === group.variants.length;
+      updateSelectedVariants(group);
     };
 
     const groupVariantsByRamAndRom = computed(() => {
@@ -1520,22 +1600,23 @@ export default defineComponent({
       const seen = new Set();
       let startIndex = 0;
 
-      logic.productVariants.value.forEach((variant, index) => {
-        const ram = logic.ramOptions.value.find(r => r.id === variant.idRam)?.dungLuong || 'N/A';
-        const rom = logic.boNhoTrongOptions.value.find(b => b.id === variant.idBoNhoTrong)?.dungLuong || 'N/A';
+      productVariants.value.forEach((variant, index) => {
+        const ram = ramOptions.value.find((r) => r.id === variant.idRam)?.dungLuong || 'N/A';
+        const rom = boNhoTrongOptions.value.find((b) => b.id === variant.idBoNhoTrong)?.dungLuong || 'N/A';
         const key = `${ram}/${rom}`;
 
         if (!seen.has(key)) {
           seen.add(key);
-          const variantsInGroup = logic.productVariants.value.filter(v => {
-            const vRam = logic.ramOptions.value.find(r => r.id === v.idRam)?.dungLuong || 'N/A';
-            const vRom = logic.boNhoTrongOptions.value.find(b => b.id === v.idBoNhoTrong)?.dungLuong || 'N/A';
+          const variantsInGroup = productVariants.value.filter((v) => {
+            const vRam = ramOptions.value.find((r) => r.id === v.idRam)?.dungLuong || 'N/A';
+            const vRom = boNhoTrongOptions.value.find((b) => b.id === v.idBoNhoTrong)?.dungLuong || 'N/A';
             return `${vRam}/${vRom}` === key;
           });
 
           grouped.push({
             ram,
             rom,
+            groupKey: key,
             variants: variantsInGroup,
             startIndex,
           });
@@ -1551,9 +1632,9 @@ export default defineComponent({
       const seen = new Set();
       const colors = [];
 
-      logic.productVariants.value.forEach(variant => {
+      productVariants.value.forEach((variant) => {
         const colorId = variant.idMauSac;
-        const colorName = logic.mauSacOptions.value.find(mau => mau.id === colorId)?.tenMau || 'N/A';
+        const colorName = mauSacOptions.value.find((mau) => mau.id === colorId)?.tenMau || 'N/A';
 
         if (!seen.has(colorId)) {
           seen.add(colorId);
@@ -1567,10 +1648,192 @@ export default defineComponent({
       return colors;
     });
 
+    const handleAddAttribute = async (data) => {
+      try {
+        let response;
+        switch (currentAttribute.value) {
+          case 'heDieuHanh':
+            response = await axios.post('http://localhost:8080/he-dieu-hanh', {
+              heDieuHanh: data.heDieuHanh,
+              phienBan: data.phienBan,
+            });
+            heDieuHanhOptions.value.push(response.data);
+            productData.value.idHeDieuHanh = response.data.id;
+            break;
+          case 'manHinh':
+            response = await axios.post('http://localhost:8080/man-hinh', {
+              kichThuoc: data.kichThuoc,
+              doPhanGiai: data.doPhanGiai,
+            });
+            manHinhOptions.value.push(response.data);
+            productData.value.idManHinh = response.data.id;
+            break;
+          case 'nhaSanXuat':
+            response = await axios.post('http://localhost:8080/nha-san-xuat', {
+              nhaSanXuat: data.nhaSanXuat,
+            });
+            nhaSanXuatOptions.value.push(response.data);
+            productData.value.idNhaSanXuat = response.data.id;
+            break;
+          case 'cumCamera':
+            response = await axios.post('http://localhost:8080/cum-camera', {
+              cameraTruoc: data.cameraTruoc,
+              cameraSau: data.cameraSau,
+            });
+            cumCameraOptions.value.push(response.data);
+            productData.value.idCumCamera = response.data.id;
+            break;
+          case 'sim':
+            response = await axios.post('http://localhost:8080/sim', {
+              cacLoaiSimHoTro: data.cacLoaiSimHoTro,
+              soLuongSimHoTro: data.soLuongSimHoTro,
+            });
+            simOptions.value.push(response.data);
+            productData.value.idSim = response.data.id;
+            break;
+          case 'thietKe':
+            response = await axios.post('http://localhost:8080/thiet-ke', {
+              chatLieuKhung: data.chatLieuKhung,
+              chatLieuMatLung: data.chatLieuMatLung,
+            });
+            thietKeOptions.value.push(response.data);
+            productData.value.idThietKe = response.data.id;
+            break;
+          case 'pin':
+            response = await axios.post('http://localhost:8080/pin', {
+              loaiPin: data.loaiPin,
+              dungLuongPin: data.dungLuongPin,
+            });
+            pinOptions.value.push(response.data);
+            productData.value.idPin = response.data.id;
+            break;
+          case 'cpu':
+            response = await axios.post('http://localhost:8080/cpu', {
+              tenCpu: data.tenCpu,
+              soNhan: data.soNhan,
+            });
+            cpuOptions.value.push(response.data);
+            productData.value.idCpu = response.data.id;
+            break;
+          case 'gpu':
+            response = await axios.post('http://localhost:8080/gpu', {
+              tenGpu: data.tenGpu,
+            });
+            gpuOptions.value.push(response.data);
+            productData.value.idGpu = response.data.id;
+            break;
+          case 'congNgheMang':
+            response = await axios.post('http://localhost:8080/cong-nghe-mang', {
+              tenCongNgheMang: data.tenCongNgheMang,
+            });
+            congNgheMangOptions.value.push(response.data);
+            productData.value.idCongNgheMang = response.data.id;
+            break;
+          case 'congSac':
+            response = await axios.post('http://localhost:8080/cong-sac', {
+              congSac: data.congSac,
+            });
+            congSacOptions.value.push(response.data);
+            productData.value.idCongSac = response.data.id;
+            break;
+          case 'hoTroCongNgheSac':
+            response = await axios.post('http://localhost:8080/ho-tro-cong-nghe-sac', {
+              tenCongNgheSac: data.tenCongNgheSac,
+            });
+            hoTroCongNgheSacOptions.value.push(response.data);
+            productData.value.idHoTroCongNgheSac = response.data.id;
+            break;
+          case 'chiSoKhangBuiVaNuoc':
+            response = await axios.post('http://localhost:8080/chi-so-khang-bui-va-nuoc', {
+              tenChiSo: data.tenChiSo,
+            });
+            chiSoKhangBuiVaNuocOptions.value.push(response.data);
+            productData.value.idChiSoKhangBuiVaNuoc = response.data.id;
+            break;
+          case 'tinhTrang':
+            response = await axios.post('http://localhost:8080/tinh-trang', {
+              loaiTinhTrang: data.loaiTinhTrang,
+            });
+            tinhTrangOptions.value.push(response.data);
+            productData.value.idLoaiTinhTrang = response.data.id;
+            break;
+          case 'ram':
+            response = await axios.post('http://localhost:8080/ram', {
+              ma: data.ma,
+              dungLuong: data.dungLuong,
+            });
+            ramOptions.value.push(response.data);
+            currentVariant.value.selectedRams.push(response.data.id);
+            break;
+          case 'boNhoTrong':
+            response = await axios.post('http://localhost:8080/bo-nho-trong', {
+              ma: data.ma,
+              dungLuong: data.dungLuong,
+            });
+            boNhoTrongOptions.value.push(response.data);
+            currentVariant.value.selectedBoNhoTrongs.push(response.data.id);
+            break;
+          case 'mauSac':
+            response = await axios.post('http://localhost:8080/mau-sac', {
+              ma: data.ma,
+              tenMau: data.tenMau,
+            });
+            mauSacOptions.value.push(response.data);
+            currentVariant.value.selectedMauSacs.push(response.data.id);
+            break;
+          default:
+            console.warn('Unknown attribute:', currentAttribute.value);
+            return;
+        }
+
+        if (toast.value) {
+          toast.value?.kshowToast('success', `Thêm ${currentAttribute.value} thành công!`);
+        }
+        closeFormModal();
+      } catch (error) {
+        if (toast.value) {
+          toast.value?.kshowToast('error', `Lỗi khi thêm ${currentAttribute.value}: ${error.response?.data?.message || error.message}`);
+        }
+        console.error('Add attribute error:', error);
+      }
+    };
+
+    onMounted(() => {
+      fetchOptions();
+    });
+
     return {
-      ...logic,
-      groupVariantsByRamAndRom,
-      uniqueColors,
+      toast,
+      productData,
+      productVariants,
+      currentVariant,
+      heDieuHanhOptions,
+      manHinhOptions,
+      nhaSanXuatOptions,
+      cumCameraOptions,
+      simOptions,
+      thietKeOptions,
+      pinOptions,
+      cpuOptions,
+      gpuOptions,
+      congNgheMangOptions,
+      congSacOptions,
+      hoTroCongNgheSacOptions,
+      chiSoKhangBuiVaNuocOptions,
+      tinhTrangOptions,
+      ramOptions,
+      boNhoTrongOptions,
+      mauSacOptions,
+      dropdownOpen,
+      breadcrumbItems,
+      toggleDropdown,
+      addVariant,
+      removeVariant,
+      showFormModal,
+      currentAttribute,
+      openAddModal,
+      closeFormModal,
+      handleAddAttribute,
       showColorModal,
       openColorModal,
       closeColorModal,
@@ -1579,21 +1842,26 @@ export default defineComponent({
       openImeiModal,
       closeImeiModal,
       saveImei,
-      imeiInput,
       handleExcelImport,
+      imeiInput,
+      variantImeis,
+      mainImages,
+      colorImages,
+      handleMainImageUpload,
+      handleColorImageUpload,
+      handleSubmit,
+      resetForm,
       getColorFromName,
       showImageSection,
-      mainImages,
-      handleMainImageUpload,
-      colorImages,
-      handleColorImageUpload,
-      resetForm,
-      commonPrice,
-      commonQuantity,
+      groupVariantsByRamAndRom,
+      uniqueColors,
       selectedVariants,
-      updateSelectedVariants,
+      allSelected,
+      groupCommonValues,
       toggleGroupSelection,
+      toggleAllVariants,
       updateSelectedCount,
+      updateSelectedVariants,
     };
   },
 });

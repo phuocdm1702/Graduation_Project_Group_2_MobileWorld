@@ -33,7 +33,7 @@ export default function CongNgheManHinh(toastRef) {
 
   const fetchData = async () => {
     try {
-      const { data } = await axios.get('http://localhost:8080/api/cong-nghe-man-hinh', {
+      const { data } = await axios.get('http://localhost:8080/cong-nghe-man-hinh', {
         params: { page: currentPage.value, size: pageSize.value },
       });
       console.log('Fetch data:', data);
@@ -70,7 +70,7 @@ export default function CongNgheManHinh(toastRef) {
 
     try {
       isSearching.value = true;
-      const { data } = await axios.get('http://localhost:8080/api/cong-nghe-man-hinh/search', {
+      const { data } = await axios.get('http://localhost:8080/cong-nghe-man-hinh/search', {
         params: {
           keyword: keyword || undefined,
           congNgheManHinh: congNgheManHinhFilter || undefined,
@@ -99,7 +99,7 @@ export default function CongNgheManHinh(toastRef) {
 
   const saveCongNgheManHinh = async () => {
     try {
-      const response = await axios.post('http://localhost:8080/api/cong-nghe-man-hinh', congNgheManHinh.value);
+      const response = await axios.post('http://localhost:8080/cong-nghe-man-hinh', congNgheManHinh.value);
       if (toast.value) toast.value.showToast('success', 'Thêm mới thành công!');
       congNgheManHinhs.value.unshift(response.data);
       totalItems.value += 1;
@@ -111,7 +111,7 @@ export default function CongNgheManHinh(toastRef) {
 
   const updateCongNgheManHinh = async () => {
     try {
-      const response = await axios.put(`http://localhost:8080/api/cong-nghe-man-hinh/${congNgheManHinh.value.id}`, congNgheManHinh.value);
+      const response = await axios.put(`http://localhost:8080/cong-nghe-man-hinh/${congNgheManHinh.value.id}`, congNgheManHinh.value);
       if (toast.value) toast.value.showToast('success', 'Cập nhật thành công!');
       const index = congNgheManHinhs.value.findIndex((item) => item.id === congNgheManHinh.value.id);
       if (index !== -1) congNgheManHinhs.value[index] = response.data;
@@ -123,7 +123,7 @@ export default function CongNgheManHinh(toastRef) {
 
   const deleteCongNgheManHinh = async (id) => {
     try {
-      await axios.delete(`http://localhost:8080/api/cong-nghe-man-hinh/${id}`);
+      await axios.delete(`http://localhost:8080/cong-nghe-man-hinh/${id}`);
       if (toast.value) toast.value.showToast('success', 'Xóa thành công!');
       congNgheManHinhs.value = congNgheManHinhs.value.filter((item) => item.id !== id);
       totalItems.value -= 1;

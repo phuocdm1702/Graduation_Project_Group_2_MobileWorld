@@ -47,12 +47,14 @@ public class ChiTietSanPhamDTO {
 
     @Data
     public static class VariantDTO {
-        private Integer idImel; // Bắt buộc
-        private Integer idMauSac; // Bắt buộc
-        private Integer idRam; // Bắt buộc
-        private Integer idBoNhoTrong; // Bắt buộc
-        private Integer idLoaiTinhTrang; // Bắt buộc
-        private Integer imageIndex; // Index của ảnh trong images để gắn vào id_anh_san_pham
+        private Integer idImel;
+        private Integer idMauSac;
+        private Integer idRam;
+        private Integer idBoNhoTrong;
+        private Integer idLoaiTinhTrang;
+        private Integer imageIndex;
+        private Integer soLuong; // Thêm trường này
+        private BigDecimal donGia; // Thêm trường này
     }
 }
 
