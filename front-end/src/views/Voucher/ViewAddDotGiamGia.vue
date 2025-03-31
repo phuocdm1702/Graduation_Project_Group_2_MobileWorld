@@ -11,15 +11,15 @@
         <div class="bg-white border rounded-lg shadow-md p-6">
           <h4 class="text-lg font-semibold text-gray-800 mb-4">Thông Tin Đợt Giảm Giá</h4>
           <form @submit.prevent="confirmAction" class="space-y-4">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Mã</label>
-              <input
-                type="text"
-                v-model="dotGiamGia.ma"
-                class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none transition"
-                placeholder="Nhập mã đợt giảm giá"
-              />
-            </div>
+<!--            <div>-->
+<!--              <label class="block text-sm font-medium text-gray-700 mb-1">Mã</label>-->
+<!--              <input-->
+<!--                type="text"-->
+<!--                v-model="dotGiamGia.ma"-->
+<!--                class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none transition"-->
+<!--                placeholder="Nhập mã đợt giảm giá"-->
+<!--              />-->
+<!--            </div>-->
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Tên đợt giảm giá</label>
               <input

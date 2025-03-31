@@ -102,7 +102,6 @@ public class dot_giam_gia_service {
             Date ngayBatDau = new Date(dotGiamGiaDTO.getNgayBatDau().getTime());
             Date ngayKetThuc = new Date(dotGiamGiaDTO.getNgayKetThuc().getTime());
             DotGiamGia dotGiamGia = new DotGiamGia();
-            dotGiamGia.setMa(dotGiamGiaDTO.getMa());
             dotGiamGia.setTenDotGiamGia(dotGiamGiaDTO.getTenDotGiamGia());
             dotGiamGia.setLoaiGiamGiaApDung(dotGiamGiaDTO.getLoaiGiamGiaApDung());
             dotGiamGia.setGiaTriGiamGia(dotGiamGiaDTO.getGiaTriGiamGia());
@@ -118,12 +117,6 @@ public class dot_giam_gia_service {
                     .filter(ctsp -> ctsp.getSelected() != null && ctsp.getSelected())
                     .collect(Collectors.toMap(ctsp -> ctsp.getCtsp().getId(), ctsp -> ctsp, (e, r) -> e));
             List<ChiTietSanPham> dsChiTietSanPham = chiTietSanPhamRepository.findAllByIdSanPhamIn(idSanPham);
-
-            String maxMaChiTiet = repo2.findMaxMa();
-            int nextNumber = 1;
-            if (maxMaChiTiet != null && maxMaChiTiet.startsWith("CTDGG")) {
-                nextNumber = Integer.parseInt(maxMaChiTiet.substring(5)) + 1;
-            }
 
             Set<String> addedCTSP = new HashSet<>();
             Date today = Date.valueOf(LocalDate.now());
@@ -190,9 +183,7 @@ public class dot_giam_gia_service {
                         }
                     }
 
-                    String newMaChiTiet = String.format("CTDGG%05d", nextNumber++);
                     ChiTietDotGiamGia chiTiet = new ChiTietDotGiamGia();
-                    chiTiet.setMa(newMaChiTiet);
                     chiTiet.setIdDotGiamGia(dotGiamGia);
                     chiTiet.setIdChiTietSanPham(chiTietSanPham);
                     chiTiet.setGiaBanDau(giaBanDau);
@@ -317,7 +308,6 @@ public class dot_giam_gia_service {
 
             dotGiamGia.setNgayBatDau(ngayBatDau);
             dotGiamGia.setNgayKetThuc(ngayKetThuc);
-            dotGiamGia.setMa(dotGiamGiaDTO.getMa());
             dotGiamGia.setTenDotGiamGia(dotGiamGiaDTO.getTenDotGiamGia());
             dotGiamGia.setLoaiGiamGiaApDung(dotGiamGiaDTO.getLoaiGiamGiaApDung());
             dotGiamGia.setGiaTriGiamGia(dotGiamGiaDTO.getGiaTriGiamGia());
@@ -331,11 +321,6 @@ public class dot_giam_gia_service {
                     .collect(Collectors.toMap(ctsp -> ctsp.getCtsp().getId(), ctsp -> ctsp, (e, r) -> e));
             List<ChiTietSanPham> dsChiTietSanPham = chiTietSanPhamRepository.findAllByIdSanPhamIn(idSanPham);
 
-            String maxMaChiTiet = repo2.findMaxMa();
-            int nextNumber = 1;
-            if (maxMaChiTiet != null && maxMaChiTiet.startsWith("CTDGG")) {
-                nextNumber = Integer.parseInt(maxMaChiTiet.substring(5)) + 1;
-            }
             Set<String> addedCTSP = new HashSet<>();
             Set<Integer> selectedCTSPIds = selectedCTSPMap.keySet();
 
@@ -450,9 +435,7 @@ public class dot_giam_gia_service {
                     List<ChiTietDotGiamGia> existingChiTietListForCTSP = repo2.findByDotGiamGiaAndIdChiTietSanPhamAndGiaBanDauAndDeleted(
                             dotGiamGia, chiTietSanPham, giaBanDau, false);
                     if (existingChiTietListForCTSP.isEmpty()) {
-                        String newMaChiTiet = String.format("CTDGG%05d", nextNumber++);
                         ChiTietDotGiamGia chiTiet = new ChiTietDotGiamGia();
-                        chiTiet.setMa(newMaChiTiet);
                         chiTiet.setIdDotGiamGia(dotGiamGia);
                         chiTiet.setIdChiTietSanPham(chiTietSanPham);
                         chiTiet.setGiaBanDau(giaBanDau);
