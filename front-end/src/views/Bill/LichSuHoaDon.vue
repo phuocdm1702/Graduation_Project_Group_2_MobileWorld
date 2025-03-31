@@ -20,7 +20,7 @@
 </template>
 
 <script setup>
-import useLichSuHoaDonLineList from "@/views/Bill/LichSuHoaDon";
+import useLichSuHoaDonLineList from "@/views/Bill/JS/LichSuHoaDon";
 import DynamicTable from "@/components/DynamicTable.vue";
 
 const {

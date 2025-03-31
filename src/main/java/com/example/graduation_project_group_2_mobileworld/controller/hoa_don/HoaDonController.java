@@ -1,55 +1,35 @@
 package com.example.graduation_project_group_2_mobileworld.controller.hoa_don;
 
 import com.example.graduation_project_group_2_mobileworld.dto.hoa_don.HoaDonDTO;
-import com.example.graduation_project_group_2_mobileworld.entity.ChiTietDotGiamGia;
-import com.example.graduation_project_group_2_mobileworld.entity.DotGiamGia;
-import com.example.graduation_project_group_2_mobileworld.entity.HoaDon;
-import com.example.graduation_project_group_2_mobileworld.service.dot_giam_gia_service.DotGiamGiaExporter;
 import com.example.graduation_project_group_2_mobileworld.service.hoa_don.HoaDonService;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ByteArrayResource;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 @CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/hoa-don")
 public class HoaDonController {
 
-    private HoaDonService hoaDonService;
+    private final HoaDonService hoaDonService;
 
     public HoaDonController(HoaDonService hoaDonService) {
         this.hoaDonService = hoaDonService;
     }
 
-
-//    @GetMapping("/home")
-//    public ResponseEntity<Page<HoaDonDTO>> getAllHoaDon(
-//            @RequestParam(defaultValue = "0") int page,
-//            @RequestParam(defaultValue = "10") int size) {
-//        return ResponseEntity.ok(hoaDonService.getHoaDonWithPagination(page, size));
-//    }
-
+    // API lấy danh sách hóa đơn với phân trang và bộ lọc
     @GetMapping("/home")
     public ResponseEntity<Page<HoaDonDTO>> getAllHoaDon(
             @RequestParam(defaultValue = "0") int page,
@@ -60,72 +40,80 @@ public class HoaDonController {
             @RequestParam(required = false) Long maxAmount,
             @RequestParam(required = false) String startDate,
             @RequestParam(required = false) String endDate,
+            @RequestParam(required = false) Short trangThai,
             Authentication authentication) {
-        if (authentication != null && authentication.isAuthenticated()) {
-            System.out.println("Authenticated user: " + authentication.getName());
-        } else {
-            System.out.println("No authenticated user");
-        }
-        return ResponseEntity.ok(hoaDonService.getHoaDonWithFilters(page, size, keyword, loaiDon, minAmount, maxAmount, startDate, endDate));
+        logAuthentication(authentication);
+        return ResponseEntity.ok(hoaDonService.getHoaDonWithFilters(page, size, keyword, loaiDon, minAmount, maxAmount, startDate, endDate, trangThai));
     }
 
+    // API lấy danh sách loại đơn
     @GetMapping("/order-types")
     public ResponseEntity<List<String>> getOrderTypes() {
-        List<String> orderTypes = Arrays.asList("Online", "Trực tiếp");
-        return ResponseEntity.ok(orderTypes);
+        return ResponseEntity.ok(Arrays.asList("Online", "Trực tiếp"));
     }
 
+    // API lấy chi tiết hóa đơn theo ID
     @GetMapping("/detail/{id}")
     public ResponseEntity<HoaDonDTO> getFullHoaDonDetail(@PathVariable("id") Integer id) {
         return ResponseEntity.ok(hoaDonService.getFullHoaDonDetails(id));
     }
 
+    // API in hóa đơn dưới dạng PDF
     @GetMapping("/print/{id}")
     public ResponseEntity<byte[]> printHoaDon(@PathVariable("id") Integer id) {
         try {
             byte[] pdfBytes = hoaDonService.generateHoaDonPdf(id);
-
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_PDF);
             headers.setContentDispositionFormData("inline", "hoa_don_" + id + ".pdf");
             headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
-
             return new ResponseEntity<>(pdfBytes, headers, HttpStatus.OK);
         } catch (Exception e) {
-            // Convert the error message to byte[]
-            String errorMessage = "Không thể tạo PDF: " + e.getMessage();
-            byte[] errorBytes = errorMessage.getBytes();
-
-            // Set headers for the error response
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.TEXT_PLAIN); // Use text/plain for error message
-            headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
-
-            return new ResponseEntity<>(errorBytes, headers, HttpStatus.INTERNAL_SERVER_ERROR);
+            return createErrorResponse("Không thể tạo PDF: " + e.getMessage());
         }
     }
 
+    // API xuất danh sách hóa đơn ra Excel
     @GetMapping("/export-excel")
     public void exportHoaDonToExcel(HttpServletResponse response) throws IOException {
-        // Thiết lập header để trình duyệt hiển thị hộp thoại tải file
         String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
-        String filename = "DanhSachHoaDon_run serve" + timestamp + ".xlsx";
-
+        String filename = "DanhSachHoaDon_" + timestamp + ".xlsx";
         response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"");
-
-        // Gọi service để ghi file Excel trực tiếp vào response
         hoaDonService.exportHoaDonToExcel(response);
     }
 
+    // API lấy hóa đơn theo mã QR
     @GetMapping("/QR-by-ma/{ma}")
     public ResponseEntity<HoaDonDTO> getHoaDonByMa(@PathVariable String ma) {
         try {
-            HoaDonDTO hoaDon = hoaDonService.getHoaDonByMa(ma);
-            return ResponseEntity.ok(hoaDon);
+            return ResponseEntity.ok(hoaDonService.getHoaDonByMa(ma));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
     }
-}
 
+    // API đếm số lượng hóa đơn theo trạng thái
+    @GetMapping("/status-count")
+    public ResponseEntity<Map<Short, Long>> getHoaDonStatusCount() {
+        return ResponseEntity.ok(hoaDonService.getHoaDonStatusCount());
+    }
+
+    // Hàm hỗ trợ ghi log xác thực
+    private void logAuthentication(Authentication authentication) {
+        if (authentication != null && authentication.isAuthenticated()) {
+            System.out.println("Authenticated user: " + authentication.getName());
+        } else {
+            System.out.println("No authenticated user");
+        }
+    }
+
+    // Hàm tạo response lỗi chung
+    private ResponseEntity<byte[]> createErrorResponse(String message) {
+        byte[] errorBytes = message.getBytes();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.TEXT_PLAIN);
+        headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
+        return new ResponseEntity<>(errorBytes, headers, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+}
