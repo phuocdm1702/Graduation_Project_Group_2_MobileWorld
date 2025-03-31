@@ -19,7 +19,6 @@ import java.util.Optional;
 @RequestMapping("/khach-hang")
 @CrossOrigin(origins = {"http://localhost:3000", "http://localhost:8080"})
 public class KhachHangController {
-
     private final KhachHangServices khachHangServices;
     private final DiaChiKhachHangServices diachiservices;
     @Autowired
@@ -89,7 +88,7 @@ public class KhachHangController {
     public ResponseEntity<?> toggleStatus(@PathVariable Integer id) {
         try {
             KhachHang updatedKhachHang = khachHangServices.toggleStatus(id);
-            String message = updatedKhachHang.getDeleted() ? "Đã hủy kích hoạt khách hàng!" : "Đã kích hoạt khách hàng!";
+            String message = updatedKhachHang.isDeleted() ? "Đã hủy kích hoạt khách hàng!" : "Đã kích hoạt khách hàng!";
             return ResponseEntity.ok(new ResponseMessage(message));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(new ResponseMessage(e.getMessage()));

@@ -15,29 +15,32 @@ import java.util.List;
 @Setter
 public class HoaDonDTO {
     private Integer id;
-    private List<HoaDonChiTietDTO> chiTietHoaDon;
-    private List<LichSuHoaDonDTO> lichSuHoaDon;
-    private List<HinhThucThanhToanDTO> hinhThucThanhToan;
+    private String ma;
     private KhachHang idKhachHang;
     private NhanVien idNhanVien;
     private PhieuGiamGia idPhieuGiamGia;
-    private String ma;
-    private String soDienThoaiKhachHang;
-    private String loaiDon;
-    private BigDecimal tongTien;
-    private Date ngayTao;
-    private BigDecimal tongTienSauGiam;
-    private Short trangThai;
-    private String diaChiKhachHang;
     private String tenKhachHang;
-    private String ghiChu;
+    private String soDienThoaiKhachHang;
+    private String diaChiKhachHang;
+    private String loaiDon;
+    private Date ngayTao;
+    private BigDecimal tongTien;
+    private BigDecimal tongTienSauGiam;
     private BigDecimal phiVanChuyen;
-
+    private Short trangThai;
+    private String ghiChu;
+    private List<HoaDonChiTietDTO> chiTietHoaDon;
+    private List<LichSuHoaDonDTO> lichSuHoaDon;
+    private List<HinhThucThanhToanDTO> hinhThucThanhToan;
 
     public HoaDonDTO() {
     }
 
-    public HoaDonDTO(Integer id, List<HoaDonChiTietDTO> chiTietHoaDon, List<LichSuHoaDonDTO> lichSuHoaDon, List<HinhThucThanhToanDTO> hinhThucThanhToan, KhachHang idKhachHang, NhanVien idNhanVien, PhieuGiamGia idPhieuGiamGia, String ma, String soDienThoaiKhachHang, String loaiDon, BigDecimal tongTien, Date ngayTao, BigDecimal tongTienSauGiam, Short trangThai, String diaChiKhachHang, String tenKhachHang, String ghiChu, BigDecimal phiVanChuyen) {
+    public HoaDonDTO(Integer id, List<HoaDonChiTietDTO> chiTietHoaDon, List<LichSuHoaDonDTO> lichSuHoaDon,
+                     List<HinhThucThanhToanDTO> hinhThucThanhToan, KhachHang idKhachHang, NhanVien idNhanVien,
+                     PhieuGiamGia idPhieuGiamGia, String ma, String soDienThoaiKhachHang, String loaiDon,
+                     BigDecimal tongTien, Date ngayTao, BigDecimal tongTienSauGiam, Short trangThai,
+                     String diaChiKhachHang, String tenKhachHang, String ghiChu, BigDecimal phiVanChuyen) {
         this.id = id;
         this.chiTietHoaDon = chiTietHoaDon;
         this.lichSuHoaDon = lichSuHoaDon;

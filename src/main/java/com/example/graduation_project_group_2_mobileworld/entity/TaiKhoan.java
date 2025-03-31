@@ -32,7 +32,7 @@ public class TaiKhoan {
 
     @Size(max = 255)
     @Nationalized
-    @Column(name = "email")
+    @Column(name = "email", unique = true, nullable = false)
     private String email;
 
     @Size(max = 255)

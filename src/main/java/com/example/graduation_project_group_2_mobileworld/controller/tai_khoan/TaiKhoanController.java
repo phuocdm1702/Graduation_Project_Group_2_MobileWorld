@@ -10,6 +10,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @CrossOrigin(origins = {"http://localhost:3000/", "http://localhost:8080"})
 @RequestMapping("tai-khoan")
@@ -25,13 +27,29 @@ public class TaiKhoanController {
         return taiKhoanServices.add(taiKhoan);
     }
 
-    @PostMapping("/addTk")
-    public ResponseEntity<?> addNhanVien(@RequestBody TaiKhoanDTO taiKhoanDTO) {
+    @PostMapping("/requestOtp")
+    public ResponseEntity<?> requestOtp(@RequestBody TaiKhoanDTO taiKhoanDTO) {
         try {
-            TaiKhoan tk = taiKhoanServices.addTK(taiKhoanDTO);
+            String message = taiKhoanServices.requestOTP(taiKhoanDTO);
+            return new ResponseEntity<>(message, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PostMapping("/addTk")
+    public ResponseEntity<?> addTk(@RequestBody Map<String, String> request) {
+        try {
+            TaiKhoanDTO taiKhoanDTO = new TaiKhoanDTO();
+            taiKhoanDTO.setTenDangNhap(request.get("tenDangNhap"));
+            taiKhoanDTO.setEmail(request.get("email"));
+            taiKhoanDTO.setMatKhau(request.get("matKhau"));
+            String otp = request.get("otp");
+
+            TaiKhoan tk = taiKhoanServices.addTK(taiKhoanDTO, otp);
             return new ResponseEntity<>(tk, HttpStatus.CREATED);
         } catch (Exception e) {
-            return new ResponseEntity<>("Lỗi khi thêm nhân viên: " + e.getMessage(), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>("Lỗi khi thêm tài khoản: " + e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
     @PostMapping("/login")

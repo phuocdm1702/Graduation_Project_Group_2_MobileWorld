@@ -268,4 +268,172 @@ public class EmailSend {
             e.printStackTrace();
         }
     }
+
+    public void sendUpdateDiscountEmail(String toEmail, String maPhieu, String ngayHetHan, double phanTram, double STGTD) {
+        sendDiscountEmail(toEmail, maPhieu, ngayHetHan, phanTram, STGTD, "📢 Cập nhật phiếu giảm giá từ MobileWorld", """
+                <div class="thank-you-section">
+                    <h2>Cập nhật!</h2>
+                    <p>Phiếu giảm giá của bạn đã được cập nhật thông tin mới từ MobileWorld.</p>
+                </div>
+                """, """
+                Thông báo từ MobileWorld!
+
+                Phiếu giảm giá của bạn đã được cập nhật:
+                """);
+    }
+
+    // Gửi email thông báo thu hồi phiếu giảm giá (cho khách hàng bị xóa)
+    public void sendRevokeDiscountEmail(String toEmail, String maPhieu) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setTo(toEmail);
+            helper.setSubject("❌ Thông báo thu hồi phiếu giảm giá từ MobileWorld");
+
+            String htmlContent = """
+                    <!DOCTYPE html>
+                    <html lang="vi">
+                    <head>
+                        <meta charset="UTF-8">
+                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                        <title>Thu hồi Phiếu Giảm Giá</title>
+                        <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
+                        <!-- CSS giống như mẫu trước đó -->
+                        <style>
+                            /* Giữ nguyên CSS từ mẫu ban đầu */
+                        </style>
+                    </head>
+                    <body>
+                        <div class="container">
+                            <div class="header">
+                                <h1>MobileWorld</h1>
+                            </div>
+                            <div class="content">
+                                <div class="thank-you-section">
+                                    <h2>Thông báo</h2>
+                                    <p>Phiếu giảm giá của bạn đã bị thu hồi bởi MobileWorld.</p>
+                                </div>
+                                <div class="coupon-details">
+                                    <p class="coupon-code"><strong>Mã phiếu:</strong> {maPhieu}</p>
+                                    <p>Chúng tôi rất tiếc phải thông báo rằng phiếu giảm giá này không còn hiệu lực nữa.</p>
+                                </div>
+                                <p>
+                                    <a href="http://localhost:3000/phieu-giam-gia" class="cta-button">Xem các ưu đãi khác</a>
+                                </p>
+                            </div>
+                            <div class="footer">
+                                <p>Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi!</p>
+                                <p>Trân trọng, <strong>MobileWorld</strong></p>
+                                <p>Liên hệ: <a href="mailto:support@mobileworld.com.vn">support@mobileworld.com.vn</a></p>
+                            </div>
+                        </div>
+                    </body>
+                    </html>
+                    """.replace("{maPhieu}", maPhieu);
+
+            String plainTextContent = """
+                    Thông báo từ MobileWorld!
+
+                    Phiếu giảm giá của bạn đã bị thu hồi:
+                    - Mã phiếu: %s
+
+                    Chúng tôi rất tiếc phải thông báo rằng phiếu giảm giá này không còn hiệu lực nữa.
+                    Nhấn vào liên kết để xem các ưu đãi khác: http://localhost:3000/phieu-giam-gia
+
+                    Trân trọng,
+                    MobileWorld
+                    Liên hệ: support@mobileworld.com.vn
+                    """.formatted(maPhieu);
+
+            helper.setText(plainTextContent, htmlContent);
+            mailSender.send(message);
+            System.out.println("Email thu hồi đã được gửi tới: " + toEmail);
+        } catch (MessagingException e) {
+            System.err.println("Lỗi khi gửi email thu hồi tới " + toEmail + ": " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    // Hàm chung để gửi email giảm giá (dùng lại cho các trường hợp)
+    private void sendDiscountEmail(String toEmail, String maPhieu, String ngayHetHan, double phanTram, double STGTD, String subject, String thankYouSection, String plainTextHeader) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setTo(toEmail);
+            helper.setSubject(subject);
+
+            String htmlContent = """
+                    <!DOCTYPE html>
+                    <html lang="vi">
+                    <head>
+                        <meta charset="UTF-8">
+                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                        <title>Phiếu Giảm Giá</title>
+                        <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
+                        <!-- CSS giống như mẫu trước đó -->
+                        <style>
+                            /* Giữ nguyên CSS từ mẫu ban đầu */
+                        </style>
+                    </head>
+                    <body>
+                        <div class="container">
+                            <div class="header">
+                                <h1>MobileWorld</h1>
+                            </div>
+                            <div class="content">
+                                {thankYouSection}
+                                <div class="discount-box">
+                                    Tặng quý khách ưu đãi {phanTram}% (Tối đa {STGTD}đ)
+                                </div>
+                                <div class="coupon-details">
+                                    <p class="coupon-code"><strong>Mã phiếu:</strong> {maPhieu}</p>
+                                    <p><strong>Hạn sử dụng:</strong> {ngayHetHan}</p>
+                                    <p>Lưu ý: Mã chỉ sử dụng được 1 lần cho khách hàng có đăng ký nhận tin email từ MobileWorld (ứng với 1 số điện thoại đã đăng ký). Sử dụng mã giảm giá để được giảm giá trực tiếp, và tất cả mã giảm giá đều không có giá trị quy đổi thành tiền mặt.</p>
+                                </div>
+                                <p>
+                                    <a href="http://localhost:3000/phieu-giam-gia" class="cta-button">MUA SẮM NGAY</a>
+                                </p>
+                            </div>
+                            <div class="footer">
+                                <p>Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi!</p>
+                                <p>Trân trọng, <strong>MobileWorld</strong></p>
+                                <p>Liên hệ: <a href="mailto:support@mobileworld.com.vn">support@mobileworld.com.vn</a></p>
+                            </div>
+                        </div>
+                    </body>
+                    </html>
+                    """;
+
+            String finalHtmlContent = htmlContent
+                    .replace("{thankYouSection}", thankYouSection)
+                    .replace("{maPhieu}", maPhieu)
+                    .replace("{ngayHetHan}", ngayHetHan)
+                    .replace("{phanTram}", String.valueOf(phanTram))
+                    .replace("{STGTD}", String.format("%,.0f", STGTD));
+
+            String plainTextContent = """
+                    %s
+                    - Mã phiếu: %s
+                    - Hạn sử dụng: %s
+                    - Ưu đãi: %s%% (Tối đa %sđ)
+
+                    Lưu ý: Mã chỉ sử dụng được 1 lần cho khách hàng có đăng ký nhận tin email từ MobileWorld (ứng với 1 số điện thoại đã đăng ký). Sử dụng mã giảm giá để được giảm giá trực tiếp, và tất cả mã giảm giá đều không có giá trị quy đổi thành tiền mặt.
+
+                    Nhấn vào liên kết để mua sắm ngay: http://localhost:3000/phieu-giam-gia
+
+                    Trân trọng,
+                    MobileWorld
+                    Liên hệ: support@mobileworld.com.vn
+                    """.formatted(plainTextHeader, maPhieu, ngayHetHan, phanTram, String.format("%,.0f", STGTD));
+
+            helper.setText(plainTextContent, finalHtmlContent);
+            mailSender.send(message);
+            System.out.println("Email đã được gửi tới: " + toEmail);
+        } catch (MessagingException e) {
+            System.err.println("Lỗi khi gửi email tới " + toEmail + ": " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
 }

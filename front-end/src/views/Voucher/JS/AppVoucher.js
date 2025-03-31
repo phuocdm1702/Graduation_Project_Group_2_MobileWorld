@@ -170,9 +170,10 @@ export default function usePhieuGiamGia() {
       key: "stt",
       label: "#",
       formatter: (_, __, index) => index + 1 + currentPage.value * pageSize.value,
+      width: "50px", 
     },
-    { key: "ma", label: "Mã" },
-    { key: "tenPhieuGiamGia", label: "Tên Phiếu" },
+    { key: "ma", label: "Mã", width: "80px" },
+    { key: "tenPhieuGiamGia", label: "Tên Phiếu", width: "150px" }, 
     {
       key: "phanTramGiamGia",
       label: "% Giảm Giá",
@@ -185,6 +186,7 @@ export default function usePhieuGiamGia() {
         }
         return "N/A";
       },
+      width: "100px",
     },
     {
       key: "soTienGiamToiDa",
@@ -198,17 +200,19 @@ export default function usePhieuGiamGia() {
         }
         return value ? value.toLocaleString("vi-VN") + " VND" : "0 VND";
       },
+      width: "120px", // Set a fixed width for "Giảm Tối Đa"
     },
-    { key: "soLuongDung", label: "Số lượng" },
+    { key: "soLuongDung", label: "Số lượng", width: "80px" }, // Optional: Set a fixed width for "Số lượng"
     {
       key: "hoaDonToiThieu",
       label: "Hóa\nĐơn\nTối\nThiểu",
       formatter: (value) => value.toLocaleString("vi-VN") + " VND",
+      width: "100px", // Optional: Set a fixed width for "Hóa Đơn Tối Thiểu"
     },
-    { key: "ngayBatDau", label: "Bắt đầu", formatter: (value) => new Date(value).toLocaleDateString("vi-VN") },
-    { key: "ngayKetThuc", label: "Kết thúc", formatter: (value) => new Date(value).toLocaleDateString("vi-VN") },
-    { key: "displayStatus", label: "Trạng thái", cellSlot: "trangThaiPGG" },
-    { key: "actions", label: "Hành động", cellSlot: "actionsSlot" },
+    { key: "ngayBatDau", label: "Bắt đầu", formatter: (value) => new Date(value).toLocaleDateString("vi-VN"), width: "100px" },
+    { key: "ngayKetThuc", label: "Kết thúc", formatter: (value) => new Date(value).toLocaleDateString("vi-VN"), width: "100px" },
+    { key: "displayStatus", label: "Trạng thái", cellSlot: "trangThaiPGG", width: "120px" },
+    { key: "actions", label: "Hành động", cellSlot: "actionsSlot", width: "100px" },
   ]);
 
   const getNestedValue = (obj, key) => {
