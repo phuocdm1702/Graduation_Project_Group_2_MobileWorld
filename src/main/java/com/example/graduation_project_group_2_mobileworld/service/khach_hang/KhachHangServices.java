@@ -106,6 +106,12 @@ public class KhachHangServices {
     }
 
     public KhachHang addKhachHang(KhachHangDTO khachHangDTO) {
+        if (taiKhoanRepository.findByEmail(khachHangDTO.getEmail()).isPresent()) {
+            throw new RuntimeException("Email đã được sử dụng!");
+        }
+        if (taiKhoanRepository.findBySoDienThoai(khachHangDTO.getSoDienThoai()).isPresent()) {
+            throw new RuntimeException("SDT đã được sử dụng!");
+        }
         QuyenHan quyenHan = new QuyenHan();
         quyenHan.setId(2); // Quyền khách hàng
 

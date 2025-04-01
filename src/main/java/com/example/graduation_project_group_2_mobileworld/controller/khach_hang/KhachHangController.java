@@ -35,12 +35,12 @@ public class KhachHangController {
     }
     // Thêm mới khách hàng
     @PostMapping("/add")
-    public ResponseEntity<KhachHang> addKhachHang(@RequestBody KhachHangDTO khachHangDTO) {
+    public ResponseEntity<?> addKhachHang(@RequestBody KhachHangDTO khachHangDTO) {
         try {
             KhachHang newKhachHang = khachHangServices.addKhachHang(khachHangDTO);
-            return ResponseEntity.status(201).body(newKhachHang);
+            return new ResponseEntity<>(newKhachHang, HttpStatus.CREATED);
         } catch (RuntimeException e) {
-            return ResponseEntity.status(400).body(null);
+            return new ResponseEntity<>("Lỗi khi thêm nhân viên: " + e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 
