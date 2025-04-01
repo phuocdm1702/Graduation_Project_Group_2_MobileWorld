@@ -25,7 +25,7 @@ public class DotGiamGia {
     private Integer id;
 
     @Size(max = 255)
-    @NotNull
+//    @NotNull
     @Nationalized
     @Column(name = "ma", nullable = false)
     private String ma;

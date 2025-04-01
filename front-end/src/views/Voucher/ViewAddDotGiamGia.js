@@ -399,17 +399,17 @@ export const useDotGiamGia = () => {
 
   const validate = async function () {
     const today = new Date().toISOString().split("T")[0];
-    if (dotGiamGia.value.ma == "") {
-      toast.value?.kshowToast("error", "Vui lòng nhập mã");
-      return false;
-    }
-    if (edit.value == false) {
-      const isDuplicate = await checkDuplicate('ma', dotGiamGia.value.ma);
-      if (isDuplicate) {
-        toast.value?.kshowToast("error", "Mã đã tồn tại");
-        return false;
-      }
-    }
+    // if (dotGiamGia.value.ma == "") {
+    //   toast.value?.kshowToast("error", "Vui lòng nhập mã");
+    //   return false;
+    // }
+    // if (edit.value == false) {
+    //   const isDuplicate = await checkDuplicate('ma', dotGiamGia.value.ma);
+    //   if (isDuplicate) {
+    //     toast.value?.kshowToast("error", "Mã đã tồn tại");
+    //     return false;
+    //   }
+    // }
     if (dotGiamGia.value.tenDotGiamGia == "") {
       toast.value?.kshowToast("error", "Vui lòng nhập tên đợt giảm giá");
       return false;

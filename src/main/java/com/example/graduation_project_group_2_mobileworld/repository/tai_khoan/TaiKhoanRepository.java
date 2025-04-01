@@ -22,6 +22,5 @@ public interface TaiKhoanRepository extends JpaRepository<TaiKhoan, Integer> {
     //checkEmail
     Optional<TaiKhoan> findByEmail(String email);
     Optional<TaiKhoan> findBytenDangNhap(String tenDangNhap);
-
-
+    Optional<TaiKhoan> findBySoDienThoai(String soDienThoai);
 }

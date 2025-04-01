@@ -532,7 +532,18 @@ async function confirmAddNhanVien() {
       });
     }, 100);
   } catch (error) {
-    toastRef.value?.kshowToast('error', 'Thêm nhân viên thất bại: ' + (error.response?.data?.message || error.message));
+    showConfirmModal.value = false;
+    const errorMessage = error.response?.data.split(": ")[1]  || error.response?.data || error.message;
+    console.log('Lỗi từ server:', error.response); // Debug
+    if (errorMessage.includes('Email đã được sử dụng')) {
+      toastRef.value?.kshowToast('error', 'Email đã được sử dụng!');
+    }
+    else if (errorMessage.includes('SDT đã được sử dụng')) {
+      toastRef.value?.kshowToast('error', 'SDT đã được sử dụng!');
+    }
+    else {
+      toastRef.value?.kshowToast('error', 'Thêm nhân viên thất bại: ' + errorMessage);
+    }
   }
 }
 
