@@ -16,7 +16,7 @@
           <input v-model="taikhoan.tenDangNhap" type="text"
                  class="block w-full mt-1 px-4 py-2 bg-gray-50 border border-gray-300 rounded-md focus:border-orange-500 focus:ring focus:ring-orange-200 focus:ring-opacity-50 transition duration-200"
                  :class="{ 'border-red-500': errors.tenDangNhap }"
-                 placeholder="Nhập UserName của bạn" />
+                 placeholder="Nhập Tên đăng nhập của bạn" />
           <span v-if="errors.tenDangNhap" class="text-xs text-red-500 mt-1">{{ errors.tenDangNhap }}</span>
         </label>
 
