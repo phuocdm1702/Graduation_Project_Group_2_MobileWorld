@@ -24,6 +24,7 @@ public class PhieuGiamGiaCaNhanService {
         return phieuGiamGiaCaNhanRepository.findAll();
     }
 
+
     @Transactional
     public PhieuGiamGiaCaNhan addPGGCN(PhieuGiamGiaCaNhan phieuGiamGiaCaNhan) {
         return phieuGiamGiaCaNhanRepository.save(phieuGiamGiaCaNhan);
@@ -34,6 +35,8 @@ public class PhieuGiamGiaCaNhanService {
         phieuGiamGiaCaNhanRepository.deleteByIdPhieuGiamGia(phieuGiamGiaId);
     }
 
-
+    public List<PhieuGiamGiaCaNhan> findByPhieuGiamGiaId(Integer pggId) {
+        return phieuGiamGiaCaNhanRepository.findByIdPhieuGiamGia_Id(pggId);
+    }
 
 }

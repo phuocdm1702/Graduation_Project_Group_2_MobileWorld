@@ -22,11 +22,13 @@ public class PhieuGiamGiaDTO {
     private List<KhPggDTO> selectedCustomers;
     private List<KhPggDTO> allCustomers;
     private List<Integer> customerIds; // Thêm trường customerIds
+    private List<Integer> restoredCustomerIds;
 
     public PhieuGiamGiaDTO() {
     }
 
-    public PhieuGiamGiaDTO(String ma, String tenPhieuGiamGia, String loaiPhieuGiamGia, Double phanTramGiamGia, Double soTienGiamToiDa, Double hoaDonToiThieu, Integer soLuongDung, Date ngayBatDau, Date ngayKetThuc, Boolean trangThai, Integer riengTu, String moTa, List<KhPggDTO> selectedCustomers, List<KhPggDTO> allCustomers, List<Integer> customerIds) {
+    public PhieuGiamGiaDTO(Integer id, String ma, String tenPhieuGiamGia, String loaiPhieuGiamGia, Double phanTramGiamGia, Double soTienGiamToiDa, Double hoaDonToiThieu, Integer soLuongDung, Date ngayBatDau, Date ngayKetThuc, Boolean trangThai, Integer riengTu, String moTa, List<KhPggDTO> selectedCustomers, List<KhPggDTO> allCustomers, List<Integer> customerIds, List<Integer> restoredCustomerIds) {
+        this.id = id;
         this.ma = ma;
         this.tenPhieuGiamGia = tenPhieuGiamGia;
         this.loaiPhieuGiamGia = loaiPhieuGiamGia;
@@ -42,6 +44,7 @@ public class PhieuGiamGiaDTO {
         this.selectedCustomers = selectedCustomers;
         this.allCustomers = allCustomers;
         this.customerIds = customerIds;
+        this.restoredCustomerIds = restoredCustomerIds;
     }
 
     // Getter và Setter cho customerIds
@@ -173,5 +176,13 @@ public class PhieuGiamGiaDTO {
 
     public void setAllCustomers(List<KhPggDTO> allCustomers) {
         this.allCustomers = allCustomers;
+    }
+
+    public List<Integer> getRestoredCustomerIds() {
+        return restoredCustomerIds;
+    }
+
+    public void setRestoredCustomerIds(List<Integer> restoredCustomerIds) {
+        this.restoredCustomerIds = restoredCustomerIds;
     }
 }

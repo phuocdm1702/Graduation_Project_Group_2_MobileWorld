@@ -9,7 +9,12 @@
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label class="block text-sm font-medium text-gray-700">Mã</label>
-              <input type="text" v-model="ma" class="form-input" @blur="checkMaTrung" />
+              <input
+                type="text"
+                v-model="ma"
+                class="form-input"
+                :disabled="true"
+              />
               <p v-if="errors.ma" class="error">{{ errors.ma }}</p>
             </div>
             <div>
@@ -269,6 +274,17 @@ const closeConfirmModal = () => {
   confirmedAction.value = null;
 };
 
+// Hàm tạo mã ngẫu nhiên dạng PGG_ + 8 ký tự (chữ và số)
+const generateRandomCode = () => {
+  const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  let randomCode = "PGG_";
+  for (let i = 0; i < 8; i++) {
+    const randomIndex = Math.floor(Math.random() * characters.length);
+    randomCode += characters[randomIndex];
+  }
+  return randomCode;
+};
+
 const baseURL = "http://localhost:8080/add-phieu-giam-gia";
 
 const today = new Date();
@@ -453,6 +469,7 @@ const handleSubmit = () => {
 
 onMounted(() => {
   fetchDataKH();
+  ma.value = generateRandomCode();
   if (toast.value) {
     console.log("Toast component is mounted:", toast.value);
     console.log("kshowToast method available:", !!toast.value.kshowToast);

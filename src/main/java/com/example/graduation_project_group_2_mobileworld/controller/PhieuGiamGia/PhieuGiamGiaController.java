@@ -4,6 +4,7 @@ import com.example.graduation_project_group_2_mobileworld.dto.phieuGiamGiaDTO.Ph
 import com.example.graduation_project_group_2_mobileworld.entity.KhachHang;
 import com.example.graduation_project_group_2_mobileworld.entity.PhieuGiamGia;
 import com.example.graduation_project_group_2_mobileworld.entity.PhieuGiamGiaCaNhan;
+import com.example.graduation_project_group_2_mobileworld.repository.giam_gia.PhieuGiamGiaCaNhanRepository;
 import com.example.graduation_project_group_2_mobileworld.repository.giam_gia.PhieuGiamGiaRepository;
 import com.example.graduation_project_group_2_mobileworld.service.PhieuGiamGia.PhieuGiamGiaCaNhanService;
 import com.example.graduation_project_group_2_mobileworld.service.PhieuGiamGia.PhieuGiamGiaService;
@@ -21,10 +22,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/phieu-giam-gia")
@@ -49,6 +48,12 @@ public class PhieuGiamGiaController {
     @Autowired
     private PhieuGiamGiaRepository phieuGiamGiaRepository;
 
+    @Autowired
+    private PhieuGiamGiaCaNhanRepository phieuGiamGiaCaNhanRepository;
+
+    // Thêm khai báo dateFormat
+    private final SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+
     @GetMapping("/data")
     public ResponseEntity<Page<PhieuGiamGia>> fetchData(
             @RequestParam(defaultValue = "0") int page,
@@ -72,7 +77,7 @@ public class PhieuGiamGiaController {
 
     @GetMapping("/filter")
     public ResponseEntity<Page<PhieuGiamGia>> filterPhieuGiamGia(
-            @RequestParam(required = false) String loaiPhieuGiamGia, // Thêm tham số
+            @RequestParam(required = false) String loaiPhieuGiamGia,
             @RequestParam(required = false) String trangThai,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date endDate,
@@ -98,7 +103,6 @@ public class PhieuGiamGiaController {
             return ResponseEntity.badRequest().body(null);
         }
     }
-
 
     @GetMapping("/{id}")
     public ResponseEntity<PhieuGiamGiaDTO> getDetail(@PathVariable Integer id) {
@@ -148,11 +152,17 @@ public class PhieuGiamGiaController {
             if (Objects.equals(dtoPGG.getRiengTu(), 1) && (dtoPGG.getCustomerIds() == null || dtoPGG.getCustomerIds().isEmpty())) {
                 return ResponseEntity.badRequest().body("Danh sách khách hàng không được trống khi phiếu riêng tư");
             }
-            // Kiểm tra số lượng với danh sách khách hàng
             if (Objects.equals(dtoPGG.getRiengTu(), 1) && dtoPGG.getSoLuongDung() != -1 && dtoPGG.getSoLuongDung() < dtoPGG.getCustomerIds().size()) {
                 return ResponseEntity.badRequest().body("Số lượng phải lớn hơn hoặc bằng số khách hàng được chọn");
             }
 
+            // Lấy danh sách khách hàng hiện tại trước khi cập nhật
+            List<PhieuGiamGiaCaNhan> existingPggcnList = phieuGiamGiaCaNhanService.findByPhieuGiamGiaId(id);
+            List<Integer> oldCustomerIds = existingPggcnList.stream()
+                    .map(pggcn -> pggcn.getIdKhachHang().getId())
+                    .collect(Collectors.toList());
+
+            // Cập nhật thông tin phiếu giảm giá
             PhieuGiamGia existingPgg = pggExist.get();
             existingPgg.setMa(dtoPGG.getMa());
             existingPgg.setTenPhieuGiamGia(dtoPGG.getTenPhieuGiamGia());
@@ -171,13 +181,30 @@ public class PhieuGiamGiaController {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Lỗi khi cập nhật phiếu giảm giá");
             }
 
-            if (Objects.equals(dtoPGG.getRiengTu(), 1)) { // Đơn giản hóa điều kiện
+            // Xử lý khách hàng nếu phiếu là riêng tư
+            if (Objects.equals(dtoPGG.getRiengTu(), 1)) {
+                List<Integer> newCustomerIds = dtoPGG.getCustomerIds();
+                List<Integer> restoredCustomerIds = dtoPGG.getRestoredCustomerIds() != null ? dtoPGG.getRestoredCustomerIds() : new ArrayList<>();
+
+                // Xác định khách hàng mới, khách hàng bị xóa, và khách hàng được khôi phục
+                List<Integer> addedCustomerIds = new ArrayList<>(newCustomerIds);
+                addedCustomerIds.removeAll(oldCustomerIds); // Khách hàng mới được thêm
+
+                List<Integer> removedCustomerIds = new ArrayList<>(oldCustomerIds);
+                removedCustomerIds.removeAll(newCustomerIds); // Khách hàng bị xóa
+
+                // Loại khách hàng được khôi phục ra khỏi danh sách khách hàng mới
+                addedCustomerIds.removeAll(restoredCustomerIds);
+
+                // Xóa tất cả khách hàng hiện tại
                 phieuGiamGiaCaNhanService.deleteByPhieuGiamGiaId(id);
-                for (Integer khachHangID : dtoPGG.getCustomerIds()) {
+
+                // Thêm lại khách hàng mới
+                for (Integer khachHangID : newCustomerIds) {
                     KhachHang kh = khachHangServices.findById(khachHangID);
                     if (kh != null) {
                         PhieuGiamGiaCaNhan pggcn = new PhieuGiamGiaCaNhan();
-                        pggcn.setIdPhieuGiamGia(existingPgg);
+                        pggcn.setIdPhieuGiamGia(updatedPgg);
                         pggcn.setIdKhachHang(kh);
                         pggcn.setMa(dtoPGG.getMa() + "-" + khachHangID);
                         pggcn.setNgayNhan(new Date());
@@ -186,14 +213,111 @@ public class PhieuGiamGiaController {
                         pggcn.setDeleted(false);
 
                         phieuGiamGiaCaNhanService.addPGGCN(pggcn);
-                        // Logic gửi email giữ nguyên...
+
+                        // Lấy email từ TaiKhoan thay vì KhachHang
+                        String email = (kh.getIdTaiKhoan() != null) ? kh.getIdTaiKhoan().getEmail() : null;
+
+                        // Gửi email cho khách hàng mới được thêm
+                        if (addedCustomerIds.contains(khachHangID)) {
+                            if (email != null && !email.isEmpty()) {
+                                emailSend.sendDiscountEmail(
+                                        email,
+                                        dtoPGG.getMa(),
+                                        dateFormat.format(updatedPgg.getNgayKetThuc()),
+                                        updatedPgg.getPhanTramGiamGia(),
+                                        updatedPgg.getSoTienGiamToiDa(),
+                                        "🎉 Cảm ơn bạn! Phiếu giảm giá từ MobileWorld",
+                                        """
+                                        <div class="thank-you-section">
+                                            <h2>Cảm ơn!</h2>
+                                            <p>Quý khách đã đăng ký nhận tin email từ MobileWorld</p>
+                                        </div>
+                                        """,
+                                        """
+                                        Cảm ơn bạn đã đăng ký nhận tin từ MobileWorld!
+    
+                                        Dưới đây là thông tin phiếu giảm giá của bạn:
+                                        """
+                                );
+                            }
+                        }
+                        // Gửi email cho khách hàng được khôi phục
+                        else if (restoredCustomerIds.contains(khachHangID)) {
+                            if (email != null && !email.isEmpty()) {
+                                emailSend.sendDiscountEmail(
+                                        email,
+                                        dtoPGG.getMa(),
+                                        dateFormat.format(updatedPgg.getNgayKetThuc()),
+                                        updatedPgg.getPhanTramGiamGia(),
+                                        updatedPgg.getSoTienGiamToiDa(),
+                                        "🎉 Phiếu giảm giá của bạn đã được khôi phục từ MobileWorld",
+                                        """
+                                        <div class="thank-you-section">
+                                            <h2>Khôi phục!</h2>
+                                            <p>Phiếu giảm giá của bạn đã được khôi phục bởi MobileWorld.</p>
+                                        </div>
+                                        """,
+                                        """
+                                        Thông báo từ MobileWorld!
+    
+                                        Phiếu giảm giá của bạn đã được khôi phục:
+                                        """
+                                );
+                            }
+                        }
                     }
                 }
+
+                // Gửi email thông báo cập nhật cho khách hàng cũ (không bao gồm khách hàng mới và khách hàng được khôi phục)
+                List<Integer> unchangedCustomerIds = new ArrayList<>(newCustomerIds);
+                unchangedCustomerIds.removeAll(addedCustomerIds);
+                unchangedCustomerIds.removeAll(restoredCustomerIds);
+
+                for (Integer khachHangID : unchangedCustomerIds) {
+                    KhachHang kh = khachHangServices.findById(khachHangID);
+                    if (kh != null) {
+                        // Lấy email từ TaiKhoan thay vì KhachHang
+                        String email = (kh.getIdTaiKhoan() != null) ? kh.getIdTaiKhoan().getEmail() : null;
+                        if (email != null && !email.isEmpty()) {
+                            emailSend.sendUpdateDiscountEmail(
+                                    email,
+                                    dtoPGG.getMa(),
+                                    dateFormat.format(updatedPgg.getNgayKetThuc()),
+                                    updatedPgg.getPhanTramGiamGia(),
+                                    updatedPgg.getSoTienGiamToiDa()
+                            );
+                        }
+                    }
+                }
+
+                // Gửi email thông báo thu hồi cho khách hàng bị xóa
+                for (Integer khachHangID : removedCustomerIds) {
+                    KhachHang kh = khachHangServices.findById(khachHangID);
+                    if (kh != null) {
+                        // Lấy email từ TaiKhoan thay vì KhachHang
+                        String email = (kh.getIdTaiKhoan() != null) ? kh.getIdTaiKhoan().getEmail() : null;
+                        if (email != null && !email.isEmpty()) {
+                            emailSend.sendRevokeDiscountEmail(email, dtoPGG.getMa());
+                        }
+                    }
+                }
+            } else {
+                // Nếu chuyển từ riêng tư sang công khai, xóa tất cả PhieuGiamGiaCaNhan và gửi email thu hồi
+                List<PhieuGiamGiaCaNhan> existPggcnList = phieuGiamGiaCaNhanService.findByPhieuGiamGiaId(id);
+                for (PhieuGiamGiaCaNhan pggcn : existPggcnList) {
+                    KhachHang kh = pggcn.getIdKhachHang();
+                    // Lấy email từ TaiKhoan thay vì KhachHang
+                    String email = (kh.getIdTaiKhoan() != null) ? kh.getIdTaiKhoan().getEmail() : null;
+                    if (email != null && !email.isEmpty()) {
+                        emailSend.sendRevokeDiscountEmail(email, dtoPGG.getMa());
+                    }
+                }
+                phieuGiamGiaCaNhanService.deleteByPhieuGiamGiaId(id);
             }
 
             return ResponseEntity.ok(updatedPgg);
         } catch (RuntimeException e) {
-            e.printStackTrace(); // Thêm để debug chi tiết trong log server
+            e.printStackTrace();
             return ResponseEntity.badRequest().body("Lỗi cập nhật: " + e.getMessage());
         }
     }
@@ -209,7 +333,4 @@ public class PhieuGiamGiaController {
         PhieuGiamGiaDTO updatedPgg = phieuGiamGiaService.updateTrangthai(id, trangThai);
         return ResponseEntity.ok(updatedPgg);
     }
-
-
-
 }

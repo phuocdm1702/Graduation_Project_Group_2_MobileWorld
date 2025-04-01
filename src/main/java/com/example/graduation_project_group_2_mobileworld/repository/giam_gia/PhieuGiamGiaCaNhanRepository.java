@@ -15,4 +15,6 @@ public interface PhieuGiamGiaCaNhanRepository extends JpaRepository<PhieuGiamGia
     void deleteByIdPhieuGiamGia(@Param("phieuGiamGiaId") Integer phieuGiamGiaId);
 
     List<PhieuGiamGiaCaNhan> findByIdPhieuGiamGia(PhieuGiamGia phieuGiamGia);
+
+    List<PhieuGiamGiaCaNhan> findByIdPhieuGiamGia_Id(Integer pggId);
 }
