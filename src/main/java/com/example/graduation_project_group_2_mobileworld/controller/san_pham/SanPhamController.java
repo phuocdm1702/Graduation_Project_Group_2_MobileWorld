@@ -7,6 +7,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.Optional;
+
 @RestController
 @RequestMapping("/san-pham")
 @CrossOrigin(origins = "http://localhost:3000", allowedHeaders = "*")
@@ -37,5 +40,41 @@ public class SanPhamController {
             @RequestParam(defaultValue = "5") int size) {
         Page<SanPham> sanPhams = sanPhamService.searchSanPham(keyword, idNhaSanXuat, idHeDieuHanh, idManHinh, page, size);
         return ResponseEntity.ok(sanPhams);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<SanPham> getSanPhamById(@PathVariable Integer id) {
+        Optional<SanPham> sanPham = sanPhamService.getSanPhamById(id);
+        return sanPham.map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> softDeleteSanPham(@PathVariable Integer id) {
+        Optional<SanPham> sanPham = sanPhamService.getSanPhamById(id);
+        if (sanPham.isPresent()) {
+            sanPhamService.deleteSanPham(id); // Soft delete
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.notFound().build();
+    }
+
+    @DeleteMapping("/bulk")
+    public ResponseEntity<Void> softDeleteMultipleSanPham(@RequestBody DeleteRequest request) {
+        sanPhamService.deleteMultipleSanPham(request.getIds()); // Soft delete multiple
+        return ResponseEntity.ok().build();
+    }
+
+    // Helper class for bulk delete request
+    static class DeleteRequest {
+        private List<Integer> ids;
+
+        public List<Integer> getIds() {
+            return ids;
+        }
+
+        public void setIds(List<Integer> ids) {
+            this.ids = ids;
+        }
     }
 }

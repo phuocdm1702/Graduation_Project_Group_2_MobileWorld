@@ -53,19 +53,6 @@
         </div>
       </div>
 
-      <!-- Nút xóa các sản phẩm đã chọn -->
-      <div v-if="selectedProducts.length" class="bg-white shadow-lg rounded-lg p-5 mb-4 mt-4 flex justify-end">
-        <button
-          @click="confirmDeleteSelected"
-          class="flex items-center gap-2 px-4 py-2 bg-red-500 text-white font-semibold rounded-lg shadow-md hover:bg-red-600 transition"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-1">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-          Xóa {{ selectedProducts.length }} sản phẩm đã chọn
-        </button>
-      </div>
-
       <!-- Thông báo khi không có dữ liệu -->
       <div v-if="productDetails.length === 0" class="text-center text-gray-500 py-4">
         Không tìm thấy sản phẩm nào.
@@ -78,28 +65,7 @@
         :data="productDetails"
         :columns="columns"
         :get-nested-value="getNestedValue"
-        :selected-products="selectedProducts"
-        @toggle-select="toggleSelect"
-      >
-        <!-- Slot để render checkbox "Chọn tất cả" trong tiêu đề cột select -->
-        <template #header-select>
-          <input
-            type="checkbox"
-            class="w-4 h-4 rounded"
-            :checked="isAllSelected"
-            @change="toggleSelectAll"
-          />
-        </template>
-        <!-- Slot để render checkbox trong các dòng -->
-        <template #cell-select="{ item }">
-          <input
-            type="checkbox"
-            class="w-4 h-4 rounded"
-            :checked="selectedProducts.includes(item.id)"
-            @change="toggleSelect(item.id)"
-          />
-        </template>
-      </DynamicTable>
+      />
 
       <!-- Phân trang -->
       <footer v-if="productDetails.length > 0" class="bg-white shadow-lg rounded-lg p-4 flex justify-center items-center mt-2">
@@ -126,7 +92,7 @@ import DynamicTable from '@/components/DynamicTable.vue';
 import BreadcrumbWrapper from '@/components/BreadcrumbWrapper.vue';
 import ConfirmModal from '@/components/ConfirmModal.vue';
 import debounce from 'lodash/debounce';
-import sanPham from './SanPham.js';
+import sanPham from './composables/SanPham.js';
 
 export default defineComponent({
   name: 'SanPham',
@@ -141,8 +107,6 @@ export default defineComponent({
       searchFilters,
       currentPage,
       totalPages,
-      selectedProducts,
-      isAllSelected,
       nhaSanXuatOptions,
       heDieuHanhOptions,
       manHinhOptions,
@@ -152,18 +116,17 @@ export default defineComponent({
       searchProductDetails,
       resetSearch,
       confirmDelete,
-      confirmDeleteSelected,
       confirmAction,
       executeConfirmedAction,
       closeConfirmModal,
-      toggleSelectAll,
-      toggleSelect,
       navigateToAddPage,
       getNestedValue,
+      showConfirmModal,
+      confirmMessage,
     } = sanPham(toast);
 
     const breadcrumbItems = computed(() => route.meta?.breadcrumb || ['Sản Phẩm']);
-    
+
     const columns = [
       { key: '#', label: 'STT', formatter: (value, item, index) => currentPage.value * 5 + index + 1 },
       { key: 'tenSanPham', label: 'Tên Sản Phẩm' },
@@ -171,12 +134,12 @@ export default defineComponent({
       { key: 'idHeDieuHanh.heDieuHanh', label: 'Hệ Điều Hành' },
       { key: 'idManHinh.kichThuoc', label: 'Màn Hình' },
       {
-        key: 'trangThai',
-        label: 'Trạng Thái Hoạt Động',
+        key: 'stockStatus',
+        label: 'Trạng Thái',
         formatter: (value, item) => {
           return item.deleted
-            ? '<span class="text-red-600">Hết hàng</span>'
-            : '<span class="text-green-600">Còn hàng</span>';
+            ? '<span class="inline-block px-3 py-1 border rounded-full text-sm font-semibold bg-gray-200 text-red-600">Hết hàng</span>'
+            : '<span class="inline-block px-3 py-1 border rounded-full text-sm font-semibold bg-gray-200 text-green-600">Còn hàng</span>';
         },
       },
       {
@@ -186,8 +149,8 @@ export default defineComponent({
           const safeItem = JSON.stringify(item);
           return `
             <div class="space-x-4">
-              <button class="text-orange-600 hover:text-orange-800 transition" data-item='${safeItem}' onclick="document.dispatchEvent(new CustomEvent('openEditModal', { detail: JSON.parse(this.dataset.item) }))">
-                <i class="fa-solid fa-edit text-orange-500"></i>
+              <button class="text-blue-600 hover:text-blue-800 transition" data-item='${safeItem}' onclick="document.dispatchEvent(new CustomEvent('viewDetails', { detail: JSON.parse(this.dataset.item) }))">
+                <i class="fa-solid fa-eye text-blue-500"></i>
               </button>
               <button class="text-red-600 hover:text-red-800 transition" data-id="${item.id}" onclick="document.dispatchEvent(new CustomEvent('confirmDelete', { detail: this.dataset.id }))">
                 <i class="fa-solid fa-trash"></i>
@@ -210,8 +173,6 @@ export default defineComponent({
       searchFilters,
       currentPage,
       totalPages,
-      selectedProducts,
-      isAllSelected,
       nhaSanXuatOptions,
       heDieuHanhOptions,
       manHinhOptions,
@@ -221,16 +182,15 @@ export default defineComponent({
       searchProductDetails,
       resetSearch,
       confirmDelete,
-      confirmDeleteSelected,
       confirmAction,
       executeConfirmedAction,
       closeConfirmModal,
-      toggleSelectAll,
-      toggleSelect,
       navigateToAddPage,
       getNestedValue,
       breadcrumbItems,
       columns,
+      showConfirmModal,
+      confirmMessage,
     };
   },
 });

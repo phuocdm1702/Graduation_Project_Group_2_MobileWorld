@@ -640,7 +640,7 @@
             @click="handleSubmit"
             class="px-4 py-2 bg-orange-500 text-white font-semibold rounded-lg hover:bg-orange-600 transition"
           >
-            Lưu
+            Thêm
           </button>
         </div>
       </div>
@@ -991,7 +991,7 @@
             ></textarea>
           </div>
           <div class="mb-4">
-            <label class="block text-sm font-medium text-gray-700 mb-2">Hoặc nhập từ file Excel</label>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Nhập từ file Excel</label>
             <input
               type="file"
               accept=".xlsx, .xls"
@@ -1020,782 +1020,155 @@
 </template>
 
 <script>
-import { defineComponent, computed, ref } from 'vue';
+import { defineComponent, computed, ref, onMounted } from 'vue';
+import { useRoute } from 'vue-router';
 import ToastNotification from '@/components/ToastNotification.vue';
 import FormModal from '@/components/FormModal.vue';
 import BreadcrumbWrapper from '@/components/BreadcrumbWrapper.vue';
-import { ref as logicRef, onMounted, computed as logicComputed } from 'vue';
-import { useRouter, useRoute } from 'vue-router';
-import axios from 'axios';
+
+// Import các composables
+import { useProductData } from './composables/useProductData';
+import { useProductVariants } from './composables/useProductVariants';
+import { useProductImages } from './composables/useProductImages';
+import { useDropdowns } from './composables/useDropdowns';
+import { useModals } from './composables/useModals';
+import { useFormHandling } from './composables/useFormHandling';
+import { useApiRequests } from './composables/useApiRequests';
 
 export default defineComponent({
-  name: 'AddProduct',
+  name: 'AddChiTietSanPham',
   components: {
     ToastNotification,
     FormModal,
     BreadcrumbWrapper,
   },
   setup() {
-    const router = useRouter();
     const route = useRoute();
-    const toast = logicRef(null);
-    const showFormModal = logicRef(false);
-    const currentAttribute = logicRef('');
-    const productData = ref({
-      tenSanPham: '',
-      idHeDieuHanh: '',
-      idManHinh: '',
-      idNhaSanXuat: '',
-      idCumCamera: '',
-      idSim: '',
-      idThietKe: '',
-      idPin: '',
-      idCpu: '',
-      idGpu: '',
-      idCongNgheMang: '',
-      idCongSac: '',
-      idHoTroCongNgheSac: '',
-      idChiSoKhangBuiVaNuoc: '',
-      idLoaiTinhTrang: '',
-      tienIchDacBiet: '',
-      createdBy: 'admin', // Thay bằng ID người dùng thực tế
-      updatedBy: 'admin'  // Thay bằng ID người dùng thực tế
-    });
+    const toast = ref(null);
 
-    const productVariants = logicRef([]);
-    const currentVariant = logicRef({
-      selectedRams: [],
-      selectedBoNhoTrongs: [],
-      selectedMauSacs: [],
-    });
+    // Khởi tạo các composables
+    const { productData, resetProductData } = useProductData();
 
-    const heDieuHanhOptions = logicRef([]);
-    const manHinhOptions = logicRef([]);
-    const nhaSanXuatOptions = logicRef([]);
-    const cumCameraOptions = logicRef([]);
-    const simOptions = logicRef([]);
-    const thietKeOptions = logicRef([]);
-    const pinOptions = logicRef([]);
-    const cpuOptions = logicRef([]);
-    const gpuOptions = logicRef([]);
-    const congNgheMangOptions = logicRef([]);
-    const congSacOptions = logicRef([]);
-    const hoTroCongNgheSacOptions = logicRef([]);
-    const chiSoKhangBuiVaNuocOptions = logicRef([]);
-    const tinhTrangOptions = logicRef([]);
-    const ramOptions = logicRef([]);
-    const boNhoTrongOptions = logicRef([]);
-    const mauSacOptions = logicRef([]);
+    const {
+      heDieuHanhOptions,
+      manHinhOptions,
+      nhaSanXuatOptions,
+      cumCameraOptions,
+      simOptions,
+      thietKeOptions,
+      pinOptions,
+      cpuOptions,
+      gpuOptions,
+      congNgheMangOptions,
+      congSacOptions,
+      hoTroCongNgheSacOptions,
+      chiSoKhangBuiVaNuocOptions,
+      tinhTrangOptions,
+      ramOptions,
+      boNhoTrongOptions,
+      mauSacOptions,
+      fetchOptions,
+      handleAddAttribute: apiHandleAddAttribute
+    } = useApiRequests(toast);
 
-    const dropdownOpen = logicRef({
-      ram: false,
-      boNhoTrong: false,
-      mauSac: false,
-    });
+    const {
+      productVariants,
+      currentVariant,
+      selectedVariants,
+      allSelected,
+      groupCommonValues,
+      groupVariantsByRamAndRom,
+      uniqueColors,
+      addVariant,
+      removeVariant,
+      updateSelectedVariants,
+      toggleGroupSelection,
+      toggleAllVariants,
+      updateSelectedCount,
+      resetVariants
+    } = useProductVariants(ramOptions, boNhoTrongOptions, mauSacOptions, productData);
 
-    const breadcrumbItems = logicComputed(() => {
+    const {
+      showImageSection,
+      mainImages,
+      colorImages,
+      getColorFromName,
+      handleMainImageUpload,
+      handleColorImageUpload,
+      resetImages
+    } = useProductImages();
+
+    const { dropdownOpen, toggleDropdown } = useDropdowns();
+
+    const {
+      showFormModal,
+      currentAttribute,
+      showColorModal,
+      showImeiModal,
+      currentVariantIndex,
+      imeiInput,
+      variantImeis,
+      openAddModal,
+      closeFormModal,
+      openColorModal,
+      closeColorModal,
+      openImeiModal,
+      closeImeiModal,
+      saveImei,
+      handleExcelImport,
+      resetModals
+    } = useModals();
+
+    const { handleSubmit } = useFormHandling(
+      toast,
+      productData,
+      productVariants,
+      mainImages,
+      colorImages
+    );
+
+    const breadcrumbItems = computed(() => {
       if (typeof route.meta.breadcrumb === 'function') {
         return route.meta.breadcrumb(route);
       }
       return route.meta?.breadcrumb || ['Thêm Sản Phẩm'];
     });
 
-    const fetchOptions = async () => {
-      try {
-        const [
-          heDieuHanhRes,
-          manHinhRes,
-          nhaSanXuatRes,
-          cumCameraRes,
-          simRes,
-          thietKeRes,
-          pinRes,
-          cpuRes,
-          gpuRes,
-          congNgheMangRes,
-          congSacRes,
-          hoTroCongNgheSacRes,
-          chiSoKhangBuiVaNuocRes,
-          tinhTrangRes,
-          ramRes,
-          boNhoTrongRes,
-          mauSacRes,
-        ] = await Promise.all([
-          axios.get('http://localhost:8080/he-dieu-hanh'),
-          axios.get('http://localhost:8080/man-hinh'),
-          axios.get('http://localhost:8080/nha-san-xuat'),
-          axios.get('http://localhost:8080/cum-camera/details'),
-          axios.get('http://localhost:8080/sim'),
-          axios.get('http://localhost:8080/thiet-ke'),
-          axios.get('http://localhost:8080/pin'),
-          axios.get('http://localhost:8080/cpu'),
-          axios.get('http://localhost:8080/gpu'),
-          axios.get('http://localhost:8080/cong-nghe-mang'),
-          axios.get('http://localhost:8080/cong-sac'),
-          axios.get('http://localhost:8080/ho-tro-cong-nghe-sac/details'),
-          axios.get('http://localhost:8080/chi-so-khang-bui-va-nuoc'),
-          axios.get('http://localhost:8080/tinh-trang'),
-          axios.get('http://localhost:8080/ram'),
-          axios.get('http://localhost:8080/bo-nho-trong'),
-          axios.get('http://localhost:8080/mau-sac'),
-        ]);
-
-        heDieuHanhOptions.value = heDieuHanhRes.data.content || [];
-        manHinhOptions.value = manHinhRes.data.content || [];
-        nhaSanXuatOptions.value = nhaSanXuatRes.data.content || [];
-        cumCameraOptions.value = cumCameraRes.data.content || [];
-        simOptions.value = simRes.data.content || [];
-        thietKeOptions.value = thietKeRes.data.content || [];
-        pinOptions.value = pinRes.data.content || [];
-        cpuOptions.value = cpuRes.data.content || [];
-        gpuOptions.value = gpuRes.data.content || [];
-        congNgheMangOptions.value = congNgheMangRes.data.content || [];
-        congSacOptions.value = congSacRes.data.content || [];
-        hoTroCongNgheSacOptions.value = hoTroCongNgheSacRes.data.content || [];
-        chiSoKhangBuiVaNuocOptions.value = chiSoKhangBuiVaNuocRes.data.content || [];
-        tinhTrangOptions.value = tinhTrangRes.data.content || [];
-        ramOptions.value = ramRes.data.content || [];
-        boNhoTrongOptions.value = boNhoTrongRes.data.content || [];
-        mauSacOptions.value = mauSacRes.data.content || [];
-      } catch (error) {
-        if (toast.value) {
-          toast.value?.kshowToast('error', 'Lỗi khi tải danh sách tùy chọn!');
-        }
-        console.error('Fetch options error:', error);
-      }
-    };
-
-    const toggleDropdown = (type) => {
-      dropdownOpen.value[type] = !dropdownOpen.value[type];
-      Object.keys(dropdownOpen.value).forEach((key) => {
-        if (key !== type) {
-          dropdownOpen.value[key] = false;
-        }
-      });
-    };
-
-    const addVariant = () => {
-      if (
-        currentVariant.value.selectedRams.length === 0 ||
-        currentVariant.value.selectedBoNhoTrongs.length === 0 ||
-        currentVariant.value.selectedMauSacs.length === 0
-      ) {
-        if (toast.value) {
-          toast.value?.kshowToast('error', 'Vui lòng chọn ít nhất một RAM, một Bộ Nhớ Trong và một Màu Sắc!');
-        }
-        return;
-      }
-
-      const newVariants = [];
-      currentVariant.value.selectedRams.forEach((ramId) => {
-        currentVariant.value.selectedBoNhoTrongs.forEach((boNhoId) => {
-          currentVariant.value.selectedMauSacs.forEach((mauSacId) => {
-            newVariants.push({
-              idRam: ramId,
-              idBoNhoTrong: boNhoId,
-              idMauSac: mauSacId,
-              idImel: 1,
-              idLoaiTinhTrang: productData.value.idLoaiTinhTrang,
-              soLuong: 0,
-              donGia: '', // Để trống, người dùng sẽ nhập trong bảng biến thể
-              imageIndex: null,
-            });
-          });
-        });
-      });
-
-      productVariants.value.push(...newVariants);
-      currentVariant.value = {
-        selectedRams: [],
-        selectedBoNhoTrongs: [],
-        selectedMauSacs: [],
-      };
-    };
-
-    const removeVariant = (index) => {
-      productVariants.value.splice(index, 1);
-    };
-
-    const showColorModal = ref(false);
-    const showImeiModal = ref(false);
-    const showImageSection = ref(false);
-    const imeiInput = ref('');
-    const currentVariantIndex = ref(null);
-    const variantImeis = ref({});
-    const mainImages = ref({
-      front: {file: null, fileName: '', previewUrl: ''},
-      back: {file: null, fileName: '', previewUrl: ''},
-    });
-    const colorImages = ref({});
-    const selectedVariants = ref([]);
-    const allSelected = ref({});
-    const groupCommonValues = ref({});
-
-    const openAddModal = (attribute) => {
-      currentAttribute.value = attribute;
-      showFormModal.value = true;
-    };
-
-    const closeFormModal = () => {
-      showFormModal.value = false;
-      currentAttribute.value = '';
-    };
-
-    const openColorModal = () => {
-      showColorModal.value = true;
-    };
-
-    const closeColorModal = () => {
-      showColorModal.value = false;
-    };
-
     const confirmColorSelection = () => {
-      addVariant();
-      showImageSection.value = true;
-      closeColorModal();
+      if (addVariant()) {
+        showImageSection.value = true;
+        closeColorModal();
 
-      groupVariantsByRamAndRom.value.forEach((group) => {
-        const groupKey = `${group.ram}/${group.rom}`;
-        if (!(groupKey in allSelected.value)) {
-          allSelected.value[groupKey] = true;
-          groupCommonValues.value[groupKey] = {price: '', quantity: ''};
-          toggleAllVariants(group, true);
-        }
-      });
-    };
-
-    const openImeiModal = (index) => {
-      currentVariantIndex.value = index;
-      imeiInput.value = variantImeis.value[index]?.join('\n') || '';
-      showImeiModal.value = true;
-    };
-
-    const closeImeiModal = () => {
-      showImeiModal.value = false;
-      imeiInput.value = '';
-      currentVariantIndex.value = null;
-    };
-
-    const saveImei = () => {
-      const imeis = imeiInput.value
-        .split('\n')
-        .map((imei) => imei.trim())
-        .filter((imei) => imei.length > 0);
-      variantImeis.value[currentVariantIndex.value] = imeis;
-      closeImeiModal();
-    };
-
-    const handleExcelImport = (event) => {
-      const file = event.target.files[0];
-      if (!file) return;
-      // Giả lập đọc file Excel (cần thư viện như XLSX để xử lý thực tế)
-      const mockImeis = ['123456789012345', '678901234567890'];
-      imeiInput.value = mockImeis.join('\n');
-    };
-
-    const getColorFromName = (colorName) => {
-      const vietnameseToEnglishColorMap = {
-        đen: 'black',
-        bạc: 'silver',
-        cam: 'orange',
-        đỏ: 'red',
-        vàng: 'yellow',
-        gold: 'gold',
-        xanh: 'green',
-        trắng: 'white',
-        hồng: 'pink',
-        tím: 'purple',
-        xám: 'gray',
-        nâu: 'brown',
-        lam: 'blue',
-        'xanh lam': 'blue',
-        'xanh lá': 'green',
-        'xanh dương': 'blue',
-      };
-      const colorNameToHex = {
-        black: '#000000',
-        silver: '#C0C0C0',
-        orange: '#FFA500',
-        red: '#FF0000',
-        yellow: '#FFFF00',
-        gold: '#FFD700',
-        green: '#008000',
-        white: '#FFFFFF',
-        pink: '#FF69B4',
-        purple: '#800080',
-        gray: '#808080',
-        brown: '#A52A2A',
-        blue: '#0000FF',
-      };
-      if (!colorName) return '#FFFFFF';
-      const normalizedName = colorName.toLowerCase().trim();
-      const englishColorName = vietnameseToEnglishColorMap[normalizedName] || normalizedName;
-      return colorNameToHex[englishColorName] || '#FFFFFF';
-    };
-
-    const handleMainImageUpload = (event, type) => {
-      const file = event.target.files[0];
-      if (file) {
-        if (mainImages.value[type].previewUrl) {
-          URL.revokeObjectURL(mainImages.value[type].previewUrl);
-        }
-        mainImages.value[type] = {
-          file,
-          fileName: file.name,
-          previewUrl: URL.createObjectURL(file),
-        };
-      }
-    };
-
-    const handleColorImageUpload = (event, colorId) => {
-      const file = event.target.files[0];
-      if (file) {
-        if (colorImages.value[colorId]?.previewUrl) {
-          URL.revokeObjectURL(colorImages.value[colorId].previewUrl);
-        }
-        colorImages.value[colorId] = {
-          file,
-          fileName: file.name,
-          previewUrl: URL.createObjectURL(file),
-        };
-      }
-    };
-
-    const handleSubmit = async () => {
-      // Validate product data
-      const requiredFields = [
-        'tenSanPham', 'idHeDieuHanh', 'idManHinh', 'idNhaSanXuat',
-        'idCumCamera', 'idSim', 'idThietKe', 'idPin', 'idCpu',
-        'idGpu', 'idCongNgheMang', 'idCongSac', 'idHoTroCongNgheSac',
-        'idLoaiTinhTrang'
-      ];
-
-      const missingFields = requiredFields.filter(field => !productData.value[field]);
-
-      if (missingFields.length > 0) {
-        if (toast.value) {
-          toast.value?.kshowToast('error', `Vui lòng nhập đầy đủ thông tin. Thiếu các trường: ${missingFields.join(', ')}`);
-        }
-        return;
-      }
-
-      // Validate variants
-      if (productVariants.value.length === 0) {
-        if (toast.value) {
-          toast.value?.kshowToast('error', 'Vui lòng thêm ít nhất một biến thể sản phẩm');
-        }
-        return;
-      }
-
-      // Validate images
-      const allImages = [];
-      if (mainImages.value.front.file) allImages.push(mainImages.value.front.file);
-      if (mainImages.value.back.file) allImages.push(mainImages.value.back.file);
-      Object.values(colorImages.value).forEach((image) => {
-        if (image.file) allImages.push(image.file);
-      });
-
-      if (allImages.length === 0) {
-        if (toast.value) {
-          toast.value?.kshowToast('error', 'Vui lòng tải lên ít nhất một ảnh');
-        }
-        return;
-      }
-
-      // Prepare variants with image indexes
-      productVariants.value.forEach((variant, index) => {
-        const colorImage = colorImages.value[variant.idMauSac];
-        if (colorImage && colorImage.file) {
-          variant.imageIndex = allImages.indexOf(colorImage.file);
-        } else {
-          variant.imageIndex = 0; // Default to first image
-        }
-      });
-
-      // Prepare FormData
-      const formData = new FormData();
-
-      // Add product data as JSON
-      formData.append('dto', JSON.stringify({
-        tenSanPham: productData.value.tenSanPham,
-        idNhaSanXuat: productData.value.idNhaSanXuat,
-        idPin: productData.value.idPin,
-        idManHinh: productData.value.idManHinh,
-        idCpu: productData.value.idCpu,
-        idGpu: productData.value.idGpu,
-        idCumCamera: productData.value.idCumCamera,
-        idHeDieuHanh: productData.value.idHeDieuHanh,
-        idThietKe: productData.value.idThietKe,
-        idSim: productData.value.idSim,
-        idCongSac: productData.value.idCongSac,
-        idHoTroCongNgheSac: productData.value.idHoTroCongNgheSac,
-        idCongNgheMang: productData.value.idCongNgheMang,
-        idChiSoKhangBuiVaNuoc: productData.value.idChiSoKhangBuiVaNuoc || null,
-        tienIchDacBiet: productData.value.tienIchDacBiet,
-        giaBan: productVariants.value[0].donGia, // Use price from first variant
-        createdAt: new Date().toISOString(),
-        createdBy: 1, // Replace with actual user ID
-        updatedAt: new Date().toISOString(),
-        updatedBy: 1, // Replace with actual user ID
-        variants: productVariants.value.map(variant => ({
-          idImel: variant.idImel || 1, // Default IMEL if not provided
-          idMauSac: variant.idMauSac,
-          idRam: variant.idRam,
-          idBoNhoTrong: variant.idBoNhoTrong,
-          idLoaiTinhTrang: variant.idLoaiTinhTrang,
-          imageIndex: variant.imageIndex,
-          soLuong: variant.soLuong,
-          donGia: variant.donGia
-        }))
-      }));
-
-      // Add images
-      allImages.forEach((image) => {
-        formData.append('images', image);
-      });
-
-      try {
-        const response = await axios.post('http://localhost:8080/chi-tiet-san-pham', formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        });
-
-        if (response.data) {
-          const { sanPhamId, chiTietSanPhamIds, anhSanPhamIds } = response.data.data;
-          if (toast.value) {
-            toast.value?.kshowToast(
-              'success',
-              `Thêm sản phẩm thành công! ID: ${sanPhamId}, ${chiTietSanPhamIds.length} biến thể, ${anhSanPhamIds.length} ảnh`
-            );
+        groupVariantsByRamAndRom.value.forEach((group) => {
+          const groupKey = `${group.ram}/${group.rom}`;
+          if (!(groupKey in allSelected.value)) {
+            allSelected.value[groupKey] = true;
+            groupCommonValues.value[groupKey] = {price: '', quantity: ''};
+            toggleAllVariants(group, true);
           }
-          await router.push('/products');
-        }
-      } catch (error) {
-        console.error('Error details:', {
-          message: error.message,
-          response: error.response?.data,
-          stack: error.stack
         });
+      } else {
+        toast.value?.kshowToast('error', 'Vui lòng chọn ít nhất một RAM, một Bộ Nhớ Trong và một Màu Sắc!');
+      }
+    };
 
-        let errorMessage = 'Lỗi khi lưu dữ liệu';
-        if (error.response) {
-          if (error.response.data?.message) {
-            errorMessage += ': ' + error.response.data.message;
-          } else if (error.response.data?.error) {
-            errorMessage += ': ' + error.response.data.error;
-          }
-        } else {
-          errorMessage += ': ' + error.message;
-        }
-
-        if (toast.value) {
-          toast.value?.kshowToast('error', errorMessage);
-        }
+    const handleAddAttribute = async (data) => {
+      const success = await apiHandleAddAttribute(
+        currentAttribute,
+        data,
+        productData,
+        currentVariant
+      );
+      if (success) {
+        closeFormModal();
       }
     };
 
     const resetForm = () => {
-      Object.values(mainImages.value).forEach((image) => {
-        if (image.previewUrl) {
-          URL.revokeObjectURL(image.previewUrl);
-        }
-      });
-      mainImages.value = {
-        front: { file: null, fileName: '', previewUrl: '' },
-        back: { file: null, fileName: '', previewUrl: '' },
-      };
-      Object.values(colorImages.value).forEach((image) => {
-        if (image?.previewUrl) {
-          URL.revokeObjectURL(image.previewUrl);
-        }
-      });
-      colorImages.value = {};
-      productData.value = {
-        tenSanPham: '',
-        idHeDieuHanh: '',
-        idManHinh: '',
-        idNhaSanXuat: '',
-        idCumCamera: '',
-        idSim: '',
-        idThietKe: '',
-        idPin: '',
-        idCpu: '',
-        idGpu: '',
-        idCongNgheMang: '',
-        idCongSac: '',
-        idHoTroCongNgheSac: '',
-        idChiSoKhangBuiVaNuoc: '',
-        idLoaiTinhTrang: '',
-        tienIchDacBiet: '',
-        createdBy: 'admin',
-        updatedBy: 'admin',
-        updatedAt: new Date().toISOString(),
-      };
-      productVariants.value = [];
-      currentVariant.value = { selectedRams: [], selectedBoNhoTrongs: [], selectedMauSacs: [] };
-      showImageSection.value = false;
-      selectedVariants.value = [];
-      allSelected.value = {};
-      groupCommonValues.value = {};
-    };
-
-    const updateSelectedVariants = (group) => {
-      const groupKey = `${group.ram}/${group.rom}`;
-      const commonPrice = groupCommonValues.value[groupKey].price;
-      const commonQuantity = groupCommonValues.value[groupKey].quantity;
-
-      const groupIndices = group.variants.map((_, i) => group.startIndex + i);
-      const selectedInGroup = selectedVariants.value.filter((index) => groupIndices.includes(index));
-      if (selectedInGroup.length === 0 && group.variants.length > 0) {
-        selectedVariants.value = [...new Set([...selectedVariants.value, ...groupIndices])];
-        if (toast.value) {
-          toast.value.kshowToast('info', `Không có biến thể nào được chọn trong ${groupKey}, áp dụng cho tất cả biến thể trong nhóm.`);
-        }
-      }
-
-      selectedVariants.value.forEach((index) => {
-        if (index >= group.startIndex && index < group.startIndex + group.variants.length) {
-          if (productVariants.value[index]) {
-            if (commonPrice !== '') {
-              productVariants.value[index].donGia = commonPrice;
-            }
-            if (commonQuantity !== '') {
-              productVariants.value[index].soLuong = commonQuantity;
-            }
-          }
-        }
-      });
-    };
-
-    const toggleGroupSelection = (group, isChecked) => {
-      const groupIndices = group.variants.map((_, i) => group.startIndex + i);
-      if (isChecked) {
-        selectedVariants.value = [...new Set([...selectedVariants.value, ...groupIndices])];
-      } else {
-        selectedVariants.value = selectedVariants.value.filter((index) => !groupIndices.includes(index));
-      }
-      const groupKey = `${group.ram}/${group.rom}`;
-      allSelected.value[groupKey] = isChecked;
-      updateSelectedVariants(group);
-    };
-
-    const toggleAllVariants = (group, isChecked) => {
-      const groupKey = `${group.ram}/${group.rom}`;
-      allSelected.value[groupKey] = isChecked;
-      toggleGroupSelection(group, isChecked);
-    };
-
-    const updateSelectedCount = (group) => {
-      selectedVariants.value = selectedVariants.value.filter((index) => index >= 0 && index < productVariants.value.length);
-      const groupIndices = group.variants.map((_, i) => group.startIndex + i);
-      const selectedInGroup = selectedVariants.value.filter((index) => groupIndices.includes(index));
-      const groupKey = `${group.ram}/${group.rom}`;
-      allSelected.value[groupKey] = selectedInGroup.length === group.variants.length;
-      updateSelectedVariants(group);
-    };
-
-    const groupVariantsByRamAndRom = computed(() => {
-      const grouped = [];
-      const seen = new Set();
-      let startIndex = 0;
-
-      productVariants.value.forEach((variant, index) => {
-        const ram = ramOptions.value.find((r) => r.id === variant.idRam)?.dungLuong || 'N/A';
-        const rom = boNhoTrongOptions.value.find((b) => b.id === variant.idBoNhoTrong)?.dungLuong || 'N/A';
-        const key = `${ram}/${rom}`;
-
-        if (!seen.has(key)) {
-          seen.add(key);
-          const variantsInGroup = productVariants.value.filter((v) => {
-            const vRam = ramOptions.value.find((r) => r.id === v.idRam)?.dungLuong || 'N/A';
-            const vRom = boNhoTrongOptions.value.find((b) => b.id === v.idBoNhoTrong)?.dungLuong || 'N/A';
-            return `${vRam}/${vRom}` === key;
-          });
-
-          grouped.push({
-            ram,
-            rom,
-            groupKey: key,
-            variants: variantsInGroup,
-            startIndex,
-          });
-
-          startIndex += variantsInGroup.length;
-        }
-      });
-
-      return grouped;
-    });
-
-    const uniqueColors = computed(() => {
-      const seen = new Set();
-      const colors = [];
-
-      productVariants.value.forEach((variant) => {
-        const colorId = variant.idMauSac;
-        const colorName = mauSacOptions.value.find((mau) => mau.id === colorId)?.tenMau || 'N/A';
-
-        if (!seen.has(colorId)) {
-          seen.add(colorId);
-          colors.push({
-            colorId,
-            colorName,
-          });
-        }
-      });
-
-      return colors;
-    });
-
-    const handleAddAttribute = async (data) => {
-      try {
-        let response;
-        switch (currentAttribute.value) {
-          case 'heDieuHanh':
-            response = await axios.post('http://localhost:8080/he-dieu-hanh', {
-              heDieuHanh: data.heDieuHanh,
-              phienBan: data.phienBan,
-            });
-            heDieuHanhOptions.value.push(response.data);
-            productData.value.idHeDieuHanh = response.data.id;
-            break;
-          case 'manHinh':
-            response = await axios.post('http://localhost:8080/man-hinh', {
-              kichThuoc: data.kichThuoc,
-              doPhanGiai: data.doPhanGiai,
-            });
-            manHinhOptions.value.push(response.data);
-            productData.value.idManHinh = response.data.id;
-            break;
-          case 'nhaSanXuat':
-            response = await axios.post('http://localhost:8080/nha-san-xuat', {
-              nhaSanXuat: data.nhaSanXuat,
-            });
-            nhaSanXuatOptions.value.push(response.data);
-            productData.value.idNhaSanXuat = response.data.id;
-            break;
-          case 'cumCamera':
-            response = await axios.post('http://localhost:8080/cum-camera', {
-              cameraTruoc: data.cameraTruoc,
-              cameraSau: data.cameraSau,
-            });
-            cumCameraOptions.value.push(response.data);
-            productData.value.idCumCamera = response.data.id;
-            break;
-          case 'sim':
-            response = await axios.post('http://localhost:8080/sim', {
-              cacLoaiSimHoTro: data.cacLoaiSimHoTro,
-              soLuongSimHoTro: data.soLuongSimHoTro,
-            });
-            simOptions.value.push(response.data);
-            productData.value.idSim = response.data.id;
-            break;
-          case 'thietKe':
-            response = await axios.post('http://localhost:8080/thiet-ke', {
-              chatLieuKhung: data.chatLieuKhung,
-              chatLieuMatLung: data.chatLieuMatLung,
-            });
-            thietKeOptions.value.push(response.data);
-            productData.value.idThietKe = response.data.id;
-            break;
-          case 'pin':
-            response = await axios.post('http://localhost:8080/pin', {
-              loaiPin: data.loaiPin,
-              dungLuongPin: data.dungLuongPin,
-            });
-            pinOptions.value.push(response.data);
-            productData.value.idPin = response.data.id;
-            break;
-          case 'cpu':
-            response = await axios.post('http://localhost:8080/cpu', {
-              tenCpu: data.tenCpu,
-              soNhan: data.soNhan,
-            });
-            cpuOptions.value.push(response.data);
-            productData.value.idCpu = response.data.id;
-            break;
-          case 'gpu':
-            response = await axios.post('http://localhost:8080/gpu', {
-              tenGpu: data.tenGpu,
-            });
-            gpuOptions.value.push(response.data);
-            productData.value.idGpu = response.data.id;
-            break;
-          case 'congNgheMang':
-            response = await axios.post('http://localhost:8080/cong-nghe-mang', {
-              tenCongNgheMang: data.tenCongNgheMang,
-            });
-            congNgheMangOptions.value.push(response.data);
-            productData.value.idCongNgheMang = response.data.id;
-            break;
-          case 'congSac':
-            response = await axios.post('http://localhost:8080/cong-sac', {
-              congSac: data.congSac,
-            });
-            congSacOptions.value.push(response.data);
-            productData.value.idCongSac = response.data.id;
-            break;
-          case 'hoTroCongNgheSac':
-            response = await axios.post('http://localhost:8080/ho-tro-cong-nghe-sac', {
-              tenCongNgheSac: data.tenCongNgheSac,
-            });
-            hoTroCongNgheSacOptions.value.push(response.data);
-            productData.value.idHoTroCongNgheSac = response.data.id;
-            break;
-          case 'chiSoKhangBuiVaNuoc':
-            response = await axios.post('http://localhost:8080/chi-so-khang-bui-va-nuoc', {
-              tenChiSo: data.tenChiSo,
-            });
-            chiSoKhangBuiVaNuocOptions.value.push(response.data);
-            productData.value.idChiSoKhangBuiVaNuoc = response.data.id;
-            break;
-          case 'tinhTrang':
-            response = await axios.post('http://localhost:8080/tinh-trang', {
-              loaiTinhTrang: data.loaiTinhTrang,
-            });
-            tinhTrangOptions.value.push(response.data);
-            productData.value.idLoaiTinhTrang = response.data.id;
-            break;
-          case 'ram':
-            response = await axios.post('http://localhost:8080/ram', {
-              ma: data.ma,
-              dungLuong: data.dungLuong,
-            });
-            ramOptions.value.push(response.data);
-            currentVariant.value.selectedRams.push(response.data.id);
-            break;
-          case 'boNhoTrong':
-            response = await axios.post('http://localhost:8080/bo-nho-trong', {
-              ma: data.ma,
-              dungLuong: data.dungLuong,
-            });
-            boNhoTrongOptions.value.push(response.data);
-            currentVariant.value.selectedBoNhoTrongs.push(response.data.id);
-            break;
-          case 'mauSac':
-            response = await axios.post('http://localhost:8080/mau-sac', {
-              ma: data.ma,
-              tenMau: data.tenMau,
-            });
-            mauSacOptions.value.push(response.data);
-            currentVariant.value.selectedMauSacs.push(response.data.id);
-            break;
-          default:
-            console.warn('Unknown attribute:', currentAttribute.value);
-            return;
-        }
-
-        if (toast.value) {
-          toast.value?.kshowToast('success', `Thêm ${currentAttribute.value} thành công!`);
-        }
-        closeFormModal();
-      } catch (error) {
-        if (toast.value) {
-          toast.value?.kshowToast('error', `Lỗi khi thêm ${currentAttribute.value}: ${error.response?.data?.message || error.message}`);
-        }
-        console.error('Add attribute error:', error);
-      }
+      resetProductData();
+      resetVariants();
+      resetImages();
+      resetModals();
     };
 
     onMounted(() => {
@@ -1803,6 +1176,7 @@ export default defineComponent({
     });
 
     return {
+      // Các refs và methods cần thiết
       toast,
       productData,
       productVariants,
@@ -1826,42 +1200,43 @@ export default defineComponent({
       mauSacOptions,
       dropdownOpen,
       breadcrumbItems,
-      toggleDropdown,
-      addVariant,
-      removeVariant,
-      showFormModal,
-      currentAttribute,
-      openAddModal,
-      closeFormModal,
-      handleAddAttribute,
-      showColorModal,
-      openColorModal,
-      closeColorModal,
-      confirmColorSelection,
-      showImeiModal,
-      openImeiModal,
-      closeImeiModal,
-      saveImei,
-      handleExcelImport,
-      imeiInput,
-      variantImeis,
-      mainImages,
-      colorImages,
-      handleMainImageUpload,
-      handleColorImageUpload,
-      handleSubmit,
-      resetForm,
-      getColorFromName,
-      showImageSection,
       groupVariantsByRamAndRom,
       uniqueColors,
       selectedVariants,
       allSelected,
       groupCommonValues,
+      showImageSection,
+      mainImages,
+      colorImages,
+      showFormModal,
+      currentAttribute,
+      showColorModal,
+      showImeiModal,
+      currentVariantIndex,
+      imeiInput,
+      variantImeis,
+      toggleDropdown,
+      addVariant,
+      removeVariant,
+      updateSelectedVariants,
       toggleGroupSelection,
       toggleAllVariants,
       updateSelectedCount,
-      updateSelectedVariants,
+      openAddModal,
+      closeFormModal,
+      handleAddAttribute,
+      openColorModal,
+      closeColorModal,
+      confirmColorSelection,
+      openImeiModal,
+      closeImeiModal,
+      saveImei,
+      handleExcelImport,
+      handleMainImageUpload,
+      handleColorImageUpload,
+      handleSubmit,
+      resetForm,
+      getColorFromName
     };
   },
 });

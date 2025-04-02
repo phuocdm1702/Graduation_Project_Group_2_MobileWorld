@@ -94,7 +94,7 @@ const {
 
 const fetchManufacturer = async (id) => {
   try {
-    const { data } = await axios.get(`http://localhost:8080/api/nha-san-xuat/${id}`);
+    const { data } = await axios.get(`http://localhost:8080/nha-san-xuat/${id}`);
     manufacturer.value = data;
     originalMa.value = data.ma; // Lưu mã gốc
   } catch (error) {

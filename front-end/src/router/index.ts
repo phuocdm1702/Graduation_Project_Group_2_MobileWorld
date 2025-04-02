@@ -79,6 +79,8 @@ import LichSuPhieuBaoHanh from "../views/BaoHanh/LichSuPhieuBaoHanh.vue";
 import CongNgheMH from "@/views/Products/Screen/CongNgheMH.vue";
 import SanPham from "@/views/Products/SanPham/SanPham.vue";
 import AddChiTietSanPham from "@/views/Products/SanPham/AddChiTietSanPham.vue";
+import SanPhamChiTiet from "@/views/Products/SanPham/SanPhamChiTiet.vue";
+import BanHang from "@/views/BanHang/BanHang.vue";
 
 const routes: Array<RouteRecordRaw> = [
   // Login
@@ -95,6 +97,14 @@ const routes: Array<RouteRecordRaw> = [
     name: "Dashboard",
     component: Dashboard,
     meta: { breadcrumb: ["Thống kê"] },
+  },
+  
+  // Bán Hàng
+  {
+    path: "/orders",
+    name: "BanHangTaiQuay",
+    component: BanHang,
+    meta: { breadcrumb: ["Bán Hàng Tại Quầy"] },
   },
 
   // Giảm giá
@@ -219,7 +229,14 @@ const routes: Array<RouteRecordRaw> = [
     path: "/products/add",
     name: "AddProduct",
     component: AddChiTietSanPham,
-    meta: { breadcrumb: ["sản Phẩm", "Thêm Sản Phẩm"] },
+    meta: { breadcrumb: ["Sản Phẩm", "Thêm Sản Phẩm"] },
+  },
+
+  {
+    path: '/products/:id',
+    name: 'SanPhamChiTiet',
+    component: SanPhamChiTiet,
+    meta: { breadcrumb: ["Sản Phẩm", "Chi Tiết Sản Phẩm"] },
   },
 
 // Thương hiệu

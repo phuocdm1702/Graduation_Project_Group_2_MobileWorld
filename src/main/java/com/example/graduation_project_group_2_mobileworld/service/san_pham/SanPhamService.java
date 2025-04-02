@@ -8,10 +8,12 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class SanPhamService {
@@ -23,32 +25,17 @@ public class SanPhamService {
         this.sanPhamRepository = sanPhamRepository;
     }
 
-    /**
-     * Lấy tất cả sản phẩm với phân trang
-     * @param page Số trang (bắt đầu từ 0)
-     * @param size Số lượng sản phẩm mỗi trang
-     * @return Page<SanPham> chứa danh sách sản phẩm
-     */
     public Page<SanPham> getAllSanPham(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        return sanPhamRepository.findAll(pageable);
+        return sanPhamRepository.findByDeletedFalse(pageable); // Only active products
     }
 
-    /**
-     * Tìm kiếm sản phẩm theo các tiêu chí
-     * @param keyword Từ khóa tìm kiếm theo tên sản phẩm
-     * @param idNhaSanXuat ID nhà sản xuất
-     * @param idHeDieuHanh ID hệ điều hành
-     * @param idManHinh ID màn hình
-     * @param page Số trang
-     * @param size Số lượng sản phẩm mỗi trang
-     * @return Page<SanPham> chứa danh sách sản phẩm khớp tiêu chí
-     */
     public Page<SanPham> searchSanPham(String keyword, Integer idNhaSanXuat, Integer idHeDieuHanh, Integer idManHinh, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
 
         Specification<SanPham> spec = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
+            predicates.add(cb.equal(root.get("deleted"), false)); // Only active products
             if (keyword != null && !keyword.isEmpty()) {
                 predicates.add(cb.like(cb.lower(root.get("tenSanPham")), "%" + keyword.toLowerCase() + "%"));
             }
@@ -65,5 +52,19 @@ public class SanPhamService {
         };
 
         return sanPhamRepository.findAll(spec, pageable);
+    }
+
+    public Optional<SanPham> getSanPhamById(Integer id) {
+        return Optional.ofNullable(sanPhamRepository.findByIdAndDeletedFalse(id));
+    }
+
+    @Transactional
+    public void deleteSanPham(Integer id) {
+        sanPhamRepository.softDeleteById(id);
+    }
+
+    @Transactional
+    public void deleteMultipleSanPham(List<Integer> ids) {
+        sanPhamRepository.softDeleteByIds(ids);
     }
 }

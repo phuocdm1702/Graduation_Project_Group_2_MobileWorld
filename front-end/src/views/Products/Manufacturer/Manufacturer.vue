@@ -138,7 +138,7 @@ const uniqueNhaSanXuatList = ref([]);
 
 const fetchManufacturerNames = async () => {
   try {
-    const { data } = await axios.get('http://localhost:8080/api/nha-san-xuat/all-names');
+    const { data } = await axios.get('http://localhost:8080/nha-san-xuat/all-names');
     uniqueNhaSanXuatList.value = data;
   } catch (error) {
     console.error('Error fetching manufacturer names:', error);

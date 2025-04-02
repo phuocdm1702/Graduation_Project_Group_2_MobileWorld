@@ -46,87 +46,28 @@
           Examples
         </p>
 
-        <div>
-          <div class="relative">
-            <button
-              @click="toggleDropdown('dropdown1')"
-              class="flex items-center w-full px-6 py-2 mt-4 duration-200 border-l-4"
-              :class="[$route.name === 'Orders' ? activeClass : inactiveClass]"
-            >
-              <svg
-                class="w-7 h-7"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M5 4h1.5L9 16m0 0h8m-8 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm8 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm-8.5-3h9.25L19 7H7.312"
-                />
-              </svg>
-              <span class="mx-4">Bán hàng</span>
-              <svg
-                class="w-4 h-4 ml-auto transform transition-transform"
-                :class="{ 'rotate-180': openDropdown === 'dropdown1' }"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-              >
-                <path
-                  fill-rule="evenodd"
-                  d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                  clip-rule="evenodd"
-                />
-              </svg>
-            </button>
-
-            <div v-if="openDropdown === 'dropdown1'" class="ml-8">
-              <router-link
-                class="flex items-center gap-x-3 block px-6 py-2 mt-2 duration-200 border-l-4"
-                :class="[$route.name === 'Orders' ? activeClass : inactiveClass]"
-                to="/orders"
-                @click="scrollToSection"
-              >
-                <svg
-                  class="w-6 h-6"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  stroke-width="2"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M16 11V9a4 4 0 1 0-8 0v2M5 11h14m-1 0a3 3 0 1 1-6 0M9 11a3 3 0 1 1-6 0m2 8h10a2 2 0 0 0 2-2v-5H5v5a2 2 0 0 0 2 2Z"
-                  />
-                </svg>
-                <span class="mx-4">Tại quầy</span>
-              </router-link>
-
-              <router-link
-                class="flex items-center gap-x-3 block px-6 py-2 mt-2 duration-200 border-l-4"
-                :class="[$route.name === 'Orders' ? activeClass : inactiveClass]"
-                to="/orders"
-                @click="scrollToSection"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="currentColor"
-                  class="w-6 h-6"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    d="M8.186 1.113a.5.5 0 0 0-.372 0L1.846 3.5l2.404.961L10.404 2zm3.564 1.426L5.596 5 8 5.961 14.154 3.5zm3.25 1.7-6.5 2.6v7.922l6.5-2.6V4.24zM7.5 14.762V6.838L1 4.239v7.923zM7.443.184a1.5 1.5 0 0 1 1.114 0l7.129 2.852A.5.5 0 0 1 16 3.5v8.662a1 1 0 0 1-.629.928l-7.185 2.874a.5.5 0 0 1-.372 0L.63 13.09a1 1 0 0 1-.63-.928V3.5a.5.5 0 0 1 .314-.464z"
-                  />
-                </svg>
-                <span class="mx-4">Đặt Online</span>
-              </router-link>
-            </div>
-          </div>
-        </div>
+        <router-link
+          class="flex items-center px-6 py-2 mt-4 duration-200 border-l-4"
+          :class="[$route.name === 'Orders' ? activeClass : inactiveClass]"
+          to="/orders"
+          @click="scrollToSection"
+        >
+          <svg
+            class="w-7 h-7"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M5 4h1.5L9 16m0 0h8m-8 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm8 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm-8.5-3h9.25L19 7H7.312"
+            />
+          </svg>
+          <span class="mx-4">Bán hàng tại quầy</span>
+        </router-link>
 
         <router-link
           class="flex items-center px-6 py-2 mt-4 duration-200 border-l-4"
@@ -147,7 +88,7 @@
               d="M3 4.5a.5.5 0 0 1 .5-.5h6a.5.5 0 1 1 0 1h-6a.5.5 0 0 1-.5-.5m0 2a.5.5 0 0 1 .5-.5h6a.5.5 0 1 1 0 1h-6a.5.5 0 0 1-.5-.5m0 2a.5.5 0 0 1 .5-.5h6a.5.5 0 1 1 0 1h-6a.5.5 0 0 1-.5-.5m0 2a.5.5 0 0 1 .5-.5h6a.5.5 0 0 1 0 1h-6a.5.5 0 0 1-.5-.5m8-6a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 0 1h-1a.5.5 0 0 1-.5-.5m0 2a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 0 1h-1a.5.5 0 0 1-.5-.5m0 2a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 0 1h-1a.5.5 0 0 1-.5-.5m0 2a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 0 1h-1a.5.5 0 0 1-.5-.5"
             />
           </svg>
-          <span class="mx-4">Hóa đơn</span>
+          <span class="mx-4"> Hóa đơn</span>
         </router-link>
 
         <div>
@@ -433,9 +374,9 @@ const inactiveClass = ref("border-gray-300 text-gray-500 hover:bg-orange-400 hov
 
 function toggleDropdown(dropdownId: string) {
   if (openDropdown.value === dropdownId) {
-    openDropdown.value = null; // Close if already open
+    openDropdown.value = null;
   } else {
-    openDropdown.value = dropdownId; // Open new dropdown and close others
+    openDropdown.value = dropdownId;
   }
   scrollToSection();
 }

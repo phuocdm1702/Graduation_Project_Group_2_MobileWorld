@@ -11,11 +11,9 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ChiTietSanPhamRepository extends JpaRepository<ChiTietSanPham, Integer> {
 
-    // Load danh sách sản phẩm chi tiết với phân trang, sắp xếp theo ngày tạo mới nhất
     @Query("SELECT c FROM ChiTietSanPham c WHERE c.deleted = false ORDER BY c.createdAt DESC")
     Page<ChiTietSanPham> findAllActive(Pageable pageable);
 
-    // Tìm kiếm và lọc
     @Query("SELECT c FROM ChiTietSanPham c WHERE c.deleted = false " +
             "AND (:keyword IS NULL OR LOWER(c.tienIchDacBiet) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
             "AND (:idSanPham IS NULL OR c.idSanPham.id = :idSanPham) " +
