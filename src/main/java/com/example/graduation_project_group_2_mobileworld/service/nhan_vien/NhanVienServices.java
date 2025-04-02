@@ -91,8 +91,12 @@ public class NhanVienServices {
     }
     //themnhanvien
     public NhanVien addNhanVien(NhanVienDTO dto) {
-
-
+        if (taiKhoanRepository.findByEmail(dto.getEmail()).isPresent()) {
+            throw new RuntimeException("Email đã được sử dụng!");
+        }
+        if (taiKhoanRepository.findBySoDienThoai(dto.getSoDienThoai()).isPresent()) {
+            throw new RuntimeException("SDT đã được sử dụng!");
+        }
         QuyenHan quyenHan = new QuyenHan();;
         quyenHan.setId(3);
         TaiKhoan taiKhoan = new TaiKhoan();

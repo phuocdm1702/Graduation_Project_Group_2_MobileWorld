@@ -1,5 +1,6 @@
 package com.example.graduation_project_group_2_mobileworld.service.PhieuGiamGia;
 
+import com.example.graduation_project_group_2_mobileworld.dto.khach_hang.KhachHangDTO;
 import com.example.graduation_project_group_2_mobileworld.dto.phieuGiamGiaDTO.KhPggDTO;
 import com.example.graduation_project_group_2_mobileworld.dto.phieuGiamGiaDTO.PhieuGiamGiaDTO;
 import com.example.graduation_project_group_2_mobileworld.entity.KhachHang;
@@ -28,16 +29,22 @@ public class PhieuGiamGiaService {
     @Autowired
     private KhachHangRepository khachHangRepository;
 
-    @Autowired
-    private PhieuGiamGiaCaNhanRepository phieuGiamGiaCaNhanRepository;
 
-    // Lấy danh sách phiếu giảm giá với phân trang
+
+    private final PhieuGiamGiaCaNhanRepository phieuGiamGiaCaNhanRepository;
+
+
+    public PhieuGiamGiaService(PhieuGiamGiaRepository phieuGiamGiaRepository,
+                               PhieuGiamGiaCaNhanRepository phieuGiamGiaCaNhanRepository) {
+        this.phieuGiamGiaRepository = phieuGiamGiaRepository;
+        this.phieuGiamGiaCaNhanRepository = phieuGiamGiaCaNhanRepository;
+    }
+
     public Page<PhieuGiamGia> getPGG(Pageable pageable) {
         Date now = new Date();
         return phieuGiamGiaRepository.findByNgayKetThucGreaterThanEqual(now, pageable);
     }
 
-    // Tự động cập nhật trạng thái phiếu giảm giá
     @Scheduled(fixedRate = 200000)
     public void updateHanPGG() {
         List<PhieuGiamGia> listPgg = phieuGiamGiaRepository.findAll();
@@ -45,15 +52,16 @@ public class PhieuGiamGiaService {
 
         for (PhieuGiamGia pgg : listPgg) {
             if (pgg.getNgayBatDau() != null && pgg.getNgayKetThuc() != null) {
+                // Đã bắt đầu (ngayBatDau <= now) và chưa hết hạn (ngayKetThuc >= now)
                 if ((pgg.getNgayBatDau().before(now) || pgg.getNgayBatDau().equals(now)) &&
                         (pgg.getNgayKetThuc().after(now) || pgg.getNgayKetThuc().equals(now))) {
-                    if (pgg.getTrangThai() == null || pgg.getTrangThai()) {
-                        pgg.setTrangThai(false); // Hoạt động
+                    if (pgg.getTrangThai() == null || !pgg.getTrangThai()) {
+                        pgg.setTrangThai(false); // Cập nhật thành Hoạt động
                         phieuGiamGiaRepository.save(pgg);
                     }
                 } else {
-                    if (pgg.getTrangThai() == null || !pgg.getTrangThai()) {
-                        pgg.setTrangThai(true); // Không hoạt động
+                    if (pgg.getTrangThai() == null || pgg.getTrangThai()) {
+                        pgg.setTrangThai(true); // Cập nhật thành Không hoạt động
                         phieuGiamGiaRepository.save(pgg);
                     }
                 }
@@ -61,16 +69,14 @@ public class PhieuGiamGiaService {
         }
     }
 
-    // Tìm kiếm phiếu giảm giá
     public Page<PhieuGiamGia> searchData(String keyword, Pageable pageable) {
         Date now = new Date();
         if (keyword == null || keyword.trim().isEmpty()) {
-            return phieuGiamGiaRepository.findAll(pageable);
+            return (Page<PhieuGiamGia>) phieuGiamGiaRepository.findAll(); // Trả về tất cả nếu không có điều kiện lọc
         }
         return phieuGiamGiaRepository.search(keyword, now, pageable);
     }
 
-    // Lọc phiếu giảm giá
     public Page<PhieuGiamGia> filterPhieuGiamGia(
             String loaiPhieuGiamGia,
             String trangThai,
@@ -81,6 +87,7 @@ public class PhieuGiamGiaService {
             Pageable pageable) {
 
         String loaiPhieu = loaiPhieuGiamGia;
+
 
         if (loaiPhieu != null && ("Tất cả loại phiếu".equals(loaiPhieu) || loaiPhieu.isEmpty())) {
             loaiPhieu = null;
@@ -97,6 +104,7 @@ public class PhieuGiamGiaService {
 
         Date now = new Date();
 
+        // Nếu không có filter nào được chọn, trả về tất cả
         if (loaiPhieu == null && trangThaiBoolean == null && ngayBatDau == null &&
                 ngayKetThuc == null && minOrder == null && valueFilter == null) {
             return phieuGiamGiaRepository.findAll(pageable);
@@ -114,8 +122,11 @@ public class PhieuGiamGiaService {
             throw new IllegalArgumentException("Giá trị phiếu không thể nhỏ hơn 0");
         }
 
+
+
+        // Gọi query từ Repository
         return phieuGiamGiaRepository.filterPhieuGiamGia(
-                loaiPhieu,
+                loaiPhieu, // Thêm vào
                 trangThaiBoolean,
                 ngayBatDau,
                 ngayKetThuc,
@@ -126,17 +137,30 @@ public class PhieuGiamGiaService {
         );
     }
 
-    // Lấy phiếu giảm giá theo ID
     public Optional<PhieuGiamGia> getById(Integer id) {
         return phieuGiamGiaRepository.findById(id);
     }
 
-    // Thêm phiếu giảm giá
     public PhieuGiamGia addPGG(PhieuGiamGia phieuGiamGia) {
         return phieuGiamGiaRepository.save(phieuGiamGia);
     }
 
-    // Cập nhật trạng thái phiếu giảm giá
+    private PhieuGiamGiaDTO convertToDTO(PhieuGiamGia pgg) {
+        PhieuGiamGiaDTO dto = new PhieuGiamGiaDTO();
+        dto.setId(pgg.getId());
+        dto.setMa(pgg.getMa());
+        dto.setTenPhieuGiamGia(pgg.getTenPhieuGiamGia());
+        dto.setLoaiPhieuGiamGia(pgg.getLoaiPhieuGiamGia());
+        dto.setPhanTramGiamGia(pgg.getPhanTramGiamGia());
+        dto.setSoTienGiamToiDa(pgg.getSoTienGiamToiDa());
+        dto.setHoaDonToiThieu(pgg.getHoaDonToiThieu());
+        dto.setSoLuongDung(pgg.getSoLuongDung());
+        dto.setNgayBatDau(pgg.getNgayBatDau());
+        dto.setNgayKetThuc(pgg.getNgayKetThuc());
+        dto.setTrangThai(pgg.getTrangThai()); // boolean từ entity sang DTO
+        return dto;
+    }
+
     public PhieuGiamGiaDTO updateTrangthai(Integer id, Boolean trangThai) {
         Optional<PhieuGiamGia> optionalPgg = phieuGiamGiaRepository.findById(id);
         if (!optionalPgg.isPresent()) {
@@ -145,11 +169,10 @@ public class PhieuGiamGiaService {
 
         PhieuGiamGia pgg = optionalPgg.get();
         pgg.setTrangThai(trangThai);
-        phieuGiamGiaRepository.save(pgg);
         return convertToDTO(pgg);
+
     }
 
-    // Lấy chi tiết phiếu giảm giá
     public PhieuGiamGiaDTO getDetailPGG(Integer id) {
         if (id == null || id <= 0) {
             throw new IllegalArgumentException("ID không hợp lệ!");
@@ -177,8 +200,8 @@ public class PhieuGiamGiaService {
         pggDTO.setNgayBatDau(pgg.getNgayBatDau());
         pggDTO.setNgayKetThuc(pgg.getNgayKetThuc());
         pggDTO.setMoTa(pgg.getMoTa());
-        pggDTO.setTrangThai(pgg.getTrangThai() != null ? pgg.getTrangThai() : false);
-        pggDTO.setRiengTu(pgg.getRiengTu() != null ? pgg.getRiengTu() : false);
+        pggDTO.setTrangThai(pgg.getTrangThai() ? true : false);
+        pggDTO.setRiengTu(pgg.getRiengTu() ? 1 : 0);
 
         List<KhPggDTO> selectedCustomers = pggCNList.stream()
                 .map(pggCN -> {
@@ -201,42 +224,8 @@ public class PhieuGiamGiaService {
         return pggDTO;
     }
 
-    // Cập nhật phiếu giảm giá
-    public void updatePGG(PhieuGiamGia editPGG) {
-        phieuGiamGiaRepository.save(editPGG);
+    public PhieuGiamGia updatePGG(PhieuGiamGia editPGG) {
+        return phieuGiamGiaRepository.save(editPGG);
     }
 
-    // Chuyển đổi từ PhieuGiamGia sang DTO
-    private PhieuGiamGiaDTO convertToDTO(PhieuGiamGia pgg) {
-        PhieuGiamGiaDTO dto = new PhieuGiamGiaDTO();
-        dto.setId(pgg.getId());
-        dto.setMa(pgg.getMa());
-        dto.setTenPhieuGiamGia(pgg.getTenPhieuGiamGia());
-        dto.setLoaiPhieuGiamGia(pgg.getLoaiPhieuGiamGia());
-        dto.setPhanTramGiamGia(pgg.getPhanTramGiamGia());
-        dto.setSoTienGiamToiDa(pgg.getSoTienGiamToiDa());
-        dto.setHoaDonToiThieu(pgg.getHoaDonToiThieu());
-        dto.setSoLuongDung(pgg.getSoLuongDung());
-        dto.setNgayBatDau(pgg.getNgayBatDau());
-        dto.setNgayKetThuc(pgg.getNgayKetThuc());
-        dto.setMoTa(pgg.getMoTa());
-        dto.setTrangThai(pgg.getTrangThai() != null ? pgg.getTrangThai() : false);
-        dto.setRiengTu(pgg.getRiengTu() != null ? pgg.getRiengTu() : false);
-
-        List<PhieuGiamGiaCaNhan> pggCNList = phieuGiamGiaCaNhanRepository.findByIdPhieuGiamGia(pgg);
-        List<KhPggDTO> selectedCustomers = pggCNList.stream()
-                .map(pggCN -> {
-                    KhachHang kh = pggCN.getIdKhachHang();
-                    return new KhPggDTO(kh.getId(), kh.getMa(), kh.getTen(), kh.getNgaySinh());
-                })
-                .collect(Collectors.toList());
-        dto.setSelectedCustomers(selectedCustomers);
-
-        List<Integer> customerIds = pggCNList.stream()
-                .map(pggCN -> pggCN.getIdKhachHang().getId())
-                .collect(Collectors.toList());
-        dto.setCustomerIds(customerIds);
-
-        return dto;
-    }
 }

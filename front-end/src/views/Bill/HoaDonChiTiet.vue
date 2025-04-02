@@ -29,7 +29,7 @@
 </template>
 
 <script setup>
-import useHoaDonChiTietLineList from "@/views/Bill/HoaDonChiTiet";
+import useHoaDonChiTietLineList from "@/views/Bill/JS/HoaDonChiTiet";
 import DynamicTable from "@/components/DynamicTable.vue";
 
 const {

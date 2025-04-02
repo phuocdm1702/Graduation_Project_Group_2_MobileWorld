@@ -106,6 +106,12 @@ public class KhachHangServices {
     }
 
     public KhachHang addKhachHang(KhachHangDTO khachHangDTO) {
+        if (taiKhoanRepository.findByEmail(khachHangDTO.getEmail()).isPresent()) {
+            throw new RuntimeException("Email đã được sử dụng!");
+        }
+        if (taiKhoanRepository.findBySoDienThoai(khachHangDTO.getSoDienThoai()).isPresent()) {
+            throw new RuntimeException("SDT đã được sử dụng!");
+        }
         QuyenHan quyenHan = new QuyenHan();
         quyenHan.setId(2); // Quyền khách hàng
 
@@ -211,7 +217,7 @@ public class KhachHangServices {
             throw new RuntimeException("Không tìm thấy khách hàng với ID: " + id);
         }
         KhachHang khachHang = optionalKhachHang.get();
-        khachHang.setDeleted(!khachHang.getDeleted()); // Toggle trạng thái
+        khachHang.setDeleted(!khachHang.isDeleted()); // Toggle trạng thái
         return khachHangRepository.save(khachHang);
     }
 

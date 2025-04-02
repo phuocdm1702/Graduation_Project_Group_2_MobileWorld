@@ -32,12 +32,12 @@ public class TaiKhoan {
 
     @Size(max = 255)
     @Nationalized
-    @Column(name = "email")
+    @Column(name = "email", unique = true, nullable = false)
     private String email;
 
     @Size(max = 255)
     @Nationalized
-    @Column(name = "so_dien_thoai")
+    @Column(name = "so_dien_thoai",unique = true, nullable = false)
     private String soDienThoai;
 
     @Size(max = 255)

@@ -3,27 +3,30 @@ package com.example.graduation_project_group_2_mobileworld.entity;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.annotations.Nationalized;
 
-import java.util.ArrayList;
+import java.time.Instant;
 import java.util.Date;
-import java.util.List;
 
+@Getter
+@Setter
 @Entity
 @Table(name = "khach_hang")
 public class KhachHang {
-    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
     @Column(name = "id", nullable = false)
     private Integer id;
 
     @ManyToOne
-    @JoinColumn(name = "id_tai_khoan", referencedColumnName = "id")
+    @JoinColumn(name = "id_tai_khoan",referencedColumnName = "id")
     private TaiKhoan idTaiKhoan;
 
     @ManyToOne
     @JoinColumn(name = "id_dia_chi_khach_hang", referencedColumnName = "id")
-    @JsonManagedReference
+    @JsonManagedReference // Phía chính sẽ được serialize
     private DiaChiKhachHang idDiaChiKH;
 
     @Size(max = 255)
@@ -57,6 +60,14 @@ public class KhachHang {
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdAt;
 
+    public @Size(max = 255) String getCccd() {
+        return cccd;
+    }
+
+    public void setCccd(@Size(max = 255) String cccd) {
+        this.cccd = cccd;
+    }
+
     @Column(name = "created_by")
     private Integer createdBy;
 
@@ -66,10 +77,13 @@ public class KhachHang {
     @Column(name = "updated_by")
     private Integer updatedBy;
 
-    @OneToMany(mappedBy = "idKhachHang", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<PhieuGiamGiaCaNhan> phieuGiamGiaCaNhans = new ArrayList<>();
+    public void setDeleted(Boolean deleted) {
+        this.deleted = deleted;
+    }
 
-    // Getter và Setter thủ công
+    public KhachHang() {
+    }
+
     public Integer getId() {
         return id;
     }
@@ -86,40 +100,36 @@ public class KhachHang {
         this.idTaiKhoan = idTaiKhoan;
     }
 
+    public @Size(max = 255) String getMa() {
+        return ma;
+    }
+
+    public void setMa(@Size(max = 255) String ma) {
+        this.ma = ma;
+    }
+
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    public @Size(max = 255) String getTen() {
+        return ten;
+    }
+
+    public void setTen(@Size(max = 255) String ten) {
+        this.ten = ten;
+    }
+
+    public Short getGioiTinh() {
+        return gioiTinh;
+    }
+
     public DiaChiKhachHang getIdDiaChiKH() {
         return idDiaChiKH;
     }
 
     public void setIdDiaChiKH(DiaChiKhachHang idDiaChiKH) {
         this.idDiaChiKH = idDiaChiKH;
-    }
-
-    public String getMa() {
-        return ma;
-    }
-
-    public void setMa(String ma) {
-        this.ma = ma;
-    }
-
-    public String getTen() {
-        return ten;
-    }
-
-    public void setTen(String ten) {
-        this.ten = ten;
-    }
-
-    public String getCccd() {
-        return cccd;
-    }
-
-    public void setCccd(String cccd) {
-        this.cccd = cccd;
-    }
-
-    public Short getGioiTinh() {
-        return gioiTinh;
     }
 
     public void setGioiTinh(Short gioiTinh) {
@@ -134,20 +144,8 @@ public class KhachHang {
         this.ngaySinh = ngaySinh;
     }
 
-    public String getAnhKhachHang() {
-        return anhKhachHang;
-    }
-
-    public void setAnhKhachHang(String anhKhachHang) {
-        this.anhKhachHang = anhKhachHang;
-    }
-
     public Boolean getDeleted() {
         return deleted;
-    }
-
-    public void setDeleted(Boolean deleted) {
-        this.deleted = deleted;
     }
 
     public Date getCreatedAt() {
@@ -180,13 +178,5 @@ public class KhachHang {
 
     public void setUpdatedBy(Integer updatedBy) {
         this.updatedBy = updatedBy;
-    }
-
-    public List<PhieuGiamGiaCaNhan> getPhieuGiamGiaCaNhans() {
-        return phieuGiamGiaCaNhans;
-    }
-
-    public void setPhieuGiamGiaCaNhans(List<PhieuGiamGiaCaNhan> phieuGiamGiaCaNhans) {
-        this.phieuGiamGiaCaNhans = phieuGiamGiaCaNhans;
     }
 }

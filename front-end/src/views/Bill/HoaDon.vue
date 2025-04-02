@@ -140,7 +140,7 @@
     </section>
 
     <section>
-      <status-bar />
+      <StatusBar @filter-by-status="handleStatusFilter" />
       <DynamicTable
         class="dynamic-table"
         :data="dataTable"
@@ -168,7 +168,7 @@
 <script setup>
 import { computed, onUnmounted } from "vue";
 import { useRoute } from "vue-router";
-import useHoaDonLineList from "@/views/Bill/HoaDon.js";
+import useHoaDonLineList from "@/views/Bill/JS/HoaDon.js";
 import DynamicTable from "@/components/DynamicTable.vue";
 import Pagination from "@/components/Pagination.vue";
 import StatusBar from "@/components/statusBar.vue";
@@ -208,6 +208,8 @@ const {
   videoElement,
   canvasElement,
   downloadQrCode, // Import the downloadQrCode function
+  selectedStatus,
+  handleStatusFilter,
 } = useHoaDonLineList();
 
 const route = useRoute();
