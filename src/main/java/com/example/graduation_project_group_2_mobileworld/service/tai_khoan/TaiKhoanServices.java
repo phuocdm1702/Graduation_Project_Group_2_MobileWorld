@@ -6,7 +6,6 @@ import com.example.graduation_project_group_2_mobileworld.entity.TaiKhoan;
 import com.example.graduation_project_group_2_mobileworld.repository.tai_khoan.TaiKhoanRepository;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -14,16 +13,14 @@ import java.util.Map;
 import java.util.Optional;
 
 @Service
+
 public class TaiKhoanServices {
     private final TaiKhoanRepository taiKhoanRepository;
     private final JavaMailSenderImpl mailSender;
-    private final PasswordEncoder passwordEncoder;
     private final Map<String, String> otpStorage = new HashMap<>();
-
-    public TaiKhoanServices(TaiKhoanRepository taiKhoanRepository, JavaMailSenderImpl mailSender, PasswordEncoder passwordEncoder) {
+    public TaiKhoanServices(TaiKhoanRepository taiKhoanRepository, JavaMailSenderImpl mailSender) {
         this.taiKhoanRepository = taiKhoanRepository;
         this.mailSender = mailSender;
-        this.passwordEncoder = passwordEncoder;
     }
 
     public String MaTaiKhoan() {
@@ -37,7 +34,6 @@ public class TaiKhoanServices {
     }
 
     public TaiKhoan add(TaiKhoan taiKhoan) {
-        taiKhoan.setMatKhau(passwordEncoder.encode(taiKhoan.getMatKhau()));
         return taiKhoanRepository.save(taiKhoan);
     }
 
@@ -48,10 +44,10 @@ public class TaiKhoanServices {
 
     public TaiKhoan login(String tenDangNhap, String matKhau) {
         TaiKhoan tk = taiKhoanRepository.findByTenDangNhap(tenDangNhap);
-        if (tk != null && matKhau.equals(tk.getMatKhau())) {
-            return tk;
+        if (tk != null && tk.getMatKhau().equals(matKhau)) {
+            return tk; // Trả về tài khoản nếu mật khẩu khớp
         }
-        return null;
+        return null; // Trả về null nếu không khớp
     }
 
     private String RandomSDT() {
@@ -59,6 +55,7 @@ public class TaiKhoanServices {
     }
 
     public String requestOTP(TaiKhoanDTO taiKhoanDTO) {
+        // Kiểm tra email trùng
         if (taiKhoanRepository.findByEmail(taiKhoanDTO.getEmail()).isPresent()) {
             throw new RuntimeException("Email đã được sử dụng!");
         }
@@ -80,7 +77,7 @@ public class TaiKhoanServices {
         mailSender.send(message);
     }
 
-    public TaiKhoan addTK(TaiKhoanDTO taiKhoanDTO, String otp) {
+    public TaiKhoan addTK(TaiKhoanDTO taiKhoanDTO,String otp) {
         String storedOtp = otpStorage.get(taiKhoanDTO.getEmail());
         if (storedOtp == null || !storedOtp.equals(otp)) {
             throw new RuntimeException("Mã OTP không hợp lệ hoặc đã hết hạn!");
@@ -96,20 +93,16 @@ public class TaiKhoanServices {
         otpStorage.remove(taiKhoanDTO.getEmail());
 
         QuyenHan quyenHan = new QuyenHan();
-        quyenHan.setId(2); // Ví dụ: STAFF
+        quyenHan.setId(2);
 
         TaiKhoan taiKhoan = new TaiKhoan();
         taiKhoan.setIdQuyenHan(quyenHan);
         taiKhoan.setMa(MaTaiKhoan());
         taiKhoan.setTenDangNhap(taiKhoanDTO.getTenDangNhap());
-        taiKhoan.setMatKhau(passwordEncoder.encode(taiKhoanDTO.getMatKhau()));
+        taiKhoan.setMatKhau(taiKhoanDTO.getMatKhau());
         taiKhoan.setEmail(taiKhoanDTO.getEmail());
         taiKhoan.setDeleted(false);
 
         return taiKhoanRepository.save(taiKhoan);
-    }
-
-    public TaiKhoan findByTenDangNhap(String tenDangNhap) {
-        return taiKhoanRepository.findByTenDangNhap(tenDangNhap);
     }
 }
