@@ -9,6 +9,7 @@
     "chartjs-plugin-datalabels": "^2.2.0",
     "file-saver": "^2.0.5",
     "html5-qrcode": "^2.3.8",
+    "jquery": "^3.7.1",
     "jsqr": "^1.4.0",
     "pdfjs-dist": "^5.0.375",
     "qrcode": "^1.5.4",
