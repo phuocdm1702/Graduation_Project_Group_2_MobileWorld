@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface SanPhamRepository extends JpaRepository<SanPham, Integer> {
     // Existing method for paginated search with specification
@@ -33,4 +34,6 @@ public interface SanPhamRepository extends JpaRepository<SanPham, Integer> {
 
     // Find all products by a list of IDs (useful for bulk operations)
     List<SanPham> findAllByIdIn(List<Integer> ids);
+
+    Optional<SanPham> findByTenSanPhamAndDeletedFalse(String tenSanPham);
 }

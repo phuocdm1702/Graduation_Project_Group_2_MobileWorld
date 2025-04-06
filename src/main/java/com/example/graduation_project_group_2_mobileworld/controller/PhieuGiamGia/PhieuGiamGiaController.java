@@ -70,13 +70,13 @@ public class PhieuGiamGiaController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ){
-        Pageable pageable = PageRequest.of(page, size);
+        Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
         Page<PhieuGiamGia> listSearch = phieuGiamGiaService.searchData(keyword, pageable);
         return ResponseEntity.ok(listSearch);
     }
 
     @GetMapping("/filter")
-    public ResponseEntity<Page<PhieuGiamGia>> filterPhieuGiamGia(
+    public ResponseEntity<?> filterPhieuGiamGia(
             @RequestParam(required = false) String loaiPhieuGiamGia,
             @RequestParam(required = false) String trangThai,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date startDate,
@@ -84,9 +84,9 @@ public class PhieuGiamGiaController {
             @RequestParam(required = false) Double minOrder,
             @RequestParam(required = false) Double valueFilter,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
-    ) {
-        Pageable pageable = PageRequest.of(page, size);
+            @RequestParam(defaultValue = "10") int size) {
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
 
         try {
             Page<PhieuGiamGia> result = phieuGiamGiaService.filterPhieuGiamGia(
@@ -100,7 +100,7 @@ public class PhieuGiamGiaController {
             );
             return ResponseEntity.ok(result);
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(null);
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
