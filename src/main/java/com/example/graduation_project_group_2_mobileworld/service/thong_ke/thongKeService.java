@@ -1,5 +1,8 @@
-package com.example.graduation_project_group_2_mobileworld.service;
+package com.example.graduation_project_group_2_mobileworld.service.thong_ke;
 
+import com.example.graduation_project_group_2_mobileworld.dto.thongKe.HangBanChayDTO;
+import com.example.graduation_project_group_2_mobileworld.dto.thongKe.LoaiHoaDonDTO;
+import com.example.graduation_project_group_2_mobileworld.dto.thongKe.SanPhamHetHangDTO;
 import com.example.graduation_project_group_2_mobileworld.dto.thongKe.TopSellingProductDTO;
 import com.example.graduation_project_group_2_mobileworld.entity.ChiTietSanPham;
 import com.example.graduation_project_group_2_mobileworld.repository.thongKe.CTSPForThongKe;
@@ -25,7 +28,6 @@ public class thongKeService {
     @Autowired
     public thongKeService(thongKeRepository tkRepo) {
         this.tkRepo = tkRepo;
-
     }
 
     public static Map<String, Object> getThongKeTheoNgay() {
@@ -170,6 +172,18 @@ public class thongKeService {
     private double calculateGrowth(double current, double previous) {
         if (previous == 0) return 0;
         return ((current - previous) / previous) * 100;
+    }
+
+    public Page<SanPhamHetHangDTO> thongKeSanPhamHetHang(Pageable pageable) {
+        return tkRepo.thongKeSanPhamHetHang(pageable);
+    }
+
+    public List<LoaiHoaDonDTO> thongKeLoaiHoaDon() {
+        return tkRepo.thongKeLoaiHoaDon();
+    }
+
+    public List<HangBanChayDTO> thongKeHangBanChay() {
+        return tkRepo.thongKeHangBanChay();
     }
 
     public Map<String, Long> getOrderStatusStats(String filterType, Date date) {
