@@ -8,26 +8,13 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface ChiTietSanPhamRepository extends JpaRepository<ChiTietSanPham, Integer> {
 
-    @Query("SELECT c FROM ChiTietSanPham c WHERE c.deleted = false ORDER BY c.createdAt DESC")
-    Page<ChiTietSanPham> findAllActive(Pageable pageable);
+    @Query("SELECT c FROM ChiTietSanPham c WHERE c.idSanPham.id = :sanPhamId AND c.deleted = :deleted")
+    List<ChiTietSanPham> findByIdSanPhamIdAndDeletedFalse(@Param("sanPhamId") Integer sanPhamId, @Param("deleted") boolean deleted);
 
-    @Query("SELECT c FROM ChiTietSanPham c WHERE c.deleted = false " +
-            "AND (:keyword IS NULL OR LOWER(c.tienIchDacBiet) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
-            "AND (:idSanPham IS NULL OR c.idSanPham.id = :idSanPham) " +
-            "AND (:idMauSac IS NULL OR c.idMauSac.id = :idMauSac) " +
-            "AND (:idRam IS NULL OR c.idRam.id = :idRam) " +
-            "AND (:idBoNhoTrong IS NULL OR c.idBoNhoTrong.id = :idBoNhoTrong) " +
-            "AND (:idLoaiTinhTrang IS NULL OR c.idLoaiTinhTrang.id = :idLoaiTinhTrang)")
-    Page<ChiTietSanPham> searchAndFilter(
-            @Param("keyword") String keyword,
-            @Param("idSanPham") Integer idSanPham,
-            @Param("idMauSac") Integer idMauSac,
-            @Param("idRam") Integer idRam,
-            @Param("idBoNhoTrong") Integer idBoNhoTrong,
-            @Param("idLoaiTinhTrang") Integer idLoaiTinhTrang,
-            Pageable pageable
-    );
+    Page<ChiTietSanPham> findAll(org.springframework.data.jpa.domain.Specification<ChiTietSanPham> spec, Pageable pageable);
 }

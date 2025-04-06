@@ -391,8 +391,6 @@ function scrollToSection() {
 const productCategories = [
   { name: "Sản Phẩm", path: "/products", route: "products" },
   { name: "Nhà Sản Xuất", path: "/manufacturer", route: "manufacturer" },
-  { name: "Imel", path: "/imel", route: "imel" },
-  { name: "Imel Đã bán", path: "/imel-sold", route: "imelSold" },
   { name: "Màn Hình", path: "/screens", route: "screens" },
   { name: "Công Nghệ Màn Hình", path: "/screens/technology", route: "screenTechnology" },
   { name: "RAM", path: "/ram", route: "ram" },

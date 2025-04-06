@@ -18,7 +18,6 @@ public class AnhSanPham {
     private Integer id;
 
     @Size(max = 255)
-    @NotNull
     @Nationalized
     @Column(name = "ma", nullable = false)
     private String ma;

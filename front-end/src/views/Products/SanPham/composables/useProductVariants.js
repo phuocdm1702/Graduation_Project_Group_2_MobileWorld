@@ -1,6 +1,6 @@
 import { ref, computed } from 'vue';
 
-export function useProductVariants(ramOptions, boNhoTrongOptions, mauSacOptions, productData) {
+export function useProductVariants(ramOptions, boNhoTrongOptions, mauSacOptions, productData, variantImeis) {
   const productVariants = ref([]);
   const currentVariant = ref({
     selectedRams: [],
@@ -84,7 +84,6 @@ export function useProductVariants(ramOptions, boNhoTrongOptions, mauSacOptions,
             idMauSac: mauSacId,
             idImel: 1,
             idLoaiTinhTrang: productData.value.idLoaiTinhTrang,
-            soLuong: 0,
             donGia: '',
             imageIndex: null,
           });
@@ -93,40 +92,50 @@ export function useProductVariants(ramOptions, boNhoTrongOptions, mauSacOptions,
     });
 
     productVariants.value.push(...newVariants);
-    currentVariant.value = {
-      selectedRams: [],
-      selectedBoNhoTrongs: [],
-      selectedMauSacs: [],
-    };
-
     return true;
   };
 
   const removeVariant = (index) => {
     productVariants.value.splice(index, 1);
+
+    // Remove corresponding IMEI data
+    if (variantImeis.value[index]) {
+      delete variantImeis.value[index];
+    }
+
+    // Re-index IMEI data
+    const newVariantImeis = {};
+    Object.keys(variantImeis.value).forEach((key) => {
+      const oldIndex = parseInt(key);
+      if (oldIndex > index) {
+        newVariantImeis[oldIndex - 1] = variantImeis.value[key];
+      } else if (oldIndex < index) {
+        newVariantImeis[oldIndex] = variantImeis.value[key];
+      }
+    });
+    variantImeis.value = newVariantImeis;
+
+    // Reset if no variants remain
+    if (productVariants.value.length === 0) {
+      resetVariants();
+    }
   };
 
   const updateSelectedVariants = (group) => {
     const groupKey = `${group.ram}/${group.rom}`;
     const commonPrice = groupCommonValues.value[groupKey].price;
-    const commonQuantity = groupCommonValues.value[groupKey].quantity;
 
     const groupIndices = group.variants.map((_, i) => group.startIndex + i);
     const selectedInGroup = selectedVariants.value.filter((index) => groupIndices.includes(index));
 
-    if (selectedInGroup.length === 0 && group.variants.length > 0) {
+    if (selectedInGroup.length === 0 && group.variantsA.length > 0) {
       selectedVariants.value = [...new Set([...selectedVariants.value, ...groupIndices])];
     }
 
     selectedVariants.value.forEach((index) => {
       if (index >= group.startIndex && index < group.startIndex + group.variants.length) {
-        if (productVariants.value[index]) {
-          if (commonPrice !== '') {
-            productVariants.value[index].donGia = commonPrice;
-          }
-          if (commonQuantity !== '') {
-            productVariants.value[index].soLuong = commonQuantity;
-          }
+        if (productVariants.value[index] && commonPrice !== '') {
+          productVariants.value[index].donGia = commonPrice;
         }
       }
     });
@@ -161,10 +170,15 @@ export function useProductVariants(ramOptions, boNhoTrongOptions, mauSacOptions,
 
   const resetVariants = () => {
     productVariants.value = [];
-    currentVariant.value = { selectedRams: [], selectedBoNhoTrongs: [], selectedMauSacs: [] };
+    currentVariant.value = {
+      selectedRams: [],
+      selectedBoNhoTrongs: [],
+      selectedMauSacs: []
+    };
     selectedVariants.value = [];
     allSelected.value = {};
     groupCommonValues.value = {};
+    variantImeis.value = {};
   };
 
   return {
@@ -181,6 +195,6 @@ export function useProductVariants(ramOptions, boNhoTrongOptions, mauSacOptions,
     toggleGroupSelection,
     toggleAllVariants,
     updateSelectedCount,
-    resetVariants
+    resetVariants,
   };
 }

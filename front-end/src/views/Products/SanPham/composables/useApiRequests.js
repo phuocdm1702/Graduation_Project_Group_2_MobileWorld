@@ -22,7 +22,30 @@ export function useApiRequests(toast) {
 
   const fetchOptions = async () => {
     try {
-      const [        heDieuHanhRes,        manHinhRes,        nhaSanXuatRes,        cumCameraRes,        simRes,        thietKeRes,        pinRes,        cpuRes,        gpuRes,        congNgheMangRes,        congSacRes,        hoTroCongNgheSacRes,        chiSoKhangBuiVaNuocRes,        tinhTrangRes,        ramRes,        boNhoTrongRes,        mauSacRes,      ] = await Promise.all([        axios.get('http://localhost:8080/he-dieu-hanh'),        axios.get('http://localhost:8080/man-hinh'),        axios.get('http://localhost:8080/nha-san-xuat'),        axios.get('http://localhost:8080/cum-camera/details'),        axios.get('http://localhost:8080/sim'),        axios.get('http://localhost:8080/thiet-ke'),        axios.get('http://localhost:8080/pin'),        axios.get('http://localhost:8080/cpu'),        axios.get('http://localhost:8080/gpu'),        axios.get('http://localhost:8080/cong-nghe-mang'),        axios.get('http://localhost:8080/cong-sac'),        axios.get('http://localhost:8080/ho-tro-cong-nghe-sac/details'),        axios.get('http://localhost:8080/chi-so-khang-bui-va-nuoc'),        axios.get('http://localhost:8080/tinh-trang'),        axios.get('http://localhost:8080/ram'),        axios.get('http://localhost:8080/bo-nho-trong'),        axios.get('http://localhost:8080/mau-sac'),      ]);
+      const [
+        heDieuHanhRes, manHinhRes, nhaSanXuatRes, cumCameraRes, simRes,
+        thietKeRes, pinRes, cpuRes, gpuRes, congNgheMangRes, congSacRes,
+        hoTroCongNgheSacRes, chiSoKhangBuiVaNuocRes, tinhTrangRes, ramRes,
+        boNhoTrongRes, mauSacRes,
+      ] = await Promise.all([
+        axios.get('http://localhost:8080/he-dieu-hanh'),
+        axios.get('http://localhost:8080/man-hinh'),
+        axios.get('http://localhost:8080/nha-san-xuat'),
+        axios.get('http://localhost:8080/cum-camera/details'),
+        axios.get('http://localhost:8080/sim'),
+        axios.get('http://localhost:8080/thiet-ke'),
+        axios.get('http://localhost:8080/pin'),
+        axios.get('http://localhost:8080/cpu'),
+        axios.get('http://localhost:8080/gpu'),
+        axios.get('http://localhost:8080/cong-nghe-mang'),
+        axios.get('http://localhost:8080/cong-sac'),
+        axios.get('http://localhost:8080/ho-tro-cong-nghe-sac/details'),
+        axios.get('http://localhost:8080/chi-so-khang-bui-va-nuoc'),
+        axios.get('http://localhost:8080/tinh-trang'),
+        axios.get('http://localhost:8080/ram'),
+        axios.get('http://localhost:8080/bo-nho-trong'),
+        axios.get('http://localhost:8080/mau-sac'),
+      ]);
 
       heDieuHanhOptions.value = heDieuHanhRes.data.content || [];
       manHinhOptions.value = manHinhRes.data.content || [];
@@ -50,7 +73,7 @@ export function useApiRequests(toast) {
   const handleAddAttribute = async (currentAttribute, data, productData, currentVariant) => {
     try {
       let response;
-      switch (currentAttribute.value) {
+      switch (currentAttribute) { // Removed .value since currentAttribute is a string
         case 'heDieuHanh':
           response = await axios.post('http://localhost:8080/he-dieu-hanh', {
             heDieuHanh: data.heDieuHanh,
@@ -68,10 +91,14 @@ export function useApiRequests(toast) {
           productData.value.idManHinh = response.data.id;
           break;
         case 'nhaSanXuat':
+          console.log('Adding manufacturer:', data.nhaSanXuat);
           response = await axios.post('http://localhost:8080/nha-san-xuat', {
             nhaSanXuat: data.nhaSanXuat,
+            ma: "NSX0010",
+            trangThai: 1,
           });
-          nhaSanXuatOptions.value.push(response.data);
+          console.log('API response:', response.data);
+          nhaSanXuatOptions.value.unshift(response.data);
           productData.value.idNhaSanXuat = response.data.id;
           break;
         case 'cumCamera':
@@ -181,15 +208,16 @@ export function useApiRequests(toast) {
           currentVariant.value.selectedMauSacs.push(response.data.id);
           break;
         default:
-          console.warn('Unknown attribute:', currentAttribute.value);
-          return;
+          console.warn('Unknown attribute:', currentAttribute);
+          return false;
       }
 
-      toast.value?.kshowToast('success', `Thêm ${currentAttribute.value} thành công!`);
+      toast.value?.kshowToast('success', `Thêm ${currentAttribute} thành công!`);
       return true;
     } catch (error) {
-      toast.value?.kshowToast('error', `Lỗi khi thêm ${currentAttribute.value}: ${error.response?.data?.message || error.message}`);
-      console.error('Add attribute error:', error);
+      const errorMessage = error.response?.data?.error || error.message;
+      toast.value?.kshowToast('error', `Lỗi khi thêm ${currentAttribute}: ${errorMessage}`);
+      console.error(`Add ${currentAttribute} error:`, error);
       return false;
     }
   };
@@ -213,6 +241,6 @@ export function useApiRequests(toast) {
     boNhoTrongOptions,
     mauSacOptions,
     fetchOptions,
-    handleAddAttribute
+    handleAddAttribute,
   };
 }

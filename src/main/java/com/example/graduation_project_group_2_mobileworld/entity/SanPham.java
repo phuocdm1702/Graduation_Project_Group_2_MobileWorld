@@ -91,7 +91,6 @@ public class SanPham {
     private CongNgheMang idCongNgheMang;
 
     @Size(max = 255)
-    @NotNull
     @Nationalized
     @Column(name = "ma", nullable = false)
     private String ma;

@@ -1,8 +1,8 @@
 import axios from 'axios';
 import { useRouter } from 'vue-router';
 
-export function useFormHandling(toast, productData, productVariants, mainImages, colorImages) {
-  const router = useRouter(); // Khởi tạo router
+export function useFormHandling(toast, productData, productVariants, mainImages, colorImages, variantImeis) {
+  const router = useRouter();
 
   const validateProductData = () => {
     const requiredFields = [
@@ -16,7 +16,8 @@ export function useFormHandling(toast, productData, productVariants, mainImages,
   };
 
   const validateVariants = () => {
-    return productVariants.value.length === 0;
+    if (productVariants.value.length === 0) return true;
+    return productVariants.value.some(variant => !variant.donGia || variant.donGia === '');
   };
 
   const validateImages = () => {
@@ -40,12 +41,14 @@ export function useFormHandling(toast, productData, productVariants, mainImages,
       if (image.file) allImages.push(image.file);
     });
 
-    productVariants.value.forEach((variant) => {
+    productVariants.value.forEach((variant, index) => {
       const colorImage = colorImages.value[variant.idMauSac];
       variant.imageIndex = colorImage && colorImage.file
         ? allImages.indexOf(colorImage.file)
         : 0;
     });
+
+    const giaBan = productVariants.value.length > 0 ? productVariants.value[0].donGia : '0';
 
     formData.append('dto', JSON.stringify({
       tenSanPham: productData.value.tenSanPham,
@@ -63,20 +66,15 @@ export function useFormHandling(toast, productData, productVariants, mainImages,
       idCongNgheMang: productData.value.idCongNgheMang,
       idChiSoKhangBuiVaNuoc: productData.value.idChiSoKhangBuiVaNuoc || null,
       tienIchDacBiet: productData.value.tienIchDacBiet,
-      giaBan: productVariants.value[0]?.donGia || 0,
-      createdAt: new Date().toISOString(),
-      createdBy: 1,
-      updatedAt: new Date().toISOString(),
-      updatedBy: 1,
-      variants: productVariants.value.map(variant => ({
-        idImel: variant.idImel || 1,
+      giaBan: giaBan,
+      variants: productVariants.value.map((variant, index) => ({
         idMauSac: variant.idMauSac,
         idRam: variant.idRam,
         idBoNhoTrong: variant.idBoNhoTrong,
         idLoaiTinhTrang: variant.idLoaiTinhTrang,
         imageIndex: variant.imageIndex,
-        soLuong: variant.soLuong,
-        donGia: variant.donGia
+        donGia: variant.donGia,
+        imeiList: variantImeis.value[index] || [] // Gửi tất cả IMEI
       }))
     }));
 
@@ -95,7 +93,7 @@ export function useFormHandling(toast, productData, productVariants, mainImages,
     }
 
     if (validateVariants()) {
-      toast.value?.kshowToast('error', 'Vui lòng thêm ít nhất một biến thể sản phẩm');
+      toast.value?.kshowToast('error', 'Vui lòng thêm ít nhất một biến thể sản phẩm và nhập đầy đủ đơn giá');
       return;
     }
 
@@ -106,30 +104,40 @@ export function useFormHandling(toast, productData, productVariants, mainImages,
 
     try {
       const formData = prepareFormData();
+
       const response = await axios.post('http://localhost:8080/chi-tiet-san-pham', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
 
-      if (response.data) {
-        const { sanPhamId, chiTietSanPhamIds, anhSanPhamIds } = response.data.data;
+      console.log('Full Response:', response);
+      console.log('Response Data:', response.data);
+
+      // More defensive check
+      if (response.data && (response.data.sanPhamId !== undefined)) {
+        const sanPhamId = response.data.sanPhamId || 'N/A';
+        const chiTietSanPhamIds = response.data.chiTietSanPhamIds || [];
+        const anhSanPhamIds = response.data.anhSanPhamIds || [];
+
         toast.value?.kshowToast(
           'success',
           `Thêm sản phẩm thành công! ID: ${sanPhamId}, ${chiTietSanPhamIds.length} biến thể, ${anhSanPhamIds.length} ảnh`
         );
         await router.push('/products');
+      } else {
+        console.error('Unexpected response structure:', response.data);
+        throw new Error('Response data is invalid or incomplete');
       }
     } catch (error) {
-      console.error('Error submitting form:', error);
+      console.error('Error submitting form:', error.response?.data || error.message);
 
       let errorMessage = 'Lỗi khi lưu dữ liệu';
       if (error.response) {
         errorMessage += `: ${error.response.data?.message || error.response.statusText}`;
-      } else {
+      } else if (error.message) {
         errorMessage += `: ${error.message}`;
       }
-
       toast.value?.kshowToast('error', errorMessage);
     }
   };
