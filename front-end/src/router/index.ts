@@ -13,6 +13,7 @@ import PhieuBaoHanh from "../views/BaoHanh/PhieuBaoHanh.vue";
 // View Login
 import Login from "../views/LoginView/AppLogin.vue";
 import DangKy from "@/views/LoginView/DangKy/DangKy.vue";
+import QuenMk from "@/views/LoginView/QuenMk/QuenMk.vue";
 // Đơn hàng
 import LichSuHD from "../views/Bill/LichSuHoaDon.vue";
 import HoaDon from "../views/Bill/HoaDon.vue";
@@ -400,6 +401,12 @@ const routes: Array<RouteRecordRaw> = [
     path: "/dang-ky",
     name: "DangKy",
     component: DangKy,
+    meta: { layout: "empty", breadcrumb: [] },
+  },
+  {
+    path: "/quen-mk",
+    name: "Quenmk",
+    component: QuenMk,
     meta: { layout: "empty", breadcrumb: [] },
   },
 ];
