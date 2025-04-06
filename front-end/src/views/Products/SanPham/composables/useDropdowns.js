@@ -18,6 +18,6 @@ export function useDropdowns() {
 
   return {
     dropdownOpen,
-    toggleDropdown
+    toggleDropdown,
   };
 }

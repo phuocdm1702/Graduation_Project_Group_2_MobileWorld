@@ -4,13 +4,22 @@ import com.example.graduation_project_group_2_mobileworld.dto.san_pham.ChiTietSa
 import com.example.graduation_project_group_2_mobileworld.entity.*;
 import com.example.graduation_project_group_2_mobileworld.repository.san_pham.*;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.criteria.Predicate;
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -18,7 +27,9 @@ import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class ChiTietSanPhamService {
@@ -45,6 +56,9 @@ public class ChiTietSanPhamService {
     private final ChiSoKhangBuiVaNuocRepository chiSoKhangBuiVaNuocRepository;
     private final TinhTrangRepository tinhTrangRepository;
     private final HoTroBoNhoNgoaiRepository hoTroBoNhoNgoaiRepository;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     @Value("${file.upload-dir}")
     private String uploadDir;
@@ -95,27 +109,48 @@ public class ChiTietSanPhamService {
         this.cumCameraRepository = cumCameraRepository;
     }
 
+    // In ChiTietSanPhamService.java
     public ChiTietSanPhamResponse createChiTietSanPham(ChiTietSanPhamDTO dto, List<MultipartFile> images) throws IOException {
-        // Validate input
         validateInput(dto, images);
 
-        // Create or update product
         SanPham sanPham = createOrUpdateProduct(dto);
+        if (sanPham == null || sanPham.getId() == null) {
+            throw new IllegalStateException("Failed to create or update product");
+        }
 
-        // Upload and save images
         List<AnhSanPham> anhSanPhams = uploadAndSaveImages(images);
+        if (anhSanPhams == null || anhSanPhams.isEmpty()) {
+            throw new IllegalStateException("No images were saved");
+        }
 
-        // Create variants
-        List<ChiTietSanPham> chiTietSanPhams = createVariants(dto, sanPham, anhSanPhams);
-
-        // Save variants
+        List<Imel> imels = createAndSaveImels(dto.getVariants());
+        List<ChiTietSanPham> chiTietSanPhams = createVariants(dto, sanPham, anhSanPhams, imels);
         List<ChiTietSanPham> savedChiTietSanPhams = chiTietSanPhamRepository.saveAll(chiTietSanPhams);
+        if (savedChiTietSanPhams == null || savedChiTietSanPhams.isEmpty()) {
+            throw new IllegalStateException("Failed to save product variants");
+        }
 
         return new ChiTietSanPhamResponse(
                 sanPham.getId(),
-                savedChiTietSanPhams.stream().map(ChiTietSanPham::getId).toList(),
-                anhSanPhams.stream().map(AnhSanPham::getId).toList()
+                savedChiTietSanPhams.stream().map(ChiTietSanPham::getId).collect(Collectors.toList()),
+                anhSanPhams.stream().map(AnhSanPham::getId).collect(Collectors.toList())
         );
+    }
+
+    // Phương thức cập nhật giá
+    public void updatePrice(Integer id, BigDecimal newPrice) {
+        if (newPrice == null) {
+            throw new IllegalArgumentException("Giá không hợp lệ: " + newPrice);
+        }
+
+        ChiTietSanPham chiTietSanPham = chiTietSanPhamRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy chi tiết sản phẩm với ID: " + id));
+
+        chiTietSanPham.setGiaBan(newPrice);
+        chiTietSanPham.setUpdatedAt(new Date());
+        chiTietSanPham.setUpdatedBy(1); // Thay bằng thông tin người dùng hiện tại nếu có
+
+        chiTietSanPhamRepository.save(chiTietSanPham);
     }
 
     private void validateInput(ChiTietSanPhamDTO dto, List<MultipartFile> images) {
@@ -128,16 +163,23 @@ public class ChiTietSanPhamService {
     }
 
     private SanPham createOrUpdateProduct(ChiTietSanPhamDTO dto) {
-        if (dto.getIdSanPham() != null) {
-            return sanPhamRepository.findById(dto.getIdSanPham())
-                    .orElseThrow(() -> new IllegalArgumentException("Sản phẩm với ID " + dto.getIdSanPham() + " không tồn tại"));
+        Optional<SanPham> existingSanPham = sanPhamRepository.findByTenSanPhamAndDeletedFalse(dto.getTenSanPham());
+
+        SanPham sanPham;
+        if (existingSanPham.isPresent()) {
+            sanPham = existingSanPham.get();
+            updateSanPhamFields(sanPham, dto);
+        } else {
+            sanPham = new SanPham();
+            sanPham.setTenSanPham(dto.getTenSanPham());
+            sanPham.setMa(null);
+            updateSanPhamFields(sanPham, dto);
         }
 
-        SanPham sanPham = new SanPham();
-        sanPham.setTenSanPham(dto.getTenSanPham());
-        sanPham.setMa(UUID.randomUUID().toString());
+        return sanPhamRepository.save(sanPham);
+    }
 
-        // Set required fields
+    private void updateSanPhamFields(SanPham sanPham, ChiTietSanPhamDTO dto) {
         sanPham.setIdNhaSanXuat(getEntity(nhaSanXuatRepository, dto.getIdNhaSanXuat(), "Nhà sản xuất"));
         sanPham.setIdPin(getEntity(pinRepository, dto.getIdPin(), "Pin"));
         sanPham.setIdManHinh(getEntity(manHinhRepository, dto.getIdManHinh(), "Màn hình"));
@@ -151,20 +193,16 @@ public class ChiTietSanPhamService {
         sanPham.setIdHoTroCongNgheSac(getEntity(hoTroCongNgheSacRepository, dto.getIdHoTroCongNgheSac(), "Hỗ trợ công nghệ sạc"));
         sanPham.setIdCongNgheMang(getEntity(congNgheMangRepository, dto.getIdCongNgheMang(), "Công nghệ mạng"));
 
-        // Set optional fields
         sanPham.setIdHoTroBoNhoNgoai(dto.getIdHoTroBoNhoNgoai() != null ?
                 getEntity(hoTroBoNhoNgoaiRepository, dto.getIdHoTroBoNhoNgoai(), "Hỗ trợ bộ nhớ ngoài") : null);
         sanPham.setIdChiSoKhangBuiVaNuoc(dto.getIdChiSoKhangBuiVaNuoc() != null ?
                 getEntity(chiSoKhangBuiVaNuocRepository, dto.getIdChiSoKhangBuiVaNuoc(), "Chỉ số kháng bụi nước") : null);
 
-        // Set audit fields
         sanPham.setDeleted(false);
-        sanPham.setCreatedAt(new Date());
-        sanPham.setCreatedBy(dto.getCreatedBy());
-        sanPham.setUpdatedAt(dto.getUpdatedAt());
-        sanPham.setUpdatedBy(dto.getUpdatedBy());
-
-        return sanPhamRepository.save(sanPham);
+        sanPham.setCreatedAt(dto.getCreatedAt() != null ? dto.getCreatedAt() : new Date());
+        sanPham.setCreatedBy(dto.getCreatedBy() != null ? dto.getCreatedBy() : 1);
+        sanPham.setUpdatedAt(new Date());
+        sanPham.setUpdatedBy(dto.getUpdatedBy() != null ? dto.getUpdatedBy() : 1);
     }
 
     private <T> T getEntity(JpaRepository<T, Integer> repository, Integer id, String entityName) {
@@ -173,7 +211,6 @@ public class ChiTietSanPhamService {
     }
 
     private List<AnhSanPham> uploadAndSaveImages(List<MultipartFile> images) throws IOException {
-        // Create upload directory if it doesn't exist
         Path uploadPath = Paths.get(uploadDir);
         if (!Files.exists(uploadPath)) {
             Files.createDirectories(uploadPath);
@@ -185,23 +222,19 @@ public class ChiTietSanPhamService {
                 continue;
             }
 
-            // Validate image
             validateImage(image);
 
-            // Generate unique filename
             String originalFilename = StringUtils.cleanPath(image.getOriginalFilename());
             String fileExtension = originalFilename.substring(originalFilename.lastIndexOf("."));
             String uniqueFilename = UUID.randomUUID().toString() + fileExtension;
 
-            // Save file
             Path filePath = uploadPath.resolve(uniqueFilename);
             try (InputStream inputStream = image.getInputStream()) {
                 Files.copy(inputStream, filePath, StandardCopyOption.REPLACE_EXISTING);
             }
 
-            // Create image entity
             AnhSanPham anh = new AnhSanPham();
-            anh.setMa(UUID.randomUUID().toString());
+            anh.setMa(null);
             anh.setTenAnh(originalFilename);
             anh.setDuongDan(filePath.toString());
             anh.setDeleted(false);
@@ -221,49 +254,210 @@ public class ChiTietSanPhamService {
         }
     }
 
-    private List<ChiTietSanPham> createVariants(ChiTietSanPhamDTO dto, SanPham sanPham, List<AnhSanPham> anhSanPhams) {
+    private List<Imel> createAndSaveImels(List<ChiTietSanPhamDTO.VariantDTO> variants) {
+        List<Imel> imels = new ArrayList<>();
+
+        for (ChiTietSanPhamDTO.VariantDTO variant : variants) {
+            if (variant.getImeiList() != null && !variant.getImeiList().isEmpty()) {
+                // Tạo một bản ghi Imel cho từng IMEI
+                for (String imei : variant.getImeiList()) {
+                    // Kiểm tra xem IMEI đã tồn tại chưa
+                    Optional<Imel> existingImel = imelRepository.findByImel(imei);
+
+                    if (existingImel.isPresent()) {
+                        imels.add(existingImel.get());
+                    } else {
+                        Imel imel = new Imel();
+                        imel.setMa(null);
+                        imel.setImel(imei); // Lưu từng IMEI riêng lẻ
+                        imel.setDeleted(false);
+                        imels.add(imel);
+                    }
+                }
+            }
+        }
+
+        // Lưu các IMEI mới
+        List<Imel> newImels = imels.stream()
+                .filter(imel -> imel.getId() == null)
+                .collect(Collectors.toList());
+
+        if (!newImels.isEmpty()) {
+            imelRepository.saveAll(newImels);
+        }
+
+        return imels;
+    }
+
+    private List<ChiTietSanPham> createVariants(ChiTietSanPhamDTO dto, SanPham sanPham,
+                                                List<AnhSanPham> anhSanPhams, List<Imel> imels) {
         List<ChiTietSanPham> chiTietSanPhams = new ArrayList<>();
+        int imelIndex = 0;
 
         for (ChiTietSanPhamDTO.VariantDTO variant : dto.getVariants()) {
-            ChiTietSanPham chiTiet = new ChiTietSanPham();
-            chiTiet.setIdSanPham(sanPham);
-            chiTiet.setIdImel(getEntity(imelRepository, variant.getIdImel(), "IMEL"));
-            chiTiet.setIdMauSac(getEntity(mauSacRepository, variant.getIdMauSac(), "Màu sắc"));
-            chiTiet.setIdRam(getEntity(ramRepository, variant.getIdRam(), "RAM"));
-            chiTiet.setIdBoNhoTrong(getEntity(boNhoTrongRepository, variant.getIdBoNhoTrong(), "Bộ nhớ trong"));
-            chiTiet.setIdLoaiTinhTrang(getEntity(tinhTrangRepository, variant.getIdLoaiTinhTrang(), "Tình trạng"));
+            // Tạo một ChiTietSanPham cho mỗi IMEI trong variant
+            if (variant.getImeiList() != null && !variant.getImeiList().isEmpty()) {
+                for (String imei : variant.getImeiList()) {
+                    ChiTietSanPham chiTiet = new ChiTietSanPham();
+                    chiTiet.setIdSanPham(sanPham);
 
-            // Set common fields
-            chiTiet.setMa(UUID.randomUUID().toString());
-            chiTiet.setGiaBan(dto.getGiaBan());
-            chiTiet.setTienIchDacBiet(dto.getTienIchDacBiet());
-            chiTiet.setGhiChu(dto.getGhiChu());
+                    // Gán Imel tương ứng
+                    Imel imelToAssign;
+                    if (imelIndex < imels.size()) {
+                        imelToAssign = imels.get(imelIndex);
+                        imelIndex++;
+                    } else {
+                        // Nếu không có đủ Imel, tạo một Imel mặc định
+                        imelToAssign = new Imel();
+                        imelToAssign.setMa("DEFAULT-" + UUID.randomUUID().toString());
+                        imelToAssign.setImel("N/A");
+                        imelToAssign.setDeleted(false);
+                        imelToAssign = imelRepository.save(imelToAssign);
+                    }
+                    chiTiet.setIdImel(imelToAssign);
 
-            // Set audit fields
-            chiTiet.setDeleted(false);
-            chiTiet.setCreatedAt(new Date());
-            chiTiet.setCreatedBy(dto.getCreatedBy());
-            chiTiet.setUpdatedAt(dto.getUpdatedAt());
-            chiTiet.setUpdatedBy(dto.getUpdatedBy());
+                    chiTiet.setIdMauSac(getEntity(mauSacRepository, variant.getIdMauSac(), "Màu sắc"));
+                    chiTiet.setIdRam(getEntity(ramRepository, variant.getIdRam(), "RAM"));
+                    chiTiet.setIdBoNhoTrong(getEntity(boNhoTrongRepository, variant.getIdBoNhoTrong(), "Bộ nhớ trong"));
+                    chiTiet.setIdLoaiTinhTrang(getEntity(tinhTrangRepository, variant.getIdLoaiTinhTrang(), "Tình trạng"));
 
-            // Set image
-            Integer imageIndex = variant.getImageIndex();
-            if (imageIndex != null && imageIndex >= 0 && imageIndex < anhSanPhams.size()) {
-                chiTiet.setIdAnhSanPham(anhSanPhams.get(imageIndex));
+                    chiTiet.setMa(null);
+                    chiTiet.setGiaBan(variant.getDonGia() != null ? variant.getDonGia() : dto.getGiaBan());
+                    chiTiet.setTienIchDacBiet(dto.getTienIchDacBiet());
+                    chiTiet.setGhiChu(dto.getGhiChu());
+
+                    chiTiet.setDeleted(false);
+                    chiTiet.setCreatedAt(new Date());
+                    chiTiet.setCreatedBy(1);
+                    chiTiet.setUpdatedAt(new Date());
+                    chiTiet.setUpdatedBy(1);
+
+                    Integer imageIndex = variant.getImageIndex();
+                    if (imageIndex != null && imageIndex >= 0 && imageIndex < anhSanPhams.size()) {
+                        chiTiet.setIdAnhSanPham(anhSanPhams.get(imageIndex));
+                    } else {
+                        chiTiet.setIdAnhSanPham(anhSanPhams.get(0));
+                    }
+
+                    chiTietSanPhams.add(chiTiet);
+                }
             } else {
-                chiTiet.setIdAnhSanPham(anhSanPhams.get(0)); // Default to first image
-            }
+                // Nếu không có IMEI, tạo một ChiTietSanPham với Imel mặc định
+                ChiTietSanPham chiTiet = new ChiTietSanPham();
+                chiTiet.setIdSanPham(sanPham);
 
-            chiTietSanPhams.add(chiTiet);
+                Imel imelToAssign = new Imel();
+                imelToAssign.setMa(null);
+                imelToAssign.setImel("N/A");
+                imelToAssign.setDeleted(false);
+                imelToAssign = imelRepository.save(imelToAssign);
+                chiTiet.setIdImel(imelToAssign);
+
+                chiTiet.setIdMauSac(getEntity(mauSacRepository, variant.getIdMauSac(), "Màu sắc"));
+                chiTiet.setIdRam(getEntity(ramRepository, variant.getIdRam(), "RAM"));
+                chiTiet.setIdBoNhoTrong(getEntity(boNhoTrongRepository, variant.getIdBoNhoTrong(), "Bộ nhớ trong"));
+                chiTiet.setIdLoaiTinhTrang(getEntity(tinhTrangRepository, variant.getIdLoaiTinhTrang(), "Tình trạng"));
+
+                chiTiet.setMa(null);
+                chiTiet.setGiaBan(variant.getDonGia() != null ? variant.getDonGia() : dto.getGiaBan());
+                chiTiet.setTienIchDacBiet(dto.getTienIchDacBiet());
+                chiTiet.setGhiChu(dto.getGhiChu());
+
+                chiTiet.setDeleted(false);
+                chiTiet.setCreatedAt(new Date());
+                chiTiet.setCreatedBy(1);
+                chiTiet.setUpdatedAt(new Date());
+                chiTiet.setUpdatedBy(1);
+
+                Integer imageIndex = variant.getImageIndex();
+                if (imageIndex != null && imageIndex >= 0 && imageIndex < anhSanPhams.size()) {
+                    chiTiet.setIdAnhSanPham(anhSanPhams.get(imageIndex));
+                } else {
+                    chiTiet.setIdAnhSanPham(anhSanPhams.get(0));
+                }
+
+                chiTietSanPhams.add(chiTiet);
+            }
         }
 
         return chiTietSanPhams;
     }
 
+    public List<ChiTietSanPhamDTO> getChiTietSanPhamBySanPhamId(Integer sanPhamId) {
+        List<ChiTietSanPham> chiTietSanPhams = chiTietSanPhamRepository.findByIdSanPhamIdAndDeletedFalse(sanPhamId, false);
+        return mapToDTOList(chiTietSanPhams);
+    }
 
+    public Page<ChiTietSanPhamDTO> getChiTietSanPhamDetails(Integer sanPhamId, String keyword, String status, Integer idMauSac, Integer idBoNhoTrong, Integer idRam, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
 
-    public List<AnhSanPham> getLastSavedImages(int limit) {
-        return anhSanPhamRepository.findTopNByOrderByIdDesc(limit);
+        Specification<ChiTietSanPham> spec = (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            predicates.add(cb.equal(root.get("idSanPham").get("id"), sanPhamId));
+            predicates.add(cb.equal(root.get("deleted"), status == null || "active".equals(status) ? false : true));
+            if (keyword != null && !keyword.isEmpty()) {
+                predicates.add(cb.like(cb.lower(root.get("ma")), "%" + keyword.toLowerCase() + "%"));
+            }
+            if (idMauSac != null) {
+                predicates.add(cb.equal(root.get("idMauSac").get("id"), idMauSac));
+            }
+            if (idBoNhoTrong != null) {
+                predicates.add(cb.equal(root.get("idBoNhoTrong").get("id"), idBoNhoTrong));
+            }
+            if (idRam != null) {
+                predicates.add(cb.equal(root.get("idRam").get("id"), idRam));
+            }
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+
+        Page<ChiTietSanPham> chiTietSanPhamPage = chiTietSanPhamRepository.findAll(spec, pageable);
+        List<ChiTietSanPhamDTO> dtos = mapToDTOList(chiTietSanPhamPage.getContent());
+        return new PageImpl<>(dtos, pageable, chiTietSanPhamPage.getTotalElements());
+    }
+
+    private List<ChiTietSanPhamDTO> mapToDTOList(List<ChiTietSanPham> chiTietSanPhams) {
+        return chiTietSanPhams.stream().map(chiTiet -> {
+            ChiTietSanPhamDTO dto = new ChiTietSanPhamDTO();
+            // Thêm ánh xạ cho id của ChiTietSanPham
+            dto.setId(chiTiet.getId());
+            SanPham sanPham = chiTiet.getIdSanPham();
+            dto.setIdSanPham(sanPham.getId());
+            dto.setIdNhaSanXuat(sanPham.getIdNhaSanXuat().getId());
+            dto.setIdPin(sanPham.getIdPin().getId());
+            dto.setIdManHinh(sanPham.getIdManHinh().getId());
+            dto.setIdCpu(sanPham.getIdCpu().getId());
+            dto.setIdGpu(sanPham.getIdGpu().getId());
+            dto.setIdCumCamera(sanPham.getIdCumCamera().getId());
+            dto.setIdHeDieuHanh(sanPham.getIdHeDieuHanh().getId());
+            dto.setIdThietKe(sanPham.getIdThietKe().getId());
+            dto.setIdSim(sanPham.getIdSim().getId());
+            dto.setIdCongSac(sanPham.getIdCongSac().getId());
+            dto.setIdHoTroCongNgheSac(sanPham.getIdHoTroCongNgheSac().getId());
+            dto.setIdCongNgheMang(sanPham.getIdCongNgheMang().getId());
+            dto.setTenSanPham(sanPham.getTenSanPham());
+            dto.setMa(chiTiet.getMa());
+            dto.setIdHoTroBoNhoNgoai(sanPham.getIdHoTroBoNhoNgoai() != null ? sanPham.getIdHoTroBoNhoNgoai().getId() : null);
+            dto.setIdChiSoKhangBuiVaNuoc(sanPham.getIdChiSoKhangBuiVaNuoc() != null ? sanPham.getIdChiSoKhangBuiVaNuoc().getId() : null);
+            dto.setTienIchDacBiet(chiTiet.getTienIchDacBiet());
+            dto.setGhiChu(chiTiet.getGhiChu());
+            dto.setGiaBan((chiTiet.getGiaBan()));
+            dto.setCreatedAt(chiTiet.getCreatedAt());
+            dto.setCreatedBy(chiTiet.getCreatedBy());
+            dto.setUpdatedAt(chiTiet.getUpdatedAt());
+            dto.setUpdatedBy(chiTiet.getUpdatedBy());
+
+            ChiTietSanPhamDTO.VariantDTO variantDTO = new ChiTietSanPhamDTO.VariantDTO();
+            variantDTO.setIdImel(chiTiet.getIdImel());
+            variantDTO.setMauSac(chiTiet.getIdMauSac() != null ? chiTiet.getIdMauSac().getMauSac() : null);
+            variantDTO.setDungLuongRam(chiTiet.getIdRam() != null ? chiTiet.getIdRam().getDungLuongRam() : null);
+            variantDTO.setDungLuongBoNhoTrong(chiTiet.getIdBoNhoTrong() != null ? chiTiet.getIdBoNhoTrong().getDungLuongBoNhoTrong() : null);
+            variantDTO.setIdLoaiTinhTrang(chiTiet.getIdLoaiTinhTrang() != null ? chiTiet.getIdLoaiTinhTrang().getId() : null);
+            variantDTO.setImageIndex(chiTiet.getIdAnhSanPham() != null ? anhSanPhamRepository.findAll().indexOf(chiTiet.getIdAnhSanPham()) : 0);
+            variantDTO.setDonGia((chiTiet.getGiaBan()));
+
+            dto.setVariants(List.of(variantDTO));
+            return dto;
+        }).collect(Collectors.toList());
     }
 
     public record ChiTietSanPhamResponse(Integer sanPhamId, List<Integer> chiTietSanPhamIds, List<Integer> anhSanPhamIds) {}

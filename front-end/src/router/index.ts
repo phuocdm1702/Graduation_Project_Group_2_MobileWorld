@@ -389,32 +389,6 @@ const routes: Array<RouteRecordRaw> = [
     meta: { breadcrumb: ["Sản phẩm", "Cổng sạc"] },
   },
 
-// Imel
-  {
-    path: "/imel",
-    name: "imel",
-    component: Imel,
-    meta: { breadcrumb: ["Sản phẩm", "Imel"] },
-  },
-  {
-    path: "/imel/add",
-    name: "imel-add",
-    component: ImelAdd,
-    meta: { breadcrumb: ["Sản phẩm", "Imel", "Thêm Imel"] },
-  },
-  {
-    path: "/imel/edit/:id",
-    name: "imel-edit",
-    component: ImelEdit,
-    meta: { breadcrumb: (route: any) => ["Sản phẩm", "Imel", `Cập nhật Imel #${route.params.id}`] },
-  },
-  {
-    path: "/imel-sold",
-    name: "ImelDaBan",
-    component: ImelDaBan,
-    meta: { breadcrumb: ["Sản phẩm", "Imel đã bán"] },
-  },
-
   // 404 Not Found
   {
     path: "/:pathMatch(.*)*",

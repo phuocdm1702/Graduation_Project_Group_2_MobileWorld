@@ -1,9 +1,6 @@
 <template>
   <div v-if="show" class="fixed inset-0 flex items-center justify-center z-50">
-    <!-- Overlay tối màu -->
     <div class="fixed inset-0 bg-black bg-opacity-50 z-40" @click="close"></div>
-
-    <!-- Modal -->
     <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-100 max-w-md w-full z-50">
       <h2 class="text-2xl font-semibold text-gray-800 mb-6 flex items-center">
         <i :class="`fa-solid ${iconClass} ${iconColor} mr-2`"></i>
@@ -11,7 +8,6 @@
       </h2>
       <form @submit.prevent="submitForm" class="space-y-6">
         <div class="grid grid-cols-1 gap-6">
-          <!-- Dùng slots để linh hoạt với các trường input -->
           <slot :entity-data="localEntityData" />
         </div>
         <div class="flex justify-end gap-4">
@@ -39,22 +35,10 @@ import { ref, watch } from 'vue';
 
 const props = defineProps({
   show: Boolean,
-  entityName: {
-    type: String,
-    required: true,
-  },
-  entityData: {
-    type: Object,
-    default: () => ({}),
-  },
-  iconClass: {
-    type: String,
-    default: 'fa-plus-circle',
-  },
-  iconColor: {
-    type: String,
-    default: 'text-orange-500',
-  },
+  entityName: { type: String, required: true },
+  entityData: { type: Object, default: () => ({}) },
+  iconClass: { type: String, default: 'fa-plus-circle' },
+  iconColor: { type: String, default: 'text-orange-500' },
 });
 
 const emit = defineEmits(['submit', 'close']);
@@ -72,73 +56,27 @@ watch(
 const submitForm = () => {
   let requiredFields = [];
   switch (props.entityName) {
-    case 'id':
-      requiredFields = ['id'];
+    case 'nhaSanXuat':
+      requiredFields = ['nhaSanXuat'];
       break;
     case 'heDieuHanh':
-      requiredFields = ['tenHeDieuHanh'];
+      requiredFields = ['heDieuHanh', 'phienBan'];
       break;
     case 'manHinh':
-      requiredFields = ['kichThuoc'];
+      requiredFields = ['kichThuoc', 'doPhanGiai'];
       break;
-    case 'nhaSanXuat':
-      requiredFields = ['tenNhaSanXuat'];
-      break;
-    case 'cumCamera':
-      requiredFields = ['tenCamera'];
-      break;
-    case 'sim':
-      requiredFields = ['loaiSim'];
-      break;
-    case 'thietKe':
-      requiredFields = ['tenThietKe'];
-      break;
-    case 'pin':
-      requiredFields = ['dungLuong'];
-      break;
-    case 'cpu':
-      requiredFields = ['tenCpu'];
-      break;
-    case 'gpu':
-      requiredFields = ['tenGpu'];
-      break;
-    case 'congNgheMang':
-      requiredFields = ['tenCongNghe'];
-      break;
-    case 'congSac':
-      requiredFields = ['tenCongNghe'];
-      break;
-    case 'hoTroCongNgheSac':
-      requiredFields = ['ten'];
-      break;
-    case 'chiSoKhangBuiVaNuoc':
-      requiredFields = ['maChiSo'];
-      break;
-    case 'tinhTrang':
-      requiredFields = ['tenTinhTrang'];
-      break;
-    case 'ram':
-      requiredFields = ['dungLuong'];
-      break;
-    case 'boNhoTrong':
-      requiredFields = ['dungLuong'];
-      break;
-    case 'mauSac':
-      requiredFields = ['tenMau'];
-      break;
-    case 'tienIchDacBiet':
-      requiredFields = ['tienIchDacBiet'];
-      break;
-    case 'giaBan':
-      requiredFields = ['giaBan'];
-      break;
+    // Add other cases as needed
     default:
       requiredFields = Object.keys(localEntityData.value);
   }
 
-  const missingFields = requiredFields.filter(field => !localEntityData.value[field]);
+  const missingFields = requiredFields.filter(field => {
+    const value = localEntityData.value[field];
+    return value === undefined || value === null || value === '';
+  });
+
   if (missingFields.length > 0) {
-    console.error('Dữ liệu không đầy đủ:', missingFields, localEntityData.value);
+    alert(`Vui lòng nhập đầy đủ thông tin: ${missingFields.join(', ')}`);
     return;
   }
 
@@ -149,19 +87,7 @@ const submitForm = () => {
     }
   });
 
+  console.log('Emitting submit with data:', sanitizedData);
   emit('submit', sanitizedData);
 };
-
-const close = () => {
-  emit('close');
-};
 </script>
-
-<style scoped>
-:root {
-  --ring-color: #10b981;
-}
-div[z-50] {
-  --ring-color: #3b82f6;
-}
-</style>
