@@ -80,6 +80,14 @@ public class TaiKhoanServices {
         mailSender.send(message);
     }
 
+    private void sendOTPQuenMk(String email, String otp) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(email);
+        message.setSubject("Mã OTP Xác Nhận Đăng Ký");
+        message.setText("Mã OTP của bạn là: " + otp + "\nVui lòng sử dụng mã này để hoàn tất đăng ký.");
+        mailSender.send(message);
+    }
+
     public TaiKhoan addTK(TaiKhoanDTO taiKhoanDTO, String otp) {
         String storedOtp = otpStorage.get(taiKhoanDTO.getEmail());
         if (storedOtp == null || !storedOtp.equals(otp)) {
@@ -111,5 +119,26 @@ public class TaiKhoanServices {
 
     public TaiKhoan findByTenDangNhap(String tenDangNhap) {
         return taiKhoanRepository.findByTenDangNhap(tenDangNhap);
+    }
+
+    public TaiKhoan quenmk(TaiKhoanDTO taiKhoanDTO, String otp) {
+        String storedOtp = otpStorage.get(taiKhoanDTO.getEmail());
+        if (storedOtp == null || !storedOtp.equals(otp)) {
+            throw new RuntimeException("Mã OTP không hợp lệ hoặc đã hết hạn!");
+        }
+        otpStorage.remove(taiKhoanDTO.getEmail());
+
+        QuyenHan quyenHan = new QuyenHan();
+        quyenHan.setId(2);
+
+        TaiKhoan taiKhoan = new TaiKhoan();
+        taiKhoan.setIdQuyenHan(quyenHan);
+        taiKhoan.setMa(MaTaiKhoan());
+        taiKhoan.setTenDangNhap(taiKhoanDTO.getTenDangNhap());
+        taiKhoan.setMatKhau(passwordEncoder.encode(taiKhoanDTO.getMatKhau()));
+        taiKhoan.setEmail(taiKhoanDTO.getEmail());
+        taiKhoan.setDeleted(false);
+
+        return taiKhoanRepository.save(taiKhoan);
     }
 }

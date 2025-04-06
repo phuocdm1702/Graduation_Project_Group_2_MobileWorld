@@ -36,6 +36,19 @@ public class TaiKhoanController {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
+    @PostMapping("/Quenmk")
+    public ResponseEntity<?> quenmk(@RequestBody Map<String, String> request) {
+        try {
+            TaiKhoanDTO taiKhoanDTO = new TaiKhoanDTO();
+            taiKhoanDTO.setEmail(request.get("email"));
+            String otp = request.get("otp");
+
+            TaiKhoan tk = taiKhoanServices.quenmk(taiKhoanDTO, otp);
+            return new ResponseEntity<>(tk, HttpStatus.CREATED);
+        } catch (Exception e) {
+            return new ResponseEntity<>("Lỗi khi thêm tài khoản: " + e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
 
     @PostMapping("/addTk")
     public ResponseEntity<?> addTk(@RequestBody Map<String, String> request) {
