@@ -63,57 +63,85 @@ public class AddKhachHangPGGController {
 
     @PostMapping("/addPhieuGiamGia")
     public ResponseEntity<PhieuGiamGia> addPGG(@RequestBody PhieuGiamGiaDTO dtoPGG) {
-        PhieuGiamGia pgg = new PhieuGiamGia();
-        pgg.setMa(dtoPGG.getMa());
-        pgg.setTenPhieuGiamGia(dtoPGG.getTenPhieuGiamGia());
-        pgg.setLoaiPhieuGiamGia(dtoPGG.getLoaiPhieuGiamGia());
-        pgg.setPhanTramGiamGia(dtoPGG.getPhanTramGiamGia());
-        pgg.setSoTienGiamToiDa(dtoPGG.getSoTienGiamToiDa());
-        pgg.setHoaDonToiThieu(dtoPGG.getHoaDonToiThieu());
-        pgg.setSoLuongDung(dtoPGG.getSoLuongDung());
-        pgg.setNgayBatDau(dtoPGG.getNgayBatDau());
-        pgg.setNgayKetThuc(dtoPGG.getNgayKetThuc());
-        pgg.setTrangThai(false);
-        pgg.setRiengTu(Objects.equals(dtoPGG.getRiengTu(), 1));
-        pgg.setMoTa(dtoPGG.getMoTa());
-        pgg.setDeleted(false);
+        try {
+            // Validation tương tự updatePGG
+            if (dtoPGG.getMa() == null || dtoPGG.getMa().trim().isEmpty()) {
+                return ResponseEntity.badRequest().body(null);
+            }
+            if (dtoPGG.getTenPhieuGiamGia() == null || dtoPGG.getTenPhieuGiamGia().trim().isEmpty()) {
+                return ResponseEntity.badRequest().body(null);
+            }
+            if (dtoPGG.getLoaiPhieuGiamGia() == null || (!dtoPGG.getLoaiPhieuGiamGia().equals("Phần trăm") && !dtoPGG.getLoaiPhieuGiamGia().equals("Tiền mặt"))) {
+                return ResponseEntity.badRequest().body(null);
+            }
+            if ("Phần trăm".equals(dtoPGG.getLoaiPhieuGiamGia()) && (dtoPGG.getPhanTramGiamGia() == null || dtoPGG.getPhanTramGiamGia() <= 0)) {
+                return ResponseEntity.badRequest().body(null);
+            }
+            if ("Tiền mặt".equals(dtoPGG.getLoaiPhieuGiamGia()) && (dtoPGG.getSoTienGiamToiDa() == null || dtoPGG.getSoTienGiamToiDa() <= 0)) {
+                return ResponseEntity.badRequest().body(null);
+            }
 
-        PhieuGiamGia savePgg = phieuGiamGiaService.addPGG(pgg);
-        if (savePgg == null) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-        }
+            PhieuGiamGia pgg = new PhieuGiamGia();
+            pgg.setMa(dtoPGG.getMa());
+            pgg.setTenPhieuGiamGia(dtoPGG.getTenPhieuGiamGia());
+            pgg.setLoaiPhieuGiamGia(dtoPGG.getLoaiPhieuGiamGia());
+            pgg.setPhanTramGiamGia(dtoPGG.getPhanTramGiamGia() != null ? dtoPGG.getPhanTramGiamGia() : 0); // Gán mặc định 0 nếu null
+            pgg.setSoTienGiamToiDa(dtoPGG.getSoTienGiamToiDa() != null ? dtoPGG.getSoTienGiamToiDa() : 0); // Gán mặc định 0 nếu null
+            pgg.setHoaDonToiThieu(dtoPGG.getHoaDonToiThieu());
+            pgg.setSoLuongDung(dtoPGG.getSoLuongDung());
+            pgg.setNgayBatDau(dtoPGG.getNgayBatDau());
+            pgg.setNgayKetThuc(dtoPGG.getNgayKetThuc());
+            pgg.setTrangThai(false);
+            pgg.setRiengTu(Objects.equals(dtoPGG.getRiengTu(), 1));
+            pgg.setMoTa(dtoPGG.getMoTa());
+            pgg.setDeleted(false);
 
-        if (Objects.equals(dtoPGG.getRiengTu(), 1) && dtoPGG.getCustomerIds() != null && !dtoPGG.getCustomerIds().isEmpty()) {
-            for (Integer khachHangID : dtoPGG.getCustomerIds()) {
-                KhachHang kh = khachHangService.findById(khachHangID);
-                if (kh != null) {
-                    PhieuGiamGiaCaNhan pggcn = new PhieuGiamGiaCaNhan();
-                    pggcn.setIdPhieuGiamGia(pgg);
-                    pggcn.setIdKhachHang(kh);
-                    pggcn.setMa(dtoPGG.getMa() + "-" + khachHangID);
-                    pggcn.setNgayNhan(new Date());
-                    pggcn.setNgayHetHan(pgg.getNgayKetThuc());
-                    pggcn.setTrangThai(true);
-                    pggcn.setDeleted(false);
+            PhieuGiamGia savePgg = phieuGiamGiaService.addPGG(pgg);
+            if (savePgg == null) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+            }
 
-                    phieuGiamGiaCaNhanService.addPGGCN(pggcn);
+            if (Objects.equals(dtoPGG.getRiengTu(), 1) && dtoPGG.getCustomerIds() != null && !dtoPGG.getCustomerIds().isEmpty()) {
+                for (Integer khachHangID : dtoPGG.getCustomerIds()) {
+                    KhachHang kh = khachHangService.findById(khachHangID);
+                    if (kh != null) {
+                        PhieuGiamGiaCaNhan pggcn = new PhieuGiamGiaCaNhan();
+                        pggcn.setIdPhieuGiamGia(savePgg);
+                        pggcn.setIdKhachHang(kh);
+                        pggcn.setMa(dtoPGG.getMa() + "-" + khachHangID);
+                        pggcn.setNgayNhan(new Date());
+                        pggcn.setNgayHetHan(savePgg.getNgayKetThuc());
+                        pggcn.setTrangThai(true);
+                        pggcn.setDeleted(false);
 
-                    String email = taiKhoanServices.findById(khachHangID);
-                    if (email != null && !email.trim().isEmpty()) {
-                        try {
-                            SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
-                            String ngayHH = dateFormat.format(pgg.getNgayKetThuc());
-                            Double TinhSTGTD = pgg.getPhanTramGiamGia() * pgg.getHoaDonToiThieu() / 100;
+                        phieuGiamGiaCaNhanService.addPGGCN(pggcn);
 
-                            emailSend.sendDiscountEmail(email, pggcn.getMa(), ngayHH, pgg.getPhanTramGiamGia(), TinhSTGTD);
-                        } catch (Exception e) {
-                            System.err.println("Failed to send email to " + email + ": " + e.getMessage());
+                        String email = (kh.getIdTaiKhoan() != null) ? kh.getIdTaiKhoan().getEmail() : null;
+                        if (email != null && !email.trim().isEmpty()) {
+                            try {
+                                SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+                                String ngayHH = dateFormat.format(savePgg.getNgayKetThuc());
+                                double tinhSTGTD = savePgg.getPhanTramGiamGia() * savePgg.getHoaDonToiThieu() / 100;
+
+                                emailSend.sendDiscountEmail(
+                                        email,
+                                        pggcn.getMa(),
+                                        ngayHH,
+                                        savePgg.getPhanTramGiamGia(),
+                                        tinhSTGTD
+                                );
+                            } catch (Exception e) {
+                                System.err.println("Failed to send email to " + email + ": " + e.getMessage());
+                            }
                         }
                     }
                 }
             }
-        }
 
-        return ResponseEntity.ok(savePgg);
+            return ResponseEntity.ok(savePgg);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
     }
 }

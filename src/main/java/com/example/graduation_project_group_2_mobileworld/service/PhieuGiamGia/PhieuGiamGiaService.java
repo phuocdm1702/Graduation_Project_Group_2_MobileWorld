@@ -86,15 +86,10 @@ public class PhieuGiamGiaService {
             Double valueFilter,
             Pageable pageable) {
 
-        String loaiPhieu = loaiPhieuGiamGia;
-
-
-        if (loaiPhieu != null && ("Tất cả loại phiếu".equals(loaiPhieu) || loaiPhieu.isEmpty())) {
-            loaiPhieu = null;
-        }
+        String loaiPhieu = loaiPhieuGiamGia != null && loaiPhieuGiamGia.trim().isEmpty() ? null : loaiPhieuGiamGia;
 
         Boolean trangThaiBoolean = null;
-        if (trangThai != null && !trangThai.isEmpty()) {
+        if (trangThai != null && !trangThai.trim().isEmpty()) {
             if ("Hoạt động".equals(trangThai)) {
                 trangThaiBoolean = false;
             } else if ("Không hoạt động".equals(trangThai)) {
@@ -103,30 +98,21 @@ public class PhieuGiamGiaService {
         }
 
         Date now = new Date();
-
-        // Nếu không có filter nào được chọn, trả về tất cả
-        if (loaiPhieu == null && trangThaiBoolean == null && ngayBatDau == null &&
-                ngayKetThuc == null && minOrder == null && valueFilter == null) {
-            return phieuGiamGiaRepository.findAll(pageable);
-        }
-
         if (ngayBatDau != null && ngayKetThuc != null && ngayBatDau.after(ngayKetThuc)) {
             throw new IllegalArgumentException("Ngày bắt đầu không thể lớn hơn ngày kết thúc");
         }
-
         if (minOrder != null && minOrder < 0) {
             throw new IllegalArgumentException("Hóa đơn tối thiểu không thể nhỏ hơn 0");
         }
-
         if (valueFilter != null && valueFilter < 0) {
             throw new IllegalArgumentException("Giá trị phiếu không thể nhỏ hơn 0");
         }
 
+        System.out.println("Filter params - loaiPhieu: " + loaiPhieu + ", trangThai: " + trangThaiBoolean +
+                ", ngayBatDau: " + ngayBatDau + ", ngayKetThuc: " + ngayKetThuc);
 
-
-        // Gọi query từ Repository
-        return phieuGiamGiaRepository.filterPhieuGiamGia(
-                loaiPhieu, // Thêm vào
+        Page<PhieuGiamGia> result = phieuGiamGiaRepository.filterPhieuGiamGia(
+                loaiPhieu,
                 trangThaiBoolean,
                 ngayBatDau,
                 ngayKetThuc,
@@ -135,6 +121,14 @@ public class PhieuGiamGiaService {
                 now,
                 pageable
         );
+
+        System.out.println("Filter result size: " + result.getContent().size());
+        result.getContent().forEach(voucher ->
+                System.out.println("Voucher: " + voucher.getMa() + ", TrangThai: " + voucher.getTrangThai() +
+                        ", NgayBatDau: " + voucher.getNgayBatDau() + ", NgayKetThuc: " + voucher.getNgayKetThuc())
+        );
+
+        return result;
     }
 
     public Optional<PhieuGiamGia> getById(Integer id) {

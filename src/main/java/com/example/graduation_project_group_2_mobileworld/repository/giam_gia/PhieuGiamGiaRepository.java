@@ -7,7 +7,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.Date;
-import java.util.List;
 
 public interface PhieuGiamGiaRepository extends JpaRepository<PhieuGiamGia, Integer> {
 
@@ -15,7 +14,7 @@ public interface PhieuGiamGiaRepository extends JpaRepository<PhieuGiamGia, Inte
 
     @Query("SELECT p FROM PhieuGiamGia p WHERE (p.ma LIKE %:keyword% OR p.tenPhieuGiamGia LIKE %:keyword%) " +
             "AND p.ngayKetThuc >= :currentDate")
-    Page<PhieuGiamGia> search(String keyword,  Date currentDate, Pageable pageable);
+    Page<PhieuGiamGia> search(String keyword, Date currentDate, Pageable pageable);
 
     @Query("SELECT p FROM PhieuGiamGia p WHERE " +
             "(:loaiPhieu IS NULL OR p.loaiPhieuGiamGia = :loaiPhieu) AND " +
@@ -24,18 +23,15 @@ public interface PhieuGiamGiaRepository extends JpaRepository<PhieuGiamGia, Inte
             "(:ngayKetThuc IS NULL OR p.ngayKetThuc <= :ngayKetThuc) AND " +
             "(:minOrder IS NULL OR p.hoaDonToiThieu >= :minOrder) AND " +
             "(:valueFilter IS NULL OR p.soTienGiamToiDa >= :valueFilter) AND " +
-            "p.ngayKetThuc >= :currentDate")
+            "(:currentDate IS NULL OR p.ngayKetThuc >= :currentDate)")
     Page<PhieuGiamGia> filterPhieuGiamGia(
-            String loaiPhieuGiamGia, // Thêm tham số
+            String loaiPhieu,
             Boolean trangThai,
             Date ngayBatDau,
             Date ngayKetThuc,
-            Double hoaDonToiThieu,
-            Double phanTramGiamGia,
+            Double minOrder,
+            Double valueFilter,
             Date currentDate,
             Pageable pageable
     );
-
-
-
 }

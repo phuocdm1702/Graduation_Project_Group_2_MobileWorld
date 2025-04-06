@@ -1,5 +1,6 @@
-import { ref, computed } from "vue";
+import { ref } from "vue";
 import axios from "axios";
+import { debounce } from "lodash"; // Cần cài đặt: npm install lodash
 
 export default function usePhieuGiamGia() {
   const vouchers = ref([]);
@@ -48,7 +49,7 @@ export default function usePhieuGiamGia() {
         };
       }
     }
-    return null;
+    return null; // Phiếu hết hạn không hiển thị
   };
 
   const updateVouchersWithDisplayStatus = (voucherList) => {
@@ -67,17 +68,13 @@ export default function usePhieuGiamGia() {
   const fetchDataPGG = async (page = 0) => {
     try {
       const response = await axios.get(`${baseURL}/data`, {
-        params: {
-          page,
-          size: pageSize.value,
-        },
+        params: { page, size: pageSize.value },
       });
       const rawVouchers = response.data.content || [];
       vouchers.value = updateVouchersWithDisplayStatus(rawVouchers);
       totalPages.value = response.data.totalPages;
     } catch (error) {
-      console.error("Error loading data:", error);
-      vouchers.value = [];
+      console.error("Error loading data:", error.response?.data || error);
     }
   };
 
@@ -86,10 +83,7 @@ export default function usePhieuGiamGia() {
       let response;
       if (!searchQuery.value || searchQuery.value.trim() === "") {
         response = await axios.get(`${baseURL}/data`, {
-          params: {
-            page,
-            size: pageSize.value,
-          },
+          params: { page, size: pageSize.value },
         });
       } else {
         response = await axios.get(`${baseURL}/search`, {
@@ -100,11 +94,11 @@ export default function usePhieuGiamGia() {
           },
         });
       }
-      const rawVouchers = response.data.content;
+      const rawVouchers = response.data.content || [];
       vouchers.value = updateVouchersWithDisplayStatus(rawVouchers);
       totalPages.value = response.data.totalPages;
     } catch (error) {
-      console.error("Lỗi search!", error);
+      console.error("Lỗi search!", error.response?.data || error);
     }
   };
 
@@ -116,24 +110,47 @@ export default function usePhieuGiamGia() {
         return isNaN(date.getTime()) ? null : date.toISOString().split("T")[0];
       };
 
+      let trangThaiValue = filterStatus.value || null;
+      let tempStartDate = startDate.value;
+      let tempEndDate = endDate.value;
+
+      if (trangThaiValue) {
+        if (["Đang diễn ra", "active"].includes(trangThaiValue)) {
+          trangThaiValue = "Hoạt động"; // trangThai = false
+          tempStartDate = null;
+          tempEndDate = null;
+        } else if (["Không hoạt động", "inactive"].includes(trangThaiValue)) {
+          trangThaiValue = "Không hoạt động"; // trangThai = true
+          tempStartDate = null;
+          tempEndDate = null;
+        } else if (trangThaiValue === "Chưa diễn ra") {
+          trangThaiValue = null;
+          tempStartDate = new Date().toISOString().split("T")[0];
+          tempEndDate = null;
+        } else {
+          trangThaiValue = null;
+        }
+      }
+
       const params = {
-        loaiPhieuGiamGia: filterType.value || null,
-        trangThai: filterStatus.value || null,
-        startDate: formatDate(startDate.value),
-        endDate: formatDate(endDate.value),
+        loaiPhieuGiamGia: filterType.value === "" ? null : filterType.value,
+        trangThai: trangThaiValue,
+        startDate: formatDate(tempStartDate),
+        endDate: formatDate(tempEndDate),
         minOrder: minOrder.value ? Number(minOrder.value) : null,
         valueFilter: valueFilter.value ? Number(valueFilter.value) : null,
         page,
         size: pageSize.value,
       };
 
+      console.log("Filter params:", params);
+
       const response = await axios.get(`${baseURL}/filter`, { params });
       const rawVouchers = response.data.content || [];
       vouchers.value = updateVouchersWithDisplayStatus(rawVouchers);
       totalPages.value = response.data.totalPages || 0;
     } catch (error) {
-      console.error("Lỗi khi lọc phiếu giảm giá:", error);
-      vouchers.value = [];
+      console.error("Lỗi khi lọc phiếu giảm giá:", error.response?.data || error);
     }
   };
 
@@ -146,34 +163,21 @@ export default function usePhieuGiamGia() {
       const newStatus = !item.trangThai;
       await axios.put(`${baseURL}/update-trang-thai/${item.id}`, { trangThai: newStatus });
 
-      // Tìm index của item trong mảng vouchers
-      const index = vouchers.value.findIndex(v => v.id === item.id);
+      const index = vouchers.value.findIndex((v) => v.id === item.id);
       if (index !== -1) {
-        // Cập nhật trạng thái gốc
         vouchers.value[index].trangThai = newStatus;
-        // Tính toán lại displayStatus
-        const displayStatus = computeDisplayStatus(vouchers.value[index]);
-        vouchers.value[index].displayStatus = displayStatus;
-
-        // Gán lại mảng để đảm bảo reactivity
+        vouchers.value[index].displayStatus = computeDisplayStatus(vouchers.value[index]);
         vouchers.value = [...vouchers.value];
-        console.log(`Toggled ${item.ma}: trangThai = ${newStatus}, displayStatus = ${displayStatus.text}`);
       }
     } catch (error) {
-      console.error("Lỗi khi cập nhật trạng thái:", error);
-      console.log("Response từ server:", error.response?.data);
+      console.error("Lỗi khi cập nhật trạng thái:", error.response?.data || error);
     }
   };
 
   const columns = ref([
-    {
-      key: "stt",
-      label: "#",
-      formatter: (_, __, index) => index + 1 + currentPage.value * pageSize.value,
-      width: "50px", 
-    },
+    { key: "stt", label: "#", formatter: (_, __, index) => index + 1 + currentPage.value * pageSize.value, width: "50px" },
     { key: "ma", label: "Mã", width: "80px" },
-    { key: "tenPhieuGiamGia", label: "Tên Phiếu", width: "150px" }, 
+    { key: "tenPhieuGiamGia", label: "Tên Phiếu", width: "150px" },
     {
       key: "phanTramGiamGia",
       label: "% Giảm Giá",
@@ -200,15 +204,10 @@ export default function usePhieuGiamGia() {
         }
         return value ? value.toLocaleString("vi-VN") + " VND" : "0 VND";
       },
-      width: "120px", // Set a fixed width for "Giảm Tối Đa"
+      width: "120px",
     },
-    { key: "soLuongDung", label: "Số lượng", width: "80px" }, // Optional: Set a fixed width for "Số lượng"
-    {
-      key: "hoaDonToiThieu",
-      label: "Hóa\nĐơn\nTối\nThiểu",
-      formatter: (value) => value.toLocaleString("vi-VN") + " VND",
-      width: "100px", // Optional: Set a fixed width for "Hóa Đơn Tối Thiểu"
-    },
+    { key: "soLuongDung", label: "Số lượng", width: "80px" },
+    { key: "hoaDonToiThieu", label: "Hóa\nĐơn\nTối\nThiểu", formatter: (value) => value.toLocaleString("vi-VN") + " VND", width: "100px" },
     { key: "ngayBatDau", label: "Bắt đầu", formatter: (value) => new Date(value).toLocaleDateString("vi-VN"), width: "100px" },
     { key: "ngayKetThuc", label: "Kết thúc", formatter: (value) => new Date(value).toLocaleDateString("vi-VN"), width: "100px" },
     { key: "displayStatus", label: "Trạng thái", cellSlot: "trangThaiPGG", width: "120px" },
@@ -226,19 +225,15 @@ export default function usePhieuGiamGia() {
     currentPage.value = page;
     if (searchQuery.value.trim().length > 0) {
       searchPGG(page);
-    } else if (
-      filterType.value ||
-      filterStatus.value ||
-      startDate.value ||
-      endDate.value ||
-      minOrder.value ||
-      valueFilter.value
-    ) {
+    } else if (filterType.value || filterStatus.value || startDate.value || endDate.value || minOrder.value || valueFilter.value) {
       filterPGG(page);
     } else {
       fetchDataPGG(page);
     }
   };
+
+  const debouncedSearchPGG = debounce(searchPGG, 300);
+  const debouncedFilterPGG = debounce(filterPGG, 300);
 
   return {
     vouchers,
@@ -254,9 +249,9 @@ export default function usePhieuGiamGia() {
     currentPage,
     pageSize,
     totalPages,
-    searchPGG,
+    searchPGG: debouncedSearchPGG,
     fetchDataPGG,
-    filterPGG,
+    filterPGG: debouncedFilterPGG,
     toggleStatusPGG,
     goToPage,
   };

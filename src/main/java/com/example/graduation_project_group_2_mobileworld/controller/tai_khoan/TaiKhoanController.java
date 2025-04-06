@@ -53,12 +53,12 @@ public class TaiKhoanController {
         }
     }
     @PostMapping("/login")
-    public ResponseEntity<TaiKhoan> login(@RequestBody TaiKhoan taiKhoan) {
+    public ResponseEntity<?> login(@RequestBody TaiKhoan taiKhoan) {
         TaiKhoan tk = taiKhoanServices.login(taiKhoan.getTenDangNhap(), taiKhoan.getMatKhau());
         if (tk != null) {
-            return ResponseEntity.ok(tk); // Trả về 200 với dữ liệu tài khoản
+            return ResponseEntity.ok(tk);
         } else {
-            return ResponseEntity.status(401).body(null); // Trả về 401 nếu thất bại
+            return ResponseEntity.status(401).body("Tên đăng nhập hoặc mật khẩu không đúng");
         }
     }
 
