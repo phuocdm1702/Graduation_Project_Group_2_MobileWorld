@@ -6,9 +6,7 @@
       <div class="flex items-center justify-center mb-6">
         <img class="logo" src="../../../assets/Logo_Mobile_World_vector.png" alt="Logo">
       </div>
-
-      <h2 class="text-2xl font-semibold text-center text-gray-800 mb-6">Đăng Ký Tài Khoản</h2>
-
+      
       <form @submit.prevent="AddTK">
         <!-- Email -->
         <label class="block mb-4 relative">
@@ -104,7 +102,7 @@ async function sendOTP() {
   }
 
   try {
-    const response = await axios.post('http://localhost:8080/tai-khoan/requestOtp', {
+    const response = await axios.post('http://localhost:8080/tai-khoan/requestOtpMk', {
       email: taikhoan.value.email,
     }, {
       headers: { 'Content-Type': 'application/json' },
@@ -134,16 +132,20 @@ async function AddTK() {
 
   const requestData = {
     email: taikhoan.value.email,
-    otp: otp.value,
   };
 
   try {
-    const response = await axios.post('http://localhost:8080/tai-khoan/verifyOtp', requestData, {
-      headers: { 'Content-Type': 'application/json' },
-    });
+    const response = await axios.post(
+      `http://localhost:8080/tai-khoan/verifyOtp?otp=${encodeURIComponent(otp.value)}`,
+      requestData,
+      {
+        headers: { 'Content-Type': 'application/json' },
+      }
+    );
     toastRef.value.kshowToast('success', 'Xác nhận OTP thành công!');
     setTimeout(() => {
-      router.push('/update-mk'); // Chuyển sang trang /update-mk
+      router.push({path: '/update-mk',
+        query: { email: taikhoan.value.email }});// Chuyển sang trang /update-mk
     }, 1000);
   } catch (error) {
     const errorMsg = error.response?.data || 'Mã OTP không hợp lệ!';

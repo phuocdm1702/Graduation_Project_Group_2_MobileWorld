@@ -146,4 +146,17 @@ public class TaiKhoanServices {
     }
 
 
+    public TaiKhoan UpdateTK(String email, TaiKhoanDTO taiKhoanDTO) {
+        TaiKhoan taiKhoan = taiKhoanRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy tài khoản!"));
+
+        if (taiKhoanDTO.getMatKhau() != null && !taiKhoanDTO.getMatKhau().trim().isEmpty()) {
+            String encodedPassword = taiKhoanDTO.getMatKhau();
+            taiKhoan.setMatKhau(encodedPassword);
+        } else {
+            throw new IllegalArgumentException("Mật khẩu không được để trống!");
+        }
+
+        return taiKhoanRepository.save(taiKhoan);
+    }
 }

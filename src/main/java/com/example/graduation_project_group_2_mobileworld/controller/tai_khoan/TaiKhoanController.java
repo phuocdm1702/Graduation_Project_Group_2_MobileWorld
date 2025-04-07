@@ -46,7 +46,7 @@ public class TaiKhoanController {
         }
     }
     @PostMapping("/verifyOtp")
-    public ResponseEntity<String> verifyOtp(@RequestBody TaiKhoanDTO taiKhoanDTO, @RequestParam String otp) {
+    public ResponseEntity<String> verifyOtp(@RequestBody TaiKhoanDTO taiKhoanDTO, @RequestParam("otp") String otp) {
         try {
             String response = taiKhoanServices.verifyOTP(taiKhoanDTO, otp);
             return ResponseEntity.ok(response);
@@ -68,6 +68,15 @@ public class TaiKhoanController {
             return new ResponseEntity<>(tk, HttpStatus.CREATED);
         } catch (Exception e) {
             return new ResponseEntity<>("Lỗi khi thêm tài khoản: " + e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
+    @PostMapping("/update-tk")
+    public ResponseEntity<?> updateTaiKhoan(@RequestBody TaiKhoanDTO taiKhoanDTO) {
+        try {
+            TaiKhoan updatedTaiKhoan = taiKhoanServices.UpdateTK(taiKhoanDTO.getEmail(), taiKhoanDTO);
+            return ResponseEntity.ok("Cập nhật tài khoản thành công!");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
     @PostMapping("/login")
