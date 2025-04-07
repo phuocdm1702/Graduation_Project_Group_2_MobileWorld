@@ -76,6 +76,7 @@ export default function useEmployeeManagement(toastRef) {
       filteredData = filteredData.filter(
         (nhanvien) =>
           nhanvien?.idTaiKhoan?.email?.toLowerCase().includes(searchNV.value.toLowerCase()) ||
+          nhanvien?.ma?.toLowerCase().includes(searchNV.value.toLowerCase()) ||
           nhanvien?.tenNhanVien?.toLowerCase().includes(searchNV.value.toLowerCase()) ||
           nhanvien?.idTaiKhoan?.soDienThoai?.toLowerCase().includes(searchNV.value.toLowerCase())
       );

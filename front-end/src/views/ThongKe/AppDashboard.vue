@@ -21,7 +21,54 @@
       </div>
       <div v-else class="text-center text-gray-500">Đang tải thống kê...</div>
     </section>
-    
+
+    <!-- Thống kê mới: Tỷ lệ doanh thu theo hãng, Phân phối đa kênh, Sản phẩm sắp hết hàng -->
+    <section class="mb-8">
+      <h2 class="text-2xl font-semibold mb-4">Thống Kê Bán Hàng</h2>
+      <div class="flex flex-col lg:flex-row gap-6">
+        <!-- Tỷ lệ doanh thu theo hãng -->
+        <div class="flex-1 flex flex-col">
+          <h2 class="text-xl font-semibold mb-4 text-center">Tỷ Lệ Doanh Thu Theo Hãng</h2>
+          <div class="bg-white shadow-lg rounded-lg p-6 w-full flex-1 min-h-[300px] flex flex-col justify-between">
+            <div class="flex-1 flex justify-center items-center">
+              <canvas id="hangBanChayChart" class="max-w-full max-h-full"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Phân phối đa kênh -->
+        <div class="flex-1 flex flex-col">
+          <h2 class="text-xl font-semibold mb-4 text-center">Phân Phối Đa Kênh</h2>
+          <div class="bg-white shadow-lg rounded-lg p-6 w-full flex-1 min-h-[300px] flex flex-col justify-between">
+            <div class="flex-1 flex justify-center items-center">
+              <canvas id="loaiHoaDonChart" class="max-w-full max-h-full"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sản phẩm sắp hết hàng -->
+        <div class="flex-1 flex flex-col">
+          <h2 class="text-xl font-semibold mb-4 text-center">Sản Phẩm Sắp Hết Hàng</h2>
+          <div class="bg-white shadow-lg rounded-lg p-6 w-full flex-1 min-h-[300px] flex flex-col justify-between">
+            <DynamicTable
+              :data="sanPhamHetHang"
+              :columns="columnsSanPhamHetHang"
+              :get-nested-value="getNestedValue"
+              class="bg-white rounded-lg min-w-[400px] max-w-[400px] h-[380px]"/>
+            <footer
+              v-if="sanPhamHetHangTotalPages > 1"
+              class="bg-white shadow-lg rounded-lg p-4 flex justify-center items-center mt-2"
+            >
+              <Pagination
+                :current-page="sanPhamHetHangCurrentPage"
+                :total-pages="sanPhamHetHangTotalPages"
+                @page-changed="changeSanPhamHetHangPage"
+              />
+            </footer>
+          </div>
+        </div>
+      </div>
+    </section>
 
     <!-- Bảng sản phẩm bán chạy -->
     <section class="mb-8">
@@ -198,7 +245,14 @@ const {
   fetchOrderStatusStats,
   changePage,
   currentPage,
-  totalPages
+  totalPages,
+  hangBanChay,
+  loaiHoaDon,
+  sanPhamHetHang,
+  columnsSanPhamHetHang,
+  changeSanPhamHetHangPage,
+  sanPhamHetHangCurrentPage,
+  sanPhamHetHangTotalPages
 } = ThongKeJs();
 
 const getNestedValue = (item, key) => {

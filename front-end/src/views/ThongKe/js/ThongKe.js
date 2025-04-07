@@ -17,7 +17,17 @@ export function ThongKeJs() {
   const currentPage = ref(0);
   const totalPages = ref(0);
   const pageSize = ref(10);
+
+  const hangBanChay = ref([]);
+  const loaiHoaDon = ref([]);
+  const sanPhamHetHang = ref([]);
+  const sanPhamHetHangCurrentPage = ref(0);
+  const sanPhamHetHangTotalPages = ref(0);
+  const sanPhamHetHangPageSize = ref(8);
+
   let orderStatusChart = null;
+  let hangBanChayChart = null;
+  let loaiHoaDonChart = null;
 
   const formatCurrency = (value) => {
     if (!value) return '0 đ';
@@ -35,6 +45,11 @@ export function ThongKeJs() {
     fetchData();
   };
 
+  const changeSanPhamHetHangPage = (page) => {
+    sanPhamHetHangCurrentPage.value = page;
+    fetchSanPhamHetHangOnly(); // Chỉ lấy dữ liệu sanPhamHetHang
+  };
+
   const columnsTopProducts = ref([
     { key: 'index', label: '#', formatter: (value, item, index) => (currentPage.value * pageSize.value) + (index + 1) },
     { key: 'imageUrl', label: 'Ảnh', formatter: (value) => value ? `<img src="${value}" alt="Ảnh" class="w-10 h-10 object-cover rounded">` : 'N/A' },
@@ -43,13 +58,21 @@ export function ThongKeJs() {
     { key: 'soldQuantity', label: 'Số Lượng Đã Bán', formatter: (value) => value || '0' }
   ]);
 
+  const columnsSanPhamHetHang = ref([
+    { key: 'index', label: '#', formatter: (value, item, index) => (sanPhamHetHangCurrentPage.value * sanPhamHetHangPageSize.value) + (index + 1) },
+    { key: 'tenSanPham', label: 'Tên Sản Phẩm', formatter: (value) => value || 'N/A' },
+    { key: 'soLuong', label: 'Số Lượng', formatter: (value) => value || '0' }
+  ]);
+
   const fetchData = async () => {
     try {
       const params = {
         filterType: filterType.value,
         ...(filterType.value === 'custom' && { startDate: startDate.value, endDate: endDate.value }),
         page: currentPage.value,
-        size: pageSize.value
+        size: pageSize.value,
+        sanPhamHetHangPage: sanPhamHetHangCurrentPage.value,
+        sanPhamHetHangSize: sanPhamHetHangPageSize.value
       };
       const response = await axios.get('http://localhost:8080/dashboard/dashboard', { params });
 
@@ -57,14 +80,35 @@ export function ThongKeJs() {
         { title: 'Hôm nay', revenue: response.data.ngay[0]?.doanhThu || 0, sold: response.data.ngay[0]?.sanPhamDaBan || 0, orders: response.data.ngay[0]?.tongSoDonHang || 0, bgColor: 'bg-blue-500' },
         { title: 'Tuần này', revenue: response.data.tuan[0]?.doanhThu || 0, sold: response.data.tuan[0]?.sanPhamDaBan || 0, orders: response.data.tuan[0]?.tongSoDonHang || 0, bgColor: 'bg-purple-500' },
         { title: 'Tháng này', revenue: response.data.thang[0]?.doanhThu || 0, sold: response.data.thang[0]?.sanPhamDaBan || 0, orders: response.data.thang[0]?.tongSoDonHang || 0, bgColor: 'bg-green-500' },
-        { title: 'Năm nay', revenue: response.data.nam[0]?.doanhThu || 0, sold: response.data.nam[0]?.sanPhamDaBan || 0, orders: response.data.nam[0]?.tongSoDonHang || 0, bgColor: 'bg-teal-600' },
+        { title: 'Năm nay', revenue: response.data.nam[0]?.doanhThu || 0, sold: response.data.nam[0]?.tongSoDonHang || 0, orders: response.data.nam[0]?.tongSoDonHang || 0, bgColor: 'bg-teal-600' },
       ];
 
       topProducts.value = response.data.topProducts || [];
       totalPages.value = response.data.totalPages || 0;
       growthData.value = response.data.growthData || {};
+      hangBanChay.value = response.data.hangBanChay || [];
+      loaiHoaDon.value = response.data.loaiHoaDon || [];
+      sanPhamHetHang.value = response.data.sanPhamHetHang || [];
+      sanPhamHetHangTotalPages.value = response.data.sanPhamHetHangTotalPages || 0;
+
+      updateHangBanChayChart();
+      updateLoaiHoaDonChart();
     } catch (error) {
       console.error('Error fetching data:', error);
+    }
+  };
+
+  const fetchSanPhamHetHangOnly = async () => {
+    try {
+      const params = {
+        sanPhamHetHangPage: sanPhamHetHangCurrentPage.value,
+        sanPhamHetHangSize: sanPhamHetHangPageSize.value
+      };
+      const response = await axios.get('http://localhost:8080/dashboard/dashboard', { params });
+      sanPhamHetHang.value = response.data.sanPhamHetHang || [];
+      sanPhamHetHangTotalPages.value = response.data.sanPhamHetHangTotalPages || 0;
+    } catch (error) {
+      console.error('Error fetching sanPhamHetHang data:', error);
     }
   };
 
@@ -79,13 +123,67 @@ export function ThongKeJs() {
     }
   };
 
+  const updateHangBanChayChart = () => {
+    const ctx = document.getElementById('hangBanChayChart')?.getContext('2d');
+    if (!ctx || hangBanChayChart) return; // Chỉ tạo biểu đồ lần đầu
+
+    hangBanChayChart = new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: hangBanChay.value.map(item => item.nhaSanXuat),
+        datasets: [{
+          data: hangBanChay.value.map(item => item.doanhThu),
+          backgroundColor: ['#36A2EB', '#FF6384', '#FFCE56'],
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { position: 'bottom', labels: { boxWidth: 20, padding: 15 } },
+          datalabels: {
+            color: '#fff',
+            formatter: (value) => formatCurrency(value),
+            font: { weight: 'bold' }
+          }
+        }
+      }
+    });
+  };
+
+  const updateLoaiHoaDonChart = () => {
+    const ctx = document.getElementById('loaiHoaDonChart')?.getContext('2d');
+    if (!ctx || loaiHoaDonChart) return; // Chỉ tạo biểu đồ lần đầu
+
+    loaiHoaDonChart = new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: loaiHoaDon.value.map(item => item.loaiDon),
+        datasets: [{
+          data: loaiHoaDon.value.map(item => item.soLuong),
+          backgroundColor: ['#FF6384', '#36A2EB'],
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { position: 'bottom', labels: { boxWidth: 20, padding: 15 } },
+          datalabels: {
+            color: '#fff',
+            formatter: (value) => value > 0 ? value : '',
+            font: { weight: 'bold' }
+          }
+        }
+      }
+    });
+  };
+
   const updateOrderStatusChart = () => {
     const ctx = document.getElementById('orderStatusChart')?.getContext('2d');
     if (!ctx) return;
 
-    if (orderStatusChart) {
-      orderStatusChart.destroy();
-    }
+    if (orderStatusChart) orderStatusChart.destroy();
 
     orderStatusChart = new Chart(ctx, {
       type: 'doughnut',
@@ -99,32 +197,18 @@ export function ThongKeJs() {
             orderStatusStats.value['Hoàn thành'] || 0,
             orderStatusStats.value['Đã hủy'] || 0
           ],
-          backgroundColor: [
-            '#FF6384', // Chờ xác nhận (hồng)
-            '#FFCE56', // Chờ giao hàng (vàng)
-            '#4BC0C0', // Đang giao (xanh lam nhạt)
-            '#9966FF', // Hoàn thành (tím)
-            '#FF4444'  // Đã hủy (đỏ)
-          ],
+          backgroundColor: ['#FF6384', '#FFCE56', '#4BC0C0', '#9966FF', '#FF4444'],
           borderWidth: 1
         }]
       },
       options: {
         responsive: true,
         plugins: {
-          legend: {
-            position: 'bottom',
-            labels: {
-              boxWidth: 20,
-              padding: 15
-            }
-          },
+          legend: { position: 'bottom', labels: { boxWidth: 20, padding: 15 } },
           datalabels: {
             color: '#fff',
             formatter: (value) => value > 0 ? value : '',
-            font: {
-              weight: 'bold'
-            }
+            font: { weight: 'bold' }
           }
         }
       }
@@ -152,6 +236,13 @@ export function ThongKeJs() {
     fetchOrderStatusStats,
     changePage,
     currentPage,
-    totalPages
+    totalPages,
+    hangBanChay,
+    loaiHoaDon,
+    sanPhamHetHang,
+    columnsSanPhamHetHang,
+    changeSanPhamHetHangPage,
+    sanPhamHetHangCurrentPage,
+    sanPhamHetHangTotalPages
   };
 }

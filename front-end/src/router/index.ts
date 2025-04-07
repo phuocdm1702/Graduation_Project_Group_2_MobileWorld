@@ -13,6 +13,7 @@ import PhieuBaoHanh from "../views/BaoHanh/PhieuBaoHanh.vue";
 // View Login
 import Login from "../views/LoginView/AppLogin.vue";
 import DangKy from "@/views/LoginView/DangKy/DangKy.vue";
+import QuenMk from "@/views/LoginView/QuenMk/QuenMk.vue";
 // Đơn hàng
 import LichSuHD from "../views/Bill/LichSuHoaDon.vue";
 import HoaDon from "../views/Bill/HoaDon.vue";
@@ -389,32 +390,6 @@ const routes: Array<RouteRecordRaw> = [
     meta: { breadcrumb: ["Sản phẩm", "Cổng sạc"] },
   },
 
-// Imel
-  {
-    path: "/imel",
-    name: "imel",
-    component: Imel,
-    meta: { breadcrumb: ["Sản phẩm", "Imel"] },
-  },
-  {
-    path: "/imel/add",
-    name: "imel-add",
-    component: ImelAdd,
-    meta: { breadcrumb: ["Sản phẩm", "Imel", "Thêm Imel"] },
-  },
-  {
-    path: "/imel/edit/:id",
-    name: "imel-edit",
-    component: ImelEdit,
-    meta: { breadcrumb: (route: any) => ["Sản phẩm", "Imel", `Cập nhật Imel #${route.params.id}`] },
-  },
-  {
-    path: "/imel-sold",
-    name: "ImelDaBan",
-    component: ImelDaBan,
-    meta: { breadcrumb: ["Sản phẩm", "Imel đã bán"] },
-  },
-
   // 404 Not Found
   {
     path: "/:pathMatch(.*)*",
@@ -426,6 +401,12 @@ const routes: Array<RouteRecordRaw> = [
     path: "/dang-ky",
     name: "DangKy",
     component: DangKy,
+    meta: { layout: "empty", breadcrumb: [] },
+  },
+  {
+    path: "/quen-mk",
+    name: "Quenmk",
+    component: QuenMk,
     meta: { layout: "empty", breadcrumb: [] },
   },
 ];

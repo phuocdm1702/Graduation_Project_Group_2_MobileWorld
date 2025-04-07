@@ -59,7 +59,6 @@ public class ChiTietSanPham {
     private TinhTrang idLoaiTinhTrang;
 
     @Size(max = 255)
-    @NotNull
     @Nationalized
     @Column(name = "ma", nullable = false)
     private String ma;

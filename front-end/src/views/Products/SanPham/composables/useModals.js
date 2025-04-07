@@ -1,6 +1,7 @@
 import { ref } from 'vue';
+import * as XLSX from 'xlsx';
 
-export function useModals() {
+export function useModals(dropdownOpen, toggleDropdown) {
   const showFormModal = ref(false);
   const currentAttribute = ref('');
   const showColorModal = ref(false);
@@ -21,6 +22,10 @@ export function useModals() {
 
   const openColorModal = () => {
     showColorModal.value = true;
+    // Đóng tất cả các dropdown khi mở modal màu sắc
+    dropdownOpen.value.ram = false;
+    dropdownOpen.value.boNhoTrong = false;
+    dropdownOpen.value.mauSac = false;
   };
 
   const closeColorModal = () => {
@@ -40,20 +45,58 @@ export function useModals() {
   };
 
   const saveImei = () => {
+    if (currentVariantIndex.value === null) return;
+
+    // Tách các IMEI thành mảng, loại bỏ các dòng trống
     const imeis = imeiInput.value
       .split('\n')
-      .map((imei) => imei.trim())
-      .filter((imei) => imei.length > 0);
-    variantImeis.value[currentVariantIndex.value] = imeis;
+      .map(imei => imei.trim())
+      .filter(imei => imei.length > 0);
+
+    // Lưu tất cả IMEI vào variant hiện tại
+    variantImeis.value = {
+      ...variantImeis.value,
+      [currentVariantIndex.value]: imeis
+    };
+
     closeImeiModal();
   };
 
   const handleExcelImport = (event) => {
     const file = event.target.files[0];
     if (!file) return;
-    // Giả lập đọc file Excel (cần thư viện như XLSX để xử lý thực tế)
-    const mockImeis = ['123456789012345', '678901234567890'];
-    imeiInput.value = mockImeis.join('\n');
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: 'array' });
+        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+        const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+
+        // Lấy tất cả IMEI từ cột đầu tiên
+        const imeis = jsonData
+          .map(row => row[0]?.toString().trim())
+          .filter(imei => imei && imei.length > 0);
+
+        if (imeis.length === 0) {
+          console.warn('Không tìm thấy IMEI nào trong file Excel.');
+          // Thêm thông báo cho người dùng nếu cần
+          return;
+        }
+
+        imeiInput.value = imeis.join('\n');
+      } catch (error) {
+        console.error('Error reading Excel file:', error);
+        // Thêm thông báo lỗi cho người dùng
+        alert('Lỗi khi đọc file Excel: ' + error.message); // Hoặc dùng toast nếu có
+      }
+    };
+    reader.onerror = (error) => {
+      console.error('Error loading file:', error);
+      alert('Không thể tải file: ' + error.message); // Hoặc dùng toast
+    };
+    reader.readAsArrayBuffer(file);
   };
 
   const resetModals = () => {
@@ -64,6 +107,9 @@ export function useModals() {
     currentVariantIndex.value = null;
     imeiInput.value = '';
     variantImeis.value = {};
+    dropdownOpen.value.ram = false;
+    dropdownOpen.value.boNhoTrong = false;
+    dropdownOpen.value.mauSac = false;
   };
 
   return {
@@ -82,6 +128,6 @@ export function useModals() {
     closeImeiModal,
     saveImei,
     handleExcelImport,
-    resetModals
+    resetModals,
   };
 }

@@ -47,13 +47,13 @@
           >
             Đăng ký
           </router-link>
-          <a
-            href="#"
+          <router-link
+            to="/quen-mk"
             class="text-orange-500 hover:text-orange-600 font-medium 
                   transition-colors duration-200"
           >
-            Quên mật khẩu?
-          </a>
+            Quên mật khẩu
+          </router-link>
         </div>
 
         <!-- Submit Button -->

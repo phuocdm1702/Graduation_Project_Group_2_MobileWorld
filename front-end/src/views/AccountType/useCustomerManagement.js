@@ -308,6 +308,7 @@ export default function useCustomerManagement(toastRef) {
           (khachhang) =>
             khachhang?.idTaiKhoan?.email?.toLowerCase().includes(searchKH.value.toLowerCase()) ||
             khachhang?.ten?.toLowerCase().includes(searchKH.value.toLowerCase()) ||
+            khachhang?.ma?.toLowerCase().includes(searchKH.value.toLowerCase()) ||
             khachhang?.idTaiKhoan?.soDienThoai?.toLowerCase().includes(searchKH.value.toLowerCase())
         );
       }
