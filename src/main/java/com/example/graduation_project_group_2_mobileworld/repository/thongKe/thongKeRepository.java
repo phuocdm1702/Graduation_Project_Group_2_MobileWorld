@@ -1,5 +1,8 @@
 package com.example.graduation_project_group_2_mobileworld.repository.thongKe;
 
+import com.example.graduation_project_group_2_mobileworld.dto.thongKe.HangBanChayDTO;
+import com.example.graduation_project_group_2_mobileworld.dto.thongKe.LoaiHoaDonDTO;
+import com.example.graduation_project_group_2_mobileworld.dto.thongKe.SanPhamHetHangDTO;
 import com.example.graduation_project_group_2_mobileworld.entity.HoaDon;
 import com.example.graduation_project_group_2_mobileworld.entity.HoaDonChiTiet;
 import org.springframework.data.domain.Page;
@@ -128,4 +131,26 @@ public interface thongKeRepository extends JpaRepository<HoaDon, Integer> {
             @Param("filterType") String filterType,
             @Param("date") Date date
     );
+
+    @Query("SELECT new com.example.graduation_project_group_2_mobileworld.dto.thongKe.SanPhamHetHangDTO(sp.tenSanPham, COUNT(ctsp)) " +
+            "FROM ChiTietSanPham ctsp " +
+            "JOIN ctsp.idSanPham sp " +
+            "GROUP BY sp.id, sp.tenSanPham " +
+            "HAVING COUNT(ctsp) < 6 " +
+            "ORDER BY COUNT(ctsp) ASC")
+    Page<SanPhamHetHangDTO> thongKeSanPhamHetHang(Pageable pageable);
+
+    @Query("SELECT new com.example.graduation_project_group_2_mobileworld.dto.thongKe.LoaiHoaDonDTO(hd.loaiDon, COUNT(hd.id)) " +
+            "FROM HoaDon hd " +
+            "GROUP BY hd.loaiDon")
+    List<LoaiHoaDonDTO> thongKeLoaiHoaDon();
+
+    @Query("SELECT new com.example.graduation_project_group_2_mobileworld.dto.thongKe.HangBanChayDTO(nsx.nhaSanXuat, COALESCE(SUM(hdct.gia), 0)) " +
+            "FROM HoaDonChiTiet hdct " +
+            "JOIN hdct.idChiTietSanPham ctsp " +
+            "JOIN ctsp.idSanPham sp " +
+            "JOIN sp.idNhaSanXuat nsx " +
+            "GROUP BY nsx.id, nsx.nhaSanXuat")
+    List<HangBanChayDTO> thongKeHangBanChay();
+
 }
