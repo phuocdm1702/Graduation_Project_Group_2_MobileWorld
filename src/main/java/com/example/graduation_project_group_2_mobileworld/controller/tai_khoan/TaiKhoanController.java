@@ -36,17 +36,22 @@ public class TaiKhoanController {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
-    @PostMapping("/Quenmk")
-    public ResponseEntity<?> quenmk(@RequestBody Map<String, String> request) {
+    @PostMapping("/requestOtpMk")
+    public ResponseEntity<?> requestOtpMk(@RequestBody TaiKhoanDTO taiKhoanDTO) {
         try {
-            TaiKhoanDTO taiKhoanDTO = new TaiKhoanDTO();
-            taiKhoanDTO.setEmail(request.get("email"));
-            String otp = request.get("otp");
-
-            TaiKhoan tk = taiKhoanServices.quenmk(taiKhoanDTO, otp);
-            return new ResponseEntity<>(tk, HttpStatus.CREATED);
+            String message = taiKhoanServices.requestOTPMk(taiKhoanDTO);
+            return new ResponseEntity<>(message, HttpStatus.OK);
         } catch (Exception e) {
-            return new ResponseEntity<>("Lỗi khi thêm tài khoản: " + e.getMessage(), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
+    @PostMapping("/verifyOtp")
+    public ResponseEntity<String> verifyOtp(@RequestBody TaiKhoanDTO taiKhoanDTO, @RequestParam String otp) {
+        try {
+            String response = taiKhoanServices.verifyOTP(taiKhoanDTO, otp);
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 

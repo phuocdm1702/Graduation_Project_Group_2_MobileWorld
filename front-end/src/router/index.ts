@@ -28,6 +28,7 @@ import CustmerForm from "@/views/AccountType/CustmerForm.vue";
 import NotFound from "../views/NotFound.vue";
 import UpdateNhanVien from "@/views/AccountType/UpdateNhanVien.vue";
 import UpdateCustmer from "@/views/AccountType/UpdateCustmer.vue";
+import UpdateMk from "@/views/LoginView/QuenMk/UpdateMk.vue";
 
 // Sản phẩm
 import ProductDetails from "../views/Products/SanPham/ChiTietSanPham.vue";
@@ -407,6 +408,12 @@ const routes: Array<RouteRecordRaw> = [
     path: "/quen-mk",
     name: "Quenmk",
     component: QuenMk,
+    meta: { layout: "empty", breadcrumb: [] },
+  },
+  {
+    path: "/update-mk",
+    name: "updatemk",
+    component: UpdateMk,
     meta: { layout: "empty", breadcrumb: [] },
   },
 ];
