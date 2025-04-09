@@ -9,7 +9,7 @@
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label class="block text-sm font-medium text-gray-700">Mã</label>
-              <input type="text" v-model="editingVoucher.ma" class="form-input" />
+              <input type="text" v-model="editingVoucher.ma" class="form-input" disabled/>
               <p v-if="errors.ma" class="error">{{ errors.ma }}</p>
             </div>
             <div>
@@ -78,7 +78,7 @@
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700">Ngày bắt đầu</label>
-              <input type="date" v-model="editingVoucher.ngayBatDau" class="form-input" :min="minDate" />
+              <input type="date" v-model="editingVoucher.ngayBatDau" class="form-input"  />
               <p v-if="errors.ngayBatDau" class="error">{{ errors.ngayBatDau }}</p>
             </div>
             <div>
