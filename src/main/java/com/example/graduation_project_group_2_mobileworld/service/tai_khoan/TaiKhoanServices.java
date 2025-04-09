@@ -80,13 +80,37 @@ public class TaiKhoanServices {
         mailSender.send(message);
     }
 
-    private void sendOTPQuenMk(String email, String otp) {
+    private void sendOTPMK(String email, String otp) {
+
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(email);
-        message.setSubject("Mã OTP Xác Nhận Đăng Ký");
-        message.setText("Mã OTP của bạn là: " + otp + "\nVui lòng sử dụng mã này để hoàn tất đăng ký.");
+        message.setSubject("Mã OTP Xác Nhận Đổi Mật Khẩu");
+        message.setText("Mã OTP của bạn là: " + otp + "\nVui lòng sử dụng mã này để Đổi Mật Khẩu.");
         mailSender.send(message);
     }
+    public String requestOTPMk(TaiKhoanDTO taiKhoanDTO) {
+        String email = taiKhoanDTO.getEmail();
+        boolean emailExists = taiKhoanRepository.existsByEmail(email);
+        if (!emailExists) {
+            return "Email không tồn tại trong hệ thống!";
+        }
+        String otp = RandomSDT();
+        otpStorage.put(taiKhoanDTO.getEmail(), otp);
+        sendOTPMK(taiKhoanDTO.getEmail(), otp);
+        return "OTP đã được gửi đến email của bạn!";
+    }
+    public String verifyOTP(TaiKhoanDTO taiKhoanDTO, String otp) {
+        String storedOtp = otpStorage.get(taiKhoanDTO.getEmail());
+        if (storedOtp == null) {
+            throw new RuntimeException("Không tìm thấy OTP cho email này!");
+        }
+        if (!storedOtp.equals(otp)) {
+            throw new RuntimeException("Mã OTP không hợp lệ!");
+        }
+        otpStorage.remove(taiKhoanDTO.getEmail());
+        return "Xác nhận OTP thành công!";
+    }
+
 
     public TaiKhoan addTK(TaiKhoanDTO taiKhoanDTO, String otp) {
         String storedOtp = otpStorage.get(taiKhoanDTO.getEmail());
@@ -121,23 +145,17 @@ public class TaiKhoanServices {
         return taiKhoanRepository.findByTenDangNhap(tenDangNhap);
     }
 
-    public TaiKhoan quenmk(TaiKhoanDTO taiKhoanDTO, String otp) {
-        String storedOtp = otpStorage.get(taiKhoanDTO.getEmail());
-        if (storedOtp == null || !storedOtp.equals(otp)) {
-            throw new RuntimeException("Mã OTP không hợp lệ hoặc đã hết hạn!");
+
+    public TaiKhoan UpdateTK(String email, TaiKhoanDTO taiKhoanDTO) {
+        TaiKhoan taiKhoan = taiKhoanRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy tài khoản!"));
+
+        if (taiKhoanDTO.getMatKhau() != null && !taiKhoanDTO.getMatKhau().trim().isEmpty()) {
+            String encodedPassword = taiKhoanDTO.getMatKhau();
+            taiKhoan.setMatKhau(encodedPassword);
+        } else {
+            throw new IllegalArgumentException("Mật khẩu không được để trống!");
         }
-        otpStorage.remove(taiKhoanDTO.getEmail());
-
-        QuyenHan quyenHan = new QuyenHan();
-        quyenHan.setId(2);
-
-        TaiKhoan taiKhoan = new TaiKhoan();
-        taiKhoan.setIdQuyenHan(quyenHan);
-        taiKhoan.setMa(MaTaiKhoan());
-        taiKhoan.setTenDangNhap(taiKhoanDTO.getTenDangNhap());
-        taiKhoan.setMatKhau(passwordEncoder.encode(taiKhoanDTO.getMatKhau()));
-        taiKhoan.setEmail(taiKhoanDTO.getEmail());
-        taiKhoan.setDeleted(false);
 
         return taiKhoanRepository.save(taiKhoan);
     }
