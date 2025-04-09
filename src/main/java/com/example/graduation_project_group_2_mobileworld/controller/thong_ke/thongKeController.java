@@ -1,16 +1,24 @@
 package com.example.graduation_project_group_2_mobileworld.controller.thong_ke;
 
+import com.example.graduation_project_group_2_mobileworld.dto.thongKe.HangBanChayDTO;
+import com.example.graduation_project_group_2_mobileworld.dto.thongKe.LoaiHoaDonDTO;
+import com.example.graduation_project_group_2_mobileworld.dto.thongKe.SanPhamHetHangDTO;
 import com.example.graduation_project_group_2_mobileworld.dto.thongKe.SoLieuDTO;
 import com.example.graduation_project_group_2_mobileworld.dto.thongKe.TopSellingProductDTO;
-import com.example.graduation_project_group_2_mobileworld.service.thongKeService;
+import com.example.graduation_project_group_2_mobileworld.service.thong_ke.thongKeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 @CrossOrigin(origins = "http://localhost:3000")
 @RestController
@@ -25,7 +33,9 @@ public class thongKeController {
             @RequestParam(required = false) String startDate,
             @RequestParam(required = false) String endDate,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "5") int size) {
+            @RequestParam(defaultValue = "5") int size,
+            @RequestParam(defaultValue = "0") int sanPhamHetHangPage,
+            @RequestParam(defaultValue = "8") int sanPhamHetHangSize) {
         Map<String, Object> response = new HashMap<>();
 
         // Dữ liệu thống kê hiện tại
@@ -60,7 +70,20 @@ public class thongKeController {
         response.put("thang", Collections.singletonList(thangDTO));
         response.put("nam", Collections.singletonList(namDTO));
 
-        // Dữ liệu sản phẩm bán chạy với phân trang
+        // Thêm dữ liệu thống kê HangBanChay
+        response.put("hangBanChay", sr.thongKeHangBanChay());
+
+        // Thêm dữ liệu thống kê LoaiHoaDon
+        response.put("loaiHoaDon", sr.thongKeLoaiHoaDon());
+
+        // Thêm dữ liệu thống kê SanPhamHetHang (có phân trang)
+        Pageable sanPhamHetHangPageable = PageRequest.of(sanPhamHetHangPage, sanPhamHetHangSize);
+        Page<SanPhamHetHangDTO> sanPhamHetHangPageData = sr.thongKeSanPhamHetHang(sanPhamHetHangPageable);
+        response.put("sanPhamHetHang", sanPhamHetHangPageData.getContent());
+        response.put("sanPhamHetHangTotalPages", sanPhamHetHangPageData.getTotalPages());
+        response.put("sanPhamHetHangCurrentPage", sanPhamHetHangPageData.getNumber());
+
+        // Thêm dữ liệu thống kê SanPhamBanChay (có phân trang)
         Page<TopSellingProductDTO> topProductsPage = sr.getTopSellingProducts(filterType, startDate, endDate, page, size);
         response.put("topProducts", topProductsPage.getContent());
         response.put("totalPages", topProductsPage.getTotalPages());

@@ -13,6 +13,7 @@ import PhieuBaoHanh from "../views/BaoHanh/PhieuBaoHanh.vue";
 // View Login
 import Login from "../views/LoginView/AppLogin.vue";
 import DangKy from "@/views/LoginView/DangKy/DangKy.vue";
+import QuenMk from "@/views/LoginView/QuenMk/QuenMk.vue";
 // Đơn hàng
 import LichSuHD from "../views/Bill/LichSuHoaDon.vue";
 import HoaDon from "../views/Bill/HoaDon.vue";
@@ -27,6 +28,7 @@ import CustmerForm from "@/views/AccountType/CustmerForm.vue";
 import NotFound from "../views/NotFound.vue";
 import UpdateNhanVien from "@/views/AccountType/UpdateNhanVien.vue";
 import UpdateCustmer from "@/views/AccountType/UpdateCustmer.vue";
+import UpdateMk from "@/views/LoginView/QuenMk/UpdateMk.vue";
 
 // Sản phẩm
 import ProductDetails from "../views/Products/SanPham/ChiTietSanPham.vue";
@@ -400,6 +402,18 @@ const routes: Array<RouteRecordRaw> = [
     path: "/dang-ky",
     name: "DangKy",
     component: DangKy,
+    meta: { layout: "empty", breadcrumb: [] },
+  },
+  {
+    path: "/quen-mk",
+    name: "Quenmk",
+    component: QuenMk,
+    meta: { layout: "empty", breadcrumb: [] },
+  },
+  {
+    path: "/update-mk",
+    name: "updatemk",
+    component: UpdateMk,
     meta: { layout: "empty", breadcrumb: [] },
   },
 ];
