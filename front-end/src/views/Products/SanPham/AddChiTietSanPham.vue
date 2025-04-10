@@ -921,7 +921,7 @@
                 class="form-checkbox h-5 w-5 text-blue-600"
               />
               <span
-                class="w-8 h-8 rounded border border-gray-300"
+                class="w-16 h-8 rounded border border-gray-300"
                 :style="{ backgroundColor: getColorFromName(mau.tenMau) || '#FFFFFF' }"
               ></span>
               <span class="text-sm text-gray-700">{{ mau.tenMau }}</span>

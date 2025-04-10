@@ -5,43 +5,42 @@
   <!-- Toast Notification -->
   <ToastNotification ref="toast" />
 
-  <div class="min-h-screen bg-gray-100 p-4 flex">
-    <!-- Sidebar for Pending Invoices -->
-    <div class="w-64 bg-white rounded-lg shadow mr-4 p-4">
-      <div class="flex justify-between items-center mb-4">
-        <h2 class="text-lg font-semibold text-orange-500">Hóa đơn chờ</h2>
-        <button
-          @click="createNewPendingInvoice"
-          class="p-1 bg-orange-500 text-white rounded hover:bg-orange-600"
-        >
-          <i class="fas fa-plus"></i>
-        </button>
-      </div>
-
-      <div class="space-y-2 max-h-[calc(100vh-200px)] overflow-y-auto">
-        <div
-          v-for="invoice in pendingInvoices"
-          :key="invoice.id"
-          @click="loadPendingInvoice(invoice)"
-          :class="{'bg-orange-100': activeInvoiceId === invoice.id}"
-          class="p-2 border rounded cursor-pointer hover:bg-gray-100"
-        >
-          <div class="flex justify-between items-center">
-            <span class="font-medium">{{ invoice.code }}</span>
-            <span class="text-xs bg-gray-200 px-2 py-1 rounded">{{ invoice.status }}</span>
-          </div>
-          <div class="text-xs text-gray-500 mt-1">
-            {{ invoice.items.length }} sản phẩm
-          </div>
-        </div>
-      </div>
-    </div>
-
+  <div class="min-h-screen bg-gray-100 p-4 flex flex-col">
     <!-- Main Content -->
     <div class="flex-1">
       <!-- Header -->
       <div class="flex justify-between items-center mb-4">
         <h1 class="text-2xl font-bold text-orange-500">Bán hàng tại quầy</h1>
+      </div>
+
+      <!-- Pending Invoices Menu -->
+      <div class="bg-white rounded-lg shadow mb-4 p-4">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-lg font-semibold text-orange-500">Hóa đơn chờ</h2>
+          <button
+            @click="createNewPendingInvoice"
+            class="p-1 bg-orange-500 text-white rounded hover:bg-orange-600"
+          >
+            <i class="fas fa-plus"></i>
+          </button>
+        </div>
+        <div class="flex space-x-2 overflow-x-auto pb-2">
+          <div
+            v-for="invoice in pendingInvoices"
+            :key="invoice.id"
+            @click="loadPendingInvoice(invoice)"
+            :class="{'bg-orange-100 border-orange-400': activeInvoiceId === invoice.id, 'border-gray-300': activeInvoiceId !== invoice.id}"
+            class="p-2 border rounded cursor-pointer hover:bg-gray-100 min-w-[150px] flex-shrink-0"
+          >
+            <div class="flex justify-between items-center">
+              <span class="font-medium">{{ invoice.code }}</span>
+              <span class="text-xs bg-gray-200 px-2 py-1 rounded">{{ invoice.status }}</span>
+            </div>
+            <div class="text-xs text-gray-500 mt-1">
+              {{ invoice.items.length }} sản phẩm
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- Cart Section -->
@@ -433,11 +432,6 @@ export default {
 </script>
 
 <style scoped>
-.w-64 {
-  width: 12rem;
-  min-width: 12rem;
-}
-
 .cursor-pointer:hover {
   background-color: #f3f4f6;
 }
@@ -445,5 +439,23 @@ export default {
 .bg-orange-100 {
   background-color: #ffedd5;
   border-color: #fdba74;
+}
+
+.overflow-x-auto {
+  scrollbar-width: thin;
+  scrollbar-color: #f3f4f6 #e5e7eb;
+}
+
+.overflow-x-auto::-webkit-scrollbar {
+  height: 8px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb {
+  background-color: #f3f4f6;
+  border-radius: 4px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-track {
+  background-color: #e5e7eb;
 }
 </style>

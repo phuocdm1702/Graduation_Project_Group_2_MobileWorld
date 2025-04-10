@@ -1,7 +1,7 @@
 package com.example.graduation_project_group_2_mobileworld.service.san_pham;
 
 import com.example.graduation_project_group_2_mobileworld.dto.san_pham.ImelDTO;
-import com.example.graduation_project_group_2_mobileworld.entity.Imel;
+import com.example.graduation_project_group_2_mobileworld.entity.SanPham.Imel;
 import com.example.graduation_project_group_2_mobileworld.repository.san_pham.ImelRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;

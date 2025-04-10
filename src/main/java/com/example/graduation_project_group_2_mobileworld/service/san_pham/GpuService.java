@@ -1,10 +1,7 @@
 package com.example.graduation_project_group_2_mobileworld.service.san_pham;
 
-import com.example.graduation_project_group_2_mobileworld.dto.san_pham.CpuDTO;
 import com.example.graduation_project_group_2_mobileworld.dto.san_pham.GpuDTO;
-import com.example.graduation_project_group_2_mobileworld.entity.Cpu;
-import com.example.graduation_project_group_2_mobileworld.entity.Gpu;
-import com.example.graduation_project_group_2_mobileworld.repository.san_pham.CpuRepository;
+import com.example.graduation_project_group_2_mobileworld.entity.SanPham.Gpu;
 import com.example.graduation_project_group_2_mobileworld.repository.san_pham.GpuRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;

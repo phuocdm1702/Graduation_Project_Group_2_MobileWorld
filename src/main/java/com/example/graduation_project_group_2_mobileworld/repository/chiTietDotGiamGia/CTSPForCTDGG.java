@@ -1,6 +1,6 @@
 package com.example.graduation_project_group_2_mobileworld.repository.chiTietDotGiamGia;
 
-import com.example.graduation_project_group_2_mobileworld.entity.ChiTietSanPham;
+import com.example.graduation_project_group_2_mobileworld.entity.SanPham.ChiTietSanPham;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

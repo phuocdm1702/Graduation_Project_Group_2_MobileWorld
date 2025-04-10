@@ -4,10 +4,9 @@ import com.example.graduation_project_group_2_mobileworld.dto.thongKe.HangBanCha
 import com.example.graduation_project_group_2_mobileworld.dto.thongKe.LoaiHoaDonDTO;
 import com.example.graduation_project_group_2_mobileworld.dto.thongKe.SanPhamHetHangDTO;
 import com.example.graduation_project_group_2_mobileworld.dto.thongKe.TopSellingProductDTO;
-import com.example.graduation_project_group_2_mobileworld.entity.ChiTietSanPham;
+import com.example.graduation_project_group_2_mobileworld.entity.SanPham.ChiTietSanPham;
 import com.example.graduation_project_group_2_mobileworld.repository.thongKe.CTSPForThongKe;
 import com.example.graduation_project_group_2_mobileworld.repository.thongKe.thongKeRepository;
-import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;

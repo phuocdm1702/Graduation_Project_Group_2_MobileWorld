@@ -1,7 +1,7 @@
 package com.example.graduation_project_group_2_mobileworld.service.san_pham;
 
 import com.example.graduation_project_group_2_mobileworld.dto.san_pham.HeDieuHanhDTO;
-import com.example.graduation_project_group_2_mobileworld.entity.HeDieuHanh;
+import com.example.graduation_project_group_2_mobileworld.entity.SanPham.HeDieuHanh;
 import com.example.graduation_project_group_2_mobileworld.repository.san_pham.HeDieuHanhRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;

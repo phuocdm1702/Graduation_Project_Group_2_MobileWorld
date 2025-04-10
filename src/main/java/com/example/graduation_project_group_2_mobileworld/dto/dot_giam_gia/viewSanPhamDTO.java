@@ -1,8 +1,8 @@
 package com.example.graduation_project_group_2_mobileworld.dto.dot_giam_gia;
 
-import com.example.graduation_project_group_2_mobileworld.entity.HeDieuHanh;
-import com.example.graduation_project_group_2_mobileworld.entity.NhaSanXuat;
-import com.example.graduation_project_group_2_mobileworld.entity.SanPham;
+import com.example.graduation_project_group_2_mobileworld.entity.SanPham.HeDieuHanh;
+import com.example.graduation_project_group_2_mobileworld.entity.SanPham.NhaSanXuat;
+import com.example.graduation_project_group_2_mobileworld.entity.SanPham.SanPham;
 
 public class viewSanPhamDTO {
     SanPham sp;

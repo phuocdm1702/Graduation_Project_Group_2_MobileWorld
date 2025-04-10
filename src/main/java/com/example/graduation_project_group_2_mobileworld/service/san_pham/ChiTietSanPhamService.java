@@ -1,7 +1,10 @@
 package com.example.graduation_project_group_2_mobileworld.service.san_pham;
 
 import com.example.graduation_project_group_2_mobileworld.dto.san_pham.ChiTietSanPhamDTO;
-import com.example.graduation_project_group_2_mobileworld.entity.*;
+import com.example.graduation_project_group_2_mobileworld.entity.SanPham.AnhSanPham;
+import com.example.graduation_project_group_2_mobileworld.entity.SanPham.ChiTietSanPham;
+import com.example.graduation_project_group_2_mobileworld.entity.SanPham.Imel;
+import com.example.graduation_project_group_2_mobileworld.entity.SanPham.SanPham;
 import com.example.graduation_project_group_2_mobileworld.repository.san_pham.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -42,7 +45,7 @@ public class ChiTietSanPhamService {
     private final MauSacRepository mauSacRepository;
     private final ImelRepository imelRepository;
     private final HeDieuHanhRepository heDieuHanhRepository;
-    private final ManHinhRepository manHinhRepository;
+    private final CongNgheManHinhRepository congNgheManHinhRepository; // Thay ManHinhRepository
     private final NhaSanXuatRepository nhaSanXuatRepository;
     private final CumCameraRepository cumCameraRepository;
     private final SimRepository simRepository;
@@ -51,10 +54,8 @@ public class ChiTietSanPhamService {
     private final CpuRepository cpuRepository;
     private final GpuRepository gpuRepository;
     private final CongNgheMangRepository congNgheMangRepository;
-    private final CongSacRepository congSacRepository;
     private final HoTroCongNgheSacRepository hoTroCongNgheSacRepository;
     private final ChiSoKhangBuiVaNuocRepository chiSoKhangBuiVaNuocRepository;
-    private final TinhTrangRepository tinhTrangRepository;
     private final HoTroBoNhoNgoaiRepository hoTroBoNhoNgoaiRepository;
 
     @PersistenceContext
@@ -74,14 +75,12 @@ public class ChiTietSanPhamService {
                                  CongNgheMangRepository congNgheMangRepository,
                                  HoTroBoNhoNgoaiRepository hoTroBoNhoNgoaiRepository,
                                  CpuRepository cpuRepository,
-                                 TinhTrangRepository tinhTrangRepository,
                                  MauSacRepository mauSacRepository,
                                  ThietKeRepository thietKeRepository,
                                  GpuRepository gpuRepository,
                                  ImelRepository imelRepository,
-                                 CongSacRepository congSacRepository,
                                  SimRepository simRepository,
-                                 ManHinhRepository manHinhRepository,
+                                 CongNgheManHinhRepository congNgheManHinhRepository, // Thay ManHinhRepository
                                  NhaSanXuatRepository nhaSanXuatRepository,
                                  HoTroCongNgheSacRepository hoTroCongNgheSacRepository,
                                  CumCameraRepository cumCameraRepository) {
@@ -96,20 +95,17 @@ public class ChiTietSanPhamService {
         this.congNgheMangRepository = congNgheMangRepository;
         this.hoTroBoNhoNgoaiRepository = hoTroBoNhoNgoaiRepository;
         this.cpuRepository = cpuRepository;
-        this.tinhTrangRepository = tinhTrangRepository;
         this.mauSacRepository = mauSacRepository;
         this.thietKeRepository = thietKeRepository;
         this.gpuRepository = gpuRepository;
         this.imelRepository = imelRepository;
-        this.congSacRepository = congSacRepository;
         this.simRepository = simRepository;
-        this.manHinhRepository = manHinhRepository;
+        this.congNgheManHinhRepository = congNgheManHinhRepository;
         this.nhaSanXuatRepository = nhaSanXuatRepository;
         this.hoTroCongNgheSacRepository = hoTroCongNgheSacRepository;
         this.cumCameraRepository = cumCameraRepository;
     }
 
-    // In ChiTietSanPhamService.java
     public ChiTietSanPhamResponse createChiTietSanPham(ChiTietSanPhamDTO dto, List<MultipartFile> images) throws IOException {
         validateInput(dto, images);
 
@@ -137,7 +133,6 @@ public class ChiTietSanPhamService {
         );
     }
 
-    // Phương thức cập nhật giá
     public void updatePrice(Integer id, BigDecimal newPrice) {
         if (newPrice == null) {
             throw new IllegalArgumentException("Giá không hợp lệ: " + newPrice);
@@ -182,15 +177,14 @@ public class ChiTietSanPhamService {
     private void updateSanPhamFields(SanPham sanPham, ChiTietSanPhamDTO dto) {
         sanPham.setIdNhaSanXuat(getEntity(nhaSanXuatRepository, dto.getIdNhaSanXuat(), "Nhà sản xuất"));
         sanPham.setIdPin(getEntity(pinRepository, dto.getIdPin(), "Pin"));
-        sanPham.setIdManHinh(getEntity(manHinhRepository, dto.getIdManHinh(), "Màn hình"));
+        sanPham.setCongNgheManHinh(getEntity(congNgheManHinhRepository, dto.getIdCongNgheManHinh(), "Công nghệ màn hình")); // Thay idManHinh
         sanPham.setIdCpu(getEntity(cpuRepository, dto.getIdCpu(), "CPU"));
         sanPham.setIdGpu(getEntity(gpuRepository, dto.getIdGpu(), "GPU"));
         sanPham.setIdCumCamera(getEntity(cumCameraRepository, dto.getIdCumCamera(), "Cụm camera"));
         sanPham.setIdHeDieuHanh(getEntity(heDieuHanhRepository, dto.getIdHeDieuHanh(), "Hệ điều hành"));
         sanPham.setIdThietKe(getEntity(thietKeRepository, dto.getIdThietKe(), "Thiết kế"));
         sanPham.setIdSim(getEntity(simRepository, dto.getIdSim(), "Sim"));
-        sanPham.setIdCongSac(getEntity(congSacRepository, dto.getIdCongSac(), "Cổng sạc"));
-        sanPham.setIdHoTroCongNgheSac(getEntity(hoTroCongNgheSacRepository, dto.getIdHoTroCongNgheSac(), "Hỗ trợ công nghệ sạc"));
+        sanPham.setHoTroCongNgheSac(getEntity(hoTroCongNgheSacRepository, dto.getIdHoTroCongNgheSac(), "Hỗ trợ công nghệ sạc")); // Thay idCongSac
         sanPham.setIdCongNgheMang(getEntity(congNgheMangRepository, dto.getIdCongNgheMang(), "Công nghệ mạng"));
 
         sanPham.setIdHoTroBoNhoNgoai(dto.getIdHoTroBoNhoNgoai() != null ?
@@ -259,9 +253,7 @@ public class ChiTietSanPhamService {
 
         for (ChiTietSanPhamDTO.VariantDTO variant : variants) {
             if (variant.getImeiList() != null && !variant.getImeiList().isEmpty()) {
-                // Tạo một bản ghi Imel cho từng IMEI
                 for (String imei : variant.getImeiList()) {
-                    // Kiểm tra xem IMEI đã tồn tại chưa
                     Optional<Imel> existingImel = imelRepository.findByImel(imei);
 
                     if (existingImel.isPresent()) {
@@ -269,7 +261,7 @@ public class ChiTietSanPhamService {
                     } else {
                         Imel imel = new Imel();
                         imel.setMa(null);
-                        imel.setImel(imei); // Lưu từng IMEI riêng lẻ
+                        imel.setImel(imei);
                         imel.setDeleted(false);
                         imels.add(imel);
                     }
@@ -277,7 +269,6 @@ public class ChiTietSanPhamService {
             }
         }
 
-        // Lưu các IMEI mới
         List<Imel> newImels = imels.stream()
                 .filter(imel -> imel.getId() == null)
                 .collect(Collectors.toList());
@@ -295,19 +286,16 @@ public class ChiTietSanPhamService {
         int imelIndex = 0;
 
         for (ChiTietSanPhamDTO.VariantDTO variant : dto.getVariants()) {
-            // Tạo một ChiTietSanPham cho mỗi IMEI trong variant
             if (variant.getImeiList() != null && !variant.getImeiList().isEmpty()) {
                 for (String imei : variant.getImeiList()) {
                     ChiTietSanPham chiTiet = new ChiTietSanPham();
                     chiTiet.setIdSanPham(sanPham);
 
-                    // Gán Imel tương ứng
                     Imel imelToAssign;
                     if (imelIndex < imels.size()) {
                         imelToAssign = imels.get(imelIndex);
                         imelIndex++;
                     } else {
-                        // Nếu không có đủ Imel, tạo một Imel mặc định
                         imelToAssign = new Imel();
                         imelToAssign.setMa("DEFAULT-" + UUID.randomUUID().toString());
                         imelToAssign.setImel("N/A");
@@ -319,7 +307,6 @@ public class ChiTietSanPhamService {
                     chiTiet.setIdMauSac(getEntity(mauSacRepository, variant.getIdMauSac(), "Màu sắc"));
                     chiTiet.setIdRam(getEntity(ramRepository, variant.getIdRam(), "RAM"));
                     chiTiet.setIdBoNhoTrong(getEntity(boNhoTrongRepository, variant.getIdBoNhoTrong(), "Bộ nhớ trong"));
-                    chiTiet.setIdLoaiTinhTrang(getEntity(tinhTrangRepository, variant.getIdLoaiTinhTrang(), "Tình trạng"));
 
                     chiTiet.setMa(null);
                     chiTiet.setGiaBan(variant.getDonGia() != null ? variant.getDonGia() : dto.getGiaBan());
@@ -342,7 +329,6 @@ public class ChiTietSanPhamService {
                     chiTietSanPhams.add(chiTiet);
                 }
             } else {
-                // Nếu không có IMEI, tạo một ChiTietSanPham với Imel mặc định
                 ChiTietSanPham chiTiet = new ChiTietSanPham();
                 chiTiet.setIdSanPham(sanPham);
 
@@ -356,7 +342,6 @@ public class ChiTietSanPhamService {
                 chiTiet.setIdMauSac(getEntity(mauSacRepository, variant.getIdMauSac(), "Màu sắc"));
                 chiTiet.setIdRam(getEntity(ramRepository, variant.getIdRam(), "RAM"));
                 chiTiet.setIdBoNhoTrong(getEntity(boNhoTrongRepository, variant.getIdBoNhoTrong(), "Bộ nhớ trong"));
-                chiTiet.setIdLoaiTinhTrang(getEntity(tinhTrangRepository, variant.getIdLoaiTinhTrang(), "Tình trạng"));
 
                 chiTiet.setMa(null);
                 chiTiet.setGiaBan(variant.getDonGia() != null ? variant.getDonGia() : dto.getGiaBan());
@@ -418,21 +403,19 @@ public class ChiTietSanPhamService {
     private List<ChiTietSanPhamDTO> mapToDTOList(List<ChiTietSanPham> chiTietSanPhams) {
         return chiTietSanPhams.stream().map(chiTiet -> {
             ChiTietSanPhamDTO dto = new ChiTietSanPhamDTO();
-            // Thêm ánh xạ cho id của ChiTietSanPham
             dto.setId(chiTiet.getId());
             SanPham sanPham = chiTiet.getIdSanPham();
             dto.setIdSanPham(sanPham.getId());
             dto.setIdNhaSanXuat(sanPham.getIdNhaSanXuat().getId());
             dto.setIdPin(sanPham.getIdPin().getId());
-            dto.setIdManHinh(sanPham.getIdManHinh().getId());
+            dto.setIdCongNgheManHinh(sanPham.getCongNgheManHinh().getId()); // Thay idManHinh
             dto.setIdCpu(sanPham.getIdCpu().getId());
             dto.setIdGpu(sanPham.getIdGpu().getId());
             dto.setIdCumCamera(sanPham.getIdCumCamera().getId());
             dto.setIdHeDieuHanh(sanPham.getIdHeDieuHanh().getId());
             dto.setIdThietKe(sanPham.getIdThietKe().getId());
             dto.setIdSim(sanPham.getIdSim().getId());
-            dto.setIdCongSac(sanPham.getIdCongSac().getId());
-            dto.setIdHoTroCongNgheSac(sanPham.getIdHoTroCongNgheSac().getId());
+            dto.setIdHoTroCongNgheSac(sanPham.getHoTroCongNgheSac().getId()); // Thay idCongSac
             dto.setIdCongNgheMang(sanPham.getIdCongNgheMang().getId());
             dto.setTenSanPham(sanPham.getTenSanPham());
             dto.setMa(chiTiet.getMa());
@@ -440,7 +423,7 @@ public class ChiTietSanPhamService {
             dto.setIdChiSoKhangBuiVaNuoc(sanPham.getIdChiSoKhangBuiVaNuoc() != null ? sanPham.getIdChiSoKhangBuiVaNuoc().getId() : null);
             dto.setTienIchDacBiet(chiTiet.getTienIchDacBiet());
             dto.setGhiChu(chiTiet.getGhiChu());
-            dto.setGiaBan((chiTiet.getGiaBan()));
+            dto.setGiaBan(chiTiet.getGiaBan());
             dto.setCreatedAt(chiTiet.getCreatedAt());
             dto.setCreatedBy(chiTiet.getCreatedBy());
             dto.setUpdatedAt(chiTiet.getUpdatedAt());
@@ -451,9 +434,8 @@ public class ChiTietSanPhamService {
             variantDTO.setMauSac(chiTiet.getIdMauSac() != null ? chiTiet.getIdMauSac().getMauSac() : null);
             variantDTO.setDungLuongRam(chiTiet.getIdRam() != null ? chiTiet.getIdRam().getDungLuongRam() : null);
             variantDTO.setDungLuongBoNhoTrong(chiTiet.getIdBoNhoTrong() != null ? chiTiet.getIdBoNhoTrong().getDungLuongBoNhoTrong() : null);
-            variantDTO.setIdLoaiTinhTrang(chiTiet.getIdLoaiTinhTrang() != null ? chiTiet.getIdLoaiTinhTrang().getId() : null);
             variantDTO.setImageIndex(chiTiet.getIdAnhSanPham() != null ? anhSanPhamRepository.findAll().indexOf(chiTiet.getIdAnhSanPham()) : 0);
-            variantDTO.setDonGia((chiTiet.getGiaBan()));
+            variantDTO.setDonGia(chiTiet.getGiaBan());
 
             dto.setVariants(List.of(variantDTO));
             return dto;

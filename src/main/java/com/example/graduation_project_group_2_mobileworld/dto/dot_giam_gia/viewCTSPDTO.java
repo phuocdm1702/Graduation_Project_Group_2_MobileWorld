@@ -1,6 +1,7 @@
 package com.example.graduation_project_group_2_mobileworld.dto.dot_giam_gia;
 
 import com.example.graduation_project_group_2_mobileworld.entity.*;
+import com.example.graduation_project_group_2_mobileworld.entity.SanPham.*;
 
 import java.math.BigDecimal;
 
