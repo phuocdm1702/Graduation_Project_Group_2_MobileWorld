@@ -1,13 +1,10 @@
 package com.example.graduation_project_group_2_mobileworld.entity;
 
+import com.example.graduation_project_group_2_mobileworld.entity.SanPham.ImelDaBan;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 import org.hibernate.annotations.Nationalized;
 
 import java.sql.Date;

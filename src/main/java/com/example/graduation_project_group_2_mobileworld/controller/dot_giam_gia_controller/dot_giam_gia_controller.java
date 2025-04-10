@@ -5,6 +5,8 @@ import com.example.graduation_project_group_2_mobileworld.dto.dot_giam_gia.addDo
 import com.example.graduation_project_group_2_mobileworld.dto.dot_giam_gia.viewCTSPDTO;
 import com.example.graduation_project_group_2_mobileworld.dto.dot_giam_gia.viewSanPhamDTO;
 import com.example.graduation_project_group_2_mobileworld.entity.*;
+import com.example.graduation_project_group_2_mobileworld.entity.SanPham.HeDieuHanh;
+import com.example.graduation_project_group_2_mobileworld.entity.SanPham.NhaSanXuat;
 import com.example.graduation_project_group_2_mobileworld.service.dot_giam_gia_service.DotGiamGiaExporter;
 import com.example.graduation_project_group_2_mobileworld.service.dot_giam_gia_service.dot_giam_gia_service;
 import jakarta.servlet.http.HttpServletResponse;

@@ -4,11 +4,14 @@ import com.example.graduation_project_group_2_mobileworld.dto.dot_giam_gia.dot_g
 import com.example.graduation_project_group_2_mobileworld.dto.dot_giam_gia.viewCTSPDTO;
 import com.example.graduation_project_group_2_mobileworld.dto.dot_giam_gia.viewSanPhamDTO;
 import com.example.graduation_project_group_2_mobileworld.entity.*;
+import com.example.graduation_project_group_2_mobileworld.entity.SanPham.ChiTietSanPham;
+import com.example.graduation_project_group_2_mobileworld.entity.SanPham.HeDieuHanh;
+import com.example.graduation_project_group_2_mobileworld.entity.SanPham.NhaSanXuat;
+import com.example.graduation_project_group_2_mobileworld.entity.SanPham.SanPham;
 import com.example.graduation_project_group_2_mobileworld.repository.chiTietDotGiamGia.CTSPForCTDGG;
 import com.example.graduation_project_group_2_mobileworld.repository.chiTietDotGiamGia.ChiTietDotGiamGiaRepository;
 import com.example.graduation_project_group_2_mobileworld.repository.dot_giam_gia_repo.dot_giam_gia_repository;
 import com.example.graduation_project_group_2_mobileworld.repository.dot_giam_gia_repo.repoDongSanPhamDGG;
-import jakarta.annotation.PostConstruct;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Modifying;
@@ -463,10 +466,10 @@ public class dot_giam_gia_service {
         return repository.timKiem(pageable, maDGG, tenDGG, loaiGiamGiaApDung, giaTriGiamGia, soTienGiamToiDa, ngayBatDau, ngayKetThuc, trangThai, deleted);
     }
 
-    @PostConstruct
-    public void initUpdate() {
-        updateStatusAutomatically();
-    }
+//    @PostConstruct
+//    public void initUpdate() {
+//        updateStatusAutomatically();
+//    }
 
     @Scheduled(cron = "0 0 0 * * *")
     @Transactional

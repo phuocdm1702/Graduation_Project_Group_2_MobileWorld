@@ -1,6 +1,6 @@
 package com.example.graduation_project_group_2_mobileworld.dto.phieu_bao_hanh;
 
-import com.example.graduation_project_group_2_mobileworld.entity.ImelDaBan;
+import com.example.graduation_project_group_2_mobileworld.entity.SanPham.ImelDaBan;
 import lombok.Getter;
 import lombok.Setter;
 

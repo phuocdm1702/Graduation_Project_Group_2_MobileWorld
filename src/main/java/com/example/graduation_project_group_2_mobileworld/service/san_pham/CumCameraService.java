@@ -1,11 +1,8 @@
 package com.example.graduation_project_group_2_mobileworld.service.san_pham;
 
 import com.example.graduation_project_group_2_mobileworld.dto.san_pham.CumCameraDTO;
-import com.example.graduation_project_group_2_mobileworld.dto.san_pham.HeDieuHanhDTO;
-import com.example.graduation_project_group_2_mobileworld.entity.CumCamera;
-import com.example.graduation_project_group_2_mobileworld.entity.HeDieuHanh;
+import com.example.graduation_project_group_2_mobileworld.entity.SanPham.CumCamera;
 import com.example.graduation_project_group_2_mobileworld.repository.san_pham.CumCameraRepository;
-import com.example.graduation_project_group_2_mobileworld.repository.san_pham.HeDieuHanhRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -39,6 +36,12 @@ public class CumCameraService {
     }
 
     private CumCameraDTO toDTO(CumCamera entity) {
-        return new CumCameraDTO(entity.getId(), entity.getMa(), entity.getDeleted());
+        CumCameraDTO dto = new CumCameraDTO();
+        dto.setId(entity.getId());
+        dto.setMa(entity.getMa());
+        dto.setCameraTruoc(entity.getThongSoCameraTruoc());
+        dto.setCameraSau(entity.getThongSoCameraSau());
+        dto.setDeleted(entity.getDeleted());
+        return dto;
     }
 }

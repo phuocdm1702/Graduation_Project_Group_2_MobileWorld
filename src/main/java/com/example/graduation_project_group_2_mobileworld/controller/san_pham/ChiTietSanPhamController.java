@@ -1,8 +1,6 @@
 package com.example.graduation_project_group_2_mobileworld.controller.san_pham;
 
 import com.example.graduation_project_group_2_mobileworld.dto.san_pham.ChiTietSanPhamDTO;
-import com.example.graduation_project_group_2_mobileworld.entity.ChiTietSanPham;
-import com.example.graduation_project_group_2_mobileworld.repository.san_pham.ChiTietSanPhamRepository;
 import com.example.graduation_project_group_2_mobileworld.service.san_pham.ChiTietSanPhamService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;

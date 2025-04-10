@@ -1,6 +1,6 @@
 package com.example.graduation_project_group_2_mobileworld.controller.san_pham;
 
-import com.example.graduation_project_group_2_mobileworld.entity.SanPham;
+import com.example.graduation_project_group_2_mobileworld.entity.SanPham.SanPham;
 import com.example.graduation_project_group_2_mobileworld.service.san_pham.SanPhamService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;

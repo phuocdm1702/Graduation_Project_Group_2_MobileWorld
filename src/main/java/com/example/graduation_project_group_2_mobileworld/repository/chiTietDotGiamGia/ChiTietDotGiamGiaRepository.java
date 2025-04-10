@@ -1,8 +1,8 @@
 package com.example.graduation_project_group_2_mobileworld.repository.chiTietDotGiamGia;
 
 import com.example.graduation_project_group_2_mobileworld.entity.ChiTietDotGiamGia;
-import com.example.graduation_project_group_2_mobileworld.entity.ChiTietSanPham;
 import com.example.graduation_project_group_2_mobileworld.entity.DotGiamGia;
+import com.example.graduation_project_group_2_mobileworld.entity.SanPham.ChiTietSanPham;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -11,7 +11,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.sql.Date;
-import java.time.LocalDate;
 import java.util.List;
 
 public interface ChiTietDotGiamGiaRepository extends JpaRepository<ChiTietDotGiamGia, Integer> {
@@ -23,7 +22,7 @@ public interface ChiTietDotGiamGiaRepository extends JpaRepository<ChiTietDotGia
 
 
     @Query("SELECT ctsp FROM ChiTietSanPham ctsp " +
-            "JOIN ChiTietDotGiamGia ctdgg ON ctdgg.idChiTietSanPham.id = ctsp.id " +
+            "JOIN ChiTietDotGiamGia ctdgg ON ctdgg.idChiTietSanPham = ctsp " +
             "WHERE ctdgg.idDotGiamGia.id = :id AND ctdgg.deleted = false")
     List<ChiTietSanPham> getChiTietSanPhamByDotGiamGia(@Param("id") Integer id);
 
@@ -67,7 +66,7 @@ public interface ChiTietDotGiamGiaRepository extends JpaRepository<ChiTietDotGia
     int updateDeletedChiTietDotGiamGia();
 
     @Query("SELECT c FROM ChiTietDotGiamGia c " +
-            "WHERE c.idChiTietSanPham.id = :ctspId " +
+            "WHERE c.idChiTietSanPham = :ctspId " +
             "AND c.idDotGiamGia.ngayBatDau <= :today " +
             "AND c.idDotGiamGia.ngayKetThuc >= :today " +
             "AND c.idDotGiamGia.deleted = false " +

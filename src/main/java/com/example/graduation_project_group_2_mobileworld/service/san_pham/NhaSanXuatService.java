@@ -1,7 +1,7 @@
 package com.example.graduation_project_group_2_mobileworld.service.san_pham;
 
 import com.example.graduation_project_group_2_mobileworld.dto.san_pham.NhaSanXuatDTO;
-import com.example.graduation_project_group_2_mobileworld.entity.NhaSanXuat;
+import com.example.graduation_project_group_2_mobileworld.entity.SanPham.NhaSanXuat;
 import com.example.graduation_project_group_2_mobileworld.repository.san_pham.NhaSanXuatRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;

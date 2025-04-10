@@ -8,22 +8,19 @@ import lombok.Setter;
 public class CumCameraDTO {
     private Integer id;
     private String ma;
-    private Boolean deleted;
+
     private String cameraTruoc;
     private String cameraSau;
+    private Boolean deleted;
 
     // Constructors, getters, setters
     public CumCameraDTO() {}
 
-    public CumCameraDTO(Integer id, String ma, Boolean deleted) {
+    public CumCameraDTO(Integer id, String ma, String cameraTruoc, String cameraSau, Boolean deleted) {
         this.id = id;
         this.ma = ma;
+        this.cameraTruoc = cameraTruoc;
+        this.cameraSau = cameraSau;
         this.deleted = deleted;
     }
-
-    // Additional getters and setters
-    public String getCameraTruoc() { return cameraTruoc; }
-    public void setCameraTruoc(String cameraTruoc) { this.cameraTruoc = cameraTruoc; }
-    public String getCameraSau() { return cameraSau; }
-    public void setCameraSau(String cameraSau) { this.cameraSau = cameraSau; }
 }

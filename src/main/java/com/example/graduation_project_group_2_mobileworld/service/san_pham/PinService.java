@@ -1,10 +1,8 @@
 package com.example.graduation_project_group_2_mobileworld.service.san_pham;
 
-import com.example.graduation_project_group_2_mobileworld.dto.san_pham.HeDieuHanhDTO;
 import com.example.graduation_project_group_2_mobileworld.dto.san_pham.PinDTO;
-import com.example.graduation_project_group_2_mobileworld.entity.HeDieuHanh;
-import com.example.graduation_project_group_2_mobileworld.entity.Pin;
-import com.example.graduation_project_group_2_mobileworld.repository.san_pham.HeDieuHanhRepository;
+import com.example.graduation_project_group_2_mobileworld.entity.SanPham.HeDieuHanh;
+import com.example.graduation_project_group_2_mobileworld.entity.SanPham.Pin;
 import com.example.graduation_project_group_2_mobileworld.repository.san_pham.PinRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;

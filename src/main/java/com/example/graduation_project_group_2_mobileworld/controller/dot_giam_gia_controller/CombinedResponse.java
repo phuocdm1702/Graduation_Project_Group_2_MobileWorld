@@ -2,7 +2,6 @@ package com.example.graduation_project_group_2_mobileworld.controller.dot_giam_g
 
 import com.example.graduation_project_group_2_mobileworld.dto.dot_giam_gia.viewCTSPDTO;
 import com.example.graduation_project_group_2_mobileworld.dto.dot_giam_gia.viewSanPhamDTO;
-import com.example.graduation_project_group_2_mobileworld.entity.SanPham;
 
 import java.util.List;
 

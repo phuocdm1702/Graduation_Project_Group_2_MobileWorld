@@ -1,5 +1,7 @@
 package com.example.graduation_project_group_2_mobileworld.entity;
 
+import com.example.graduation_project_group_2_mobileworld.entity.SanPham.ChiTietSanPham;
+import com.example.graduation_project_group_2_mobileworld.entity.SanPham.ImelDaBan;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;

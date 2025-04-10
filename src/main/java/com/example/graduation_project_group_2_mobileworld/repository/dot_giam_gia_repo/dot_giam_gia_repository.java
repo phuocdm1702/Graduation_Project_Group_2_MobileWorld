@@ -4,6 +4,9 @@ import com.example.graduation_project_group_2_mobileworld.dto.dot_giam_gia.viewC
 
 import com.example.graduation_project_group_2_mobileworld.dto.dot_giam_gia.viewSanPhamDTO;
 import com.example.graduation_project_group_2_mobileworld.entity.*;
+import com.example.graduation_project_group_2_mobileworld.entity.SanPham.HeDieuHanh;
+import com.example.graduation_project_group_2_mobileworld.entity.SanPham.NhaSanXuat;
+import com.example.graduation_project_group_2_mobileworld.entity.SanPham.SanPham;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -14,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.sql.Date;
-import java.time.LocalDate;
 import java.util.List;
 
 public interface dot_giam_gia_repository extends JpaRepository<DotGiamGia, Integer> {
