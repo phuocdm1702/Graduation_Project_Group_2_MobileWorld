@@ -39,7 +39,5 @@ public class HoTroCongNgheSac {
     @Column(name = "cong_nghe_ho_tro")
     private String congNgheHoTro;
 
-    @OneToMany(mappedBy = "hoTroCongNgheSac")
-    private Set<SanPham> sanPhams = new LinkedHashSet<>();
 
 }

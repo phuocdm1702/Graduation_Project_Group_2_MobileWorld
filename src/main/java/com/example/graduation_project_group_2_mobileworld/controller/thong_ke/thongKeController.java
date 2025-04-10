@@ -83,7 +83,7 @@ public class thongKeController {
         response.put("sanPhamHetHangTotalPages", sanPhamHetHangPageData.getTotalPages());
         response.put("sanPhamHetHangCurrentPage", sanPhamHetHangPageData.getNumber());
 
-        // Thêm dữ liệu thống kê SanPhamBanChay (có phân trang)
+        // Thêm dữ liệu thống kê SanPhamBanChay (có  phân trang)
         Page<TopSellingProductDTO> topProductsPage = sr.getTopSellingProducts(filterType, startDate, endDate, page, size);
         response.put("topProducts", topProductsPage.getContent());
         response.put("totalPages", topProductsPage.getTotalPages());
