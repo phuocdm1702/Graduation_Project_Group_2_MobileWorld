@@ -65,7 +65,5 @@ public class CongNgheManHinh {
     @Column(name = "kieu_man_hinh", length = 50)
     private String kieuManHinh;
 
-    @OneToMany(mappedBy = "congNgheManHinh")
-    private Set<SanPham> sanPhams = new LinkedHashSet<>();
 
 }

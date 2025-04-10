@@ -1,6 +1,6 @@
 package com.example.graduation_project_group_2_mobileworld.dto.thongKe;
 
-public class SanPhamHetHangDTO {
+     public class SanPhamHetHangDTO {
     private String tenSanPham;
     private Long soLuong;
 

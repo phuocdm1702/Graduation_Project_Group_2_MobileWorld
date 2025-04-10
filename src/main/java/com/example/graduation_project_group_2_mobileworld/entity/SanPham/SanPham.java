@@ -1,5 +1,7 @@
 package com.example.graduation_project_group_2_mobileworld.entity.SanPham;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -7,14 +9,15 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.Nationalized;
 
-import java.util.Date;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.*;
 
 @Getter
 @Setter
 @Entity
 @Table(name = "san_pham")
+@JsonIgnoreProperties({"chiTietSanPhams", "idNhaSanXuat", "idHeDieuHanh", "idCpu", "idGpu", "idCumCamera",
+        "idCongNgheMang", "idPin", "idSim", "idThietKe", "idHoTroBoNhoNgoai",
+        "hoTroCongNgheSac", "congNgheManHinh", "idChiSoKhangBuiVaNuoc"})
 public class SanPham {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -54,27 +57,27 @@ public class SanPham {
     private ChiSoKhangBuiVaNuoc idChiSoKhangBuiVaNuoc;
 
     @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne
     @JoinColumn(name = "id_cong_nghe_mang", nullable = false)
     private CongNgheMang idCongNgheMang;
 
     @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne
     @JoinColumn(name = "id_cpu", nullable = false)
     private Cpu idCpu;
 
     @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne
     @JoinColumn(name = "id_cum_camera", nullable = false)
     private CumCamera idCumCamera;
 
     @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne
     @JoinColumn(name = "id_gpu", nullable = false)
     private Gpu idGpu;
 
     @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne
     @JoinColumn(name = "id_he_dieu_hanh", nullable = false)
     private HeDieuHanh idHeDieuHanh;
 
@@ -83,22 +86,22 @@ public class SanPham {
     private HoTroBoNhoNgoai idHoTroBoNhoNgoai;
 
     @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne
     @JoinColumn(name = "id_nha_san_xuat", nullable = false)
     private NhaSanXuat idNhaSanXuat;
 
     @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne
     @JoinColumn(name = "id_pin", nullable = false)
     private Pin idPin;
 
     @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne
     @JoinColumn(name = "id_sim", nullable = false)
     private Sim idSim;
 
     @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne
     @JoinColumn(name = "id_thiet_ke", nullable = false)
     private ThietKe idThietKe;
 
@@ -109,8 +112,5 @@ public class SanPham {
     @ManyToOne
     @JoinColumn(name = "cong_nghe_man_hinh_id")
     private CongNgheManHinh congNgheManHinh;
-
-    @OneToMany(mappedBy = "idSanPham")
-    private Set<ChiTietSanPham> chiTietSanPhams = new LinkedHashSet<>();
 
 }

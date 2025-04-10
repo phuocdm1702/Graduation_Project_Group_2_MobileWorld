@@ -20,7 +20,7 @@ import java.sql.Date;
 @AllArgsConstructor
 public class DotGiamGia {
     @Id
-    @Column(name = "id", nullable = false)
+    @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
