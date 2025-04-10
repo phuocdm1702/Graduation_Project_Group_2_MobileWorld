@@ -26,6 +26,7 @@ import java.util.List;
 @Table(name = "hoa_don")
 public class HoaDon {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Integer id;
     @OneToMany(mappedBy = "hoaDon")
@@ -41,7 +42,6 @@ public class HoaDon {
     @JoinColumn(name = "id_khach_hang", referencedColumnName = "id")
     private KhachHang idKhachHang;
 
-    @NotNull
     @ManyToOne
     @JoinColumn(name = "id_nhan_vien",referencedColumnName = "id")
     private NhanVien idNhanVien;

@@ -1,3 +1,4 @@
+<!-- src/views/CounterSales.vue -->
 <template>
   <!-- Breadcrumb -->
   <BreadcrumbWrapper :breadcrumb-items="breadcrumbItems" />
@@ -221,214 +222,59 @@
   </div>
 </template>
 
-<script>
-import { computed } from "vue";
+<script setup>
+import { ref, computed } from "vue";
 import { useRoute } from "vue-router";
-import DynamicTable from '@/components/DynamicTable.vue';
-import ToastNotification from '@/components/ToastNotification.vue';
-import BreadcrumbWrapper from '@/components/BreadcrumbWrapper.vue';
+import DynamicTable from "@/components/DynamicTable.vue";
+import ToastNotification from "@/components/ToastNotification.vue";
+import BreadcrumbWrapper from "@/components/BreadcrumbWrapper.vue";
+import { useCounterSales } from "@/views/BanHang/BanHang.js";
 
-export default {
-  components: {
-    DynamicTable,
-    ToastNotification,
-    BreadcrumbWrapper
-  },
-  setup() {
-    const route = useRoute();
-
-    const breadcrumbItems = computed(() => {
-      if (typeof route.meta.breadcrumb === 'function') {
-        return route.meta.breadcrumb(route);
-      }
-      return route.meta?.breadcrumb || ['Bán Hàng Tại Quầy'];
-    });
-
-    return {
-      breadcrumbItems
-    };
-  },
-  data() {
-    return {
-      cartItems: [],
-      cartColumns: [
-        { key: 'id', label: 'STT' },
-        { key: 'name', label: 'Sản phẩm' },
-        { key: 'imei', label: 'IMEI' },
-        { key: 'price', label: 'Đơn giá', formatter: (value) => `${value.toLocaleString()} đ` },
-        { key: 'actions', label: 'Xóa', cellSlot: 'actionsSlot' }
-      ],
-      searchCustomer: '',
-      selectedCustomer: null,
-      customer: { name: '', phone: '' },
-      receiver: {
-        name: '',
-        phone: '',
-        city: 'Tỉnh Phú Thọ',
-        district: 'Huyện Lâm Thao',
-        ward: 'Xã Xuân Lũng',
-        address: ''
-      },
-      discountCode: '',
-      discount: 0,
-      orderNotes: '',
-      payOnDelivery: false,
-      paymentMethod: '',
-      activeInvoiceId: null,
-      pendingInvoices: [
-        {
-          id: 1,
-          code: 'HD252',
-          status: '0',
-          items: [
-            { id: 1, name: 'iPhone 13 Pro Max', imei: 'IME0000154', price: 25000000 },
-            { id: 2, name: 'AirPods Pro', imei: 'IME0000155', price: 5000000 }
-          ]
-        },
-        {
-          id: 2,
-          code: 'HD255',
-          status: '0',
-          items: [
-            { id: 3, name: 'Samsung Galaxy S22 Ultra', imei: 'IME0000156', price: 22000000 }
-          ]
-        },
-        {
-          id: 3,
-          code: 'HD267',
-          status: '0',
-          items: [
-            { id: 4, name: 'iPad Pro 11"', imei: 'IME0000157', price: 18000000 },
-            { id: 5, name: 'Apple Pencil 2', imei: 'IME0000158', price: 2500000 }
-          ]
-        }
-      ]
-    };
-  },
-  computed: {
-    totalPrice() {
-      return this.cartItems.reduce((total, item) => total + item.price, 0);
-    }
-  },
-  methods: {
-    getNestedValue(item, key) {
-      return key.split('.').reduce((obj, k) => (obj && obj[k] !== undefined ? obj[k] : null), item) || 'N/A';
-    },
-    editItem(item) {
-      this.$refs.toast.kshowToast('info', `Chỉnh sửa sản phẩm: ${item.name}`);
-    },
-    toggleStatus(item) {
-      this.$refs.toast.kshowToast('success', `Đã thay đổi trạng thái sản phẩm: ${item.name}`);
-    },
-    removeItem(item) {
-      const index = this.cartItems.findIndex(i => i.id === item.id);
-      if (index !== -1) {
-        this.cartItems.splice(index, 1);
-        this.$refs.toast.kshowToast('success', `Đã xóa sản phẩm: ${item.name}`);
-      }
-    },
-    createNewPendingInvoice() {
-      const newInvoiceId = this.pendingInvoices.length > 0
-        ? Math.max(...this.pendingInvoices.map(i => i.id)) + 1
-        : 1;
-
-      const newInvoice = {
-        id: newInvoiceId,
-        code: `HD${270 + newInvoiceId}`,
-        status: '0',
-        items: []
-      };
-
-      this.pendingInvoices.unshift(newInvoice);
-      this.loadPendingInvoice(newInvoice);
-      this.$refs.toast.kshowToast('success', `Đã tạo hóa đơn chờ mới: ${newInvoice.code}`);
-    },
-    loadPendingInvoice(invoice) {
-      this.activeInvoiceId = invoice.id;
-      this.cartItems = [...invoice.items];
-      this.$refs.toast.kshowToast('info', `Đã tải hóa đơn chờ: ${invoice.code}`);
-    },
-    scanQR() {
-      this.$refs.toast.kshowToast('info', 'Đang quét QR...');
-    },
-    addProduct() {
-      const newProduct = {
-        id: this.cartItems.length > 0 ? Math.max(...this.cartItems.map(i => i.id)) + 1 : 1,
-        name: `Sản phẩm mới ${this.cartItems.length + 1}`,
-        imei: `IME${Math.floor(1000 + Math.random() * 9000)}`,
-        price: 1000000 + Math.floor(Math.random() * 9000000)
-      };
-
-      this.cartItems.push(newProduct);
-
-      // Cập nhật vào hóa đơn chờ đang active
-      if (this.activeInvoiceId) {
-        const invoice = this.pendingInvoices.find(i => i.id === this.activeInvoiceId);
-        if (invoice) {
-          invoice.items.push(newProduct);
-        }
-      }
-
-      this.$refs.toast.kshowToast('success', `Đã thêm sản phẩm: ${newProduct.name}`);
-    },
-    searchCustomers() {
-      if (this.searchCustomer) {
-        this.selectedCustomer = true;
-        this.customer = { name: 'Khách hàng tìm thấy', phone: '098xxxxxxx' };
-        this.$refs.toast.kshowToast('success', `Đã tìm thấy khách hàng: ${this.customer.name}`);
-      } else {
-        this.selectedCustomer = null;
-      }
-    },
-    addNewCustomer() {
-      this.selectedCustomer = true;
-      this.customer = { name: '', phone: '' };
-      this.$refs.toast.kshowToast('info', 'Thêm mới khách hàng');
-    },
-    applyDiscount() {
-      if (this.discountCode) {
-        this.discount = 2000000;
-        this.$refs.toast.kshowToast('success', 'Đã áp dụng mã giảm giá');
-      } else {
-        this.$refs.toast.kshowToast('error', 'Vui lòng nhập mã giảm giá');
-      }
-    },
-    selectPayment(method) {
-      this.paymentMethod = method;
-      let methodName = '';
-      switch(method) {
-        case 'transfer': methodName = 'Chuyển khoản'; break;
-        case 'cash': methodName = 'Tiền mặt'; break;
-        case 'both': methodName = 'Cả hai phương thức'; break;
-      }
-      this.$refs.toast.kshowToast('info', `Đã chọn phương thức thanh toán: ${methodName}`);
-    },
-    createOrder() {
-      if (!this.paymentMethod && !this.payOnDelivery) {
-        this.$refs.toast.kshowToast('error', 'Vui lòng chọn phương thức thanh toán');
-        return;
-      }
-
-      // Xóa hóa đơn chờ nếu đang active
-      if (this.activeInvoiceId) {
-        this.pendingInvoices = this.pendingInvoices.filter(i => i.id !== this.activeInvoiceId);
-        this.activeInvoiceId = null;
-      }
-
-      this.$refs.toast.kshowToast('success', 'Thanh toán thành công!');
-
-      // Reset form
-      this.cartItems = [];
-      this.selectedCustomer = null;
-      this.searchCustomer = '';
-      this.discountCode = '';
-      this.discount = 0;
-      this.orderNotes = '';
-      this.paymentMethod = '';
-      this.payOnDelivery = false;
-    }
+// Xử lý breadcrumb
+const route = useRoute();
+const breadcrumbItems = computed(() => {
+  if (typeof route.meta.breadcrumb === "function") {
+    return route.meta.breadcrumb(route);
   }
-};
+  return route.meta?.breadcrumb || ["Bán Hàng Tại Quầy"];
+});
+
+// Khởi tạo toast ref
+const toast = ref(null);
+
+// Sử dụng useCounterSales với toast ref
+const counterSales = useCounterSales(toast);
+
+// Trải các thuộc tính và phương thức từ useCounterSales
+const {
+  cartItems,
+  cartColumns,
+  searchCustomer,
+  selectedCustomer,
+  customer,
+  receiver,
+  discountCode,
+  discount,
+  orderNotes,
+  payOnDelivery,
+  paymentMethod,
+  activeInvoiceId,
+  pendingInvoices,
+  totalPrice,
+  getNestedValue,
+  editItem,
+  toggleStatus,
+  removeItem,
+  createNewPendingInvoice,
+  loadPendingInvoice,
+  scanQR,
+  addProduct,
+  searchCustomers,
+  addNewCustomer,
+  applyDiscount,
+  selectPayment,
+  createOrder,
+} = counterSales;
 </script>
 
 <style scoped>

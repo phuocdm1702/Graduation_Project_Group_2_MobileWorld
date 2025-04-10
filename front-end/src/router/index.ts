@@ -106,7 +106,7 @@ const routes: Array<RouteRecordRaw> = [
 
   // Bán Hàng
   {
-    path: "/orders",
+    path: "/ban-hang",
     name: "BanHangTaiQuay",
     component: BanHang,
     meta: { breadcrumb: ["Bán Hàng Tại Quầy"] },

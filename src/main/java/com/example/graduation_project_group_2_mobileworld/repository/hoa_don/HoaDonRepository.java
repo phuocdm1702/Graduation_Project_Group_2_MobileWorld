@@ -9,10 +9,15 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.sql.Timestamp;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface HoaDonRepository extends JpaRepository<HoaDon, Integer> {
+
+    // Lấy các hóa đơn chưa xác nhận
+    @Query("SELECT hd FROM HoaDon hd WHERE hd.trangThai = 0 AND hd.deleted = false")
+    List<HoaDon> findAllHDNotConfirm();
 
     // Lấy tất cả hóa đơn với phân trang
     @Query("SELECT hd FROM HoaDon hd ORDER BY hd.id DESC")
