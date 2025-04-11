@@ -26,6 +26,7 @@ import java.util.List;
 @Table(name = "hoa_don")
 public class HoaDon {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Integer id;
     @OneToMany(mappedBy = "hoaDon")
