@@ -1,6 +1,7 @@
 package com.example.graduation_project_group_2_mobileworld.controller.hoa_don;
 
 import com.example.graduation_project_group_2_mobileworld.dto.hoa_don.HoaDonDTO;
+import com.example.graduation_project_group_2_mobileworld.dto.hoa_don.HoaDonDTOGet;
 import com.example.graduation_project_group_2_mobileworld.service.hoa_don.HoaDonService;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.data.domain.Page;
@@ -33,7 +34,7 @@ public class HoaDonController {
     @GetMapping("/home")
     public ResponseEntity<Page<HoaDonDTO>> getAllHoaDon(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "0") int size,
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) String loaiDon,
             @RequestParam(required = false) Long minAmount,

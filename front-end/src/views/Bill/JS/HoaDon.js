@@ -14,7 +14,7 @@ export default function useHoaDonLineList() {
   const dataTable = ref([]);
   const originalData = ref([]);
   const currentPage = ref(0);
-  const pageSize = ref(10);
+  const pageSize = ref(5);
   const totalElements = ref(0);
   const totalPages = computed(() => Math.ceil(totalElements.value / pageSize.value));
   const orderTypes = ref([]);
@@ -49,7 +49,7 @@ export default function useHoaDonLineList() {
     { key: "index", label: "#", formatter: (_, __, index) => currentPage.value * pageSize.value + index + 1 },
     { key: "ma", label: "Mã" },
     { key: "idNhanVien.ma", label: "Nhân viên" },
-    { key: "idKhachHang.ten", label: "Khách hàng" },
+    { key: "tenKhachHang", label: "Khách hàng" },
     { key: "soDienThoaiKhachHang", label: "SDT" },
     {
       key: "tongTienSauGiam",
