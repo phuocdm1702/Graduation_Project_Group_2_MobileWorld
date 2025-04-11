@@ -18,18 +18,20 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
-public class thongKeService {
-    private static thongKeRepository tkRepo;
+public class ThongKeService {
+    // Loại bỏ static để Spring có thể inject
+    private thongKeRepository tkRepo;
 
     @Autowired
     private CTSPForThongKe chiTietSanPhamRepository;
 
     @Autowired
-    public thongKeService(thongKeRepository tkRepo) {
+    public ThongKeService(thongKeRepository tkRepo) {
         this.tkRepo = tkRepo;
     }
 
-    public static Map<String, Object> getThongKeTheoNgay() {
+    // Loại bỏ static
+    public Map<String, Object> getThongKeTheoNgay() {
         Calendar cal = Calendar.getInstance();
         cal.set(Calendar.HOUR_OF_DAY, 0);
         cal.set(Calendar.MINUTE, 0);
@@ -39,7 +41,8 @@ public class thongKeService {
         return tkRepo.thongKeTheoNgay(ngayHienTai);
     }
 
-    public static Map<String, Object> getThongKeTheoTuan() {
+    // Loại bỏ static
+    public Map<String, Object> getThongKeTheoTuan() {
         Calendar cal = Calendar.getInstance();
         cal.set(Calendar.DAY_OF_WEEK, cal.getFirstDayOfWeek());
         Date startOfWeek = cal.getTime();
@@ -48,14 +51,16 @@ public class thongKeService {
         return tkRepo.thongKeTheoTuan(startOfWeek, endOfWeek);
     }
 
-    public static Map<String, Object> getThongKeTheoThang() {
+    // Loại bỏ static
+    public Map<String, Object> getThongKeTheoThang() {
         Calendar cal = Calendar.getInstance();
         int thang = cal.get(Calendar.MONTH) + 1; // +1 vì tháng bắt đầu từ 0
         int nam = cal.get(Calendar.YEAR);
         return tkRepo.thongKeTheoThang(thang, nam);
     }
 
-    public static Map<String, Object> getThongKeTheoNam() {
+    // Loại bỏ static
+    public Map<String, Object> getThongKeTheoNam() {
         Calendar cal = Calendar.getInstance();
         int nam = cal.get(Calendar.YEAR);
         return tkRepo.thongKeTheoNam(nam);
@@ -112,6 +117,54 @@ public class thongKeService {
         return new PageImpl<>(dtos, pageable, results.getTotalElements());
     }
 
+    public List<Map<String, Object>> getAllTopSellingProducts(String filterType, String startDateStr, String endDateStr) {
+        Date startDate = null;
+        Date endDate = null;
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+
+        Calendar cal = Calendar.getInstance();
+        if ("day".equals(filterType)) {
+            startDate = new Date();
+            endDate = startDate;
+        } else if ("month".equals(filterType)) {
+            cal.set(Calendar.DAY_OF_MONTH, 1);
+            startDate = cal.getTime();
+            endDate = new Date();
+        } else if ("year".equals(filterType)) {
+            cal.set(Calendar.MONTH, 0);
+            cal.set(Calendar.DAY_OF_MONTH, 1);
+            startDate = cal.getTime();
+            endDate = new Date();
+        } else if ("custom".equals(filterType) && startDateStr != null && endDateStr != null) {
+            try {
+                startDate = sdf.parse(startDateStr);
+                endDate = sdf.parse(endDateStr);
+            } catch (ParseException e) {
+                throw new RuntimeException("Invalid date format");
+            }
+        }
+
+        List<Object[]> results = tkRepo.findAllTopSellingProducts(startDate, endDate);
+
+        return results.stream().map(result -> {
+            Integer chiTietSanPhamId = (Integer) result[0];
+            ChiTietSanPham ctsp = chiTietSanPhamRepository.findById(chiTietSanPhamId).orElse(null);
+            if (ctsp != null) {
+                String productName = String.format("%s - %s - %s",
+                        ctsp.getIdSanPham().getTenSanPham(),
+                        ctsp.getIdMauSac().getMauSac(),
+                        ctsp.getIdBoNhoTrong().getDungLuongBoNhoTrong());
+                Map<String, Object> map = new HashMap<>();
+                map.put("imageUrl", ctsp.getIdAnhSanPham().getDuongDan());
+                map.put("productName", productName);
+                map.put("price", ctsp.getGiaBan());
+                map.put("soldQuantity", ((Number) result[1]).longValue());
+                return map;
+            }
+            return null;
+        }).filter(Objects::nonNull).collect(Collectors.toList());
+    }
+
     public Map<String, Object> getGrowthData() {
         Map<String, Object> growthData = new HashMap<>();
 
@@ -119,17 +172,16 @@ public class thongKeService {
         Map<String, Object> thangHienTai = tkRepo.tangTruongTheoThang(new Date());
         Map<String, Object> namHienTai = tkRepo.tangTruongTheoNam(new Date());
 
-        // Lấy dữ liệu kỳ trước
         Calendar cal = Calendar.getInstance();
-        cal.add(Calendar.DAY_OF_YEAR, -1); // Ngày hôm qua
+        cal.add(Calendar.DAY_OF_YEAR, -1);
         Map<String, Object> ngayTruoc = tkRepo.tangTruongTheoNgay(cal.getTime());
 
         cal = Calendar.getInstance();
-        cal.add(Calendar.MONTH, -1); // Tháng trước
+        cal.add(Calendar.MONTH, -1);
         Map<String, Object> thangTruoc = tkRepo.tangTruongTheoThang(cal.getTime());
 
         cal = Calendar.getInstance();
-        cal.add(Calendar.YEAR, -1); // Năm trước
+        cal.add(Calendar.YEAR, -1);
         Map<String, Object> namTruoc = tkRepo.tangTruongTheoNam(cal.getTime());
 
         growthData.put("doanhThuNgay", getDoubleValue(ngayHienTai, "doanhThu"));
@@ -139,7 +191,6 @@ public class thongKeService {
         growthData.put("hoaDonTheoNgay", getLongValue(ngayHienTai, "tongSoDonHang"));
         growthData.put("hoaDonTheoNam", getLongValue(namHienTai, "tongSoDonHang"));
 
-        // Tính tốc độ tăng trưởng
         growthData.put("growthDoanhThuNgay", calculateGrowth(getDoubleValue(ngayHienTai, "doanhThu"), getDoubleValue(ngayTruoc, "doanhThu")));
         growthData.put("growthDoanhThuThang", calculateGrowth(getDoubleValue(thangHienTai, "doanhThu"), getDoubleValue(thangTruoc, "doanhThu")));
         growthData.put("growthDoanhThuNam", calculateGrowth(getDoubleValue(namHienTai, "doanhThu"), getDoubleValue(namTruoc, "doanhThu")));
@@ -177,8 +228,28 @@ public class thongKeService {
         return tkRepo.thongKeSanPhamHetHang(pageable);
     }
 
+    public List<Map<String, Object>> getAllSanPhamHetHang() {
+        List<SanPhamHetHangDTO> results = tkRepo.thongKeSanPhamHetHangNoPage();
+        return results.stream().map(dto -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("tenSanPham", dto.getTenSanPham());
+            map.put("soLuong", dto.getSoLuong());
+            return map;
+        }).collect(Collectors.toList());
+    }
+
     public List<LoaiHoaDonDTO> thongKeLoaiHoaDon() {
         return tkRepo.thongKeLoaiHoaDon();
+    }
+
+    public List<Map<String, Object>> getAllLoaiHoaDon() {
+        List<LoaiHoaDonDTO> results = tkRepo.thongKeLoaiHoaDon();
+        return results.stream().map(dto -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("loaiDon", dto.getLoaiDon());
+            map.put("soLuong", dto.getSoLuong());
+            return map;
+        }).collect(Collectors.toList());
     }
 
     public List<HangBanChayDTO> thongKeHangBanChay() {
@@ -189,7 +260,6 @@ public class thongKeService {
         List<Map<String, Object>> result = tkRepo.thongKeTrangThaiDonHang(filterType, date);
         Map<String, Long> statusStats = new HashMap<>();
 
-        // Khởi tạo trạng thái
         statusStats.put("Chờ xác nhận", 0L);
         statusStats.put("Chờ giao hàng", 0L);
         statusStats.put("Đang giao", 0L);
@@ -197,7 +267,6 @@ public class thongKeService {
         statusStats.put("Đã hủy", 0L);
 
         for (Map<String, Object> entry : result) {
-            // Đổi trangThai từ Short ) sang Integer
             Object trangThaiObj = entry.get("trangThai");
             Integer trangThai = null;
             if (trangThaiObj instanceof Short) {

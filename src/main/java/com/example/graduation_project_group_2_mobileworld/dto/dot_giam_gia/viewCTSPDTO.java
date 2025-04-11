@@ -25,7 +25,7 @@ public class viewCTSPDTO {
         this.anh = anh;
         this.bnt = bnt;
         this.ms = ms;
-        this.selected = true; // Mặc định là true khi khởi tạo, khớp với frontend
+        this.selected = true;
     }
 
     public viewCTSPDTO(SanPham sp, ChiTietSanPham ctsp, AnhSanPham anh, BoNhoTrong bnt, MauSac ms, Long soLuongTrongDotGiamGiaKhac) {

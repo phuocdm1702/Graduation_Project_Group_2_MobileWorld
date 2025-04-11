@@ -18,7 +18,7 @@ import java.util.Map;
 
 @Repository
 public interface thongKeRepository extends JpaRepository<HoaDon, Integer> {
-    //Ngày hôm nay
+    // Ngày hôm nay
     @Query("SELECT " +
             "SUM(hd.tongTienSauGiam) as doanhThu, " +
             "COUNT(hdct.idChiTietSanPham) as sanPhamDaBan, " +
@@ -26,13 +26,12 @@ public interface thongKeRepository extends JpaRepository<HoaDon, Integer> {
             "FROM HoaDon hd " +
             "LEFT JOIN hd.chiTietHoaDon hdct " +
             "WHERE hd.ngayThanhToan >= :ngayHienTai " +
-//            "AND hd.trangThai = 1 " +
             "AND hd.deleted = false")
     Map<String, Object> thongKeTheoNgay(
             @Param("ngayHienTai") Date ngayHienTai
     );
 
-    // 2. Tuần hiện tại
+    // Tuần hiện tại
     @Query("SELECT " +
             "SUM(hd.tongTienSauGiam) as doanhThu, " +
             "COUNT(hdct.idChiTietSanPham) as sanPhamDaBan, " +
@@ -41,14 +40,13 @@ public interface thongKeRepository extends JpaRepository<HoaDon, Integer> {
             "LEFT JOIN hd.chiTietHoaDon hdct " +
             "WHERE hd.ngayThanhToan >= :startOfWeek " +
             "AND hd.ngayThanhToan <= :endOfWeek " +
-//            "AND hd.trangThai = 1 " +
             "AND hd.deleted = false")
     Map<String, Object> thongKeTheoTuan(
             @Param("startOfWeek") Date startOfWeek,
             @Param("endOfWeek") Date endOfWeek
     );
 
-    // 3. Tháng hiện tại
+    // Tháng hiện tại
     @Query("SELECT " +
             "SUM(hd.tongTienSauGiam) as doanhThu, " +
             "COUNT(hdct.idChiTietSanPham) as sanPhamDaBan, " +
@@ -57,7 +55,6 @@ public interface thongKeRepository extends JpaRepository<HoaDon, Integer> {
             "LEFT JOIN hd.chiTietHoaDon hdct " +
             "WHERE MONTH(hd.ngayThanhToan) = :thang " +
             "AND YEAR(hd.ngayThanhToan) = :nam " +
-//            "AND hd.trangThai = 1 " +
             "AND hd.deleted = false")
     Map<String, Object> thongKeTheoThang(
             @Param("thang") int thang,
@@ -72,13 +69,12 @@ public interface thongKeRepository extends JpaRepository<HoaDon, Integer> {
             "FROM HoaDon hd " +
             "LEFT JOIN hd.chiTietHoaDon hdct " +
             "WHERE YEAR(hd.ngayThanhToan) = :nam " +
-//            "AND hd.trangThai = 1 " +
             "AND hd.deleted = false")
     Map<String, Object> thongKeTheoNam(
             @Param("nam") int nam
     );
 
-
+    // Sản phẩm bán chạy (phân trang)
     @Query("SELECT c.idChiTietSanPham.id, COUNT(c.id) as soLuongBan " +
             "FROM HoaDonChiTiet c " +
             "JOIN c.hoaDon h " +
@@ -87,6 +83,16 @@ public interface thongKeRepository extends JpaRepository<HoaDon, Integer> {
             "GROUP BY c.idChiTietSanPham.id")
     Page<Object[]> findTopSellingProducts(@Param("startDate") Date startDate, @Param("endDate") Date endDate, Pageable pageable);
 
+    // Sản phẩm bán chạy (toàn bộ dữ liệu)
+    @Query("SELECT c.idChiTietSanPham.id, COUNT(c.id) as soLuongBan " +
+            "FROM HoaDonChiTiet c " +
+            "JOIN c.hoaDon h " +
+            "WHERE (:startDate IS NULL OR h.createdAt >= :startDate) " +
+            "AND (:endDate IS NULL OR h.createdAt <= :endDate) " +
+            "GROUP BY c.idChiTietSanPham.id")
+    List<Object[]> findAllTopSellingProducts(@Param("startDate") Date startDate, @Param("endDate") Date endDate);
+
+    // Tăng trưởng
     @Query("SELECT new map(" +
             "SUM(hd.tongTien) as doanhThu, " +
             "COUNT(hdct.id) as sanPhamDaBan, " +
@@ -117,7 +123,7 @@ public interface thongKeRepository extends JpaRepository<HoaDon, Integer> {
             "WHERE year(hd.createdAt) = year(:nam)")
     Map<String, Object> tangTruongTheoNam(@Param("nam") Date nam);
 
-
+    // Trạng thái đơn hàng
     @Query("SELECT new map(hd.trangThai as trangThai, COUNT(hd.id) as soLuong) " +
             "FROM HoaDon hd " +
             "WHERE (:filterType = 'day' AND day(hd.createdAt) = day(:date) " +
@@ -132,6 +138,7 @@ public interface thongKeRepository extends JpaRepository<HoaDon, Integer> {
             @Param("date") Date date
     );
 
+    // Sản phẩm sắp hết hàng (phân trang)
     @Query("SELECT new com.example.graduation_project_group_2_mobileworld.dto.thongKe.SanPhamHetHangDTO(sp.tenSanPham, COUNT(ctsp)) " +
             "FROM ChiTietSanPham ctsp " +
             "JOIN ctsp.idSanPham sp " +
@@ -140,17 +147,27 @@ public interface thongKeRepository extends JpaRepository<HoaDon, Integer> {
             "ORDER BY COUNT(ctsp) ASC")
     Page<SanPhamHetHangDTO> thongKeSanPhamHetHang(Pageable pageable);
 
+    // Sản phẩm sắp hết hàng (toàn bộ dữ liệu)
+    @Query("SELECT new com.example.graduation_project_group_2_mobileworld.dto.thongKe.SanPhamHetHangDTO(sp.tenSanPham, COUNT(ctsp)) " +
+            "FROM ChiTietSanPham ctsp " +
+            "JOIN ctsp.idSanPham sp " +
+            "GROUP BY sp.id, sp.tenSanPham " +
+            "HAVING COUNT(ctsp) < 6 " +
+            "ORDER BY COUNT(ctsp) ASC")
+    List<SanPhamHetHangDTO> thongKeSanPhamHetHangNoPage();
+
+    // Phân phối đa kênh
     @Query("SELECT new com.example.graduation_project_group_2_mobileworld.dto.thongKe.LoaiHoaDonDTO(hd.loaiDon, COUNT(hd.id)) " +
             "FROM HoaDon hd " +
             "GROUP BY hd.loaiDon")
     List<LoaiHoaDonDTO> thongKeLoaiHoaDon();
 
-    @Query("SELECT new com.example.graduation_project_group_2_mobileworld.dto.thongKe.HangBanChayDTO(nsx.nhaSanXuat, COALESCE(SUM(hdct.gia), 0)) " +
+
+    @Query("SELECT new com.example.graduation_project_group_2_mobileworld.dto.thongKe.HangBanChayDTO(nsx.nhaSanXuat, SUM(hdct.gia)) " +
             "FROM HoaDonChiTiet hdct " +
             "JOIN hdct.idChiTietSanPham ctsp " +
             "JOIN ctsp.idSanPham sp " +
             "JOIN sp.idNhaSanXuat nsx " +
             "GROUP BY nsx.id, nsx.nhaSanXuat")
     List<HangBanChayDTO> thongKeHangBanChay();
-
 }
