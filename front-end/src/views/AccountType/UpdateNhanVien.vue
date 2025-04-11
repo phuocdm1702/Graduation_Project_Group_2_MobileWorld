@@ -289,7 +289,7 @@ const fetchEmployeeData = async () => {
       cccd: data.cccd || "",
       soDienThoai: data.idTaiKhoan?.soDienThoai || "",
       ngaySinh: data.ngaySinh ? new Date(data.ngaySinh).toISOString().split("T")[0] : "",
-      gioiTinh: data.idTaiKhoan?.deleted !== undefined ? String(data.idTaiKhoan.deleted) : "", // Sửa lại: không dùng !deleted
+      gioiTinh: data.idTaiKhoan?.deleted !== undefined ? String(data.idTaiKhoan.deleted) : "",
       tenNhanVien: data.tenNhanVien || "",
       diaChiCuThe: data.diaChiCuThe || "",
       thanhPho: data.thanhPho || "",
@@ -325,7 +325,7 @@ const fetchEmployeeData = async () => {
 
 // Kiểm tra điều kiện cập nhật
 const dienKienUpdate = () => {
-  return true; // Thay bằng logic kiểm tra nếu cần
+  return true;
 };
 
 // Hiển thị ConfirmModal và lưu hành động
@@ -478,10 +478,13 @@ const updatediaChi = async () => {
     showConfirmModal.value = false;
   }
 };
+
 // Lấy danh sách tỉnh/thành phố
 onMounted(async () => {
   try {
-    const response = await axios.get("https://provinces.open-api.vn/api/?depth=3");
+    const response = await axios.get("https://provinces.open-api.vn/api/?depth=3", {
+      withCredentials: false // Thêm dòng này để tránh lỗi CORS
+    });
     provinces.value = response.data;
 
     const imageFromQuery = route.query.image;
@@ -493,6 +496,7 @@ onMounted(async () => {
     }
   } catch (error) {
     console.error("Lỗi khi tải dữ liệu địa chỉ:", error);
+    toastRef.value.kshowToast('error', 'Không thể tải danh sách tỉnh/thành phố: ' + (error.response?.data?.error || error.message));
     await fetchEmployeeData();
   }
 });
