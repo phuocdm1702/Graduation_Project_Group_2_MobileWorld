@@ -245,6 +245,9 @@
                   >
                     <option value="" disabled>Chọn quận/huyện</option>
                     <option v-for="district in address.availableDistricts" :key="district.code" :value="district.name">{{ district.name }}</option>
+                    <option v-if="address.quan && !address.availableDistricts.some(d => d.name === address.quan)" :value="address.quan">
+                      {{ address.quan }} (từ dữ liệu cũ)
+                    </option>
                   </select>
                 </div>
                 <div class="space-y-1">
@@ -336,7 +339,7 @@ import { useRoute, useRouter } from "vue-router";
 import axios from "axios";
 import BreadcrumbWrapper from '@/components/BreadcrumbWrapper.vue';
 import ToastNotification from "@/components/ToastNotification.vue";
-import ConfirmModal from "@/components/ConfirmModal.vue"; // Đảm bảo import ConfirmModal
+import ConfirmModal from "@/components/ConfirmModal.vue";
 
 const route = useRoute();
 const router = useRouter();
@@ -380,8 +383,8 @@ const newAddress = ref({
   quan: "",
   phuong: "",
 });
-const confirmAction = ref(null); // Để xác định hành động khi confirm
-const confirmMessage = ref(""); // Tin nhắn hiển thị trong modal
+const confirmAction = ref(null);
+const confirmMessage = ref("");
 
 const paginatedAddresses = computed(() => {
   const start = (currentPage.value - 1) * itemsPerPage.value;
@@ -426,6 +429,22 @@ const deleteImage = () => {
 const handleImageError = () => {
   console.error("Không thể tải ảnh khách hàng!");
   customerImage.value = null;
+};
+
+const fetchProvinces = async () => {
+  try {
+    const response = await axios.get("https://provinces.open-api.vn/api/?depth=3", {
+      withCredentials: false // Tắt thông tin xác thực để tránh lỗi CORS
+    });
+    provinces.value = response.data || [];
+    if (!provinces.value.length) {
+      toastRef.value.kshowToast('error', 'Không tải được danh sách tỉnh/thành phố!');
+    }
+  } catch (error) {
+    console.error("Lỗi khi tải dữ liệu địa chỉ:", error);
+    toastRef.value.kshowToast('error', 'Không thể tải danh sách tỉnh/thành phố: ' + (error.response?.data?.error || error.message));
+    provinces.value = [];
+  }
 };
 
 const fetchCustomerData = async () => {
@@ -474,6 +493,7 @@ const fetchCustomerData = async () => {
       customerImage.value = null;
     }
 
+    // Cập nhật danh sách quận/huyện và xã/phường cho từng địa chỉ
     for (const address of addresses.value) {
       await updateDistricts(address);
       await updateWards(address);
@@ -607,7 +627,7 @@ const toggleAddAddress = () => {
   }
 };
 
-const handleNewProvinceChange = async () => {
+const handleNewProvinceChange = () => {
   newDistricts.value = [];
   newWards.value = [];
   newAddress.value.quan = "";
@@ -621,7 +641,7 @@ const handleNewProvinceChange = async () => {
   }
 };
 
-const handleNewDistrictChange = async () => {
+const handleNewDistrictChange = () => {
   newWards.value = [];
   newAddress.value.phuong = "";
 
@@ -631,7 +651,6 @@ const handleNewDistrictChange = async () => {
   if (district && district.wards) {
     newWards.value = district.wards;
   }
-  await nextTick();
 };
 
 const addNewAddress = async () => {
@@ -640,7 +659,7 @@ const addNewAddress = async () => {
       toastRef.value.kshowToast('error', 'ID khách hàng không hợp lệ!');
       return;
     }
-    if (!newAddress.value.diaChiCuThe || !newAddress.value.phuong || !newAddress.value.thanhPho || !newAddress.value.quan) {
+    if (!newAddress.value.diaChiCuThe || !newAddress.value.thanhPho || !newAddress.value.quan || !newAddress.value.phuong) {
       toastRef.value.kshowToast('error', 'Vui lòng nhập đầy đủ thông tin địa chỉ!');
       return;
     }
@@ -678,18 +697,27 @@ const updateDistricts = async (address) => {
   const province = provinces.value.find(prov => prov.name === address.thanhPho);
   if (province && province.districts) {
     address.availableDistricts = province.districts;
+    // Nếu quan hiện tại không có trong danh sách mới, giữ nguyên để hiển thị
+    if (address.quan && !address.availableDistricts.some(d => d.name === address.quan)) {
+      address.availableDistricts.push({ code: address.quan, name: address.quan });
+    }
   }
+  await nextTick();
 };
 
 const updateWards = async (address) => {
   address.availableWards = [];
   address.phuong = address.phuong || "";
 
-  if (!address.quan) return;
+  if (!address.quan || !address.availableDistricts.length) return;
 
   const district = address.availableDistricts.find(dist => dist.name === address.quan);
   if (district && district.wards) {
     address.availableWards = district.wards;
+    // Nếu phuong hiện tại không có trong danh sách mới, giữ nguyên để hiển thị
+    if (address.phuong && !address.availableWards.some(w => w.name === address.phuong)) {
+      address.availableWards.push({ code: address.phuong, name: address.phuong });
+    }
   }
   await nextTick();
 };
@@ -776,14 +804,8 @@ const deleteAddress = async (id) => {
 };
 
 onMounted(async () => {
-  try {
-    const response = await axios.get("https://provinces.open-api.vn/api/?depth=3");
-    provinces.value = response.data;
-    await fetchCustomerData();
-  } catch (error) {
-    console.error("Lỗi khi tải dữ liệu địa chỉ:", error);
-    toastRef.value.kshowToast('error', 'Không thể tải dữ liệu địa chỉ: ' + (error.response?.data?.error || error.message));
-  }
+  await fetchProvinces();
+  await fetchCustomerData();
 });
 </script>
 

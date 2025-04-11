@@ -399,17 +399,6 @@ export const useDotGiamGia = () => {
 
   const validate = async function () {
     const today = new Date().toISOString().split("T")[0];
-    // if (dotGiamGia.value.ma == "") {
-    //   toast.value?.kshowToast("error", "Vui lòng nhập mã");
-    //   return false;
-    // }
-    // if (edit.value == false) {
-    //   const isDuplicate = await checkDuplicate('ma', dotGiamGia.value.ma);
-    //   if (isDuplicate) {
-    //     toast.value?.kshowToast("error", "Mã đã tồn tại");
-    //     return false;
-    //   }
-    // }
     if (dotGiamGia.value.tenDotGiamGia == "") {
       toast.value?.kshowToast("error", "Vui lòng nhập tên đợt giảm giá");
       return false;
@@ -422,8 +411,8 @@ export const useDotGiamGia = () => {
       toast.value?.kshowToast("error", "Vui lòng nhập giá trị giảm giá");
       return false;
     }
-    if (dotGiamGia.value.soTienGiamToiDa == 0) {
-      toast.value?.kshowToast("error", "Vui lòng nhập số tiền giảm tối đa");
+    if (!dotGiamGia.value.soTienGiamToiDa || dotGiamGia.value.soTienGiamToiDa <= 0) {
+      toast.value?.kshowToast("error", "Số tiền giảm tối đa phải lớn hơn 0");
       return false;
     }
     if (dotGiamGia.value.ngayBatDau == "") {
@@ -436,10 +425,6 @@ export const useDotGiamGia = () => {
     }
     if (dotGiamGia.value.ngayKetThuc == "" || dotGiamGia.value.ngayKetThuc < dotGiamGia.value.ngayBatDau) {
       toast.value?.kshowToast("error", "Vui lòng chọn lại ngày kết thúc");
-      return false;
-    }
-    if (dotGiamGia.value.ngayKetThuc < dotGiamGia.value.ngayBatDau) {
-      toast.value?.kshowToast("error", "Ngày kết thúc không được nhỏ hơn ngày bắt đầu");
       return false;
     }
     if (idDSPs.value.length === 0) {

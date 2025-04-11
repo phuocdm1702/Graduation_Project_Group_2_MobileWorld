@@ -29,4 +29,7 @@ public class QuyenHan {
     @Column(name = "deleted")
     private Boolean deleted;
 
+    public QuyenHan() {
+
+    }
 }

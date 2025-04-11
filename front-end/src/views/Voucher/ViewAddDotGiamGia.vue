@@ -11,15 +11,6 @@
         <div class="bg-white border rounded-lg shadow-md p-6">
           <h4 class="text-lg font-semibold text-gray-800 mb-4">Thông Tin Đợt Giảm Giá</h4>
           <form @submit.prevent="confirmAction" class="space-y-4">
-<!--            <div>-->
-<!--              <label class="block text-sm font-medium text-gray-700 mb-1">Mã</label>-->
-<!--              <input-->
-<!--                type="text"-->
-<!--                v-model="dotGiamGia.ma"-->
-<!--                class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none transition"-->
-<!--                placeholder="Nhập mã đợt giảm giá"-->
-<!--              />-->
-<!--            </div>-->
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Tên đợt giảm giá</label>
               <input
@@ -53,8 +44,8 @@
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Số tiền giảm tối đa</label>
               <input
-                type="number"
-                v-model="dotGiamGia.soTienGiamToiDa"
+                type="text"
+                v-model="formattedSoTienGiamToiDa"
                 class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none transition"
                 placeholder="Nhập số tiền tối đa"
               />
@@ -145,8 +136,6 @@
             />
           </footer>
         </div>
-      
-      
       </div>
 
       <!-- Chi Tiết Sản Phẩm -->
@@ -310,6 +299,18 @@ const isTienMat = computed(() => {
 const updateBoNhoTrong = () => {
   currentPageCTSP.value = 0;
 };
+
+const formattedSoTienGiamToiDa = computed({
+  get() {
+    const value = dotGiamGia.value.soTienGiamToiDa;
+    return value ? Number(value).toLocaleString('vi-VN') : '';
+  },
+  set(newValue) {
+    // Loại bỏ các dấu chấm hoặc ký tự không phải số
+    const rawValue = newValue.replace(/[^0-9]/g, '');
+    dotGiamGia.value.soTienGiamToiDa = rawValue ? Number(rawValue) : 0;
+  }
+});
 </script>
 
 <style scoped>

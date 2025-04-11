@@ -60,4 +60,22 @@ public class HoaDonDTO {
         this.ghiChu = ghiChu;
         this.phiVanChuyen = phiVanChuyen;
     }
+
+    // Constructor mới khớp với truy vấn @Query
+    public HoaDonDTO(String ma, String maNhanVien, String tenKhachHang, String soDienThoaiKhachHang,
+                     BigDecimal tongTienSauGiam, Double phanTramGiamGia, BigDecimal phiVanChuyen,
+                     Date ngayTao, String loaiDon, Short trangThai) {
+        this.ma = ma;
+        this.idNhanVien = new NhanVien(); // Tạo đối tượng NhanVien và gán mã
+        this.idNhanVien.setMa(maNhanVien);
+        this.tenKhachHang = tenKhachHang;
+        this.soDienThoaiKhachHang = soDienThoaiKhachHang;
+        this.tongTienSauGiam = tongTienSauGiam;
+        this.idPhieuGiamGia = new PhieuGiamGia(); // Tạo đối tượng PhieuGiamGia và gán phần trăm giảm giá
+        this.idPhieuGiamGia.setPhanTramGiamGia(phanTramGiamGia);
+        this.phiVanChuyen = phiVanChuyen;
+        this.ngayTao = ngayTao;
+        this.loaiDon = loaiDon;
+        this.trangThai = trangThai;
+    }
 }

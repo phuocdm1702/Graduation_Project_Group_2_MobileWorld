@@ -16,4 +16,6 @@ public class HangBanChayDTO {
     public void setNhaSanXuat(String nhaSanXuat) { this.nhaSanXuat = nhaSanXuat; }
     public BigDecimal getDoanhThu() { return doanhThu; }
     public void setDoanhThu(BigDecimal doanhThu) { this.doanhThu = doanhThu; }
+
+
 }

@@ -50,77 +50,56 @@ public class HoaDon {
     @JoinColumn(name = "id_phieu_giam_gia", referencedColumnName = "id")
     private PhieuGiamGia idPhieuGiamGia;
 
-    @Size(max = 255)
-    @NotNull
-    @Nationalized
     @Column(name = "ma", nullable = false)
     private String ma;
 
-    @NotNull
     @Column(name = "tien_san_pham", nullable = false, precision = 18, scale = 2)
     private BigDecimal tienSanPham;
 
-    @Size(max = 255)
-    @NotNull
-    @Nationalized
-    @Column(name = "loai_don", nullable = false)
+
+    @Column(name = "loai_don")
     private String loaiDon;
 
-    @NotNull
-    @Column(name = "phi_van_chuyen", nullable = false, precision = 18, scale = 2)
+
+    @Column(name = "phi_van_chuyen")
     private BigDecimal phiVanChuyen;
 
-    @NotNull
-    @Column(name = "tong_tien", nullable = false, precision = 18, scale = 2)
+
+    @Column(name = "tong_tien")
     private BigDecimal tongTien;
 
-    @Column(name = "tong_tien_sau_giam", precision = 18, scale = 2)
+    @Column(name = "tong_tien_sau_giam")
     private BigDecimal tongTienSauGiam;
 
-    @Size(max = 255)
-    @Nationalized
     @Column(name = "ghi_chu")
     private String ghiChu;
 
-    @Size(max = 255)
-    @NotNull
-    @Nationalized
-    @Column(name = "ten_khach_hang", nullable = false)
+    @Column(name = "ten_khach_hang")
     private String tenKhachHang;
 
-    @Size(max = 255)
-    @NotNull
-    @Nationalized
-    @Column(name = "dia_chi_khach_hang", nullable = false)
+    @Column(name = "dia_chi_khach_hang")
     private String diaChiKhachHang;
 
-    @Size(max = 20)
-    @NotNull
-    @Nationalized
-    @Column(name = "so_dien_thoai_khach_hang", nullable = false, length = 20)
+    @Column(name = "so_dien_thoai_khach_hang")
     private String soDienThoaiKhachHang;
 
-    @Size(max = 255)
-    @Nationalized
     @Column(name = "email")
     private String email;
 
-    @NotNull
-    @Column(name = "ngay_tao", nullable = false)
+    @Column(name = "ngay_tao")
     private Date ngayTao;
 
     @Column(name = "ngay_thanh_toan")
     private Date ngayThanhToan;
 
-    @Column(name = "trang_thai", columnDefinition = "tinyint not null")
+    @Column(name = "trang_thai")
     private Short trangThai;
 
-    @NotNull
-    @Column(name = "deleted", nullable = false)
+
+    @Column(name = "deleted")
     private Boolean deleted = false;
 
-    @NotNull
-    @Column(name = "created_at", nullable = false)
+    @Column(name = "created_at")
     private Date createdAt;
 
     @Column(name = "created_by")

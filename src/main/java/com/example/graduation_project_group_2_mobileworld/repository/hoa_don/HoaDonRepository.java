@@ -1,5 +1,7 @@
 package com.example.graduation_project_group_2_mobileworld.repository.hoa_don;
 
+import com.example.graduation_project_group_2_mobileworld.dto.hoa_don.HoaDonDTO;
+import com.example.graduation_project_group_2_mobileworld.dto.hoa_don.HoaDonDTOGet;
 import com.example.graduation_project_group_2_mobileworld.entity.HoaDon;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -20,8 +22,28 @@ public interface HoaDonRepository extends JpaRepository<HoaDon, Integer> {
     List<HoaDon> findAllHDNotConfirm();
 
     // Lấy tất cả hóa đơn với phân trang
-    @Query("SELECT hd FROM HoaDon hd ORDER BY hd.id DESC")
-    Page<HoaDon> findAllWithPagination(Pageable pageable);
+
+    @Query(
+            """
+                    select new com.example.graduation_project_group_2_mobileworld.dto.hoa_don.HoaDonDTO
+                    (
+                   hd.ma,
+                   hd.idNhanVien.ma,
+                   hd.tenKhachHang,
+                   hd.soDienThoaiKhachHang,
+                   hd.tongTienSauGiam,
+                   hd.idPhieuGiamGia.phanTramGiamGia,
+                   hd.phiVanChuyen,
+                   hd.ngayTao,
+                   hd.loaiDon,
+                   hd.trangThai
+                    )
+                    from HoaDon hd 
+                    """
+    )
+    Page<HoaDonDTO> findAllWithPagination(Pageable pageable);
+//    @Query("SELECT hd FROM HoaDon hd ORDER BY hd.id DESC")
+//    Page<HoaDon> findAllWithPagination(Pageable pageable);
 
     // Lấy hóa đơn với chi tiết
     @Query("SELECT hd FROM HoaDon hd LEFT JOIN FETCH hd.chiTietHoaDon WHERE hd.id = :id")
@@ -39,7 +61,47 @@ public interface HoaDonRepository extends JpaRepository<HoaDon, Integer> {
             "WHERE hd.id = :id")
     Optional<HoaDon> findHoaDonWithDetailsAndHistoryById(@Param("id") Integer id);
 
-    // Lấy hóa đơn với bộ lọc
+//    // Lấy hóa đơn với bộ lọc
+//
+//    @Query("""
+//                SELECT new com.example.graduation_project_group_2_mobileworld.dto.hoa_don.HoaDonDTO(
+//                    hd.ma,
+//                    hd.idNhanVien.ma,
+//                    hd.tenKhachHang,
+//                    hd.soDienThoaiKhachHang,
+//                    hd.tongTienSauGiam,
+//                    hd.idPhieuGiamGia.phanTramGiamGia,
+//                    hd.phiVanChuyen,
+//                    hd.ngayTao,
+//                    hd.loaiDon,
+//                    hd.trangThai
+//                )
+//                FROM HoaDon hd
+//                WHERE (:keyword IS NULL
+//                    OR hd.ma LIKE %:keyword%
+//                    OR hd.idNhanVien.tenNhanVien LIKE %:keyword%
+//                    OR hd.tenKhachHang LIKE %:keyword%
+//                    OR hd.soDienThoaiKhachHang LIKE %:keyword%)
+//                AND (:loaiDon IS NULL OR hd.loaiDon = :loaiDon)
+//                AND (:minAmount IS NULL OR hd.tongTienSauGiam >= :minAmount)
+//                AND (:maxAmount IS NULL OR hd.tongTienSauGiam <= :maxAmount)
+//                AND (:startDate IS NULL OR hd.ngayTao >= :startDate)
+//                AND (:endDate IS NULL OR hd.ngayTao <= :endDate)
+//                AND (:trangThai IS NULL OR hd.trangThai = :trangThai)
+//                ORDER BY hd.id DESC
+//            """)
+//    Page<HoaDonDTOGet> findHoaDonWithFilters(
+//            @Param("keyword") String keyword,
+//            @Param("loaiDon") String loaiDon,
+//            @Param("minAmount") Long minAmount,
+//            @Param("maxAmount") Long maxAmount,
+//            @Param("startDate") Timestamp startDate,
+//            @Param("endDate") Timestamp endDate,
+//            @Param("trangThai") Short trangThai,
+//            Pageable pageable);
+
+
+
     @Query("SELECT hd FROM HoaDon hd " +
             "WHERE (:keyword IS NULL OR hd.ma LIKE %:keyword% OR hd.idNhanVien.tenNhanVien LIKE %:keyword% " +
             "OR hd.tenKhachHang LIKE %:keyword% OR hd.soDienThoaiKhachHang LIKE %:keyword%) " +
@@ -62,5 +124,5 @@ public interface HoaDonRepository extends JpaRepository<HoaDon, Integer> {
 
     // Tìm hóa đơn theo mã
     @Query("SELECT hd FROM HoaDon hd WHERE hd.ma = :ma")
-    Optional<HoaDon> findByMa(@Param("ma") String ma);
+    Optional<HoaDonDTO> findByMa(@Param("ma") String ma);
 }

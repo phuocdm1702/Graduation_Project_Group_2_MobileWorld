@@ -66,10 +66,20 @@ public interface ChiTietDotGiamGiaRepository extends JpaRepository<ChiTietDotGia
     int updateDeletedChiTietDotGiamGia();
 
     @Query("SELECT c FROM ChiTietDotGiamGia c " +
-            "WHERE c.idChiTietSanPham = :ctspId " +
+            "WHERE c.idChiTietSanPham.id = :ctspId " +
             "AND c.idDotGiamGia.ngayBatDau <= :today " +
             "AND c.idDotGiamGia.ngayKetThuc >= :today " +
             "AND c.idDotGiamGia.deleted = false " +
             "AND c.deleted = false")
     List<ChiTietDotGiamGia> findActiveChiTietDotGiamGiaByCtspId(@Param("ctspId") Integer ctspId, @Param("today") Date today);
+
+        @Query("SELECT c FROM ChiTietDotGiamGia c " +
+                "WHERE c.idDotGiamGia = :dotGiamGia " +
+                "AND c.idChiTietSanPham = :chiTietSanPham " +
+                "AND c.deleted = :deleted")
+        List<ChiTietDotGiamGia> findByDotGiamGiaAndIdChiTietSanPhamAndDeleted(
+                @Param("dotGiamGia") DotGiamGia dotGiamGia,
+                @Param("chiTietSanPham") ChiTietSanPham chiTietSanPham,
+                @Param("deleted") boolean deleted);
+
 }
