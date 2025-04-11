@@ -32,7 +32,7 @@ public class HoaDonController {
 
     // API lấy danh sách hóa đơn với phân trang và bộ lọc
     @GetMapping("/home")
-    public ResponseEntity<Page<HoaDonDTOGet>> getAllHoaDon(
+    public ResponseEntity<Page<HoaDonDTO>> getAllHoaDon(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "0") int size,
             @RequestParam(required = false) String keyword,

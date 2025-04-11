@@ -46,12 +46,22 @@ public class HoaDonService {
     }
 
     // Lấy hóa đơn với bộ lọc
-    public Page<HoaDonDTOGet> getHoaDonWithFilters(int page, int size, String keyword, String loaiDon, Long minAmount,
-                                                   Long maxAmount, String startDate, String endDate, Short trangThai) {
+//    public Page<HoaDonDTOGet> getHoaDonWithFilters(int page, int size, String keyword, String loaiDon, Long minAmount,
+//                                                   Long maxAmount, String startDate, String endDate, Short trangThai) {
+//        Pageable pageable = PageRequest.of(page, size);
+//        Timestamp start = parseDateToTimestamp(startDate);
+//        Timestamp end = parseDateToTimestamp(endDate);
+//        return hoaDonRepository.findHoaDonWithFilters(keyword, loaiDon, minAmount, maxAmount, start, end, trangThai, pageable);
+//    }
+
+    // Lấy hóa đơn với bộ lọc
+    public Page<HoaDonDTO> getHoaDonWithFilters(int page, int size, String keyword, String loaiDon, Long minAmount,
+                                                Long maxAmount, String startDate, String endDate, Short trangThai) {
         Pageable pageable = PageRequest.of(page, size);
         Timestamp start = parseDateToTimestamp(startDate);
         Timestamp end = parseDateToTimestamp(endDate);
-        return hoaDonRepository.findHoaDonWithFilters(keyword, loaiDon, minAmount, maxAmount, start, end, trangThai, pageable);
+        return hoaDonRepository.findHoaDonWithFilters(keyword, loaiDon, minAmount, maxAmount, start, end, trangThai, pageable)
+                .map(this::toDTO);
     }
 
     // Lấy chi tiết hóa đơn theo ID
