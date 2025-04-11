@@ -13,10 +13,10 @@ import org.hibernate.annotations.Nationalized;
 @Table(name = "gio_hang")
 public class GioHang {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Integer id;
 
-    @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "id_khach_hang", nullable = false)
     private KhachHang idKhachHang;

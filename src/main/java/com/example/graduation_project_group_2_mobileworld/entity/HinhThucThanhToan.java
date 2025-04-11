@@ -15,6 +15,7 @@ import java.math.BigDecimal;
 @Table(name = "hinh_thuc_thanh_toan")
 public class HinhThucThanhToan {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Integer id;
 

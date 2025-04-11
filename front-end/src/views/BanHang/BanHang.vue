@@ -1,20 +1,13 @@
-<!-- src/views/CounterSales.vue -->
 <template>
-  <!-- Breadcrumb -->
   <BreadcrumbWrapper :breadcrumb-items="breadcrumbItems" />
-
-  <!-- Toast Notification -->
   <ToastNotification ref="toast" />
 
   <div class="min-h-screen bg-gray-100 p-4 flex flex-col">
-    <!-- Main Content -->
     <div class="flex-1">
-      <!-- Header -->
       <div class="flex justify-between items-center mb-4">
         <h1 class="text-2xl font-bold text-orange-500">Bán hàng tại quầy</h1>
       </div>
 
-      <!-- Pending Invoices Menu -->
       <div class="bg-white rounded-lg shadow mb-4 p-4">
         <div class="flex justify-between items-center mb-4">
           <h2 class="text-lg font-semibold text-orange-500">Hóa đơn chờ</h2>
@@ -44,13 +37,12 @@
         </div>
       </div>
 
-      <!-- Cart Section -->
       <div class="bg-white p-4 rounded-lg shadow mb-4">
         <div class="flex justify-between items-center mb-4">
           <h2 class="text-lg font-semibold text-orange-500">Giỏ hàng</h2>
           <div class="flex space-x-2">
             <button @click="scanQR" class="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600">Quét QR</button>
-            <button @click="addProduct" class="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600">Thêm sản phẩm</button>
+            <button @click="openProductModal" class="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600">Thêm sản phẩm</button>
           </div>
         </div>
 
@@ -75,7 +67,57 @@
         </div>
       </div>
 
-      <!-- Customer Info Section -->
+      <!-- Modal chọn sản phẩm -->
+      <div v-if="showProductModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-lg w-full max-w-2xl p-6">
+          <div class="flex justify-between items-center mb-4">
+            <h2 class="text-lg font-semibold text-orange-500">Chọn sản phẩm</h2>
+            <button @click="showProductModal = false" class="text-gray-500 hover:text-gray-700">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700">Tìm kiếm sản phẩm</label>
+            <input
+              v-model="productSearchQuery"
+              @input="searchProducts"
+              type="text"
+              class="mt-1 p-2 w-full border rounded"
+              placeholder="Nhập tên, mã hoặc IMEI sản phẩm"
+            />
+          </div>
+          <div class="max-h-96 overflow-y-auto">
+            <table class="w-full">
+              <thead>
+              <tr class="bg-gray-100">
+                <th class="p-2 text-left">Tên sản phẩm</th>
+                <th class="p-2 text-left">Mã</th>
+                <th class="p-2 text-left">IMEI</th>
+                <th class="p-2 text-left">Giá</th>
+                <th class="p-2"></th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr v-for="product in filteredProducts" :key="product.id" class="border-b">
+                <td class="p-2">{{ product.tenSanPham }}</td>
+                <td class="p-2">{{ product.ma }}</td>
+                <td class="p-2">{{ product.imel }}</td>
+                <td class="p-2">{{ product.giaBan.toLocaleString() }} đ</td>
+                <td class="p-2 text-right">
+                  <button
+                    @click="addProduct(product)"
+                    class="px-3 py-1 bg-orange-500 text-white rounded hover:bg-orange-600"
+                  >
+                    Chọn
+                  </button>
+                </td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
       <div class="bg-white p-4 rounded-lg shadow mb-4">
         <h2 class="text-lg font-semibold text-orange-500 mb-2">Thông tin khách hàng</h2>
         <div class="flex space-x-4 mb-4">
@@ -105,18 +147,16 @@
         </div>
       </div>
 
-      <!-- Order Info Section -->
       <div class="bg-white p-4 rounded-lg shadow">
         <div class="flex justify-between items-center mb-4">
           <h2 class="text-lg font-semibold text-orange-500">Thông tin đơn hàng</h2>
           <label class="flex items-center">
-            <input type="checkbox" class="mr-2" />
+            <input type="checkbox" v-model="payOnDelivery" class="mr-2" />
             <span>Bán giao hàng</span>
           </label>
         </div>
 
         <div class="grid grid-cols-2 gap-4">
-          <!-- Receiver Info -->
           <div>
             <h3 class="text-md font-medium text-orange-500 mb-2">Thông tin người nhận</h3>
             <div class="grid grid-cols-2 gap-4">
@@ -151,19 +191,14 @@
               <label class="block text-sm font-medium text-gray-700">Địa chỉ cụ thể</label>
               <input v-model="receiver.address" type="text" class="mt-1 p-2 w-full border rounded" placeholder="Xóm Bình Yên" />
             </div>
-            <!-- Notes -->
             <div class="mt-4">
               <label class="block text-sm font-medium text-gray-700">Ghi chú</label>
               <textarea v-model="orderNotes" class="mt-1 p-2 w-full border rounded" rows="3"></textarea>
             </div>
           </div>
 
-          <!-- Payment and Discount Info -->
           <div>
-            <!-- Divider -->
             <div class="border-t border-gray-300 mb-4"></div>
-
-            <!-- Discount Info -->
             <div class="mb-4">
               <h3 class="text-md font-medium text-orange-500">Mã giảm giá</h3>
               <div class="flex space-x-4">
@@ -176,8 +211,6 @@
                 <p class="text-lg font-semibold">Tổng tiền cần thanh toán: {{ (totalPrice - discount).toLocaleString() }} đ</p>
               </div>
             </div>
-
-            <!-- Payment Options -->
             <div class="mb-4">
               <h3 class="text-md font-medium text-orange-500">Phương thức thanh toán</h3>
               <div class="flex flex-wrap gap-2">
@@ -203,6 +236,27 @@
                   Cả hai
                 </button>
               </div>
+              <!-- Thêm ô nhập tiền nếu chọn "Cả hai" -->
+              <div v-if="paymentMethod === 'both'" class="mt-4 grid grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700">Tiền chuyển khoản</label>
+                  <input
+                    v-model="tienChuyenKhoan"
+                    type="number"
+                    class="mt-1 p-2 w-full border rounded"
+                    placeholder="Nhập số tiền chuyển khoản"
+                  />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700">Tiền mặt</label>
+                  <input
+                    v-model="tienMat"
+                    type="number"
+                    class="mt-1 p-2 w-full border rounded"
+                    placeholder="Nhập số tiền mặt"
+                  />
+                </div>
+              </div>
               <div class="mt-2">
                 <label class="flex items-center">
                   <input type="checkbox" v-model="payOnDelivery" class="mr-2" />
@@ -210,8 +264,6 @@
                 </label>
               </div>
             </div>
-
-            <!-- Submit Button -->
             <div class="text-right">
               <button @click="createOrder" class="px-6 py-2 bg-orange-500 text-white rounded hover:bg-orange-600">Thanh toán</button>
             </div>
@@ -228,9 +280,8 @@ import { useRoute } from "vue-router";
 import DynamicTable from "@/components/DynamicTable.vue";
 import ToastNotification from "@/components/ToastNotification.vue";
 import BreadcrumbWrapper from "@/components/BreadcrumbWrapper.vue";
-import { useCounterSales } from "@/views/BanHang/BanHang.js";
+import { useBanHang } from "@/views/BanHang/BanHang.js"; // Sửa đường dẫn import
 
-// Xử lý breadcrumb
 const route = useRoute();
 const breadcrumbItems = computed(() => {
   if (typeof route.meta.breadcrumb === "function") {
@@ -239,13 +290,7 @@ const breadcrumbItems = computed(() => {
   return route.meta?.breadcrumb || ["Bán Hàng Tại Quầy"];
 });
 
-// Khởi tạo toast ref
 const toast = ref(null);
-
-// Sử dụng useCounterSales với toast ref
-const counterSales = useCounterSales(toast);
-
-// Trải các thuộc tính và phương thức từ useCounterSales
 const {
   cartItems,
   cartColumns,
@@ -260,7 +305,14 @@ const {
   paymentMethod,
   activeInvoiceId,
   pendingInvoices,
+  showProductModal,
+  products,
+  filteredProducts,
+  productSearchQuery,
   totalPrice,
+  tienChuyenKhoan,
+  tienMat,
+  fetchPendingInvoices,
   getNestedValue,
   editItem,
   toggleStatus,
@@ -268,13 +320,24 @@ const {
   createNewPendingInvoice,
   loadPendingInvoice,
   scanQR,
+  openProductModal,
+  searchProducts,
   addProduct,
   searchCustomers,
   addNewCustomer,
-  applyDiscount,
   selectPayment,
   createOrder,
-} = counterSales;
+} = useBanHang(toast);
+
+// Hàm applyDiscount (logic giả lập, bạn có thể thay đổi theo yêu cầu)
+const applyDiscount = () => {
+  if (discountCode.value === "MungQuocKhanh") {
+    discount.value = 500000; // Giả lập giảm giá 500,000
+    toast.value.kshowToast("success", "Áp dụng mã giảm giá thành công!");
+  } else {
+    toast.value.kshowToast("error", "Mã giảm giá không hợp lệ!");
+  }
+};
 </script>
 
 <style scoped>

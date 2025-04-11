@@ -4,6 +4,7 @@ import java.util.List;
 
 public class HDban_hangDTO {
 
+    private Integer id;
     private String ma;
     private Short status;
     private List<HDCTban_hangDTO> items;
@@ -13,6 +14,13 @@ public class HDban_hangDTO {
 
     }
 
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
 
     public String getMa() {
         return ma;

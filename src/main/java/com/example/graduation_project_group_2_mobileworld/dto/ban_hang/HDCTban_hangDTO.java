@@ -1,6 +1,8 @@
 package com.example.graduation_project_group_2_mobileworld.dto.ban_hang;
 
 public class HDCTban_hangDTO {
+
+    private Integer id;
     private String name;
     private String imei;
     private Long price;
@@ -10,6 +12,13 @@ public class HDCTban_hangDTO {
 
     }
 
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
 
     public String getName() {
         return name;
