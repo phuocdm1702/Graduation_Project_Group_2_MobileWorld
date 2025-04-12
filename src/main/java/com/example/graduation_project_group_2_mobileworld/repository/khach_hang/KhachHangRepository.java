@@ -25,7 +25,8 @@ public interface KhachHangRepository extends JpaRepository<KhachHang, Integer> {
 
     @Query("SELECT k FROM KhachHang k WHERE CONCAT(k.ma, k.ten) LIKE %?1% ")
     List<KhachHang> searchFormAdd(String keyword);
-
+    @Query("SELECT k from KhachHang k where k.ten like %?1% OR k.idTaiKhoan.soDienThoai like %?1%")
+    List<KhachHang> searchBh(String keyword);
 
     Optional<KhachHang> findByMa(String ma);
 }

@@ -132,7 +132,7 @@
             />
           </div>
           <div class="flex items-end">
-            <button @click="addNewCustomer" class="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600">Thêm mới khách hàng</button>
+            <button @click="openCustomerModal" class="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600">Thêm mới khách hàng</button>
           </div>
         </div>
         <div v-if="selectedCustomer" class="grid grid-cols-2 gap-4">
@@ -162,11 +162,11 @@
             <div class="grid grid-cols-2 gap-4">
               <div>
                 <label class="block text-sm font-medium text-gray-700">Tên người nhận</label>
-                <input v-model="receiver.name" type="text" class="mt-1 p-2 w-full border rounded" placeholder="Nguyễn Oanh" />
+                <input v-model="customer.name" type="text" class="mt-1 p-2 w-full border rounded" placeholder="Nguyễn Oanh" />
               </div>
               <div>
                 <label class="block text-sm font-medium text-gray-700">Số điện thoại</label>
-                <input v-model="receiver.phone" type="text" class="mt-1 p-2 w-full border rounded" placeholder="0985357224" />
+                <input v-model="customer.phone" type="text" class="mt-1 p-2 w-full border rounded" placeholder="0985357224" />
               </div>
               <div>
                 <label class="block text-sm font-medium text-gray-700">Tỉnh, Thành phố</label>
@@ -272,15 +272,110 @@
       </div>
     </div>
   </div>
+  <FormModal
+    :show="isCustomerModalOpen"
+    entity-name="khách hàng"
+    :entity-data="customer"
+    @submit="(data) => { addNewCustomer(data); isCustomerModalOpen = false; }"
+    @close="isCustomerModalOpen = false"
+  >
+    <template #default="{ entityData }">
+      <div class="grid grid-cols-1 gap-4">
+        <!-- Tên khách hàng -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Tên khách hàng</label>
+          <input
+            v-model="entityData.name"
+            type="text"
+            class="mt-1 p-2 w-full border rounded"
+            placeholder="Nhập tên khách hàng"
+            required
+          />
+        </div>
+        <!-- Số điện thoại -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Số điện thoại</label>
+          <input
+            v-model="entityData.phone"
+            type="text"
+            class="mt-1 p-2 w-full border rounded"
+            placeholder="Nhập số điện thoại"
+            required
+            pattern="\d{10}"
+            title="Số điện thoại phải có đúng 10 chữ số"
+          />
+        </div>
+        <!-- Tỉnh/Thành phố -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Tỉnh/Thành phố</label>
+          <select
+            v-model="entityData.city"
+            class="mt-1 p-2 w-full border rounded"
+            required
+            @change="handleProvinceChange(entityData)"
+          >
+            <option value="" disabled>Chọn tỉnh/thành phố</option>
+            <option v-for="province in provinces" :key="province.code" :value="province.name">
+              {{ province.name }}
+            </option>
+          </select>
+        </div>
+        <!-- Quận/Huyện -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Quận/Huyện</label>
+          <select
+            v-model="entityData.district"
+            class="mt-1 p-2 w-full border rounded"
+            required
+            @change="handleDistrictChange(entityData)"
+            :disabled="!entityData.city"
+          >
+            <option value="" disabled>Chọn quận/huyện</option>
+            <option v-for="district in districts" :key="district.code" :value="district.name">
+              {{ district.name }}
+            </option>
+          </select>
+        </div>
+        <!-- Phường/Xã -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Phường/Xã</label>
+          <select
+            v-model="entityData.ward"
+            class="mt-1 p-2 w-full border rounded"
+            required
+            :disabled="!entityData.district"
+          >
+            <option value="" disabled>Chọn phường/xã</option>
+            <option v-for="ward in wards" :key="ward.code" :value="ward.name">
+              {{ ward.name }}
+            </option>
+          </select>
+        </div>
+        <!-- Địa chỉ cụ thể -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Địa chỉ cụ thể</label>
+          <input
+            v-model="entityData.address"
+            type="text"
+            class="mt-1 p-2 w-full border rounded"
+            placeholder="Nhập địa chỉ cụ thể"
+            required
+          />
+        </div>
+      </div>
+    </template>
+  </FormModal>
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import {ref, computed, onMounted} from "vue";
 import { useRoute } from "vue-router";
 import DynamicTable from "@/components/DynamicTable.vue";
 import ToastNotification from "@/components/ToastNotification.vue";
 import BreadcrumbWrapper from "@/components/BreadcrumbWrapper.vue";
 import { useBanHang } from "@/views/BanHang/BanHang.js"; // Sửa đường dẫn import
+import FormModal from "@/components/FormModal.vue";
+import axios from "axios";
 
 const route = useRoute();
 const breadcrumbItems = computed(() => {
@@ -290,7 +385,48 @@ const breadcrumbItems = computed(() => {
   return route.meta?.breadcrumb || ["Bán Hàng Tại Quầy"];
 });
 
+const provinces = ref([]);
+const districts = ref([]);
+const wards = ref([]);
+
+// Khởi tạo toast ref
 const toast = ref(null);
+
+// Xử lý thay đổi tỉnh/thành phố
+const handleProvinceChange = (entityData) => {
+  const province = provinces.value.find((prov) => prov.name === entityData.city);
+  districts.value = province ? province.districts : [];
+  entityData.district = ''; // Đặt lại quận
+  entityData.ward = ''; // Đặt lại phường
+  wards.value = []; // Đặt lại danh sách phường
+};
+
+// Xử lý thay đổi quận/huyện
+const handleDistrictChange = (entityData) => {
+  const district = districts.value.find((dist) => dist.name === entityData.district);
+  wards.value = district ? district.wards : [];
+  entityData.ward = ''; // Đặt lại phường
+};
+
+// Tải dữ liệu địa chỉ khi component được mounted
+onMounted(async () => {
+  try {
+    const response = await axios.get('https://provinces.open-api.vn/api/?depth=3', {
+      withCredentials: false // Thêm dòng này để tránh lỗi CORS
+    });
+    provinces.value = response.data;
+  } catch (error) {
+    console.error('Lỗi khi tải dữ liệu địa chỉ:', error);
+    if (toast.value) {
+      toast.value.kshowToast('error', 'Không thể tải danh sách tỉnh/thành phố: ' + (error.response?.data?.error || error.message));
+    }
+  }
+})
+
+const isCustomerModalOpen = ref(false);
+const openCustomerModal = () => {
+  isCustomerModalOpen.value = true;
+};
 const {
   cartItems,
   cartColumns,

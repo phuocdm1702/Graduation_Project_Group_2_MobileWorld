@@ -62,7 +62,7 @@ const submitForm = () => {
   let requiredFields = [];
   switch (props.entityName) {
     case 'khách hàng':
-      requiredFields = ['name', 'phone']; // Thêm case cho khách hàng
+      requiredFields = ['name', 'phone','city','district','ward','address']; 
       break;
     case 'nhaSanXuat':
       requiredFields = ['nhaSanXuat'];

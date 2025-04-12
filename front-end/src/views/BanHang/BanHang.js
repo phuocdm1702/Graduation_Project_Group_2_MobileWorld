@@ -320,20 +320,118 @@ export function useBanHang(toastRef) {
     }
   };
 
-  const searchCustomers = () => {
-    if (searchCustomer.value) {
-      selectedCustomer.value = true;
-      customer.value = { name: "Khách hàng tìm thấy", phone: "098xxxxxxx" };
-      if (toastRef.value) toastRef.value.kshowToast("success", `Đã tìm thấy khách hàng: ${customer.value.name}`);
-    } else {
+  const searchCustomers = async () => {
+    if (!searchCustomer.value.trim()) {
       selectedCustomer.value = null;
+      customer.value = {
+        name: "",
+        phone: "",
+        city: "",
+        district: "",
+        ward: "",
+        address: "",
+      };
+      return;
+    }
+
+    try {
+      const response = await axios.get(`http://localhost:8080/khach-hang/search?query=${encodeURIComponent(searchCustomer.value.trim())}`);
+      if (response.data && response.data.length > 0) {
+        // Lấy khách hàng đầu tiên trong danh sách
+        const firstCustomer = response.data[0];
+        selectedCustomer.value = true;
+        customer.value = {
+          name: firstCustomer.ten || "",
+          phone: firstCustomer.idTaiKhoan?.soDienThoai || "",
+          city: firstCustomer.thanhPho || "",
+          district: firstCustomer.quan || "",
+          ward: firstCustomer.phuong || "",
+          address: firstCustomer.diaChiCuThe || "",
+        };
+      } else {
+        selectedCustomer.value = null;
+        customer.value = {
+          name: "",
+          phone: "",
+          city: "",
+          district: "",
+          ward: "",
+          address: "",
+        };
+        if (toastRef.value) {
+          toastRef.value.kshowToast("info", "Không tìm thấy khách hàng phù hợp");
+        }
+      }
+    } catch (error) {
+      console.error("Lỗi khi tìm kiếm khách hàng:", error);
+      selectedCustomer.value = null;
+      customer.value = {
+        name: "",
+        phone: "",
+        city: "",
+        district: "",
+        ward: "",
+        address: "",
+      };
+      if (toastRef.value) {
+        toastRef.value.kshowToast("error", "Không thể tìm kiếm khách hàng: " + (error.response?.data?.error || error.message));
+      }
     }
   };
 
-  const addNewCustomer = () => {
-    selectedCustomer.value = true;
-    customer.value = { name: "", phone: "" };
-    if (toastRef.value) toastRef.value.kshowToast("info", "Thêm mới khách hàng");
+  const addNewCustomer = async (newCustomer) => {
+    console.log('Dữ liệu gửi lên:', newCustomer);
+    const customerData = {
+      tenKH: newCustomer.name?.trim(),
+      soDienThoai: newCustomer.phone,
+      thanhPho: newCustomer.city,
+      quan: newCustomer.district,
+      phuong: newCustomer.ward,
+      diaChiCuThe: newCustomer.address,
+    };
+
+    // Kiểm tra dữ liệu trước khi gửi
+    if (!customerData.tenKH || !customerData.soDienThoai || !customerData.thanhPho ||
+      !customerData.quan || !customerData.phuong || !customerData.diaChiCuThe) {
+      console.error('Dữ liệu không đầy đủ:', customerData);
+      if (toastRef.value) {
+        toastRef.value.kshowToast('error', 'Vui lòng điền đầy đủ thông tin khách hàng');
+      }
+      return;
+    }
+
+    try {
+      const response = await axios.post('http://localhost:8080/khach-hang/addBh', customerData, {
+        headers: { 'Content-Type': 'application/json' },
+      });
+      console.log('Phản hồi từ server:', response.data);
+      selectedCustomer.value = true;
+      customer.value = {
+        name: response.data.ten,
+        phone: response.data.soDienThoai || response.data.idTaiKhoan?.soDienThoai || '',
+        city: response.data.idDiaChiKH?.thanhPho,
+        district: response.data.idDiaChiKH?.quan,
+        ward: response.data.idDiaChiKH?.phuong,
+        address: response.data.idDiaChiKH?.diaChiCuThe,
+      };
+      if (toastRef.value) {
+        toastRef.value.kshowToast("success", `Đã thêm thành công khách hàng: ${response.data.ten}`);
+      }
+
+    } catch (error) {
+      console.error('Lỗi khi thêm khách hàng:', error);
+      console.log('Phản hồi lỗi từ server:', error.response?.data);
+      let errorMessage = 'Không thể thêm khách hàng';
+      if (error.response?.status === 400 && error.response?.data?.includes('constraint [UQ__')) {
+        errorMessage = 'Số điện thoại đã tồn tại. Vui lòng sử dụng số khác.';
+      } else {
+        errorMessage = error.response?.data || error.message;
+      }
+      if (toastRef.value) {
+        toastRef.value.kshowToast('error', errorMessage);
+      }
+      return;
+    }
   };
 
   const selectPayment = (method) => {
