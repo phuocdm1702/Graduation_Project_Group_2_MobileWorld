@@ -22,14 +22,14 @@ export function useBanHang(toastRef) {
   ]);
   const searchCustomer = ref("");
   const selectedCustomer = ref(null);
-  const customer = ref({ name: "", phone: "" });
+  const customer = ref({ name: "", phone: "", city: "", district: "", ward: "", address: ""});
   const receiver = ref({
     name: "",
     phone: "",
-    city: "Tỉnh Phú Thọ",
-    district: "Huyện Lâm Thao",
-    ward: "Xã Xuân Lũng",
-    address: "",
+    city: "",
+    district: "",
+    ward: "",
+    address: ""
   });
   const discountCode = ref("");
   const discount = ref(0);
@@ -331,26 +331,50 @@ export function useBanHang(toastRef) {
         ward: "",
         address: "",
       };
+      receiver.value = {
+        name: "",
+        phone: "",
+        city: "",
+        district: "",
+        ward: "",
+        address: "",
+      };
       return;
     }
 
     try {
       const response = await axios.get(`http://localhost:8080/khach-hang/search?query=${encodeURIComponent(searchCustomer.value.trim())}`);
       if (response.data && response.data.length > 0) {
-        // Lấy khách hàng đầu tiên trong danh sách
         const firstCustomer = response.data[0];
         selectedCustomer.value = true;
         customer.value = {
           name: firstCustomer.ten || "",
           phone: firstCustomer.idTaiKhoan?.soDienThoai || "",
-          city: firstCustomer.thanhPho || "",
-          district: firstCustomer.quan || "",
-          ward: firstCustomer.phuong || "",
-          address: firstCustomer.diaChiCuThe || "",
+          city: firstCustomer.idDiaChiKH?.thanhPho || "",
+          district: firstCustomer.idDiaChiKH?.quan || "",
+          ward: firstCustomer.idDiaChiKH?.phuong || "",
+          address: firstCustomer.idDiaChiKH?.diaChiCuThe || "",
+        };
+        // Đồng bộ dữ liệu với receiver
+        receiver.value = {
+          name: customer.value.name,
+          phone: customer.value.phone,
+          city: customer.value.city || "Tỉnh Phú Thọ", // Giá trị mặc định nếu không có
+          district: customer.value.district || "Huyện Lâm Thao",
+          ward: customer.value.ward || "Xã Xuân Lũng",
+          address: customer.value.address || "",
         };
       } else {
         selectedCustomer.value = null;
         customer.value = {
+          name: "",
+          phone: "",
+          city: "",
+          district: "",
+          ward: "",
+          address: "",
+        };
+        receiver.value = {
           name: "",
           phone: "",
           city: "",
@@ -366,6 +390,14 @@ export function useBanHang(toastRef) {
       console.error("Lỗi khi tìm kiếm khách hàng:", error);
       selectedCustomer.value = null;
       customer.value = {
+        name: "",
+        phone: "",
+        city: "",
+        district: "",
+        ward: "",
+        address: "",
+      };
+      receiver.value = {
         name: "",
         phone: "",
         city: "",

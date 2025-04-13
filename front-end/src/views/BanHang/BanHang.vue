@@ -169,22 +169,16 @@
                 <input v-model="customer.phone" type="text" class="mt-1 p-2 w-full border rounded" placeholder="0985357224" />
               </div>
               <div>
-                <label class="block text-sm font-medium text-gray-700">Tỉnh, Thành phố</label>
-                <select v-model="receiver.city" class="mt-1 p-2 w-full border rounded">
-                  <option>Tỉnh Phú Thọ</option>
-                </select>
+                <label class="block text-sm font-medium text-gray-700">Thành phố</label>
+                <input v-model="receiver.city" type="text" class="mt-1 p-2 w-full border rounded"  />
               </div>
               <div>
                 <label class="block text-sm font-medium text-gray-700">Quận, Huyện</label>
-                <select v-model="receiver.district" class="mt-1 p-2 w-full border rounded">
-                  <option>Huyện Lâm Thao</option>
-                </select>
+                <input v-model="receiver.district" type="text" class="mt-1 p-2 w-full border rounded"  />
               </div>
               <div>
-                <label class="block text-sm font-medium text-gray-700">Phường, Xã</label>
-                <select v-model="receiver.ward" class="mt-1 p-2 w-full border rounded">
-                  <option>Xã Xuân Lũng</option>
-                </select>
+                <label class="block text-sm font-medium text-gray-700">Phường, xã</label>
+                <input v-model="receiver.ward" type="text" class="mt-1 p-2 w-full border rounded"  />
               </div>
             </div>
             <div class="mt-4">
