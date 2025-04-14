@@ -11,20 +11,22 @@ export default function sanPham(toast) {
   const searchFilters = ref({
     idNhaSanXuat: '',
     idHeDieuHanh: '',
-    idManHinh: '',
-    idMauSac: '',
+    heDieuHanh: '',
+    phienBan: '',
+    idCongNgheManHinh: '',
+    congNgheManHinh: '',
+    chuanManHinh: '',
     idPin: '',
-    idRam: '',
-    idBoNhoTrong: '',
+    loaiPin: '',
+    dungLuongPin: '',
     idCpu: '',
     idGpu: '',
     idCumCamera: '',
     idThietKe: '',
     idSim: '',
-    idCongSac: '',
     idHoTroCongNgheSac: '',
     idCongNgheMang: '',
-    idLoaiTinhTrang: '',
+    stockStatus: '',
   });
   const currentPage = ref(0);
   const pageSize = ref(5);
@@ -34,9 +36,18 @@ export default function sanPham(toast) {
   const confirmMessage = ref('');
   const confirmedAction = ref(null);
 
+  // Options for all filters
   const nhaSanXuatOptions = ref([]);
   const heDieuHanhOptions = ref([]);
-  const manHinhOptions = ref([]);
+  const congNgheManHinhOptions = ref([]);
+  const pinOptions = ref([]);
+  const cpuOptions = ref([]);
+  const gpuOptions = ref([]);
+  const cumCameraOptions = ref([]);
+  const thietKeOptions = ref([]);
+  const simOptions = ref([]);
+  const hoTroCongNgheSacOptions = ref([]);
+  const congNgheMangOptions = ref([]);
 
   // Computed properties
   const totalPages = computed(() => Math.ceil(totalItems.value / pageSize.value));
@@ -47,7 +58,24 @@ export default function sanPham(toast) {
       const { data } = await axios.get('http://localhost:8080/san-pham', {
         params: { page: currentPage.value, size: pageSize.value },
       });
-      productDetails.value = data.content;
+      productDetails.value = data.content.map(item => ({
+        ...item,
+        nhaSanXuat: item.nhaSanXuat || 'N/A',
+        heDieuHanh: item.heDieuHanh || 'N/A',
+        phienBan: item.phienBan || 'N/A',
+        congNgheManHinh: item.congNgheManHinh || 'N/A',
+        chuanManHinh: item.chuanManHinh || 'N/A',
+        tenCpu: item.tenCpu || 'N/A',
+        cameraTruoc: item.cameraTruoc || 'N/A',
+        cameraSau: item.cameraSau || 'N/A',
+        loaiPin: item.loaiPin || 'N/A',
+        dungLuongPin: item.dungLuongPin || 'N/A',
+        soLuongSimHoTro: item.soLuongSimHoTro || 'N/A',
+        cacLoaiSimHoTro: item.cacLoaiSimHoTro || 'N/A',
+        imeiCount: item.imeiCount || 0,
+        minPrice: item.minPrice || 0,
+        maxPrice: item.maxPrice || 0,
+      }));
       totalItems.value = data.totalElements;
     } catch (error) {
       toast.value?.kshowToast('error', 'Không thể tải dữ liệu!');
@@ -55,17 +83,52 @@ export default function sanPham(toast) {
     }
   };
 
-  // Fetch options for filters
+  // Fetch options for all filters
   const fetchOptions = async () => {
     try {
-      const [nhaSanXuatRes, heDieuHanhRes, manHinhRes] = await Promise.all([
+      const [
+        nhaSanXuatRes,
+        heDieuHanhRes,
+        congNgheManHinhRes,
+        pinRes,
+        cumCameraRes,
+        cpuRes,
+        gpuRes,
+        thietKeRes,
+        simRes,
+        congNgheMangRes,
+      ] = await Promise.all([
         axios.get('http://localhost:8080/nha-san-xuat'),
         axios.get('http://localhost:8080/he-dieu-hanh'),
-        axios.get('http://localhost:8080/man-hinh'),
+        axios.get('http://localhost:8080/cong-nghe-man-hinh'),
+        axios.get('http://localhost:8080/pin'),
+        axios.get('http://localhost:8080/cum-camera'),
+        axios.get('http://localhost:8080/cpu'),
+        axios.get('http://localhost:8080/gpu'),
+        axios.get('http://localhost:8080/thiet-ke'),
+        axios.get('http://localhost:8080/sim'),
+        axios.get('http://localhost:8080/cong-nghe-mang'),
       ]);
+
+      console.log('nhaSanXuatRes:', nhaSanXuatRes.data);
+      console.log('heDieuHanhRes:', heDieuHanhRes.data);
+      console.log('congNgheManHinhRes:', congNgheManHinhRes.data);
+      console.log('pinRes:', pinRes.data);
+
       nhaSanXuatOptions.value = nhaSanXuatRes.data.content || nhaSanXuatRes.data || [];
       heDieuHanhOptions.value = heDieuHanhRes.data.content || heDieuHanhRes.data || [];
-      manHinhOptions.value = manHinhRes.data.content || manHinhRes.data || [];
+      congNgheManHinhOptions.value = congNgheManHinhRes.data.content || congNgheManHinhRes.data || [];
+      pinOptions.value = pinRes.data.content || pinRes.data || [];
+      cpuOptions.value = cpuRes.data.content || cpuRes.data || [];
+      gpuOptions.value = gpuRes.data.content || gpuRes.data || [];
+      cumCameraOptions.value = cumCameraRes.data.content || cumCameraRes.data || [];
+      thietKeOptions.value = thietKeRes.data.content || thietKeRes.data || [];
+      simOptions.value = simRes.data.content || simRes.data || [];
+      congNgheMangOptions.value = congNgheMangRes.data.content || congNgheMangRes.data || [];
+
+      console.log('heDieuHanhOptions:', heDieuHanhOptions.value);
+      console.log('congNgheManHinhOptions:', congNgheManHinhOptions.value);
+      console.log('pinOptions:', pinOptions.value);
     } catch (error) {
       toast.value?.kshowToast('error', 'Lỗi khi tải danh sách tùy chọn!');
       console.error('Fetch options error:', error);
@@ -82,21 +145,67 @@ export default function sanPham(toast) {
     }
   };
 
-  // Search product details
+  // Search product details with all filters
   const searchProductDetails = async () => {
-    const keyword = searchKeyword.value.replace(/\s+/g, '').trim();
+    const keyword = searchKeyword.value;
     try {
-      const { data } = await axios.get('http://localhost:8080/san-pham/search', {
-        params: {
-          keyword: keyword || undefined,
-          idNhaSanXuat: searchFilters.value.idNhaSanXuat || undefined,
-          idHeDieuHanh: searchFilters.value.idHeDieuHanh || undefined,
-          idManHinh: searchFilters.value.idManHinh || undefined,
-          page: currentPage.value,
-          size: pageSize.value,
-        },
-      });
-      productDetails.value = data.content;
+      let inStock;
+      if (searchFilters.value.stockStatus === 'inStock') {
+        inStock = true;
+      } else if (searchFilters.value.stockStatus === 'outOfStock') {
+        inStock = false;
+      } else {
+        inStock = undefined;
+      }
+
+      const params = {
+        keyword: keyword || undefined,
+        idNhaSanXuat: searchFilters.value.idNhaSanXuat || undefined,
+        idHeDieuHanh: searchFilters.value.idHeDieuHanh || undefined,
+        heDieuHanh: searchFilters.value.heDieuHanh || undefined,
+        phienBan: searchFilters.value.phienBan || undefined,
+        idCongNgheManHinh: searchFilters.value.idCongNgheManHinh || undefined,
+        congNgheManHinh: searchFilters.value.congNgheManHinh || undefined,
+        chuanManHinh: searchFilters.value.chuanManHinh || undefined,
+        idPin: searchFilters.value.idPin || undefined,
+        loaiPin: searchFilters.value.loaiPin || undefined,
+        dungLuongPin: searchFilters.value.dungLuongPin || undefined,
+        idCpu: searchFilters.value.idCpu || undefined,
+        idGpu: searchFilters.value.idGpu || undefined,
+        idCumCamera: searchFilters.value.idCumCamera || undefined,
+        idThietKe: searchFilters.value.idThietKe || undefined,
+        idSim: searchFilters.value.idSim || undefined,
+        idHoTroCongNgheSac: searchFilters.value.idHoTroCongNgheSac || undefined,
+        idCongNgheMang: searchFilters.value.idCongNgheMang || undefined,
+        inStock: inStock,
+        page: currentPage.value,
+        size: pageSize.value,
+      };
+
+      console.log('Search params:', params);
+
+      const { data } = await axios.get('http://localhost:8080/san-pham/search', { params });
+      console.log('API response:', data);
+
+      productDetails.value = data.content.map(item => ({
+        ...item,
+        nhaSanXuat: item.nhaSanXuat || 'N/A',
+        heDieuHanh: item.heDieuHanh || 'N/A',
+        phienBan: item.phienBan || 'N/A',
+        congNgheManHinh: item.congNgheManHinh || 'N/A',
+        chuanManHinh: item.chuanManHinh || 'N/A',
+        tenCpu: item.tenCpu || 'N/A',
+        cameraTruoc: item.cameraTruoc || 'N/A',
+        cameraSau: item.cameraSau || 'N/A',
+        loaiPin: item.loaiPin || 'N/A',
+        dungLuongPin: item.dungLuongPin || 'N/A',
+        soLuongSimHoTro: item.soLuongSimHoTro || 'N/A',
+        cacLoaiSimHoTro: item.cacLoaiSimHoTro || 'N/A',
+        imeiCount: item.imeiCount || 0,
+        minPrice: item.minPrice || 0,
+        maxPrice: item.maxPrice || 0,
+      }));
+
       totalItems.value = data.totalElements;
     } catch (error) {
       toast.value?.kshowToast('error', 'Lỗi tìm kiếm!');
@@ -110,52 +219,36 @@ export default function sanPham(toast) {
     searchFilters.value = {
       idNhaSanXuat: '',
       idHeDieuHanh: '',
-      idManHinh: '',
-      idMauSac: '',
+      heDieuHanh: '',
+      phienBan: '',
+      idCongNgheManHinh: '',
+      congNgheManHinh: '',
+      chuanManHinh: '',
       idPin: '',
-      idRam: '',
-      idBoNhoTrong: '',
+      loaiPin: '',
+      dungLuongPin: '',
       idCpu: '',
       idGpu: '',
       idCumCamera: '',
       idThietKe: '',
       idSim: '',
-      idCongSac: '',
       idHoTroCongNgheSac: '',
       idCongNgheMang: '',
-      idLoaiTinhTrang: '',
+      stockStatus: '',
     };
     isSearching.value = false;
     currentPage.value = 0;
     fetchData();
   };
 
-  // Soft delete single product
-  const deleteProductDetail = async (id) => {
-    try {
-      await axios.delete(`http://localhost:8080/san-pham/${id}`);
-      toast.value?.kshowToast('success', 'Đã đánh dấu sản phẩm là hết hàng!');
-      await refreshData();
-    } catch (error) {
-      toast.value?.kshowToast('error', 'Lỗi khi cập nhật trạng thái!');
-      console.error('Soft delete error:', error);
-    }
-  };
+  // Navigation
+  const navigateToAddPage = () => router.push('/products/add');
+  const navigateToEditPage = (id) => router.push(`/products/edit/${id}`);
 
-  // Refresh data based on search state
-  const refreshData = async () => {
-    if (isSearching.value) {
-      await searchProductDetails();
-    } else {
-      await fetchData();
-    }
-  };
+  // Utility
+  const getNestedValue = (obj, path) => path.split('.').reduce((acc, part) => acc && acc[part], obj);
 
-  // Confirm actions
-  const confirmDelete = (id) => {
-    confirmAction('Bạn có chắc chắn muốn đánh dấu sản phẩm này là hết hàng?', () => deleteProductDetail(id));
-  };
-
+  // Modal handlers
   const confirmAction = (message, action) => {
     confirmMessage.value = message;
     confirmedAction.value = action;
@@ -172,33 +265,31 @@ export default function sanPham(toast) {
     confirmedAction.value = null;
   };
 
-  // Navigation
-  const navigateToAddPage = () => router.push('/products/add');
-
-  // Utility
-  const getNestedValue = (obj, path) => path.split('.').reduce((acc, part) => acc && acc[part], obj);
-
   // Event handlers
   const handleCustomEvents = () => {
     document.addEventListener('viewDetails', (event) => {
       router.push(`/products/${event.detail.id}`);
     });
-    document.addEventListener('confirmDelete', (event) => {
-      confirmDelete(event.detail);
+    document.addEventListener('editProduct', (event) => {
+      navigateToEditPage(event.detail);
     });
   };
 
   // Watchers
-  watch([searchKeyword, searchFilters], () => {
-    currentPage.value = 0;
-    if (searchKeyword.value || Object.values(searchFilters.value).some(val => val)) {
-      isSearching.value = true;
-      searchProductDetails();
-    } else {
-      isSearching.value = false;
-      fetchData();
-    }
-  }, { deep: true });
+  watch(
+    [searchKeyword, searchFilters],
+    () => {
+      currentPage.value = 0;
+      if (searchKeyword.value || Object.values(searchFilters.value).some(val => val)) {
+        isSearching.value = true;
+        searchProductDetails();
+      } else {
+        isSearching.value = false;
+        fetchData();
+      }
+    },
+    { deep: true }
+  );
 
   // Lifecycle
   onMounted(() => {
@@ -215,19 +306,27 @@ export default function sanPham(toast) {
     totalPages,
     nhaSanXuatOptions,
     heDieuHanhOptions,
-    manHinhOptions,
+    congNgheManHinhOptions,
+    pinOptions,
+    cpuOptions,
+    gpuOptions,
+    cumCameraOptions,
+    thietKeOptions,
+    simOptions,
+    hoTroCongNgheSacOptions,
+    congNgheMangOptions,
     fetchData,
     fetchOptions,
     goToPage,
     searchProductDetails,
     resetSearch,
-    confirmDelete,
-    confirmAction,
-    executeConfirmedAction,
-    closeConfirmModal,
+    navigateToEditPage,
     navigateToAddPage,
     getNestedValue,
     showConfirmModal,
     confirmMessage,
+    confirmAction,
+    executeConfirmedAction,
+    closeConfirmModal,
   };
 }

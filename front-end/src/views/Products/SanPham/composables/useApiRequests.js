@@ -3,7 +3,7 @@ import axios from 'axios';
 
 export function useApiRequests(toast) {
   const heDieuHanhOptions = ref([]);
-  const manHinhOptions = ref([]);
+  const congNgheManHinhOptions = ref([]);
   const nhaSanXuatOptions = ref([]);
   const cumCameraOptions = ref([]);
   const simOptions = ref([]);
@@ -12,43 +12,18 @@ export function useApiRequests(toast) {
   const cpuOptions = ref([]);
   const gpuOptions = ref([]);
   const congNgheMangOptions = ref([]);
-  const congSacOptions = ref([]);
   const hoTroCongNgheSacOptions = ref([]);
   const chiSoKhangBuiVaNuocOptions = ref([]);
-  const tinhTrangOptions = ref([]);
   const ramOptions = ref([]);
   const boNhoTrongOptions = ref([]);
   const mauSacOptions = ref([]);
 
   const fetchOptions = async () => {
     try {
-      const [
-        heDieuHanhRes, manHinhRes, nhaSanXuatRes, cumCameraRes, simRes,
-        thietKeRes, pinRes, cpuRes, gpuRes, congNgheMangRes, congSacRes,
-        hoTroCongNgheSacRes, chiSoKhangBuiVaNuocRes, tinhTrangRes, ramRes,
-        boNhoTrongRes, mauSacRes,
-      ] = await Promise.all([
-        axios.get('http://localhost:8080/he-dieu-hanh'),
-        axios.get('http://localhost:8080/man-hinh'),
-        axios.get('http://localhost:8080/nha-san-xuat'),
-        axios.get('http://localhost:8080/cum-camera/details'),
-        axios.get('http://localhost:8080/sim'),
-        axios.get('http://localhost:8080/thiet-ke'),
-        axios.get('http://localhost:8080/pin'),
-        axios.get('http://localhost:8080/cpu'),
-        axios.get('http://localhost:8080/gpu'),
-        axios.get('http://localhost:8080/cong-nghe-mang'),
-        axios.get('http://localhost:8080/cong-sac'),
-        axios.get('http://localhost:8080/ho-tro-cong-nghe-sac/details'),
-        axios.get('http://localhost:8080/chi-so-khang-bui-va-nuoc'),
-        axios.get('http://localhost:8080/tinh-trang'),
-        axios.get('http://localhost:8080/ram'),
-        axios.get('http://localhost:8080/bo-nho-trong'),
-        axios.get('http://localhost:8080/mau-sac'),
-      ]);
+      const [        heDieuHanhRes, congNgheManHinhRes, nhaSanXuatRes, cumCameraRes, simRes,        thietKeRes, pinRes, cpuRes, gpuRes, congNgheMangRes,        hoTroCongNgheSacRes, chiSoKhangBuiVaNuocRes, ramRes,        boNhoTrongRes, mauSacRes,      ] = await Promise.all([        axios.get('http://localhost:8080/he-dieu-hanh'),        axios.get('http://localhost:8080/cong-nghe-man-hinh'),        axios.get('http://localhost:8080/nha-san-xuat'),        axios.get('http://localhost:8080/cum-camera'),        axios.get('http://localhost:8080/sim'),        axios.get('http://localhost:8080/thiet-ke'),        axios.get('http://localhost:8080/pin'),        axios.get('http://localhost:8080/cpu'),        axios.get('http://localhost:8080/gpu'),        axios.get('http://localhost:8080/cong-nghe-mang'),        axios.get('http://localhost:8080/ho-tro-cong-nghe-sac'),        axios.get('http://localhost:8080/chi-so-khang-bui-va-nuoc'),        axios.get('http://localhost:8080/ram'),        axios.get('http://localhost:8080/bo-nho-trong'),        axios.get('http://localhost:8080/mau-sac'),      ]);
 
       heDieuHanhOptions.value = heDieuHanhRes.data.content || [];
-      manHinhOptions.value = manHinhRes.data.content || [];
+      congNgheManHinhOptions.value = congNgheManHinhRes.data.content || [];
       nhaSanXuatOptions.value = nhaSanXuatRes.data.content || [];
       cumCameraOptions.value = cumCameraRes.data.content || [];
       simOptions.value = simRes.data.content || [];
@@ -57,10 +32,8 @@ export function useApiRequests(toast) {
       cpuOptions.value = cpuRes.data.content || [];
       gpuOptions.value = gpuRes.data.content || [];
       congNgheMangOptions.value = congNgheMangRes.data.content || [];
-      congSacOptions.value = congSacRes.data.content || [];
       hoTroCongNgheSacOptions.value = hoTroCongNgheSacRes.data.content || [];
       chiSoKhangBuiVaNuocOptions.value = chiSoKhangBuiVaNuocRes.data.content || [];
-      tinhTrangOptions.value = tinhTrangRes.data.content || [];
       ramOptions.value = ramRes.data.content || [];
       boNhoTrongOptions.value = boNhoTrongRes.data.content || [];
       mauSacOptions.value = mauSacRes.data.content || [];
@@ -82,13 +55,13 @@ export function useApiRequests(toast) {
           heDieuHanhOptions.value.push(response.data);
           productData.value.idHeDieuHanh = response.data.id;
           break;
-        case 'manHinh':
-          response = await axios.post('http://localhost:8080/man-hinh', {
+        case 'congNgheManHinh':
+          response = await axios.post('http://localhost:8080/cong-nghe-man-hinh', {
             kichThuoc: data.kichThuoc,
             doPhanGiai: data.doPhanGiai,
           });
-          manHinhOptions.value.push(response.data);
-          productData.value.idManHinh = response.data.id;
+          congNgheManHinhOptions.value.push(response.data);
+          productData.value.congNgheManHinh = response.data.id;
           break;
         case 'nhaSanXuat':
           console.log('Adding manufacturer:', data.nhaSanXuat);
@@ -155,19 +128,12 @@ export function useApiRequests(toast) {
           congNgheMangOptions.value.push(response.data);
           productData.value.idCongNgheMang = response.data.id;
           break;
-        case 'congSac':
-          response = await axios.post('http://localhost:8080/cong-sac', {
-            congSac: data.congSac,
-          });
-          congSacOptions.value.push(response.data);
-          productData.value.idCongSac = response.data.id;
-          break;
         case 'hoTroCongNgheSac':
           response = await axios.post('http://localhost:8080/ho-tro-cong-nghe-sac', {
             tenCongNgheSac: data.tenCongNgheSac,
           });
           hoTroCongNgheSacOptions.value.push(response.data);
-          productData.value.idHoTroCongNgheSac = response.data.id;
+          productData.value.hoTroCongNgheSac = response.data.id;
           break;
         case 'chiSoKhangBuiVaNuoc':
           response = await axios.post('http://localhost:8080/chi-so-khang-bui-va-nuoc', {
@@ -175,13 +141,6 @@ export function useApiRequests(toast) {
           });
           chiSoKhangBuiVaNuocOptions.value.push(response.data);
           productData.value.idChiSoKhangBuiVaNuoc = response.data.id;
-          break;
-        case 'tinhTrang':
-          response = await axios.post('http://localhost:8080/tinh-trang', {
-            loaiTinhTrang: data.loaiTinhTrang,
-          });
-          tinhTrangOptions.value.push(response.data);
-          productData.value.idLoaiTinhTrang = response.data.id;
           break;
         case 'ram':
           response = await axios.post('http://localhost:8080/ram', {
@@ -224,7 +183,7 @@ export function useApiRequests(toast) {
 
   return {
     heDieuHanhOptions,
-    manHinhOptions,
+    congNgheManHinhOptions,
     nhaSanXuatOptions,
     cumCameraOptions,
     simOptions,
@@ -233,10 +192,8 @@ export function useApiRequests(toast) {
     cpuOptions,
     gpuOptions,
     congNgheMangOptions,
-    congSacOptions,
     hoTroCongNgheSacOptions,
     chiSoKhangBuiVaNuocOptions,
-    tinhTrangOptions,
     ramOptions,
     boNhoTrongOptions,
     mauSacOptions,

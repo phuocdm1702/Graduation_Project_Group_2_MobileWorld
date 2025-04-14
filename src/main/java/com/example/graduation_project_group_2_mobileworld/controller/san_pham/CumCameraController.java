@@ -1,6 +1,7 @@
 package com.example.graduation_project_group_2_mobileworld.controller.san_pham;
 
 import com.example.graduation_project_group_2_mobileworld.dto.san_pham.CumCameraDTO;
+import com.example.graduation_project_group_2_mobileworld.dto.san_pham.GpuDTO;
 import com.example.graduation_project_group_2_mobileworld.service.san_pham.CumCameraService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -18,10 +19,10 @@ public class CumCameraController {
         this.cumCameraService = cumCameraService;
     }
 
-    @GetMapping("/details")
-    public ResponseEntity<Page<CumCameraDTO>> getCameraDetails(
+    @GetMapping
+    public ResponseEntity<Page<CumCameraDTO>> getAll(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size) {
-        return ResponseEntity.ok(cumCameraService.getCameraDetails(page, size));
+        return ResponseEntity.ok(cumCameraService.getAllCumCamera(page, size));
     }
 }

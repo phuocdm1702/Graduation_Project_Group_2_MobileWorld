@@ -1,18 +1,19 @@
 package com.example.graduation_project_group_2_mobileworld.dto.san_pham;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
+@AllArgsConstructor
 public class HoTroCongNgheSacDTO {
     private Integer id;
     private String ma;
-    private String tenCongNgheSac;
+    private String congSac;
 
-    // Constructors
-    public HoTroCongNgheSacDTO() {}
+    private String congNgheHoTro;
 
-    // Getters and setters
-    public Integer getId() { return id; }
-    public void setId(Integer id) { this.id = id; }
-    public String getMa() { return ma; }
-    public void setMa(String ma) { this.ma = ma; }
-    public String getTenCongNgheSac() { return tenCongNgheSac; }
-    public void setTenCongNgheSac(String tenCongNgheSac) { this.tenCongNgheSac = tenCongNgheSac; }
+    private Boolean deleted = false;
+
 }

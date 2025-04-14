@@ -2,37 +2,58 @@
   <div>
     <BreadcrumbWrapper v-if="breadcrumbItems" :breadcrumb-items="breadcrumbItems"/>
 
-    <!-- Kiểm tra an toàn cho heDieuHanhOptions -->
-    <div v-if="heDieuHanhOptions && heDieuHanhOptions.length" class="mt-2 mx-auto">
+    <div class="mt-2 mx-auto">
       <ToastNotification ref="toast"/>
 
+      <div v-if="isLoading" class="text-center">
+        <p>Đang tải dữ liệu...</p>
+      </div>
+
       <div class="bg-white shadow-lg rounded-lg p-5 mb-4">
-        <h3 class="text-lg font-medium text-gray-600 mb-4 text-center">THÊM SẢN PHẨM</h3>
+        <h3 class="text-xl font-semibold text-gray-800 mb-6 text-center">THÊM SẢN PHẨM</h3>
         <div class="grid grid-cols-1 gap-6">
-          <div class="flex items-center">
-            <label class="w-40 text-sm font-medium text-gray-700">Tên Sản Phẩm</label>
-            <input
-              v-model="productData.tenSanPham"
-              type="text"
-              placeholder="Nhập Tên sản phẩm"
-              @input="trimSpaces"
-              class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
+          <!-- Tên sản phẩm -->
+          <div class="flex items-center relative">
+            <label class="w-28 text-sm font-medium text-gray-700">Tên Sản Phẩm</label>
+            <div class="w-full relative">
+              <input
+                v-model="productData.tenSanPham"
+                type="text"
+                placeholder="Nhập hoặc chọn tên sản phẩm"
+                class="input-field p-2 border border-gray-300"
+                @focus="showProductDropdown = true"
+                @blur="delayHideProductDropdown"
+                @input="filterProducts"
+              />
+              <div
+                v-if="showProductDropdown && filteredProductNameOptions.length > 0"
+                class="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-48 overflow-y-auto"
+              >
+                <div
+                  v-for="product in filteredProductNameOptions"
+                  :key="product.id"
+                  class="p-2 hover:bg-gray-100 cursor-pointer"
+                  @click="selectProduct(product)"
+                >
+                  {{ product.tenSanPham }}
+                </div>
+              </div>
+            </div>
           </div>
 
           <!-- Hệ Điều Hành, Màn Hình, Nhà Sản Xuất -->
           <div class="grid grid-cols-3 gap-6">
             <div class="flex items-center">
               <label class="w-36 text-sm font-medium text-gray-700">Hệ Điều Hành</label>
-              <select
+              <v-select
                 v-model="productData.idHeDieuHanh"
-                class="w-3/5 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option v-for="he in heDieuHanhOptions" :key="he.id" :value="he.id">{{
-                    he.heDieuHanh + " " + he.phienBan
-                  }}
-                </option>
-              </select>
+                :options="heDieuHanhOptions"
+                :get-option-label="option => `${option.heDieuHanh} ${option.phienBan}`"
+                :reduce="option => option.id"
+                placeholder="Chọn Hệ Điều Hành"
+                class="input-field w-3/5"
+                
+              />
               <button
                 @click="openAddModal('heDieuHanh')"
                 class="ml-2 px-2 py-1 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition"
@@ -42,16 +63,17 @@
             </div>
             <div class="flex items-center">
               <label class="w-36 text-sm font-medium text-gray-700">Màn Hình</label>
-              <select
-                v-model="productData.idManHinh"
-                class="w-3/5 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option v-for="man in manHinhOptions" :key="man.id" :value="man.id">
-                  {{ man.kichThuoc + " " + man.doPhanGiai }}
-                </option>
-              </select>
+              <v-select
+                v-model="productData.congNgheManHinh"
+                :options="congNgheManHinhOptions"
+                :get-option-label="option => `${option.congNgheManHinh} ${option.chuanManHinh}`"
+                :reduce="option => option.id"
+                placeholder="Chọn Màn Hình"
+                class="input-field w-3/5"
+                
+              />
               <button
-                @click="openAddModal('manHinh')"
+                @click="openAddModal('congNgheManHinh')"
                 class="ml-2 px-2 py-1 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition"
               >
                 +
@@ -59,14 +81,15 @@
             </div>
             <div class="flex items-center">
               <label class="w-36 text-sm font-medium text-gray-700">Nhà Sản Xuất</label>
-              <select
+              <v-select
                 v-model="productData.idNhaSanXuat"
-                class="w-3/5 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option v-for="nha in nhaSanXuatOptions" :key="nha.id" :value="nha.id">
-                  {{ nha.nhaSanXuat }}
-                </option>
-              </select>
+                :options="nhaSanXuatOptions"
+                label="nhaSanXuat"
+                :reduce="option => option.id"
+                placeholder="Chọn Nhà Sản Xuất"
+                class="input-field w-3/5"
+                
+              />
               <button
                 @click="openAddModal('nhaSanXuat')"
                 class="ml-2 px-2 py-1 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition"
@@ -75,19 +98,20 @@
               </button>
             </div>
           </div>
-          
+
           <!-- Camera, Sim, Thiết Kế -->
           <div class="grid grid-cols-3 gap-6">
             <div class="flex items-center">
               <label class="w-36 text-sm font-medium text-gray-700">Cụm Camera</label>
-              <select
+              <v-select
                 v-model="productData.idCumCamera"
-                class="w-3/5 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option v-for="camera in cumCameraOptions" :key="camera.id" :value="camera.id">
-                  (Trước: {{ camera.cameraTruoc || 'N/A' }}, Sau: {{ camera.cameraSau || 'N/A' }})
-                </option>
-              </select>
+                :options="cumCameraOptions"
+                :get-option-label="option => `${option.cameraTruoc || 'N/A'} (${option.cameraSau ? option.cameraSau.split(',').slice(0, 2).join(', ') : 'N/A'})`"
+                :reduce="option => option.id"
+                placeholder="Chọn Cụm Camera"
+                class="input-field w-3/5"
+                
+              />
               <button
                 @click="openAddModal('cumCamera')"
                 class="ml-2 px-2 py-1 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition"
@@ -97,14 +121,15 @@
             </div>
             <div class="flex items-center">
               <label class="w-36 text-sm font-medium text-gray-700">Sim</label>
-              <select
+              <v-select
                 v-model="productData.idSim"
-                class="w-3/5 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option v-for="sim in simOptions" :key="sim.id" :value="sim.id">
-                  {{ sim.cacLoaiSimHoTro + " " + "(hỗ trợ " + sim.soLuongSimHoTro + " sim)" }}
-                </option>
-              </select>
+                :options="simOptions"
+                :get-option-label="option => `${option.cacLoaiSimHoTro} (hỗ trợ ${option.soLuongSimHoTro} sim)`"
+                :reduce="option => option.id"
+                placeholder="Chọn Sim"
+                class="input-field w-3/5"
+                
+              />
               <button
                 @click="openAddModal('sim')"
                 class="ml-2 px-2 py-1 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition"
@@ -114,14 +139,15 @@
             </div>
             <div class="flex items-center">
               <label class="w-36 text-sm font-medium text-gray-700">Thiết Kế</label>
-              <select
+              <v-select
                 v-model="productData.idThietKe"
-                class="w-3/5 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option v-for="thietKe in thietKeOptions" :key="thietKe.id" :value="thietKe.id">
-                  {{ thietKe.chatLieuKhung + " " + "(" + thietKe.chatLieuMatLung + ")" }}
-                </option>
-              </select>
+                :options="thietKeOptions"
+                :get-option-label="option => `${option.chatLieuKhung} (${option.chatLieuMatLung})`"
+                :reduce="option => option.id"
+                placeholder="Chọn Thiết Kế"
+                class="input-field w-3/5"
+                
+              />
               <button
                 @click="openAddModal('thietKe')"
                 class="ml-2 px-2 py-1 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition"
@@ -131,18 +157,19 @@
             </div>
           </div>
 
-          <!-- Pin, CPU, GPU, Công Nghệ Mạng, Công Nghệ Sạc, Hỗ Trợ Công Nghệ Sạc, Chỉ Số Kháng Bụi Nước, Tình Trạng -->
-          <div class="grid grid-cols-2 gap-6">
+          <!-- Pin, CPU, GPU, Công Nghệ Mạng, Công Nghệ Sạc, Hỗ Trợ Công Nghệ Sạc, Chỉ Số Kháng Bụi Nước -->
+          <div class="grid grid-cols-3 gap-6">
             <div class="flex items-center">
               <label class="w-36 text-sm font-medium text-gray-700">Pin</label>
-              <select
+              <v-select
                 v-model="productData.idPin"
-                class="w-3/5 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option v-for="pin in pinOptions" :key="pin.id" :value="pin.id">
-                  {{ pin.loaiPin + " " + "(" + pin.dungLuongPin + ")" }}
-                </option>
-              </select>
+                :options="pinOptions"
+                :get-option-label="option => `${option.loaiPin} (${option.dungLuongPin})`"
+                :reduce="option => option.id"
+                placeholder="Chọn Pin"
+                class="input-field w-3/5"
+                
+              />
               <button
                 @click="openAddModal('pin')"
                 class="ml-2 px-2 py-1 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition"
@@ -151,15 +178,16 @@
               </button>
             </div>
             <div class="flex items-center">
-              <label class="ml-24 w-36 text-sm font-medium text-gray-700">CPU</label>
-              <select
+              <label class="w-36 text-sm font-medium text-gray-700">CPU</label>
+              <v-select
                 v-model="productData.idCpu"
-                class="w-3/5 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option v-for="cpu in cpuOptions" :key="cpu.id" :value="cpu.id">
-                  {{ cpu.tenCpu + " " + "(" + cpu.soNhan + " lõi)" }}
-                </option>
-              </select>
+                :options="cpuOptions"
+                :get-option-label="option => `${option.tenCpu} (${option.soNhan} lõi)`"
+                :reduce="option => option.id"
+                placeholder="Chọn CPU"
+                class="input-field w-3/5"
+                
+              />
               <button
                 @click="openAddModal('cpu')"
                 class="ml-2 px-2 py-1 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition"
@@ -169,12 +197,15 @@
             </div>
             <div class="flex items-center">
               <label class="w-36 text-sm font-medium text-gray-700">GPU</label>
-              <select
+              <v-select
                 v-model="productData.idGpu"
-                class="w-3/5 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option v-for="gpu in gpuOptions" :key="gpu.id" :value="gpu.id">{{ gpu.tenGpu }}</option>
-              </select>
+                :options="gpuOptions"
+                label="tenGpu"
+                :reduce="option => option.id"
+                placeholder="Chọn GPU"
+                class="input-field w-3/5"
+                
+              />
               <button
                 @click="openAddModal('gpu')"
                 class="ml-2 px-2 py-1 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition"
@@ -183,15 +214,16 @@
               </button>
             </div>
             <div class="flex items-center">
-              <label class="ml-24 w-36 text-sm font-medium text-gray-700">Công Nghệ Mạng</label>
-              <select
+              <label class="w-36 text-sm font-medium text-gray-700">Công Nghệ Mạng</label>
+              <v-select
                 v-model="productData.idCongNgheMang"
-                class="w-3/5 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option v-for="congNghe in congNgheMangOptions" :key="congNghe.id" :value="congNghe.id">
-                  {{ congNghe.tenCongNgheMang }}
-                </option>
-              </select>
+                :options="congNgheMangOptions"
+                label="tenCongNgheMang"
+                :reduce="option => option.id"
+                placeholder="Chọn Công Nghệ Mạng"
+                class="input-field"
+                
+              />
               <button
                 @click="openAddModal('congNgheMang')"
                 class="ml-2 px-2 py-1 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition"
@@ -200,33 +232,16 @@
               </button>
             </div>
             <div class="flex items-center">
-              <label class="w-36 text-sm font-medium text-gray-700">Cổng Sạc</label>
-              <select
-                v-model="productData.idCongSac"
-                class="w-3/5 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option v-for="congSac in congSacOptions" :key="congSac.id" :value="congSac.id">{{
-                    congSac.congSac
-                  }}
-                </option>
-              </select>
-              <button
-                @click="openAddModal('congSac')"
-                class="ml-2 px-2 py-1 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition"
-              >
-                +
-              </button>
-            </div>
-            <div class="flex items-center">
-              <label class="ml-24 w-36 text-sm font-medium text-gray-700">Hỗ Trợ Công Nghệ Sạc</label>
-              <select
-                v-model="productData.idHoTroCongNgheSac"
-                class="w-3/5 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option v-for="hoTro in hoTroCongNgheSacOptions" :key="hoTro.id" :value="hoTro.id">
-                  {{ hoTro.tenCongNgheSac || 'N/A' }}
-                </option>
-              </select>
+              <label class="w-36 text-sm font-medium text-gray-700">Hỗ Trợ Công Nghệ Sạc</label>
+              <v-select
+                v-model="productData.hoTroCongNgheSac"
+                :options="hoTroCongNgheSacOptions"
+                :get-option-label="option => `${option.congSac || 'N/A'} (${option.congNgheHoTro ? option.congNgheHoTro.split(',').slice(0, 2).join(', ') : 'N/A'})`"
+                :reduce="option => option.id"
+                placeholder="Chọn Hỗ Trợ Công Nghệ Sạc"
+                class="input-field w-3/5"
+                
+              />
               <button
                 @click="openAddModal('hoTroCongNgheSac')"
                 class="ml-2 px-2 py-1 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition"
@@ -236,15 +251,15 @@
             </div>
             <div class="flex items-center">
               <label class="w-36 text-sm font-medium text-gray-700">Kháng Bụi Nước</label>
-              <select
+              <v-select
                 v-model="productData.idChiSoKhangBuiVaNuoc"
-                class="w-3/5 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option v-for="chiSo in chiSoKhangBuiVaNuocOptions" :key="chiSo.id" :value="chiSo.id">{{
-                    chiSo.tenChiSo
-                  }}
-                </option>
-              </select>
+                :options="chiSoKhangBuiVaNuocOptions"
+                label="tenChiSo"
+                :reduce="option => option.id"
+                placeholder="Chọn Kháng Bụi Nước"
+                class="input-field w-3/5"
+                
+              />
               <button
                 @click="openAddModal('chiSoKhangBuiVaNuoc')"
                 class="ml-2 px-2 py-1 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition"
@@ -252,54 +267,29 @@
                 +
               </button>
             </div>
-            <div class="flex items-center">
-              <label class="ml-24 w-36 text-sm font-medium text-gray-700">Tình Trạng</label>
-              <select
-                v-model="productData.idLoaiTinhTrang"
-                class="w-3/5 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option v-for="tinhTrang in tinhTrangOptions" :key="tinhTrang.id" :value="tinhTrang.id">
-                  {{ tinhTrang.loaiTinhTrang }}
-                </option>
-              </select>
-              <button
-                @click="openAddModal('tinhTrang')"
-                class="ml-2 px-2 py-1 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition"
-              >
-                +
-              </button>
-            </div>
-          </div>
-
-          <!-- Tiện Ích Đặc Biệt-->
-          <div class="grid grid-cols-1 gap-6">
-            <div class="flex items-center">
-              <label class="w-40 text-sm font-medium text-gray-700">Tiện Ích Đặc Biệt</label>
-              <input
-                v-model="productData.tienIchDacBiet"
-                type="text"
-                placeholder="Nhập Tiện Ích Đặc Biệt"
-                class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
           </div>
         </div>
       </div>
 
       <!-- Phần Thêm Phiên Bản -->
       <div class="bg-white shadow-lg rounded-lg p-5 mb-4">
-        <h3 class="text-lg font-medium text-gray-600 mb-4 text-center">THÊM PHIÊN BẢN</h3>
+        <h3 class="text-xl font-semibold text-gray-800 mb-6 text-center">THÊM PHIÊN BẢN</h3>
         <div class="grid grid-cols-3 gap-6">
           <!-- RAM -->
           <div class="flex items-center relative">
             <label class="w-36 text-sm font-medium text-gray-700">RAM</label>
-            <div class="w-3/5 relative">
+            <div class="w-full relative">
               <button
                 @click="toggleDropdown('ram')"
-                class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-left"
+                class="input-field p-2 border border-gray-300 text-left"
               >
                 {{
-                  currentVariant.selectedRams.length > 0 ? currentVariant.selectedRams.length + ' RAM đã chọn' : 'Chọn RAM'
+                  currentVariant.selectedRams.length > 0
+                    ? currentVariant.selectedRams
+                    .map((id) => ramOptions.find((r) => r.id === id)?.dungLuong)
+                    .filter(Boolean)
+                    .join(', ') || 'Không có RAM hợp lệ'
+                    : 'Chọn RAM'
                 }}
               </button>
               <div
@@ -325,15 +315,21 @@
             </button>
           </div>
 
+          <!-- Bộ Nhớ Trong -->
           <div class="flex items-center relative">
             <label class="w-36 text-sm font-medium text-gray-700">Bộ Nhớ Trong</label>
-            <div class="w-3/5 relative">
+            <div class="w-full relative">
               <button
                 @click="toggleDropdown('boNhoTrong')"
-                class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-left"
+                class="input-field p-2 border border-gray-300 text-left"
               >
                 {{
-                  currentVariant.selectedBoNhoTrongs.length > 0 ? currentVariant.selectedBoNhoTrongs.length + ' ROM đã chọn' : 'Chọn Bộ Nhớ Trong'
+                  currentVariant.selectedBoNhoTrongs.length > 0
+                    ? currentVariant.selectedBoNhoTrongs
+                    .map((id) => boNhoTrongOptions.find((b) => b.id === id)?.dungLuong)
+                    .filter(Boolean)
+                    .join(', ') || 'Không có ROM hợp lệ'
+                    : 'Chọn Bộ Nhớ Trong'
                 }}
               </button>
               <div
@@ -360,20 +356,26 @@
             </button>
           </div>
 
+          <!-- Màu Sắc -->
           <div class="flex items-center relative">
             <label class="w-36 text-sm font-medium text-gray-700">Màu Sắc</label>
-            <div class="w-3/5 relative">
+            <div class="w-full relative">
               <button
                 @click="openColorModal"
-                class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-left"
+                class="input-field p-2 border border-gray-300 text-left"
               >
                 {{
-                  currentVariant.selectedMauSacs.length > 0 ? currentVariant.selectedMauSacs.length + ' Màu đã chọn' : 'Chọn Màu Sắc'
+                  currentVariant.selectedMauSacs.length > 0
+                    ? currentVariant.selectedMauSacs
+                    .map((id) => mauSacOptions.find((m) => m.id === id)?.tenMau)
+                    .filter(Boolean)
+                    .join(', ') || 'Không có màu hợp lệ'
+                    : 'Chọn Màu Sắc'
                 }}
               </button>
             </div>
             <button
-              @click="openAddModal('mauSac')"
+              @click="openAddModal('  mauSac')"
               class="ml-2 px-2 py-1 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition"
             >
               +
@@ -383,16 +385,11 @@
 
         <!-- Danh sách biến thể đã thêm -->
         <div v-if="productVariants.length > 0" class="mt-6">
-          <div v-if="productVariants && productVariants.length > 0" class="mt-6 col-span-3">
+
+          <div v-if="productVariants && productVariants.length > 0" class="col-span-3">
             <div v-for="(group, groupIndex) in groupVariantsByRamAndRom" :key="groupIndex">
               <div class="flex justify-between m-2 items-center">
                 <div class="flex items-center">
-                  <input
-                    type="checkbox"
-                    v-model="allSelected[group.groupKey]"
-                    @change="toggleAllVariants(group, $event.target.checked)"
-                    class="mr-2"
-                  />
                   <h4 class="text-lg font-medium text-gray-600">
                     PHIÊN BẢN {{ group.ram }}/{{ group.rom }}
                   </h4>
@@ -404,9 +401,19 @@
                       v-model="groupCommonValues[group.groupKey].price"
                       type="text"
                       placeholder="Nhập giá chung"
-                      class="w-3/5 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      class="input-field p-2 border border-gray-300"
                       @input="updateSelectedVariants(group)"
                     />
+                  </div>
+                  <!-- Nút xóa nhiều -->
+                  <div class="flex items-center">
+                    <button
+                      v-if="selectedVariants.length > 0"
+                      @click="removeMultipleVariants"
+                      class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition"
+                    >
+                      Xóa {{ selectedVariants.length }} Đã Chọn
+                    </button>
                   </div>
                 </div>
               </div>
@@ -416,7 +423,7 @@
                   <th class="border border-gray-300 p-2 text-sm font-medium text-gray-700">
                     <input
                       type="checkbox"
-                      v-model="allSelected[group.groupKey]"
+                      :checked="allSelected[group.groupKey] || false"
                       @change="toggleGroupSelection(group, $event.target.checked)"
                     />
                   </th>
@@ -442,10 +449,10 @@
                   <td class="border border-gray-300 p-2">{{ productData.tenSanPham || 'N/A' }}</td>
                   <td class="border border-gray-300 p-2">
                     <div class="flex items-center">
-                        <span
-                          class="w-12 h-6 mr-2 inline-block"
-                          :style="{ backgroundColor: getColorFromName(mauSacOptions.find(mau => mau.id === variant.idMauSac)?.tenMau) || '#000' }"
-                        ></span>
+              <span
+                class="w-12 h-6 mr-2 inline-block"
+                :style="{ backgroundColor: getColorFromName(mauSacOptions.find(mau => mau.id === variant.idMauSac)?.tenMau) || '#000' }"
+              ></span>
                       {{ mauSacOptions.find(mau => mau.id === variant.idMauSac)?.tenMau || 'N/A' }}
                     </div>
                   </td>
@@ -453,12 +460,13 @@
                     <input
                       v-model="variant.donGia"
                       type="text"
-                      class="w-full p-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      class="input-field p-1 border border-gray-300"
                     />
                   </td>
-                  <!-- Kiểm tra an toàn cho variantImeis -->
                   <td class="border border-gray-300 p-2 text-center">
-                    {{ (variantImeis && variantImeis[group.startIndex + variantIndex]) ? variantImeis[group.startIndex + variantIndex].length : 0 }}
+                    {{
+                      (variantImeis && variantImeis[group.startIndex + variantIndex]) ? variantImeis[group.startIndex + variantIndex].length : 0
+                    }}
                   </td>
                   <td class="border border-gray-300 p-2 flex justify-center gap-2">
                     <button
@@ -483,134 +491,66 @@
       </div>
 
       <!-- Phần Thêm Ảnh Tự Động -->
-      <div v-if="showImageSection && productVariants && productVariants.length > 0" class="bg-white shadow-lg rounded-lg p-5 mb-4">
-        <h3 class="text-lg font-medium text-gray-600 mb-4 text-center">THÊM ẢNH</h3>
-
-        <!-- Ảnh Chính -->
-        <div class="mb-6">
-          <h4 class="text-lg font-medium text-gray-600 mb-2">Ảnh Chính</h4>
-          <table class="w-full border-collapse border border-gray-300">
-            <thead>
-            <tr class="bg-gray-100">
-              <th class="border border-gray-300 p-2 text-sm font-medium text-gray-700">STT</th>
-              <th class="border border-gray-300 p-2 text-sm font-medium text-gray-700">LOẠI ẢNH</th>
-              <th class="border border-gray-300 p-2 text-sm font-medium text-gray-700">ẢNH</th>
-              <th class="border border-gray-300 p-2 text-sm font-medium text-gray-700">TẢI LÊN</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr>
-              <td class="border border-gray-300 p-2 text-center">1</td>
-              <td class="border border-gray-300 p-2">Ảnh Trước</td>
-              <td class="border border-gray-300 p-2">
-                <div class="flex justify-center">
-                  <img
-                    v-if="mainImages.front.previewUrl"
-                    :src="mainImages.front.previewUrl"
-                    alt="Front Image Preview"
-                    class="w-16 h-16 object-cover rounded-lg border border-gray-300"
-                  />
-                </div>
-              </td>
-              <td class="border border-gray-300 p-2">
-                <input
-                  type="file"
-                  accept="image/*"
-                  @change="handleMainImageUpload($event, 'front')"
-                  class="p-2 border border-gray-300 rounded-lg w-full"
-                />
-              </td>
-            </tr>
-            <tr>
-              <td class="border border-gray-300 p-2 text-center">2</td>
-              <td class="border border-gray-300 p-2">Ảnh Sau</td>
-              <td class="border border-gray-300 p-2">
-                <div class="flex justify-center">
-                  <img
-                    v-if="mainImages.back.previewUrl"
-                    :src="mainImages.back.previewUrl"
-                    alt="Back Image Preview"
-                    class="w-16 h-16 object-cover rounded-lg border border-gray-300"
-                  />
-                </div>
-              </td>
-              <td class="border border-gray-300 p-2">
-                <input
-                  type="file"
-                  accept="image/*"
-                  @change="handleMainImageUpload($event, 'back')"
-                  class="p-2 border border-gray-300 rounded-lg w-full"
-                />
-              </td>
-            </tr>
-            </tbody>
-          </table>
-        </div>
+      <div v-if="showImageSection && productVariants && productVariants.length > 0"
+           class="bg-white shadow-lg rounded-lg p-6 mb-4">
+        <h3 class="text-xl font-semibold text-gray-800 mb-6 text-center">THÊM ẢNH SẢN PHẨM</h3>
 
         <!-- Ảnh Theo Màu Sắc -->
         <div v-if="uniqueColors.length > 0">
-          <h4 class="text-lg font-medium text-gray-600 mb-2">Ảnh Theo Màu Sắc</h4>
-          <div v-for="(color, colorIndex) in uniqueColors" :key="color.colorId" class="mb-6">
-            <h5 class="text-md font-medium text-gray-600 mb-2">MÀU: {{ color.colorName }}</h5>
-            <table class="w-full border-collapse border border-gray-300">
-              <thead>
-              <tr class="bg-gray-100">
-                <th class="border border-gray-300 p-2 text-sm font-medium text-gray-700">STT</th>
-                <th class="border border-gray-300 p-2 text-sm font-medium text-gray-700">TÊN MÀU</th>
-                <th class="border border-gray-300 p-2 text-sm font-medium text-gray-700">MÀU SẮC</th>
-                <th class="border border-gray-300 p-2 text-sm font-medium text-gray-700">ẢNH</th>
-                <th class="border border-gray-300 p-2 text-sm font-medium text-gray-700">TẢI LÊN</th>
-              </tr>
-              </thead>
-              <tbody>
-              <tr>
-                <td class="border border-gray-300 p-2 text-center">{{ colorIndex + 1 }}</td>
-                <td class="border border-gray-300 p-2">{{ color.colorName }}</td>
-                <td class="border border-gray-300 p-2">
-                  <div class="flex items-center justify-center">
-                      <span
-                        class="w-16 h-8 inline-block"
-                        :style="{ backgroundColor: getColorFromName(color.colorName) || '#000' }"
-                      ></span>
-                  </div>
-                </td>
-                <td class="border border-gray-300 p-2">
-                  <div class="flex justify-center">
-                    <img
-                      v-if="colorImages[color.colorId]?.previewUrl"
-                      :src="colorImages[color.colorId].previewUrl"
-                      alt="Color Image Preview"
-                      class="w-16 h-16 object-cover rounded-lg border border-gray-300"
-                    />
-                  </div>
-                </td>
-                <td class="border border-gray-300 p-2">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    @change="handleColorImageUpload($event, color.colorId)"
-                    class="p-2 border border-gray-300 rounded-lg w-full"
-                  />
-                </td>
-              </tr>
-              </tbody>
-            </table>
+          <div class="grid grid-cols-3 gap-6">
+            <div v-for="color in uniqueColors" :key="color.colorId"
+                 class="relative flex flex-col items-center bg-gray-50 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow duration-300">
+              <!-- Badge tên màu -->
+              <span
+                class="absolute -top-3 px-3 py-1 text-sm font-medium rounded-full shadow-sm text-white"
+                :style="{ backgroundColor: getColorFromName(color.colorName) || '#000' }"
+              >
+          {{ color.colorName }}
+        </span>
+              <!-- Khung ảnh -->
+              <div
+                class="w-36 h-44 bg-white rounded-lg border border-gray-200 flex items-center justify-center overflow-hidden mt-4">
+                <img
+                  v-if="colorImages[color.colorId]?.previewUrl"
+                  :src="colorImages[color.colorId].previewUrl"
+                  alt="Color Image Preview"
+                  class="w-full h-full object-contain p-2"
+                />
+                <span v-else class="text-gray-400 text-sm">Chưa có ảnh</span>
+              </div>
+              <!-- Button tải ảnh -->
+              <label
+                class="mt-4 flex items-center px-4 py-2 bg-orange-500 text-white text-sm font-medium rounded-lg cursor-pointer hover:bg-orange-600 transition duration-300">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                     xmlns="http://www.w3.org/2000/svg">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+                </svg>
+                Tải ảnh lên
+                <input
+                  type="file"
+                  accept="image/*"
+                  @change="handleColorImageUpload($event, color.colorId)"
+                  class="hidden"
+                />
+              </label>
+            </div>
           </div>
         </div>
 
         <!-- Nút chức năng -->
-        <div class="flex justify-end gap-2 mt-4">
+        <div class="flex justify-end gap-3 mt-8">
           <button
             @click="resetForm"
-            class="px-4 py-2 bg-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-400 transition"
+            class="px-5 py-2 bg-gray-200 text-gray-700 font-medium rounded-lg hover:bg-gray-300 transition duration-300"
           >
             Làm mới
           </button>
           <button
             @click="handleSubmit"
-            class="px-4 py-2 bg-orange-500 text-white font-semibold rounded-lg hover:bg-orange-600 transition"
+            class="px-5 py-2 bg-orange-500 text-white font-medium rounded-lg hover:bg-orange-600 transition duration-300"
           >
-            Thêm
+            Thêm sản phẩm
           </button>
         </div>
       </div>
@@ -631,7 +571,7 @@
               <input
                 v-model="entityData.heDieuHanh"
                 type="text"
-                class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                class="input-field p-2 border border-gray-300"
                 placeholder="Nhập tên hệ điều hành"
               />
             </div>
@@ -640,18 +580,18 @@
               <input
                 v-model="entityData.phienBan"
                 type="text"
-                class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                class="input-field p-2 border border-gray-300"
                 placeholder="Nhập phiên bản"
               />
             </div>
           </div>
-          <div v-if="currentAttribute === 'manHinh'" class="grid grid-cols-1 gap-4">
+          <div v-if="currentAttribute === 'congNgheManHinh'" class="grid grid-cols-1 gap-4">
             <div>
               <label class="block text-sm font-medium text-gray-700">Kích Thước Màn Hình</label>
               <input
                 v-model="entityData.kichThuoc"
                 type="text"
-                class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                class="input-field p-2 border border-gray-300"
                 placeholder="Nhập kích thước màn hình"
               />
             </div>
@@ -660,7 +600,7 @@
               <input
                 v-model="entityData.doPhanGiai"
                 type="text"
-                class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                class="input-field p-2 border border-gray-300"
                 placeholder="Nhập độ phân giải"
               />
             </div>
@@ -671,7 +611,7 @@
               <input
                 v-model="entityData.nhaSanXuat"
                 type="text"
-                class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                class="input-field p-2 border border-gray-300"
                 placeholder="Nhập tên nhà sản xuất"
               />
             </div>
@@ -682,7 +622,7 @@
               <input
                 v-model="entityData.cameraTruoc"
                 type="text"
-                class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                class="input-field p-2 border border-gray-300"
                 placeholder="Nhập thông số camera trước"
               />
             </div>
@@ -691,7 +631,7 @@
               <input
                 v-model="entityData.cameraSau"
                 type="text"
-                class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                class="input-field p-2 border border-gray-300"
                 placeholder="Nhập thông số camera sau"
               />
             </div>
@@ -702,7 +642,7 @@
               <input
                 v-model="entityData.cacLoaiSimHoTro"
                 type="text"
-                class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                class="input-field p-2 border border-gray-300"
                 placeholder="Nhập loại sim"
               />
             </div>
@@ -711,7 +651,7 @@
               <input
                 v-model="entityData.soLuongSimHoTro"
                 type="number"
-                class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                class="input-field p-2 border border-gray-300"
                 placeholder="Nhập số lượng sim"
               />
             </div>
@@ -722,7 +662,7 @@
               <input
                 v-model="entityData.chatLieuKhung"
                 type="text"
-                class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                class="input-field p-2 border border-gray-300"
                 placeholder="Nhập chất liệu khung"
               />
             </div>
@@ -731,7 +671,7 @@
               <input
                 v-model="entityData.chatLieuMatLung"
                 type="text"
-                class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                class="input-field p-2 border border-gray-300"
                 placeholder="Nhập chất liệu mặt lưng"
               />
             </div>
@@ -742,7 +682,7 @@
               <input
                 v-model="entityData.loaiPin"
                 type="text"
-                class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                class="input-field p-2 border border-gray-300"
                 placeholder="Nhập loại pin"
               />
             </div>
@@ -751,7 +691,7 @@
               <input
                 v-model="entityData.dungLuongPin"
                 type="text"
-                class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                class="input-field p-2 border border-gray-300"
                 placeholder="Nhập dung lượng pin"
               />
             </div>
@@ -762,7 +702,7 @@
               <input
                 v-model="entityData.tenCpu"
                 type="text"
-                class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                class="input-field p-2 border border-gray-300"
                 placeholder="Nhập tên CPU"
               />
             </div>
@@ -771,7 +711,7 @@
               <input
                 v-model="entityData.soNhan"
                 type="number"
-                class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                class="input-field p-2 border border-gray-300"
                 placeholder="Nhập số nhân"
               />
             </div>
@@ -782,7 +722,7 @@
               <input
                 v-model="entityData.tenGpu"
                 type="text"
-                class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                class="input-field p-2 border border-gray-300"
                 placeholder="Nhập tên GPU"
               />
             </div>
@@ -793,19 +733,8 @@
               <input
                 v-model="entityData.tenCongNgheMang"
                 type="text"
-                class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                class="input-field p-2 border border-gray-300"
                 placeholder="Nhập tên công nghệ mạng"
-              />
-            </div>
-          </div>
-          <div v-if="currentAttribute === 'congSac'" class="grid grid-cols-1 gap-4">
-            <div>
-              <label class="block text-sm font-medium text-gray-700">Tên Cổng Sạc</label>
-              <input
-                v-model="entityData.congSac"
-                type="text"
-                class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Nhập tên cổng sạc"
               />
             </div>
           </div>
@@ -815,7 +744,7 @@
               <input
                 v-model="entityData.tenCongNgheSac"
                 type="text"
-                class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                class="input-field p-2 border border-gray-300"
                 placeholder="Nhập tên hỗ trợ công nghệ sạc"
               />
             </div>
@@ -826,19 +755,8 @@
               <input
                 v-model="entityData.tenChiSo"
                 type="text"
-                class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                class="input-field p-2 border border-gray-300"
                 placeholder="Nhập tên chỉ số kháng bụi nước"
-              />
-            </div>
-          </div>
-          <div v-if="currentAttribute === 'tinhTrang'" class="grid grid-cols-1 gap-4">
-            <div>
-              <label class="block text-sm font-medium text-gray-700">Tên Tình Trạng</label>
-              <input
-                v-model="entityData.loaiTinhTrang"
-                type="text"
-                class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Nhập tên tình trạng"
               />
             </div>
           </div>
@@ -848,7 +766,7 @@
               <input
                 v-model="entityData.ma"
                 type="text"
-                class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                class="input-field p-2 border border-gray-300"
                 placeholder="Nhập mã RAM"
               />
             </div>
@@ -857,7 +775,7 @@
               <input
                 v-model="entityData.dungLuong"
                 type="text"
-                class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                class="input-field p-2 border border-gray-300"
                 placeholder="Nhập dung lượng RAM (ví dụ: 8GB)"
               />
             </div>
@@ -868,7 +786,7 @@
               <input
                 v-model="entityData.ma"
                 type="text"
-                class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                class="input-field p-2 border border-gray-300"
                 placeholder="Nhập mã bộ nhớ trong"
               />
             </div>
@@ -877,7 +795,7 @@
               <input
                 v-model="entityData.dungLuong"
                 type="text"
-                class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                class="input-field p-2 border border-gray-300"
                 placeholder="Nhập dung lượng bộ nhớ trong (ví dụ: 128GB)"
               />
             </div>
@@ -888,7 +806,7 @@
               <input
                 v-model="entityData.ma"
                 type="text"
-                class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                class="input-field p-2 border border-gray-300"
                 placeholder="Nhập mã màu sắc (ví dụ: #000000 cho Đen)"
               />
             </div>
@@ -897,7 +815,7 @@
               <input
                 v-model="entityData.tenMau"
                 type="text"
-                class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                class="input-field p-2 border border-gray-300"
                 placeholder="Nhập tên màu sắc (ví dụ: Đen)"
               />
             </div>
@@ -956,18 +874,29 @@
             <textarea
               v-model="imeiInput"
               rows="5"
-              class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              class="input-field p-2 border border-gray-300"
               placeholder="Nhập IMEI, mỗi IMEI trên một dòng..."
             ></textarea>
           </div>
-          <div class="mb-4">
-            <label class="block text-sm font-medium text-gray-700 mb-2">Nhập từ file Excel</label>
-            <input
-              type="file"
-              accept=".xlsx, .xls"
-              @change="handleExcelImport"
-              class="w-full p-2 border border-gray-300 rounded-lg"
-            />
+          <div class="mb-4 flex items-center gap-4">
+            <div class="w-3/4">
+              <label class="block text-sm font-medium text-gray-700 mb-2">Nhập từ file Excel</label>
+              <input
+                type="file"
+                accept=".xlsx, .xls"
+                @change="handleExcelImport"
+                class="input-field w-full p-2 border border-gray-300"
+              />
+            </div>
+            <div class="w-1/4">
+              <label class="block text-sm font-medium text-gray-700 mb-2">Tải mẫu Excel</label>
+              <button
+                @click="downloadImeiTemplate"
+                class="px-4 py-2 bg-orange-500 text-white font-semibold rounded-lg hover:bg-orange-600 transition w-full"
+              >
+                Tải mẫu IMEI
+              </button>
+            </div>
           </div>
           <div class="flex justify-between">
             <button
@@ -986,16 +915,18 @@
         </div>
       </div>
     </div>
-    <div v-else>Loading...</div>
   </div>
 </template>
 
 <script>
-import { defineComponent, computed, ref, onMounted } from 'vue';
+import { defineComponent, computed, ref, onMounted, watch } from 'vue';
 import { useRoute } from 'vue-router';
+import axios from 'axios';
 import ToastNotification from '@/components/ToastNotification.vue';
 import FormModal from '@/components/FormModal.vue';
 import BreadcrumbWrapper from '@/components/BreadcrumbWrapper.vue';
+import VSelect from 'vue-select';
+import 'vue-select/dist/vue-select.css';
 
 import { useProductData } from './composables/useProductData';
 import { useProductVariants } from './composables/useProductVariants';
@@ -1011,6 +942,7 @@ export default defineComponent({
     ToastNotification,
     FormModal,
     BreadcrumbWrapper,
+    VSelect,
   },
   setup() {
     const route = useRoute();
@@ -1019,7 +951,7 @@ export default defineComponent({
     const { productData, resetProductData, setDefaultValues } = useProductData();
     const {
       heDieuHanhOptions,
-      manHinhOptions,
+      congNgheManHinhOptions,
       nhaSanXuatOptions,
       cumCameraOptions,
       simOptions,
@@ -1028,10 +960,8 @@ export default defineComponent({
       cpuOptions,
       gpuOptions,
       congNgheMangOptions,
-      congSacOptions,
       hoTroCongNgheSacOptions,
       chiSoKhangBuiVaNuocOptions,
-      tinhTrangOptions,
       ramOptions,
       boNhoTrongOptions,
       mauSacOptions,
@@ -1056,7 +986,8 @@ export default defineComponent({
       closeImeiModal,
       saveImei,
       handleExcelImport,
-      resetModals
+      resetModals,
+      downloadImeiTemplate,
     } = useModals(dropdownOpen, toggleDropdown);
 
     const {
@@ -1069,11 +1000,13 @@ export default defineComponent({
       uniqueColors,
       addVariant,
       removeVariant,
+      removeMultipleVariants,
       updateSelectedVariants,
       toggleGroupSelection,
       toggleAllVariants,
       updateSelectedCount,
-      resetVariants
+      resetVariants,
+      validateSelections,
     } = useProductVariants(ramOptions, boNhoTrongOptions, mauSacOptions, productData, variantImeis);
 
     const {
@@ -1083,7 +1016,7 @@ export default defineComponent({
       getColorFromName,
       handleMainImageUpload,
       handleColorImageUpload,
-      resetImages
+      resetImages,
     } = useProductImages();
 
     const { handleSubmit } = useFormHandling(
@@ -1095,19 +1028,103 @@ export default defineComponent({
       variantImeis
     );
 
-    const quickAddInputs = ref({
-      heDieuHanh: { heDieuHanh: '', phienBan: '' },
-      manHinh: { kichThuoc: '', doPhanGiai: '' },
-      nhaSanXuat: { nhaSanXuat: '' },
-      // Thêm các thuộc tính khác tương tự
-    });
-
-    const breadcrumbItems = computed(() => {
-      if (typeof route.meta.breadcrumb === 'function') {
-        return route.meta.breadcrumb(route) || ['Thêm Sản Phẩm'];
+    // Ghi đè handleSubmit để thêm thông báo thành công
+    const handleSubmitWithSuccess = async () => {
+      try {
+        await handleSubmit();
+        // Nếu không có lỗi (tức là submit thành công)
+        toast.value?.kshowToast('success', 'Thêm mới sản phẩm thành công!');
+      } catch (error) {
+        // Lỗi đã được xử lý trong handleSubmit, không cần thêm gì ở đây
       }
-      return route.meta?.breadcrumb || ['Thêm Sản Phẩm'];
-    });
+    };
+
+    const breadcrumbItems = computed(() => route.meta?.breadcrumb || ['Thêm Sản Phẩm']);
+
+    const productNameOptions = ref([]);
+    const filteredProductNameOptions = ref([]);
+    const showProductDropdown = ref(false);
+
+    const fetchProductNames = async () => {
+      try {
+        let allProducts = [];
+        let page = 0;
+        let hasMore = true;
+        const pageSize = 100;
+
+        while (hasMore) {
+          const response = await axios.get('http://localhost:8080/san-pham', {
+            params: {
+              page: page,
+              size: pageSize
+            }
+          });
+
+          const data = response.data;
+          if (data.content && data.content.length > 0) {
+            allProducts = [...allProducts, ...data.content];
+            page += 1;
+            hasMore = data.content.length === pageSize && (!data.totalPages || page < data.totalPages);
+          } else {
+            hasMore = false;
+          }
+        }
+
+        productNameOptions.value = allProducts;
+        filteredProductNameOptions.value = allProducts;
+      } catch (error) {
+        console.error('Lỗi khi lấy danh sách sản phẩm:', error);
+        toast.value?.kshowToast('error', 'Lỗi khi tải danh sách sản phẩm!');
+      }
+    };
+
+    const filterProducts = () => {
+      const searchTerm = productData.value.tenSanPham.toLowerCase().trim();
+      if (searchTerm) {
+        filteredProductNameOptions.value = productNameOptions.value.filter(product =>
+          product.tenSanPham.toLowerCase().includes(searchTerm)
+        );
+      } else {
+        filteredProductNameOptions.value = productNameOptions.value;
+      }
+    };
+
+    const selectProduct = async (product) => {
+      productData.value.tenSanPham = product.tenSanPham;
+      showProductDropdown.value = false;
+
+      try {
+        const response = await axios.get(`http://localhost:8080/san-pham/${product.id}`);
+        const productDetails = response.data;
+
+        productData.value = {
+          ...productData.value,
+          idHeDieuHanh: productDetails.idHeDieuHanh || '',
+          congNgheManHinh: productDetails.congNgheManHinh || '',
+          idNhaSanXuat: productDetails.idNhaSanXuat || '',
+          idCumCamera: productDetails.idCumCamera || '',
+          idSim: productDetails.idSim || '',
+          idThietKe: productDetails.idThietKe || '',
+          idPin: productDetails.idPin || '',
+          idCpu: productDetails.idCpu || '',
+          idGpu: productDetails.idGpu || '',
+          idCongNgheMang: productDetails.idCongNgheMang || '',
+          hoTroCongNgheSac: productDetails.hoTroCongNgheSac || '',
+          idChiSoKhangBuiVaNuoc: productDetails.idChiSoKhangBuiVaNuoc || '',
+        };
+
+        toast.value?.kshowToast('success', 'Đã tải thông tin sản phẩm!');
+      } catch (error) {
+        console.error('Lỗi khi lấy chi tiết sản phẩm:', error);
+        toast.value?.kshowToast('error', 'Lỗi khi tải chi tiết sản phẩm!');
+      }
+    };
+
+    const delayHideProductDropdown = () => {
+      setTimeout(() => {
+        showProductDropdown.value = false;
+      }, 200);
+    };
 
     const confirmColorSelection = () => {
       if (addVariant()) {
@@ -1117,9 +1134,9 @@ export default defineComponent({
         groupVariantsByRamAndRom.value.forEach((group) => {
           const groupKey = `${group.ram}/${group.rom}`;
           if (!(groupKey in allSelected.value)) {
-            allSelected.value[groupKey] = true;
+            allSelected.value[groupKey] = false;
             groupCommonValues.value[groupKey] = { price: '' };
-            toggleAllVariants(group, true);
+            toggleAllVariants(group, false);
           }
         });
       } else {
@@ -1129,7 +1146,6 @@ export default defineComponent({
 
     const handleAddAttributeLocal = async (data) => {
       try {
-        console.log('Adding attribute:', currentAttribute.value, 'with data:', data);
         const success = await handleAddAttribute(
           currentAttribute.value,
           data,
@@ -1140,12 +1156,35 @@ export default defineComponent({
         if (success) {
           toast.value?.kshowToast('success', 'Thêm thành công!');
           closeFormModal();
+          validateSelections(); // Kiểm tra lại sau khi thêm tùy chọn mới
         } else {
           toast.value?.kshowToast('error', 'Thêm thất bại. Vui lòng thử lại.');
         }
       } catch (error) {
-        console.error('Error adding attribute:', error);
+        console.error('Lỗi khi thêm thuộc tính:', error);
         toast.value?.kshowToast('error', 'Có lỗi xảy ra: ' + (error.response?.data?.message || error.message));
+      }
+    };
+
+    // Hàm xóa tùy chọn (mô phỏng, thay bằng API thực tế)
+    const deleteOption = async (type, id) => {
+      try {
+        // Thay bằng API thực tế, ví dụ: axios.delete(`http://localhost:8080/${type}/${id}`)
+        console.log(`Xóa ${type} với id ${id}`);
+
+        // Cập nhật danh sách tùy chọn
+        if (type === 'mauSac') {
+          mauSacOptions.value = mauSacOptions.value.filter((opt) => opt.id !== id);
+        } else if (type === 'ram') {
+          ramOptions.value = ramOptions.value.filter((opt) => opt.id !== id);
+        } else if (type === 'boNhoTrong') {
+          boNhoTrongOptions.value = boNhoTrongOptions.value.filter((opt) => opt.id !== id);
+        }
+
+        toast.value?.kshowToast('success', `Đã xóa ${type === 'mauSac' ? 'màu sắc' : type === 'ram' ? 'RAM' : 'Bộ Nhớ Trong'}!`);
+      } catch (error) {
+        console.error(`Lỗi khi xóa ${type}:`, error);
+        toast.value?.kshowToast('error', `Lỗi khi xóa ${type}!`);
       }
     };
 
@@ -1156,7 +1195,7 @@ export default defineComponent({
     const resetForm = () => {
       resetProductData({
         heDieuHanhOptions: heDieuHanhOptions.value || [],
-        manHinhOptions: manHinhOptions.value || [],
+        congNgheManHinhOptions: congNgheManHinhOptions.value || [],
         nhaSanXuatOptions: nhaSanXuatOptions.value || [],
         cumCameraOptions: cumCameraOptions.value || [],
         simOptions: simOptions.value || [],
@@ -1165,35 +1204,45 @@ export default defineComponent({
         cpuOptions: cpuOptions.value || [],
         gpuOptions: gpuOptions.value || [],
         congNgheMangOptions: congNgheMangOptions.value || [],
-        congSacOptions: congSacOptions.value || [],
         hoTroCongNgheSacOptions: hoTroCongNgheSacOptions.value || [],
         chiSoKhangBuiVaNuocOptions: chiSoKhangBuiVaNuocOptions.value || [],
-        tinhTrangOptions: tinhTrangOptions.value || []
       });
       resetVariants();
       resetImages();
       resetModals();
     };
 
+    const isLoading = ref(true);
+
     onMounted(async () => {
-      await fetchOptions();
-      setDefaultValues({
-        heDieuHanhOptions: heDieuHanhOptions.value || [],
-        manHinhOptions: manHinhOptions.value || [],
-        nhaSanXuatOptions: nhaSanXuatOptions.value || [],
-        cumCameraOptions: cumCameraOptions.value || [],
-        simOptions: simOptions.value || [],
-        thietKeOptions: thietKeOptions.value || [],
-        pinOptions: pinOptions.value || [],
-        cpuOptions: cpuOptions.value || [],
-        gpuOptions: gpuOptions.value || [],
-        congNgheMangOptions: congNgheMangOptions.value || [],
-        congSacOptions: congSacOptions.value || [],
-        hoTroCongNgheSacOptions: hoTroCongNgheSacOptions.value || [],
-        chiSoKhangBuiVaNuocOptions: chiSoKhangBuiVaNuocOptions.value || [],
-        tinhTrangOptions: tinhTrangOptions.value || []
-      });
+      try {
+        await Promise.all([fetchOptions(), fetchProductNames()]);
+        setDefaultValues({
+          heDieuHanhOptions: heDieuHanhOptions.value || [],
+          congNgheManHinhOptions: congNgheManHinhOptions.value || [],
+          nhaSanXuatOptions: nhaSanXuatOptions.value || [],
+          cumCameraOptions: cumCameraOptions.value || [],
+          simOptions: simOptions.value || [],
+          thietKeOptions: thietKeOptions.value || [],
+          pinOptions: pinOptions.value || [],
+          cpuOptions: cpuOptions.value || [],
+          gpuOptions: gpuOptions.value || [],
+          congNgheMangOptions: congNgheMangOptions.value || [],
+          hoTroCongNgheSacOptions: hoTroCongNgheSacOptions.value || [],
+          chiSoKhangBuiVaNuocOptions: chiSoKhangBuiVaNuocOptions.value || [],
+        });
+      } finally {
+        isLoading.value = false;
+      }
     });
+
+    watch(
+      () => productData.value,
+      (newValue) => {
+        console.log('productData cập nhật:', newValue);
+      },
+      { deep: true }
+    );
 
     return {
       toast,
@@ -1201,7 +1250,7 @@ export default defineComponent({
       productVariants,
       currentVariant,
       heDieuHanhOptions,
-      manHinhOptions,
+      congNgheManHinhOptions,
       nhaSanXuatOptions,
       cumCameraOptions,
       simOptions,
@@ -1210,10 +1259,8 @@ export default defineComponent({
       cpuOptions,
       gpuOptions,
       congNgheMangOptions,
-      congSacOptions,
       hoTroCongNgheSacOptions,
       chiSoKhangBuiVaNuocOptions,
-      tinhTrangOptions,
       ramOptions,
       boNhoTrongOptions,
       mauSacOptions,
@@ -1234,9 +1281,13 @@ export default defineComponent({
       currentVariantIndex,
       imeiInput,
       variantImeis,
+      productNameOptions,
+      filteredProductNameOptions,
+      showProductDropdown,
       toggleDropdown,
       addVariant,
       removeVariant,
+      removeMultipleVariants,
       updateSelectedVariants,
       toggleGroupSelection,
       toggleAllVariants,
@@ -1253,11 +1304,49 @@ export default defineComponent({
       handleExcelImport,
       handleMainImageUpload,
       handleColorImageUpload,
-      handleSubmit,
+      handleSubmit: handleSubmitWithSuccess,
       resetForm,
       getColorFromName,
-      trimSpaces
+      trimSpaces,
+      filterProducts,
+      selectProduct,
+      delayHideProductDropdown,
+      downloadImeiTemplate,
+      deleteOption,
     };
   },
 });
 </script>
+
+<style scoped>
+.input-field {
+  @apply w-full h-12 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm;
+}
+
+.input-field :deep(.v-select) {
+  @apply w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm;
+}
+
+.input-field :deep(.vs__dropdown-toggle) {
+  @apply border border-gray-300 rounded-lg h-14;
+}
+
+.input-field :deep(.vs__search) {
+  @apply p-2;
+}
+
+/* Đảm bảo card có kích thước đồng đều */
+.grid-cols-3 > div {
+  @apply flex-1;
+}
+
+/* Hiệu ứng hover cho button tải ảnh */
+label:hover svg {
+  @apply transform scale-110 transition-transform duration-200;
+}
+
+/* Đảm bảo ảnh không bị méo */
+img.object-contain {
+  @apply max-w-full max-h-full;
+}
+</style>

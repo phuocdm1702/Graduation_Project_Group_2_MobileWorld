@@ -17,7 +17,7 @@ public interface CumCameraRepository extends JpaRepository<CumCamera, Integer> {
     Page<CumCamera> findByDeletedFalse(Pageable pageable);
 
     @Query("SELECT cc.id AS cumCameraId, cc.ma AS cumCameraMa, " +
-            "cc.thongSoCameraTruoc AS cameraTruoc, cc.thongSoCameraSau AS cameraSau " +
+            "cc.cameraTruoc AS cameraTruoc, cc.cameraSau AS cameraSau " +
             "FROM CumCamera cc " +
             "WHERE cc.deleted = false " +
             "ORDER BY cc.ma")

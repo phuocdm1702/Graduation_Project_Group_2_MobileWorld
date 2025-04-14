@@ -18,17 +18,13 @@
         <td v-for="column in columns" :key="column.key" class="td-cell">
           <template v-if="column.cellSlot === 'actionsSlot'">
             <slot name="actionsSlot" :item="item">
-              <div class="flex items-center space-x-2">
+              <div class="flex items-center justify-center space-x-2">
                 <button @click="editItem(item)" class="bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600 transition">
-                  <i class="fa-solid fa-edit"></i>
+                  <i class="fa-solid fa-eye"></i>
                 </button>
-                <ToggleSwitch
-                  v-if="!item.displayStatus.isHiddenToggle"
-                  :checked="!item.trangThai"
-                  :value="!item.trangThai"
-                  @change="toggleStatus(item)"
-                  :id="item.id"
-                />
+                <button @click="deleteItem(item)" class="bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600 transition">
+                  <i class="fa-solid fa-trash"></i>
+                </button>
               </div>
             </slot>
           </template>
@@ -48,8 +44,7 @@
               {{ item.trangThai ? 'Không hoạt động' : 'Hoạt động' }}
             </span>
           </template>
-          <span v-else-if="column.formatter"
-                v-html="column.formatter(getNestedValue(item, column.key), item, index)"></span>
+          <span v-else-if="column.formatter" v-html="column.formatter(getNestedValue(item, column.key), item, index)"></span>
           <span v-else>{{ getNestedValue(item, column.key) || 'N/A' }}</span>
         </td>
       </tr>
@@ -61,7 +56,8 @@
 <script setup>
 import { defineProps, defineEmits } from 'vue';
 import { useRouter } from 'vue-router';
-import ToggleSwitch from '@/components/ToggleSwitch.vue';
+import axios from 'axios';
+import ToastNotification from '@/components/ToastNotification.vue';
 
 defineProps({
   data: { type: Array, required: true },
@@ -73,21 +69,29 @@ const emit = defineEmits(['editItem', 'toggleStatus']);
 const router = useRouter();
 
 const editItem = (item) => {
-  router.push({ name: 'FormUpdatePgg', params: { id: item.id } });
+  router.push({ name: 'SanPhamChiTiet', params: { id: item.id } });
 };
 
-const toggleStatus = (item) => {
-  emit('toggleStatus', item);
+const deleteItem = async (item) => {
+  try {
+    await axios.delete(`http://localhost:8080/san-pham/${item.id}`);
+    emit('deleteItem', item); // Emit sự kiện để thông báo xóa
+    // Giả sử bạn có component ToastNotification
+    ToastNotification.value?.showToast('success', 'Xóa sản phẩm thành công!');
+  } catch (error) {
+    console.error('Delete error:', error);
+    ToastNotification.value?.showToast('error', 'Xóa sản phẩm thất bại!');
+  }
 };
 </script>
 
 <style scoped>
 .th-cell {
-  @apply px-4 py-3 text-left border-b;
+  @apply px-4 py-3 border-b text-center font-semibold; /* Căn giữa chữ và thêm font-semibold */
 }
 
 .td-cell {
-  @apply px-4 py-2 text-sm;
+  @apply px-4 py-2 text-sm text-center; /* Căn giữa chữ */
 }
 
 .badge-pending {

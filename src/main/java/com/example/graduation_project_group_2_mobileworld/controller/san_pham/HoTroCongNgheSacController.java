@@ -1,6 +1,8 @@
 package com.example.graduation_project_group_2_mobileworld.controller.san_pham;
 
+import com.example.graduation_project_group_2_mobileworld.dto.san_pham.CumCameraDTO;
 import com.example.graduation_project_group_2_mobileworld.dto.san_pham.HoTroCongNgheSacDTO;
+import com.example.graduation_project_group_2_mobileworld.dto.san_pham.NhaSanXuatDTO;
 import com.example.graduation_project_group_2_mobileworld.service.san_pham.HoTroCongNgheSacService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -19,10 +21,11 @@ public class HoTroCongNgheSacController {
         this.hoTroCongNgheSacService = hoTroCongNgheSacService;
     }
 
-    @GetMapping("/details")
-    public ResponseEntity<Page<HoTroCongNgheSacDTO>> getChargingTechDetails(
+    @GetMapping
+    public ResponseEntity<Page<HoTroCongNgheSacDTO>> getAll(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size) {
-        return ResponseEntity.ok(hoTroCongNgheSacService.getChargingTechDetails(page, size));
+        return ResponseEntity.ok(hoTroCongNgheSacService.getAllCongNgheSac(page, size));
     }
+
 }

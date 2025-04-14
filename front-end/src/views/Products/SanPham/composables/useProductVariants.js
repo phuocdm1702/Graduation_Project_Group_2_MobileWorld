@@ -78,20 +78,44 @@ export function useProductVariants(ramOptions, boNhoTrongOptions, mauSacOptions,
     currentVariant.value.selectedRams.forEach((ramId) => {
       currentVariant.value.selectedBoNhoTrongs.forEach((boNhoId) => {
         currentVariant.value.selectedMauSacs.forEach((mauSacId) => {
-          newVariants.push({
-            idRam: ramId,
-            idBoNhoTrong: boNhoId,
-            idMauSac: mauSacId,
-            idImel: 1,
-            idLoaiTinhTrang: productData.value.idLoaiTinhTrang,
-            donGia: '',
-            imageIndex: null,
-          });
+          // Check if the variant already exists to avoid duplicates
+          const variantExists = productVariants.value.some(
+            (v) =>
+              v.idRam === ramId &&
+              v.idBoNhoTrong === boNhoId &&
+              v.idMauSac === mauSacId
+          );
+
+          if (!variantExists) {
+            newVariants.push({
+              idRam: ramId,
+              idBoNhoTrong: boNhoId,
+              idMauSac: mauSacId,
+              idImel: 1,
+              idLoaiTinhTrang: productData.value.idLoaiTinhTrang,
+              donGia: '',
+              imageIndex: null,
+            });
+          }
         });
       });
     });
 
-    productVariants.value.push(...newVariants);
+    if (newVariants.length > 0) {
+      productVariants.value.push(...newVariants);
+    }
+
+    // Do NOT reset currentVariant to keep selections
+    // currentVariant.value = {
+    //   selectedRams: [],
+    //   selectedBoNhoTrongs: [],
+    //   selectedMauSacs: [],
+    // };
+
+    // Đảm bảo không chọn bất kỳ biến thể nào sau khi thêm
+    selectedVariants.value = [];
+    allSelected.value = {};
+
     return true;
   };
 
@@ -121,22 +145,26 @@ export function useProductVariants(ramOptions, boNhoTrongOptions, mauSacOptions,
     }
   };
 
+  const removeMultipleVariants = () => {
+    const indicesToRemove = [...selectedVariants.value].sort((a, b) => b - a);
+
+    indicesToRemove.forEach((index) => {
+      removeVariant(index);
+    });
+
+    selectedVariants.value = [];
+    allSelected.value = {};
+  };
+
   const updateSelectedVariants = (group) => {
     const groupKey = `${group.ram}/${group.rom}`;
-    const commonPrice = groupCommonValues.value[groupKey].price;
+    const commonPrice = groupCommonValues.value[groupKey]?.price || '';
 
     const groupIndices = group.variants.map((_, i) => group.startIndex + i);
-    const selectedInGroup = selectedVariants.value.filter((index) => groupIndices.includes(index));
-
-    if (selectedInGroup.length === 0 && group.variantsA.length > 0) {
-      selectedVariants.value = [...new Set([...selectedVariants.value, ...groupIndices])];
-    }
 
     selectedVariants.value.forEach((index) => {
-      if (index >= group.startIndex && index < group.startIndex + group.variants.length) {
-        if (productVariants.value[index] && commonPrice !== '') {
-          productVariants.value[index].donGia = commonPrice;
-        }
+      if (groupIndices.includes(index) && commonPrice !== '') {
+        productVariants.value[index].donGia = commonPrice;
       }
     });
   };
@@ -160,7 +188,9 @@ export function useProductVariants(ramOptions, boNhoTrongOptions, mauSacOptions,
   };
 
   const updateSelectedCount = (group) => {
-    selectedVariants.value = selectedVariants.value.filter((index) => index >= 0 && index < productVariants.value.length);
+    selectedVariants.value = selectedVariants.value.filter(
+      (index) => index >= 0 && index < productVariants.value.length
+    );
     const groupIndices = group.variants.map((_, i) => group.startIndex + i);
     const selectedInGroup = selectedVariants.value.filter((index) => groupIndices.includes(index));
     const groupKey = `${group.ram}/${group.rom}`;
@@ -173,7 +203,7 @@ export function useProductVariants(ramOptions, boNhoTrongOptions, mauSacOptions,
     currentVariant.value = {
       selectedRams: [],
       selectedBoNhoTrongs: [],
-      selectedMauSacs: []
+      selectedMauSacs: [],
     };
     selectedVariants.value = [];
     allSelected.value = {};
@@ -191,6 +221,7 @@ export function useProductVariants(ramOptions, boNhoTrongOptions, mauSacOptions,
     uniqueColors,
     addVariant,
     removeVariant,
+    removeMultipleVariants,
     updateSelectedVariants,
     toggleGroupSelection,
     toggleAllVariants,

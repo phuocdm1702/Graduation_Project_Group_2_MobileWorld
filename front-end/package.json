@@ -10,6 +10,7 @@
   "dependencies": {
     "@faker-js/faker": "^9.5.1",
     "@fortawesome/fontawesome-free": "^6.7.2",
+    "@vueform/slider": "^2.1.10",
     "@vuepic/vue-datepicker": "^11.0.2",
     "autoprefixer": "^10",
     "axios": "^1.8.1",
@@ -25,6 +26,7 @@
     "pdfjs-dist": "^5.0.375",
     "postcss": "^8",
     "qrcode": "^1.5.4",
+    "qrcode.vue": "^3.6.0",
     "select2": "^4.1.0-rc.0",
     "tailwindcss": "^3",
     "vue": "^3.5.13",
@@ -32,6 +34,8 @@
     "vue-cli-service": "^5.0.10",
     "vue-qrcode-reader": "^5.7.1",
     "vue-router": "^4.0.3",
+    "vue-select": "^4.0.0-beta.6",
+    "vue-slider-component": "^4.1.0-beta.7",
     "vue3-apexcharts": "^1.8.0",
     "vue3-qr-reader": "^1.0.0",
     "xlsx": "^0.18.5"

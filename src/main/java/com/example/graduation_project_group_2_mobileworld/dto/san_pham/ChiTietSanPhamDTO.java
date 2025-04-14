@@ -15,7 +15,7 @@ public class ChiTietSanPhamDTO {
     private Integer idSanPham;
     private Integer idNhaSanXuat;
     private Integer idPin;
-    private Integer idCongNgheManHinh; // Thay idManHinh
+    private Integer congNgheManHinh; // Thay idManHinh
     private Integer idHoTroBoNhoNgoai;
     private Integer idCpu;
     private Integer idGpu;
@@ -24,7 +24,7 @@ public class ChiTietSanPhamDTO {
     private Integer idChiSoKhangBuiVaNuoc;
     private Integer idThietKe;
     private Integer idSim;
-    private Integer idHoTroCongNgheSac;
+    private Integer hoTroCongNgheSac;
     private Integer idCongNgheMang;
     private String ma;
     private String tenSanPham;

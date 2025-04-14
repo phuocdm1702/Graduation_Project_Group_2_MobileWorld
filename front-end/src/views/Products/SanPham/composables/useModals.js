@@ -74,27 +74,27 @@ export function useModals(dropdownOpen, toggleDropdown) {
         const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
         const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
 
-        // Lấy tất cả IMEI từ cột đầu tiên
+        // Bỏ qua dòng đầu tiên (header), đọc từ dòng thứ hai
         const imeis = jsonData
-          .map(row => row[0]?.toString().trim())
-          .filter(imei => imei && imei.length > 0);
+          .slice(1) // Bỏ qua dòng đầu tiên
+          .map(row => row[0]?.toString().trim()) // Lấy giá trị cột đầu tiên
+          .filter(imei => imei && imei.length > 0); // Loại bỏ giá trị rỗng hoặc không hợp lệ
 
         if (imeis.length === 0) {
           console.warn('Không tìm thấy IMEI nào trong file Excel.');
-          // Thêm thông báo cho người dùng nếu cần
+          alert('Không tìm thấy IMEI hợp lệ trong file Excel. Vui lòng kiểm tra lại.');
           return;
         }
 
         imeiInput.value = imeis.join('\n');
       } catch (error) {
         console.error('Error reading Excel file:', error);
-        // Thêm thông báo lỗi cho người dùng
-        alert('Lỗi khi đọc file Excel: ' + error.message); // Hoặc dùng toast nếu có
+        alert('Lỗi khi đọc file Excel: ' + error.message);
       }
     };
     reader.onerror = (error) => {
       console.error('Error loading file:', error);
-      alert('Không thể tải file: ' + error.message); // Hoặc dùng toast
+      alert('Không thể tải file: ' + error.message);
     };
     reader.readAsArrayBuffer(file);
   };
@@ -110,6 +110,19 @@ export function useModals(dropdownOpen, toggleDropdown) {
     dropdownOpen.value.ram = false;
     dropdownOpen.value.boNhoTrong = false;
     dropdownOpen.value.mauSac = false;
+  };
+
+  const downloadImeiTemplate = () => {
+    // Tạo dữ liệu mẫu với tiêu đề cột IMEI
+    const wsData = [['IMEI']]; // Chỉ một cột tiêu đề
+    const ws = XLSX.utils.aoa_to_sheet(wsData);
+
+    // Tạo workbook và thêm worksheet
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'IMEI Template');
+
+    // Xuất file Excel
+    XLSX.writeFile(wb, 'imei_template.xlsx');
   };
 
   return {
@@ -129,5 +142,6 @@ export function useModals(dropdownOpen, toggleDropdown) {
     saveImei,
     handleExcelImport,
     resetModals,
+    downloadImeiTemplate,
   };
 }

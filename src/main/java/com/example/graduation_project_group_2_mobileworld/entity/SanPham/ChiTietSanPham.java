@@ -55,11 +55,6 @@ public class ChiTietSanPham {
     @Column(name = "ma", nullable = false)
     private String ma;
 
-    @Size(max = 255)
-    @Nationalized
-    @Column(name = "tien_ich_dac_biet")
-    private String tienIchDacBiet;
-
     @NotNull
     @Column(name = "gia_ban", nullable = false, precision = 18, scale = 2)
     private BigDecimal giaBan;

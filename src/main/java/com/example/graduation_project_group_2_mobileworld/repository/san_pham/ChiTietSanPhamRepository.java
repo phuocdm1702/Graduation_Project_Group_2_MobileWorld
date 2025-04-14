@@ -16,5 +16,8 @@ public interface ChiTietSanPhamRepository extends JpaRepository<ChiTietSanPham, 
     @Query("SELECT c FROM ChiTietSanPham c WHERE c.idSanPham.id = :sanPhamId AND c.deleted = :deleted")
     List<ChiTietSanPham> findByIdSanPhamIdAndDeletedFalse(@Param("sanPhamId") Integer sanPhamId, @Param("deleted") boolean deleted);
 
+    @Query("SELECT COUNT(c) FROM ChiTietSanPham c WHERE c.idSanPham.id = :sanPhamId AND c.deleted = false")
+    Long countByIdSanPhamIdAndDeletedFalse(@Param("sanPhamId") Integer sanPhamId);
+
     Page<ChiTietSanPham> findAll(org.springframework.data.jpa.domain.Specification<ChiTietSanPham> spec, Pageable pageable);
 }

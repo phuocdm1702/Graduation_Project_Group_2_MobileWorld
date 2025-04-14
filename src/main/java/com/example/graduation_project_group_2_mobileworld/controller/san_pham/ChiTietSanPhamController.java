@@ -42,24 +42,13 @@ public class ChiTietSanPhamController {
             @RequestPart("dto") String dtoJson,
             @RequestPart(value = "images", required = true) List<MultipartFile> images) {
         try {
-            Path uploadPath = Paths.get(uploadDir);
-            if (!Files.exists(uploadPath)) {
-                Files.createDirectories(uploadPath);
-            }
-
             ChiTietSanPhamDTO dto = objectMapper.readValue(dtoJson, ChiTietSanPhamDTO.class);
             ChiTietSanPhamService.ChiTietSanPhamResponse response = chiTietSanPhamService.createChiTietSanPham(dto, images);
-
-            // Create a response map that matches what frontend expects
-            var responseBody = Map.of(
+            return ResponseEntity.status(HttpStatus.CREATED).body(Map.of(
                     "sanPhamId", response.sanPhamId(),
                     "chiTietSanPhamIds", response.chiTietSanPhamIds(),
                     "anhSanPhamIds", response.anhSanPhamIds()
-            );
-
-            return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(responseBody);
-
+            ));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(Map.of("error", e.getMessage()));
@@ -68,7 +57,7 @@ public class ChiTietSanPhamController {
                     .body(Map.of("error", "Lỗi khi xử lý ảnh: " + e.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("error", "Lỗi server: " + e.getMessage()));
+                    .body(Map.of("error", "Lỗi server: " + e.getMessage(), "details", e.toString()));
         }
     }
 
@@ -76,6 +65,12 @@ public class ChiTietSanPhamController {
     public ResponseEntity<List<ChiTietSanPhamDTO>> getChiTietSanPhamById(@PathVariable Integer id) {
         List<ChiTietSanPhamDTO> details = chiTietSanPhamService.getChiTietSanPhamBySanPhamId(id);
         return details.isEmpty() ? ResponseEntity.notFound().build() : ResponseEntity.ok(details);
+    }
+
+    @GetMapping("/{id}/price-range")
+    public ResponseEntity<Map<String, BigDecimal>> getPriceRange(@PathVariable Integer id) {
+        Map<String, BigDecimal> priceRange = chiTietSanPhamService.getPriceRange(id);
+        return ResponseEntity.ok(priceRange);
     }
 
     @GetMapping("/{id}/details")
@@ -86,9 +81,11 @@ public class ChiTietSanPhamController {
             @RequestParam(required = false) Integer idMauSac,
             @RequestParam(required = false) Integer idBoNhoTrong,
             @RequestParam(required = false) Integer idRam,
+            @RequestParam(required = false) BigDecimal minPrice,
+            @RequestParam(required = false) BigDecimal maxPrice,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size) {
-        Page<ChiTietSanPhamDTO> details = chiTietSanPhamService.getChiTietSanPhamDetails(id, keyword, status, idMauSac, idBoNhoTrong, idRam, page, size);
+        Page<ChiTietSanPhamDTO> details = chiTietSanPhamService.getChiTietSanPhamDetails(id, keyword, status, idMauSac, idBoNhoTrong, idRam, minPrice, maxPrice, page, size);
         return ResponseEntity.ok(details);
     }
 

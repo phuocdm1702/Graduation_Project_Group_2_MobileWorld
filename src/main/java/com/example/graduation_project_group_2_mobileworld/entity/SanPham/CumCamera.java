@@ -25,14 +25,11 @@ public class CumCamera {
     @Size(max = 255)
     @Nationalized
     @Column(name = "thong_so_camera_sau")
-    private String thongSoCameraSau;
+    private String cameraSau;
 
     @Size(max = 255)
     @Nationalized
     @Column(name = "thong_so_camera_truoc")
-    private String thongSoCameraTruoc;
-
-    @OneToMany(mappedBy = "idCumCamera")
-    private Set<SanPham> sanPhams = new LinkedHashSet<>();
+    private String cameraTruoc;
 
 }

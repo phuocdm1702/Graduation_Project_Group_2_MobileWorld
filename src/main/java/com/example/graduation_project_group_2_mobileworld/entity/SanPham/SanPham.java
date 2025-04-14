@@ -1,7 +1,5 @@
 package com.example.graduation_project_group_2_mobileworld.entity.SanPham;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -15,9 +13,6 @@ import java.util.*;
 @Setter
 @Entity
 @Table(name = "san_pham")
-@JsonIgnoreProperties({"chiTietSanPhams", "idNhaSanXuat", "idHeDieuHanh", "idCpu", "idGpu", "idCumCamera",
-        "idCongNgheMang", "idPin", "idSim", "idThietKe", "idHoTroBoNhoNgoai",
-        "hoTroCongNgheSac", "congNgheManHinh", "idChiSoKhangBuiVaNuoc"})
 public class SanPham {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

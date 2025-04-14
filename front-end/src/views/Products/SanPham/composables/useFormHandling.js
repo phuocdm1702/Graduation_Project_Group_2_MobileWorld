@@ -6,13 +6,15 @@ export function useFormHandling(toast, productData, productVariants, mainImages,
 
   const validateProductData = () => {
     const requiredFields = [
-      'tenSanPham', 'idHeDieuHanh', 'idManHinh', 'idNhaSanXuat',
+      'tenSanPham', 'idHeDieuHanh', 'congNgheManHinh', 'idNhaSanXuat',
       'idCumCamera', 'idSim', 'idThietKe', 'idPin', 'idCpu',
-      'idGpu', 'idCongNgheMang', 'idCongSac', 'idHoTroCongNgheSac',
-      'idLoaiTinhTrang'
+      'idGpu', 'idCongNgheMang', 'hoTroCongNgheSac'
     ];
 
-    return requiredFields.filter(field => !productData.value[field]);
+    return requiredFields.filter(field => {
+      const value = productData.value[field];
+      return value === null || value === '' || value === undefined;
+    });
   };
 
   const validateVariants = () => {
@@ -50,31 +52,30 @@ export function useFormHandling(toast, productData, productVariants, mainImages,
 
     const giaBan = productVariants.value.length > 0 ? productVariants.value[0].donGia : '0';
 
+    // Only include the `id` values, not the full objects
     formData.append('dto', JSON.stringify({
       tenSanPham: productData.value.tenSanPham,
-      idNhaSanXuat: productData.value.idNhaSanXuat,
-      idPin: productData.value.idPin,
-      idManHinh: productData.value.idManHinh,
-      idCpu: productData.value.idCpu,
-      idGpu: productData.value.idGpu,
-      idCumCamera: productData.value.idCumCamera,
-      idHeDieuHanh: productData.value.idHeDieuHanh,
-      idThietKe: productData.value.idThietKe,
-      idSim: productData.value.idSim,
-      idCongSac: productData.value.idCongSac,
-      idHoTroCongNgheSac: productData.value.idHoTroCongNgheSac,
-      idCongNgheMang: productData.value.idCongNgheMang,
-      idChiSoKhangBuiVaNuoc: productData.value.idChiSoKhangBuiVaNuoc || null,
+      idNhaSanXuat: productData.value.idNhaSanXuat?.id || productData.value.idNhaSanXuat,
+      idPin: productData.value.idPin?.id || productData.value.idPin,
+      congNgheManHinh: productData.value.congNgheManHinh?.id || productData.value.congNgheManHinh,
+      idCpu: productData.value.idCpu?.id || productData.value.idCpu,
+      idGpu: productData.value.idGpu?.id || productData.value.idGpu,
+      idCumCamera: productData.value.idCumCamera?.id || productData.value.idCumCamera,
+      idHeDieuHanh: productData.value.idHeDieuHanh?.id || productData.value.idHeDieuHanh,
+      idThietKe: productData.value.idThietKe?.id || productData.value.idThietKe,
+      idSim: productData.value.idSim?.id || productData.value.idSim,
+      hoTroCongNgheSac: productData.value.hoTroCongNgheSac?.id || productData.value.hoTroCongNgheSac,
+      idCongNgheMang: productData.value.idCongNgheMang?.id || productData.value.idCongNgheMang,
+      idChiSoKhangBuiVaNuoc: productData.value.idChiSoKhangBuiVaNuoc?.id || productData.value.idChiSoKhangBuiVaNuoc,
       tienIchDacBiet: productData.value.tienIchDacBiet,
       giaBan: giaBan,
       variants: productVariants.value.map((variant, index) => ({
         idMauSac: variant.idMauSac,
         idRam: variant.idRam,
         idBoNhoTrong: variant.idBoNhoTrong,
-        idLoaiTinhTrang: variant.idLoaiTinhTrang,
         imageIndex: variant.imageIndex,
         donGia: variant.donGia,
-        imeiList: variantImeis.value[index] || [] // Gửi tất cả IMEI
+        imeiList: variantImeis.value[index] || []
       }))
     }));
 
@@ -104,33 +105,21 @@ export function useFormHandling(toast, productData, productVariants, mainImages,
 
     try {
       const formData = prepareFormData();
-
+      console.log('FormData DTO:', JSON.parse(formData.get('dto'))); // Log DTO for debugging
       const response = await axios.post('http://localhost:8080/chi-tiet-san-pham', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
 
-      console.log('Full Response:', response);
-      console.log('Response Data:', response.data);
+      console.log('Phản hồi đầy đủ:', response);
+      console.log('Dữ liệu phản hồi:', response.data);
 
-      // More defensive check
-      if (response.data && (response.data.sanPhamId !== undefined)) {
-        const sanPhamId = response.data.sanPhamId || 'N/A';
-        const chiTietSanPhamIds = response.data.chiTietSanPhamIds || [];
-        const anhSanPhamIds = response.data.anhSanPhamIds || [];
-
-        toast.value?.kshowToast(
-          'success',
-          `Thêm sản phẩm thành công! ID: ${sanPhamId}, ${chiTietSanPhamIds.length} biến thể, ${anhSanPhamIds.length} ảnh`
-        );
-        await router.push('/products');
-      } else {
-        console.error('Unexpected response structure:', response.data);
-        throw new Error('Response data is invalid or incomplete');
-      }
+      setTimeout(() => {
+        router.push('/products');
+      }, 1000);
     } catch (error) {
-      console.error('Error submitting form:', error.response?.data || error.message);
+      console.error('Lỗi khi gửi biểu mẫu:', error.response?.data || error.message);
 
       let errorMessage = 'Lỗi khi lưu dữ liệu';
       if (error.response) {

@@ -39,8 +39,8 @@ public class CumCameraService {
         CumCameraDTO dto = new CumCameraDTO();
         dto.setId(entity.getId());
         dto.setMa(entity.getMa());
-        dto.setCameraTruoc(entity.getThongSoCameraTruoc());
-        dto.setCameraSau(entity.getThongSoCameraSau());
+        dto.setCameraTruoc(entity.getCameraTruoc());
+        dto.setCameraSau(entity.getCameraSau());
         dto.setDeleted(entity.getDeleted());
         return dto;
     }
