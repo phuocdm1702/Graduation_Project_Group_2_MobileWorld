@@ -41,7 +41,7 @@ public class ChiTietSanPhamService {
     private final MauSacRepository mauSacRepository;
     private final ImelRepository imelRepository;
     private final HeDieuHanhRepository heDieuHanhRepository;
-    private final CongNgheManHinhRepository congNgheManHinhRepository; // Thay ManHinhRepository
+    private final CongNgheManHinhRepository congNgheManHinhRepository;
     private final NhaSanXuatRepository nhaSanXuatRepository;
     private final CumCameraRepository cumCameraRepository;
     private final SimRepository simRepository;
@@ -76,7 +76,7 @@ public class ChiTietSanPhamService {
                                  GpuRepository gpuRepository,
                                  ImelRepository imelRepository,
                                  SimRepository simRepository,
-                                 CongNgheManHinhRepository congNgheManHinhRepository, // Thay ManHinhRepository
+                                 CongNgheManHinhRepository congNgheManHinhRepository,
                                  NhaSanXuatRepository nhaSanXuatRepository,
                                  HoTroCongNgheSacRepository hoTroCongNgheSacRepository,
                                  CumCameraRepository cumCameraRepository) {
@@ -144,7 +144,7 @@ public class ChiTietSanPhamService {
 
         chiTietSanPham.setGiaBan(newPrice);
         chiTietSanPham.setUpdatedAt(new Date());
-        chiTietSanPham.setUpdatedBy(1); // Thay bằng thông tin người dùng hiện tại nếu có
+        chiTietSanPham.setUpdatedBy(1);
 
         chiTietSanPhamRepository.save(chiTietSanPham);
     }
@@ -228,14 +228,14 @@ public class ChiTietSanPhamService {
     private void updateSanPhamFields(SanPham sanPham, ChiTietSanPhamDTO dto) {
         sanPham.setIdNhaSanXuat(getEntity(nhaSanXuatRepository, dto.getIdNhaSanXuat(), "Nhà sản xuất"));
         sanPham.setIdPin(getEntity(pinRepository, dto.getIdPin(), "Pin"));
-        sanPham.setCongNgheManHinh(getEntity(congNgheManHinhRepository, dto.getCongNgheManHinh(), "Công nghệ màn hình")); // Thay idManHinh
+        sanPham.setCongNgheManHinh(getEntity(congNgheManHinhRepository, dto.getCongNgheManHinh(), "Công nghệ màn hình"));
         sanPham.setIdCpu(getEntity(cpuRepository, dto.getIdCpu(), "CPU"));
         sanPham.setIdGpu(getEntity(gpuRepository, dto.getIdGpu(), "GPU"));
         sanPham.setIdCumCamera(getEntity(cumCameraRepository, dto.getIdCumCamera(), "Cụm camera"));
         sanPham.setIdHeDieuHanh(getEntity(heDieuHanhRepository, dto.getIdHeDieuHanh(), "Hệ điều hành"));
         sanPham.setIdThietKe(getEntity(thietKeRepository, dto.getIdThietKe(), "Thiết kế"));
         sanPham.setIdSim(getEntity(simRepository, dto.getIdSim(), "Sim"));
-        sanPham.setHoTroCongNgheSac(getEntity(hoTroCongNgheSacRepository, dto.getHoTroCongNgheSac(), "Hỗ trợ công nghệ sạc")); // Thay idCongSac
+        sanPham.setHoTroCongNgheSac(getEntity(hoTroCongNgheSacRepository, dto.getHoTroCongNgheSac(), "Hỗ trợ công nghệ sạc"));
         sanPham.setIdCongNgheMang(getEntity(congNgheMangRepository, dto.getIdCongNgheMang(), "Công nghệ mạng"));
 
         sanPham.setIdHoTroBoNhoNgoai(dto.getIdHoTroBoNhoNgoai() != null ?
@@ -466,7 +466,7 @@ public class ChiTietSanPhamService {
         if (chiTietSanPhams.isEmpty()) {
             return Map.of(
                     "minPrice", BigDecimal.ZERO,
-                    "maxPrice", BigDecimal.valueOf(10000000) // Giá mặc định nếu không có sản phẩm
+                    "maxPrice", BigDecimal.valueOf(10000000)
             );
         }
 
@@ -496,14 +496,14 @@ public class ChiTietSanPhamService {
             dto.setIdSanPham(sanPham.getId());
             dto.setIdNhaSanXuat(sanPham.getIdNhaSanXuat().getId());
             dto.setIdPin(sanPham.getIdPin().getId());
-            dto.setCongNgheManHinh(sanPham.getCongNgheManHinh().getId()); // Thay idManHinh
+            dto.setCongNgheManHinh(sanPham.getCongNgheManHinh().getId());
             dto.setIdCpu(sanPham.getIdCpu().getId());
             dto.setIdGpu(sanPham.getIdGpu().getId());
             dto.setIdCumCamera(sanPham.getIdCumCamera().getId());
             dto.setIdHeDieuHanh(sanPham.getIdHeDieuHanh().getId());
             dto.setIdThietKe(sanPham.getIdThietKe().getId());
             dto.setIdSim(sanPham.getIdSim().getId());
-            dto.setHoTroCongNgheSac(sanPham.getHoTroCongNgheSac().getId()); // Thay idCongSac
+            dto.setHoTroCongNgheSac(sanPham.getHoTroCongNgheSac().getId());
             dto.setIdCongNgheMang(sanPham.getIdCongNgheMang().getId());
             dto.setTenSanPham(sanPham.getTenSanPham());
             dto.setMa(chiTiet.getMa());

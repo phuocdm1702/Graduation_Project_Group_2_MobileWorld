@@ -93,7 +93,6 @@ public class ChiTietSanPhamController {
     public ResponseEntity<Map<String, String>> updatePrice(@PathVariable("id") String idStr, @RequestParam("newPrice") BigDecimal newPrice) {
         Map<String, String> response = new HashMap<>();
         try {
-            // Kiểm tra và chuyển đổi id từ String sang Integer
             if (idStr == null || idStr.trim().isEmpty() || "undefined".equals(idStr)) {
                 response.put("status", "error");
                 response.put("message", "ID sản phẩm không hợp lệ!");

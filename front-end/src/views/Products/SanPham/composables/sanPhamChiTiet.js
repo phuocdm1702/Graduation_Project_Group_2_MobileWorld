@@ -14,8 +14,6 @@ export default function useSanPhamChiTiet() {
     idMauSac: '',
     idBoNhoTrong: '',
     idRam: '',
-    minPrice: null,
-    maxPrice: null
   });
   const currentPage = ref(0);
   const pageSize = ref(5);
@@ -25,12 +23,6 @@ export default function useSanPhamChiTiet() {
   const mauSacOptions = ref([]);
   const boNhoTrongOptions = ref([]);
   const ramOptions = ref([]);
-  const priceRange = ref({
-    min: 0,
-    max: 10000000 // Giá trị mặc định
-  });
-
-  const priceRangeValue = ref([priceRange.value.min, priceRange.value.max]);
 
   const breadcrumbItems = computed(() => route.meta?.breadcrumb || ['Sản Phẩm Chi Tiết']);
 
@@ -105,15 +97,13 @@ export default function useSanPhamChiTiet() {
           idMauSac: searchFilters.value.idMauSac || undefined,
           idBoNhoTrong: searchFilters.value.idBoNhoTrong || undefined,
           idRam: searchFilters.value.idRam || undefined,
-          minPrice: searchFilters.value.minPrice || undefined,
-          maxPrice: searchFilters.value.maxPrice || undefined,
         },
       });
       productDetails.value = data.content || data;
       totalItems.value = data.totalElements || productDetails.value.length;
     } catch (error) {
       toast.value?.kshowToast('error', 'Không thể tải dữ liệu!');
-      console.error('Fetch error:', error);
+      console.error('Lỗi khi tải chi tiết sản phẩm:', error);
       productDetails.value = [];
       totalItems.value = 0;
     }
@@ -146,50 +136,24 @@ export default function useSanPhamChiTiet() {
     } catch (error) {
       const errorMessage = error.response?.data?.message || 'Không thể cập nhật giá!';
       toast.value?.kshowToast('error', errorMessage);
-      console.error('Update price error:', error);
+      console.error('Lỗi cập nhật giá:', error);
     }
   };
 
   const fetchOptions = async () => {
     try {
-      const [mauSacRes, boNhoTrongRes, ramRes, priceRangeRes] = await Promise.all([
+      const [mauSacRes, boNhoTrongRes, ramRes] = await Promise.all([
         axios.get('http://localhost:8080/mau-sac'),
         axios.get('http://localhost:8080/bo-nho-trong'),
         axios.get('http://localhost:8080/ram'),
-        axios.get(`http://localhost:8080/chi-tiet-san-pham/${productId.value}/price-range`)
       ]);
 
       mauSacOptions.value = mauSacRes.data.content || mauSacRes.data || [];
       boNhoTrongOptions.value = boNhoTrongRes.data.content || boNhoTrongRes.data || [];
       ramOptions.value = ramRes.data.content || ramRes.data || [];
-
-      if (priceRangeRes.data) {
-        priceRange.value = {
-          min: priceRangeRes.data.minPrice ? Math.floor(priceRangeRes.data.minPrice) : 0,
-          max: priceRangeRes.data.maxPrice ? Math.ceil(priceRangeRes.data.maxPrice) : 10000000
-        };
-      }
     } catch (error) {
       toast.value?.kshowToast('error', 'Lỗi khi tải danh sách tùy chọn!');
-      console.error('Fetch options error:', error);
-    }
-  };
-
-  const fetchPriceRange = async () => {
-    try {
-      const { data } = await axios.get(`http://localhost:8080/chi-tiet-san-pham/${productId.value}/price-range`);
-      if (data) {
-        priceRange.value = {
-          min: data.minPrice ? Math.floor(data.minPrice) : 0,
-          max: data.maxPrice ? Math.ceil(data.maxPrice) : 10000000
-        };
-        priceRangeValue.value = [priceRange.value.min, priceRange.value.max]; // Cập nhật giá trị slider
-      }
-    } catch (error) {
-      console.error('Error fetching price range:', error);
-      // Đặt giá trị mặc định nếu có lỗi
-      priceRange.value = { min: 0, max: 10000000 };
-      priceRangeValue.value = [priceRange.value.min, priceRange.value.max];
+      console.error('Lỗi khi tải tùy chọn:', error);
     }
   };
 
@@ -225,7 +189,7 @@ export default function useSanPhamChiTiet() {
         return acc && acc[part];
       }, obj);
     } catch (e) {
-      console.error(`Error accessing path ${path}:`, e);
+      console.error(`Lỗi khi truy cập đường dẫn ${path}:`, e);
       return null;
     }
   };
@@ -233,7 +197,6 @@ export default function useSanPhamChiTiet() {
   onMounted(() => {
     fetchProductDetails();
     fetchOptions();
-    fetchPriceRange(); // Thêm dòng này
     window.updatePrice = updatePrice;
   });
 
@@ -247,7 +210,6 @@ export default function useSanPhamChiTiet() {
     mauSacOptions,
     boNhoTrongOptions,
     ramOptions,
-    priceRange,
     breadcrumbItems,
     columns,
     goToPage,
@@ -255,7 +217,5 @@ export default function useSanPhamChiTiet() {
     searchProductDetails,
     goBack,
     getNestedValue,
-    fetchPriceRange,
-    priceRangeValue,
   };
 }

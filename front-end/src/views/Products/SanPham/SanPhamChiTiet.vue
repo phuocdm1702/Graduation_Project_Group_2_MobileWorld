@@ -62,37 +62,6 @@
           />
         </div>
 
-        <!-- Filter for Price Range -->
-        <div class="col-span-full">
-          <label class="block text-sm font-medium text-gray-700 mb-1">Khoảng giá</label>
-          <div class="flex items-center gap-4">
-            <div class="w-full">
-              <div class="flex justify-between text-xs text-gray-500 mb-1">
-                <span>{{ formatCurrency(priceRange.min) }}</span>
-                <span>{{ formatCurrency(priceRange.max) }}</span>
-              </div>
-              <vue-slider
-                v-model="priceRangeValue"
-                :min="priceRange.min"
-                :max="priceRange.max"
-                :interval="100000"
-                :tooltip-formatter="formatCurrency"
-                @change="handlePriceRangeChange"
-              />
-              <div class="flex justify-between mt-2">
-                <span class="text-sm">{{ formatCurrency(searchFilters.minPrice || priceRange.min) }}</span>
-                <span class="text-sm">{{ formatCurrency(searchFilters.maxPrice || priceRange.max) }}</span>
-              </div>
-            </div>
-            <button
-              @click="resetPriceRange"
-              class="text-sm text-orange-500 hover:text-orange-700 whitespace-nowrap"
-            >
-              Đặt lại
-            </button>
-          </div>
-        </div>
-
         <div class="flex justify-end w-full col-span-full gap-2">
           <button
             @click="resetAllFilters"
@@ -132,8 +101,7 @@
 </template>
 
 <script>
-// Thêm các import cần thiết từ Vue
-import { ref } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import BreadcrumbWrapper from '@/components/BreadcrumbWrapper.vue';
 import ToastNotification from '@/components/ToastNotification.vue';
 import Pagination from '@/components/Pagination.vue';
@@ -141,8 +109,6 @@ import DynamicTable from '@/components/DynamicTable.vue';
 import useSanPhamChiTiet from '@/views/Products/SanPham/composables/sanPhamChiTiet';
 import VSelect from 'vue-select';
 import 'vue-select/dist/vue-select.css';
-import VueSlider from 'vue-slider-component';
-import 'vue-slider-component/theme/default.css';
 
 export default {
   name: 'SanPhamChiTiet',
@@ -152,10 +118,8 @@ export default {
     Pagination,
     DynamicTable,
     VSelect,
-    VueSlider
   },
   setup() {
-    // Sử dụng composable để lấy tất cả logic
     const {
       toast,
       productDetails,
@@ -173,24 +137,7 @@ export default {
       searchProductDetails,
       goBack,
       getNestedValue,
-      priceRange,
-      priceRangeValue,
-      fetchPriceRange,
     } = useSanPhamChiTiet();
-    
-
-    const handlePriceRangeChange = (value) => {
-      searchFilters.value.minPrice = value[0];
-      searchFilters.value.maxPrice = value[1];
-      searchProductDetails();
-    };
-
-    const resetPriceRange = () => {
-      searchFilters.value.minPrice = null;
-      searchFilters.value.maxPrice = null;
-      priceRangeValue.value = [priceRange.value.min, priceRange.value.max];
-      searchProductDetails();
-    };
 
     const resetAllFilters = () => {
       searchKeyword.value = '';
@@ -199,19 +146,31 @@ export default {
         idMauSac: '',
         idBoNhoTrong: '',
         idRam: '',
-        minPrice: null,
-        maxPrice: null
       };
-      priceRangeValue.value = [priceRange.value.min, priceRange.value.max];
       searchProductDetails();
     };
 
-    const formatCurrency = (value) => {
-      return new Intl.NumberFormat('vi-VN', {
-        style: 'currency',
-        currency: 'VND'
-      }).format(value).replace('₫', 'VND');
+    // Xử lý lỗi getSelection
+    const handleMouseDown = (event) => {
+      try {
+        if (window.getSelection) {
+          const selection = window.getSelection();
+          if (selection && selection.toString()) {
+            // Không làm gì thêm trừ khi cần
+          }
+        }
+      } catch (error) {
+        console.warn('Lỗi xử lý getSelection:', error);
+      }
     };
+
+    onMounted(() => {
+      document.addEventListener('mousedown', handleMouseDown);
+    });
+
+    onUnmounted(() => {
+      document.removeEventListener('mousedown', handleMouseDown);
+    });
 
     return {
       toast,
@@ -230,12 +189,7 @@ export default {
       searchProductDetails,
       goBack,
       getNestedValue,
-      priceRange,
-      priceRangeValue,
-      handlePriceRangeChange,
-      resetPriceRange,
       resetAllFilters,
-      formatCurrency,
     };
   },
 };
@@ -261,21 +215,5 @@ export default {
 .dynamic-table {
   border-top-left-radius: 0px;
   border-top-right-radius: 0px;
-}
-
-:deep(.vue-slider-rail) {
-  @apply bg-gray-200;
-}
-
-:deep(.vue-slider-process) {
-  @apply bg-orange-500;
-}
-
-:deep(.vue-slider-dot-handle) {
-  @apply border-orange-500;
-}
-
-:deep(.vue-slider-dot-tooltip-inner) {
-  @apply bg-orange-500 border-orange-500 text-white;
 }
 </style>
