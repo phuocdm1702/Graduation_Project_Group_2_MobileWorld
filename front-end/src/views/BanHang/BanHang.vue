@@ -1,19 +1,13 @@
 <template>
-  <!-- Breadcrumb -->
   <BreadcrumbWrapper :breadcrumb-items="breadcrumbItems" />
-
-  <!-- Toast Notification -->
   <ToastNotification ref="toast" />
 
   <div class="min-h-screen bg-gray-100 p-4 flex flex-col">
-    <!-- Main Content -->
     <div class="flex-1">
-      <!-- Header -->
       <div class="flex justify-between items-center mb-4">
         <h1 class="text-2xl font-bold text-orange-500">Bán hàng tại quầy</h1>
       </div>
 
-      <!-- Pending Invoices Menu -->
       <div class="bg-white rounded-lg shadow mb-4 p-4">
         <div class="flex justify-between items-center mb-4">
           <h2 class="text-lg font-semibold text-orange-500">Hóa đơn chờ</h2>
@@ -43,13 +37,12 @@
         </div>
       </div>
 
-      <!-- Cart Section -->
       <div class="bg-white p-4 rounded-lg shadow mb-4">
         <div class="flex justify-between items-center mb-4">
           <h2 class="text-lg font-semibold text-orange-500">Giỏ hàng</h2>
           <div class="flex space-x-2">
             <button @click="scanQR" class="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600">Quét QR</button>
-            <button @click="addProduct" class="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600">Thêm sản phẩm</button>
+            <button @click="openProductModal" class="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600">Thêm sản phẩm</button>
           </div>
         </div>
 
@@ -74,7 +67,57 @@
         </div>
       </div>
 
-      <!-- Customer Info Section -->
+      <!-- Modal chọn sản phẩm -->
+      <div v-if="showProductModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-lg w-full max-w-2xl p-6">
+          <div class="flex justify-between items-center mb-4">
+            <h2 class="text-lg font-semibold text-orange-500">Chọn sản phẩm</h2>
+            <button @click="showProductModal = false" class="text-gray-500 hover:text-gray-700">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700">Tìm kiếm sản phẩm</label>
+            <input
+              v-model="productSearchQuery"
+              @input="searchProducts"
+              type="text"
+              class="mt-1 p-2 w-full border rounded"
+              placeholder="Nhập tên, mã hoặc IMEI sản phẩm"
+            />
+          </div>
+          <div class="max-h-96 overflow-y-auto">
+            <table class="w-full">
+              <thead>
+              <tr class="bg-gray-100">
+                <th class="p-2 text-left">Tên sản phẩm</th>
+                <th class="p-2 text-left">Mã</th>
+                <th class="p-2 text-left">IMEI</th>
+                <th class="p-2 text-left">Giá</th>
+                <th class="p-2"></th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr v-for="product in filteredProducts" :key="product.id" class="border-b">
+                <td class="p-2">{{ product.tenSanPham }}</td>
+                <td class="p-2">{{ product.ma }}</td>
+                <td class="p-2">{{ product.imel }}</td>
+                <td class="p-2">{{ product.giaBan.toLocaleString() }} đ</td>
+                <td class="p-2 text-right">
+                  <button
+                    @click="addProduct(product)"
+                    class="px-3 py-1 bg-orange-500 text-white rounded hover:bg-orange-600"
+                  >
+                    Chọn
+                  </button>
+                </td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
       <div class="bg-white p-4 rounded-lg shadow mb-4">
         <h2 class="text-lg font-semibold text-orange-500 mb-2">Thông tin khách hàng</h2>
         <div class="flex space-x-4 mb-4">
@@ -89,7 +132,7 @@
             />
           </div>
           <div class="flex items-end">
-            <button @click="addNewCustomer" class="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600">Thêm mới khách hàng</button>
+            <button @click="openCustomerModal" class="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600">Thêm mới khách hàng</button>
           </div>
         </div>
         <div v-if="selectedCustomer" class="grid grid-cols-2 gap-4">
@@ -104,65 +147,52 @@
         </div>
       </div>
 
-      <!-- Order Info Section -->
       <div class="bg-white p-4 rounded-lg shadow">
         <div class="flex justify-between items-center mb-4">
           <h2 class="text-lg font-semibold text-orange-500">Thông tin đơn hàng</h2>
           <label class="flex items-center">
-            <input type="checkbox" class="mr-2" />
+            <input type="checkbox" v-model="payOnDelivery" class="mr-2" />
             <span>Bán giao hàng</span>
           </label>
         </div>
 
         <div class="grid grid-cols-2 gap-4">
-          <!-- Receiver Info -->
           <div>
             <h3 class="text-md font-medium text-orange-500 mb-2">Thông tin người nhận</h3>
             <div class="grid grid-cols-2 gap-4">
               <div>
                 <label class="block text-sm font-medium text-gray-700">Tên người nhận</label>
-                <input v-model="receiver.name" type="text" class="mt-1 p-2 w-full border rounded" placeholder="Nguyễn Oanh" />
+                <input v-model="customer.name" type="text" class="mt-1 p-2 w-full border rounded" placeholder="Nguyễn Oanh" />
               </div>
               <div>
                 <label class="block text-sm font-medium text-gray-700">Số điện thoại</label>
-                <input v-model="receiver.phone" type="text" class="mt-1 p-2 w-full border rounded" placeholder="0985357224" />
+                <input v-model="customer.phone" type="text" class="mt-1 p-2 w-full border rounded" placeholder="0985357224" />
               </div>
               <div>
-                <label class="block text-sm font-medium text-gray-700">Tỉnh, Thành phố</label>
-                <select v-model="receiver.city" class="mt-1 p-2 w-full border rounded">
-                  <option>Tỉnh Phú Thọ</option>
-                </select>
+                <label class="block text-sm font-medium text-gray-700">Thành phố</label>
+                <input v-model="receiver.city" type="text" class="mt-1 p-2 w-full border rounded"  />
               </div>
               <div>
                 <label class="block text-sm font-medium text-gray-700">Quận, Huyện</label>
-                <select v-model="receiver.district" class="mt-1 p-2 w-full border rounded">
-                  <option>Huyện Lâm Thao</option>
-                </select>
+                <input v-model="receiver.district" type="text" class="mt-1 p-2 w-full border rounded"  />
               </div>
               <div>
-                <label class="block text-sm font-medium text-gray-700">Phường, Xã</label>
-                <select v-model="receiver.ward" class="mt-1 p-2 w-full border rounded">
-                  <option>Xã Xuân Lũng</option>
-                </select>
+                <label class="block text-sm font-medium text-gray-700">Phường, xã</label>
+                <input v-model="receiver.ward" type="text" class="mt-1 p-2 w-full border rounded"  />
               </div>
             </div>
             <div class="mt-4">
               <label class="block text-sm font-medium text-gray-700">Địa chỉ cụ thể</label>
               <input v-model="receiver.address" type="text" class="mt-1 p-2 w-full border rounded" placeholder="Xóm Bình Yên" />
             </div>
-            <!-- Notes -->
             <div class="mt-4">
               <label class="block text-sm font-medium text-gray-700">Ghi chú</label>
               <textarea v-model="orderNotes" class="mt-1 p-2 w-full border rounded" rows="3"></textarea>
             </div>
           </div>
 
-          <!-- Payment and Discount Info -->
           <div>
-            <!-- Divider -->
             <div class="border-t border-gray-300 mb-4"></div>
-
-            <!-- Discount Info -->
             <div class="mb-4">
               <h3 class="text-md font-medium text-orange-500">Mã giảm giá</h3>
               <div class="flex space-x-4">
@@ -175,8 +205,6 @@
                 <p class="text-lg font-semibold">Tổng tiền cần thanh toán: {{ (totalPrice - discount).toLocaleString() }} đ</p>
               </div>
             </div>
-
-            <!-- Payment Options -->
             <div class="mb-4">
               <h3 class="text-md font-medium text-orange-500">Phương thức thanh toán</h3>
               <div class="flex flex-wrap gap-2">
@@ -202,6 +230,27 @@
                   Cả hai
                 </button>
               </div>
+              <!-- Thêm ô nhập tiền nếu chọn "Cả hai" -->
+              <div v-if="paymentMethod === 'both'" class="mt-4 grid grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700">Tiền chuyển khoản</label>
+                  <input
+                    v-model="tienChuyenKhoan"
+                    type="number"
+                    class="mt-1 p-2 w-full border rounded"
+                    placeholder="Nhập số tiền chuyển khoản"
+                  />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700">Tiền mặt</label>
+                  <input
+                    v-model="tienMat"
+                    type="number"
+                    class="mt-1 p-2 w-full border rounded"
+                    placeholder="Nhập số tiền mặt"
+                  />
+                </div>
+              </div>
               <div class="mt-2">
                 <label class="flex items-center">
                   <input type="checkbox" v-model="payOnDelivery" class="mr-2" />
@@ -209,8 +258,6 @@
                 </label>
               </div>
             </div>
-
-            <!-- Submit Button -->
             <div class="text-right">
               <button @click="createOrder" class="px-6 py-2 bg-orange-500 text-white rounded hover:bg-orange-600">Thanh toán</button>
             </div>
@@ -219,214 +266,206 @@
       </div>
     </div>
   </div>
+  <FormModal
+    :show="isCustomerModalOpen"
+    entity-name="khách hàng"
+    :entity-data="customer"
+    @submit="(data) => { addNewCustomer(data); isCustomerModalOpen = false; }"
+    @close="isCustomerModalOpen = false"
+  >
+    <template #default="{ entityData }">
+      <div class="grid grid-cols-1 gap-4">
+        <!-- Tên khách hàng -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Tên khách hàng</label>
+          <input
+            v-model="entityData.name"
+            type="text"
+            class="mt-1 p-2 w-full border rounded"
+            placeholder="Nhập tên khách hàng"
+            required
+          />
+        </div>
+        <!-- Số điện thoại -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Số điện thoại</label>
+          <input
+            v-model="entityData.phone"
+            type="text"
+            class="mt-1 p-2 w-full border rounded"
+            placeholder="Nhập số điện thoại"
+            required
+            pattern="\d{10}"
+            title="Số điện thoại phải có đúng 10 chữ số"
+          />
+        </div>
+        <!-- Tỉnh/Thành phố -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Tỉnh/Thành phố</label>
+          <select
+            v-model="entityData.city"
+            class="mt-1 p-2 w-full border rounded"
+            required
+            @change="handleProvinceChange(entityData)"
+          >
+            <option value="" disabled>Chọn tỉnh/thành phố</option>
+            <option v-for="province in provinces" :key="province.code" :value="province.name">
+              {{ province.name }}
+            </option>
+          </select>
+        </div>
+        <!-- Quận/Huyện -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Quận/Huyện</label>
+          <select
+            v-model="entityData.district"
+            class="mt-1 p-2 w-full border rounded"
+            required
+            @change="handleDistrictChange(entityData)"
+            :disabled="!entityData.city"
+          >
+            <option value="" disabled>Chọn quận/huyện</option>
+            <option v-for="district in districts" :key="district.code" :value="district.name">
+              {{ district.name }}
+            </option>
+          </select>
+        </div>
+        <!-- Phường/Xã -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Phường/Xã</label>
+          <select
+            v-model="entityData.ward"
+            class="mt-1 p-2 w-full border rounded"
+            required
+            :disabled="!entityData.district"
+          >
+            <option value="" disabled>Chọn phường/xã</option>
+            <option v-for="ward in wards" :key="ward.code" :value="ward.name">
+              {{ ward.name }}
+            </option>
+          </select>
+        </div>
+        <!-- Địa chỉ cụ thể -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Địa chỉ cụ thể</label>
+          <input
+            v-model="entityData.address"
+            type="text"
+            class="mt-1 p-2 w-full border rounded"
+            placeholder="Nhập địa chỉ cụ thể"
+            required
+          />
+        </div>
+      </div>
+    </template>
+  </FormModal>
 </template>
 
-<script>
-import { computed } from "vue";
+<script setup>
+import {ref, computed, onMounted} from "vue";
 import { useRoute } from "vue-router";
-import DynamicTable from '@/components/DynamicTable.vue';
-import ToastNotification from '@/components/ToastNotification.vue';
-import BreadcrumbWrapper from '@/components/BreadcrumbWrapper.vue';
+import DynamicTable from "@/components/DynamicTable.vue";
+import ToastNotification from "@/components/ToastNotification.vue";
+import BreadcrumbWrapper from "@/components/BreadcrumbWrapper.vue";
+import { useBanHang } from "@/views/BanHang/BanHang.js"; // Sửa đường dẫn import
+import FormModal from "@/components/FormModal.vue";
+import axios from "axios";
 
-export default {
-  components: {
-    DynamicTable,
-    ToastNotification,
-    BreadcrumbWrapper
-  },
-  setup() {
-    const route = useRoute();
+const route = useRoute();
+const breadcrumbItems = computed(() => {
+  if (typeof route.meta.breadcrumb === "function") {
+    return route.meta.breadcrumb(route);
+  }
+  return route.meta?.breadcrumb || ["Bán Hàng Tại Quầy"];
+});
 
-    const breadcrumbItems = computed(() => {
-      if (typeof route.meta.breadcrumb === 'function') {
-        return route.meta.breadcrumb(route);
-      }
-      return route.meta?.breadcrumb || ['Bán Hàng Tại Quầy'];
+const provinces = ref([]);
+const districts = ref([]);
+const wards = ref([]);
+
+// Khởi tạo toast ref
+const toast = ref(null);
+
+// Xử lý thay đổi tỉnh/thành phố
+const handleProvinceChange = (entityData) => {
+  const province = provinces.value.find((prov) => prov.name === entityData.city);
+  districts.value = province ? province.districts : [];
+  entityData.district = ''; // Đặt lại quận
+  entityData.ward = ''; // Đặt lại phường
+  wards.value = []; // Đặt lại danh sách phường
+};
+
+// Xử lý thay đổi quận/huyện
+const handleDistrictChange = (entityData) => {
+  const district = districts.value.find((dist) => dist.name === entityData.district);
+  wards.value = district ? district.wards : [];
+  entityData.ward = ''; // Đặt lại phường
+};
+
+// Tải dữ liệu địa chỉ khi component được mounted
+onMounted(async () => {
+  try {
+    const response = await axios.get('https://provinces.open-api.vn/api/?depth=3', {
+      withCredentials: false // Thêm dòng này để tránh lỗi CORS
     });
-
-    return {
-      breadcrumbItems
-    };
-  },
-  data() {
-    return {
-      cartItems: [],
-      cartColumns: [
-        { key: 'id', label: 'STT' },
-        { key: 'name', label: 'Sản phẩm' },
-        { key: 'imei', label: 'IMEI' },
-        { key: 'price', label: 'Đơn giá', formatter: (value) => `${value.toLocaleString()} đ` },
-        { key: 'actions', label: 'Xóa', cellSlot: 'actionsSlot' }
-      ],
-      searchCustomer: '',
-      selectedCustomer: null,
-      customer: { name: '', phone: '' },
-      receiver: {
-        name: '',
-        phone: '',
-        city: 'Tỉnh Phú Thọ',
-        district: 'Huyện Lâm Thao',
-        ward: 'Xã Xuân Lũng',
-        address: ''
-      },
-      discountCode: '',
-      discount: 0,
-      orderNotes: '',
-      payOnDelivery: false,
-      paymentMethod: '',
-      activeInvoiceId: null,
-      pendingInvoices: [
-        {
-          id: 1,
-          code: 'HD252',
-          status: '0',
-          items: [
-            { id: 1, name: 'iPhone 13 Pro Max', imei: 'IME0000154', price: 25000000 },
-            { id: 2, name: 'AirPods Pro', imei: 'IME0000155', price: 5000000 }
-          ]
-        },
-        {
-          id: 2,
-          code: 'HD255',
-          status: '0',
-          items: [
-            { id: 3, name: 'Samsung Galaxy S22 Ultra', imei: 'IME0000156', price: 22000000 }
-          ]
-        },
-        {
-          id: 3,
-          code: 'HD267',
-          status: '0',
-          items: [
-            { id: 4, name: 'iPad Pro 11"', imei: 'IME0000157', price: 18000000 },
-            { id: 5, name: 'Apple Pencil 2', imei: 'IME0000158', price: 2500000 }
-          ]
-        }
-      ]
-    };
-  },
-  computed: {
-    totalPrice() {
-      return this.cartItems.reduce((total, item) => total + item.price, 0);
+    provinces.value = response.data;
+  } catch (error) {
+    console.error('Lỗi khi tải dữ liệu địa chỉ:', error);
+    if (toast.value) {
+      toast.value.kshowToast('error', 'Không thể tải danh sách tỉnh/thành phố: ' + (error.response?.data?.error || error.message));
     }
-  },
-  methods: {
-    getNestedValue(item, key) {
-      return key.split('.').reduce((obj, k) => (obj && obj[k] !== undefined ? obj[k] : null), item) || 'N/A';
-    },
-    editItem(item) {
-      this.$refs.toast.kshowToast('info', `Chỉnh sửa sản phẩm: ${item.name}`);
-    },
-    toggleStatus(item) {
-      this.$refs.toast.kshowToast('success', `Đã thay đổi trạng thái sản phẩm: ${item.name}`);
-    },
-    removeItem(item) {
-      const index = this.cartItems.findIndex(i => i.id === item.id);
-      if (index !== -1) {
-        this.cartItems.splice(index, 1);
-        this.$refs.toast.kshowToast('success', `Đã xóa sản phẩm: ${item.name}`);
-      }
-    },
-    createNewPendingInvoice() {
-      const newInvoiceId = this.pendingInvoices.length > 0
-        ? Math.max(...this.pendingInvoices.map(i => i.id)) + 1
-        : 1;
+  }
+})
 
-      const newInvoice = {
-        id: newInvoiceId,
-        code: `HD${270 + newInvoiceId}`,
-        status: '0',
-        items: []
-      };
+const isCustomerModalOpen = ref(false);
+const openCustomerModal = () => {
+  isCustomerModalOpen.value = true;
+};
+const {
+  cartItems,
+  cartColumns,
+  searchCustomer,
+  selectedCustomer,
+  customer,
+  receiver,
+  discountCode,
+  discount,
+  orderNotes,
+  payOnDelivery,
+  paymentMethod,
+  activeInvoiceId,
+  pendingInvoices,
+  showProductModal,
+  products,
+  filteredProducts,
+  productSearchQuery,
+  totalPrice,
+  tienChuyenKhoan,
+  tienMat,
+  fetchPendingInvoices,
+  getNestedValue,
+  editItem,
+  toggleStatus,
+  removeItem,
+  createNewPendingInvoice,
+  loadPendingInvoice,
+  scanQR,
+  openProductModal,
+  searchProducts,
+  addProduct,
+  searchCustomers,
+  addNewCustomer,
+  selectPayment,
+  createOrder,
+} = useBanHang(toast);
 
-      this.pendingInvoices.unshift(newInvoice);
-      this.loadPendingInvoice(newInvoice);
-      this.$refs.toast.kshowToast('success', `Đã tạo hóa đơn chờ mới: ${newInvoice.code}`);
-    },
-    loadPendingInvoice(invoice) {
-      this.activeInvoiceId = invoice.id;
-      this.cartItems = [...invoice.items];
-      this.$refs.toast.kshowToast('info', `Đã tải hóa đơn chờ: ${invoice.code}`);
-    },
-    scanQR() {
-      this.$refs.toast.kshowToast('info', 'Đang quét QR...');
-    },
-    addProduct() {
-      const newProduct = {
-        id: this.cartItems.length > 0 ? Math.max(...this.cartItems.map(i => i.id)) + 1 : 1,
-        name: `Sản phẩm mới ${this.cartItems.length + 1}`,
-        imei: `IME${Math.floor(1000 + Math.random() * 9000)}`,
-        price: 1000000 + Math.floor(Math.random() * 9000000)
-      };
-
-      this.cartItems.push(newProduct);
-
-      // Cập nhật vào hóa đơn chờ đang active
-      if (this.activeInvoiceId) {
-        const invoice = this.pendingInvoices.find(i => i.id === this.activeInvoiceId);
-        if (invoice) {
-          invoice.items.push(newProduct);
-        }
-      }
-
-      this.$refs.toast.kshowToast('success', `Đã thêm sản phẩm: ${newProduct.name}`);
-    },
-    searchCustomers() {
-      if (this.searchCustomer) {
-        this.selectedCustomer = true;
-        this.customer = { name: 'Khách hàng tìm thấy', phone: '098xxxxxxx' };
-        this.$refs.toast.kshowToast('success', `Đã tìm thấy khách hàng: ${this.customer.name}`);
-      } else {
-        this.selectedCustomer = null;
-      }
-    },
-    addNewCustomer() {
-      this.selectedCustomer = true;
-      this.customer = { name: '', phone: '' };
-      this.$refs.toast.kshowToast('info', 'Thêm mới khách hàng');
-    },
-    applyDiscount() {
-      if (this.discountCode) {
-        this.discount = 2000000;
-        this.$refs.toast.kshowToast('success', 'Đã áp dụng mã giảm giá');
-      } else {
-        this.$refs.toast.kshowToast('error', 'Vui lòng nhập mã giảm giá');
-      }
-    },
-    selectPayment(method) {
-      this.paymentMethod = method;
-      let methodName = '';
-      switch(method) {
-        case 'transfer': methodName = 'Chuyển khoản'; break;
-        case 'cash': methodName = 'Tiền mặt'; break;
-        case 'both': methodName = 'Cả hai phương thức'; break;
-      }
-      this.$refs.toast.kshowToast('info', `Đã chọn phương thức thanh toán: ${methodName}`);
-    },
-    createOrder() {
-      if (!this.paymentMethod && !this.payOnDelivery) {
-        this.$refs.toast.kshowToast('error', 'Vui lòng chọn phương thức thanh toán');
-        return;
-      }
-
-      // Xóa hóa đơn chờ nếu đang active
-      if (this.activeInvoiceId) {
-        this.pendingInvoices = this.pendingInvoices.filter(i => i.id !== this.activeInvoiceId);
-        this.activeInvoiceId = null;
-      }
-
-      this.$refs.toast.kshowToast('success', 'Thanh toán thành công!');
-
-      // Reset form
-      this.cartItems = [];
-      this.selectedCustomer = null;
-      this.searchCustomer = '';
-      this.discountCode = '';
-      this.discount = 0;
-      this.orderNotes = '';
-      this.paymentMethod = '';
-      this.payOnDelivery = false;
-    }
+// Hàm applyDiscount (logic giả lập, bạn có thể thay đổi theo yêu cầu)
+const applyDiscount = () => {
+  if (discountCode.value === "MungQuocKhanh") {
+    discount.value = 500000; // Giả lập giảm giá 500,000
+    toast.value.kshowToast("success", "Áp dụng mã giảm giá thành công!");
+  } else {
+    toast.value.kshowToast("error", "Mã giảm giá không hợp lệ!");
   }
 };
 </script>

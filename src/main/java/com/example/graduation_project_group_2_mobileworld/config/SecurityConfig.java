@@ -29,11 +29,8 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests((requests) -> requests
-                        .requestMatchers("/tai-khoan/login", "/tai-khoan/requestOtp", "/tai-khoan/addTk").permitAll() // Cho phép đăng nhập và đăng ký
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN") // Chỉ ADMIN
-                        .requestMatchers("/api/staff/**").hasRole("STAFF") // Chỉ STAFF
-                        .requestMatchers("/api/user/**").hasRole("USER") // Chỉ USER
-                        .requestMatchers("/api/**").authenticated() // Yêu cầu xác thực cho các API khác
+                        .requestMatchers("/tai-khoan/login").permitAll()
+                        .requestMatchers("/api/**").authenticated() // Chỉ yêu cầu xác thực cho /api/**
                         .anyRequest().permitAll() // Các endpoint khác tạm thời cho phép
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED));
@@ -59,25 +56,9 @@ public class SecurityConfig {
             if (tk == null) {
                 throw new UsernameNotFoundException("User not found: " + username);
             }
-            // Ánh xạ cap_quyen_han sang vai trò
-            String role;
-            int capQuyenHan = tk.getIdQuyenHan().getCapQuyenHan();
-            switch (capQuyenHan) {
-                case 1:
-                    role = "ADMIN";
-                    break;
-                case 2:
-                    role = "STAFF";
-                    break;
-                case 3:
-                    role = "USER";
-                    break;
-                default:
-                    role = "USER"; // Mặc định là USER nếu không xác định
-            }
             return User.withUsername(tk.getTenDangNhap())
-                    .password(tk.getMatKhau()) // Mật khẩu đã mã hóa
-                    .roles(role) // Gán vai trò động
+                    .password(tk.getMatKhau()) // Đảm bảo mật khẩu trong DB đã mã hóa
+                    .roles("USER")
                     .build();
         };
     }
@@ -86,6 +67,4 @@ public class SecurityConfig {
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-
-
 }

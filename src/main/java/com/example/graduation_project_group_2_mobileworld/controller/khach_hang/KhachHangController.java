@@ -44,6 +44,16 @@ public class KhachHangController {
         }
     }
 
+    @PostMapping("/addBh")
+    public ResponseEntity<?> addKhachHangBh(@RequestBody KhachHangDTO khachHangDTO) {
+        try {
+            KhachHang newKhachHang = khachHangServices.addKhachHangBH(khachHangDTO);
+            return new ResponseEntity<>(newKhachHang, HttpStatus.CREATED);
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>("Lỗi khi thêm nhân viên: " + e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
+
 
     @GetMapping("/detail/{id}")
     public ResponseEntity<?> getNhanVienDetail(@PathVariable Integer id) {
@@ -106,7 +116,11 @@ public class KhachHangController {
                     .body(new ResponseMessage("Nhập dữ liệu từ Excel thất bại: " + e.getMessage()));
         }
     }
-
+    @GetMapping("/search")
+    public ResponseEntity<List<KhachHang>> searchKhachHang(@RequestParam("query") String keyword) {
+        List<KhachHang> result = khachHangServices.searchKhachHang(keyword);
+        return ResponseEntity.ok(result);
+    }
 
     // Các endpoint khác như /home, /delete/{id}, v.v.
 }

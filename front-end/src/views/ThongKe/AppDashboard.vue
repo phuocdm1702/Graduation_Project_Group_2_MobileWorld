@@ -2,10 +2,20 @@
   <div class="container mx-auto p-6">
     <!-- Breadcrumb -->
     <BreadcrumbWrapper :breadcrumb-items="breadcrumbItems" class="mb-6" />
-
+    
+    
     <!-- Thống kê -->
     <section class="mb-8">
-      <h2 class="text-2xl font-semibold mb-4">Thống Kê Tổng Quan</h2>
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-2xl font-semibold">Thống Kê Tổng Quan</h2>
+        <button
+          @click="exportExcel"
+          class="px-4 py-2 bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-600 transition flex items-center gap-2">
+          <i class="fa fa-file-excel text-white text-lg"></i>
+          Xuất Excel
+        </button>
+      </div>
+
       <div v-if="statistics.length" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <div
           v-for="(stat, index) in statistics"
@@ -21,6 +31,7 @@
       </div>
       <div v-else class="text-center text-gray-500">Đang tải thống kê...</div>
     </section>
+
 
     <!-- Thống kê mới: Tỷ lệ doanh thu theo hãng, Phân phối đa kênh, Sản phẩm sắp hết hàng -->
     <section class="mb-8">
@@ -252,7 +263,8 @@ const {
   columnsSanPhamHetHang,
   changeSanPhamHetHangPage,
   sanPhamHetHangCurrentPage,
-  sanPhamHetHangTotalPages
+  sanPhamHetHangTotalPages,
+  exportExcel
 } = ThongKeJs();
 
 const getNestedValue = (item, key) => {

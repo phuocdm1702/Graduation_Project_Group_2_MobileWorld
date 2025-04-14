@@ -3,6 +3,7 @@ package com.example.graduation_project_group_2_mobileworld.service.hoa_don;
 import com.example.graduation_project_group_2_mobileworld.dto.hinh_thuc_thanh_toan.HinhThucThanhToanDTO;
 import com.example.graduation_project_group_2_mobileworld.dto.hoa_don.HoaDonChiTietDTO;
 import com.example.graduation_project_group_2_mobileworld.dto.hoa_don.HoaDonDTO;
+import com.example.graduation_project_group_2_mobileworld.dto.hoa_don.HoaDonDTOGet;
 import com.example.graduation_project_group_2_mobileworld.dto.hoa_don.LichSuHoaDonDTO;
 import com.example.graduation_project_group_2_mobileworld.entity.HoaDon;
 import com.example.graduation_project_group_2_mobileworld.repository.hoa_don.HoaDonRepository;
@@ -41,8 +42,17 @@ public class HoaDonService {
     // Lấy hóa đơn với phân trang
     public Page<HoaDonDTO> getHoaDonWithPagination(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        return hoaDonRepository.findAllWithPagination(pageable).map(this::toDTO);
+        return hoaDonRepository.findAllWithPagination(pageable);
     }
+
+    // Lấy hóa đơn với bộ lọc
+//    public Page<HoaDonDTOGet> getHoaDonWithFilters(int page, int size, String keyword, String loaiDon, Long minAmount,
+//                                                   Long maxAmount, String startDate, String endDate, Short trangThai) {
+//        Pageable pageable = PageRequest.of(page, size);
+//        Timestamp start = parseDateToTimestamp(startDate);
+//        Timestamp end = parseDateToTimestamp(endDate);
+//        return hoaDonRepository.findHoaDonWithFilters(keyword, loaiDon, minAmount, maxAmount, start, end, trangThai, pageable);
+//    }
 
     // Lấy hóa đơn với bộ lọc
     public Page<HoaDonDTO> getHoaDonWithFilters(int page, int size, String keyword, String loaiDon, Long minAmount,
@@ -90,9 +100,9 @@ public class HoaDonService {
 
     // Lấy hóa đơn theo mã
     public HoaDonDTO getHoaDonByMa(String ma) {
-        HoaDon hoaDon = hoaDonRepository.findByMa(ma)
+        HoaDonDTO hoaDon = hoaDonRepository.findByMa(ma)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy hóa đơn với mã: " + ma));
-        return toDTO(hoaDon);
+        return hoaDon;
     }
 
     // Đếm số lượng hóa đơn theo trạng thái

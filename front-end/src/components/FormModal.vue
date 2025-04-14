@@ -1,3 +1,4 @@
+<!-- src/components/FormModal.vue -->
 <template>
   <div v-if="show" class="fixed inset-0 flex items-center justify-center z-50">
     <div class="fixed inset-0 bg-black bg-opacity-50 z-40" @click="close"></div>
@@ -53,9 +54,16 @@ watch(
   { immediate: true }
 );
 
+const close = () => {
+  emit('close');
+};
+
 const submitForm = () => {
   let requiredFields = [];
   switch (props.entityName) {
+    case 'khách hàng':
+      requiredFields = ['name', 'phone','city','district','ward','address']; 
+      break;
     case 'nhaSanXuat':
       requiredFields = ['nhaSanXuat'];
       break;
@@ -65,7 +73,6 @@ const submitForm = () => {
     case 'manHinh':
       requiredFields = ['kichThuoc', 'doPhanGiai'];
       break;
-    // Add other cases as needed
     default:
       requiredFields = Object.keys(localEntityData.value);
   }
@@ -87,7 +94,6 @@ const submitForm = () => {
     }
   });
 
-  console.log('Emitting submit with data:', sanitizedData);
   emit('submit', sanitizedData);
 };
 </script>

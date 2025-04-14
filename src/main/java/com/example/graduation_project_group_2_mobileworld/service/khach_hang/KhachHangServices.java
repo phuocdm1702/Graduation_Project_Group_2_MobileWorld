@@ -314,4 +314,52 @@ public class KhachHangServices {
             }
         }
     }
+    public List<KhachHang> searchKhachHang(String keyword) {
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return List.of(); // Trả về danh sách rỗng nếu keyword trống
+        }
+        return khachHangRepository.searchBh(keyword.trim());
+    }
+
+    public KhachHang addKhachHangBH(KhachHangDTO khachHangDTO) {
+        if (khachHangDTO == null || khachHangDTO.getSoDienThoai() == null || khachHangDTO.getTenKH() == null
+                || khachHangDTO.getDiaChiCuThe() == null || khachHangDTO.getQuan() == null
+                || khachHangDTO.getThanhPho() == null || khachHangDTO.getPhuong() == null) {
+            throw new IllegalArgumentException("Thông tin khách hàng không đầy đủ");
+        }
+
+        // Tạo quyền hạn
+        QuyenHan quyenHan = new QuyenHan();
+        quyenHan.setId(2); // Quyền khách hàng
+
+        // Tạo và lưu tài khoản
+        TaiKhoan taiKhoan = new TaiKhoan();
+        taiKhoan.setSoDienThoai(khachHangDTO.getSoDienThoai());
+        taiKhoan.setIdQuyenHan(quyenHan);
+        taiKhoan = taiKhoanRepository.save(taiKhoan);
+
+        // Tạo và lưu khách hàng
+        KhachHang kh = new KhachHang();
+        kh.setCreatedAt(new Date()); // Tự động thêm ngày tạo
+        kh.setMa(generateMaKH(khachHangDTO.getTenKH()));
+        kh.setIdTaiKhoan(taiKhoan);
+        kh.setTen(khachHangDTO.getTenKH());
+        kh.setDeleted(false);
+        kh = khachHangRepository.save(kh); // Lưu trước để có ID
+
+        // Tạo và lưu địa chỉ khách hàng
+        DiaChiKhachHang dchi = new DiaChiKhachHang();
+        dchi.setMa(MaDchi());
+        dchi.setDiaChiCuThe(khachHangDTO.getDiaChiCuThe());
+        dchi.setQuan(khachHangDTO.getQuan());
+        dchi.setThanhPho(khachHangDTO.getThanhPho());
+        dchi.setPhuong(khachHangDTO.getPhuong());
+        dchi.setMacDinh(true);
+        dchi.setIdKhachHang(kh);
+        dchi = diaChiKhachHangRepo.save(dchi);
+
+        // Cập nhật địa chỉ cho khách hàng
+        kh.setIdDiaChiKH(dchi);
+        return khachHangRepository.save(kh);
+    }
 }

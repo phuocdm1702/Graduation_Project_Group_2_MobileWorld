@@ -47,7 +47,7 @@ export function ThongKeJs() {
 
   const changeSanPhamHetHangPage = (page) => {
     sanPhamHetHangCurrentPage.value = page;
-    fetchSanPhamHetHangOnly(); // Chỉ lấy dữ liệu sanPhamHetHang
+    fetchSanPhamHetHangOnly();
   };
 
   const columnsTopProducts = ref([
@@ -80,7 +80,7 @@ export function ThongKeJs() {
         { title: 'Hôm nay', revenue: response.data.ngay[0]?.doanhThu || 0, sold: response.data.ngay[0]?.sanPhamDaBan || 0, orders: response.data.ngay[0]?.tongSoDonHang || 0, bgColor: 'bg-blue-500' },
         { title: 'Tuần này', revenue: response.data.tuan[0]?.doanhThu || 0, sold: response.data.tuan[0]?.sanPhamDaBan || 0, orders: response.data.tuan[0]?.tongSoDonHang || 0, bgColor: 'bg-purple-500' },
         { title: 'Tháng này', revenue: response.data.thang[0]?.doanhThu || 0, sold: response.data.thang[0]?.sanPhamDaBan || 0, orders: response.data.thang[0]?.tongSoDonHang || 0, bgColor: 'bg-green-500' },
-        { title: 'Năm nay', revenue: response.data.nam[0]?.doanhThu || 0, sold: response.data.nam[0]?.tongSoDonHang || 0, orders: response.data.nam[0]?.tongSoDonHang || 0, bgColor: 'bg-teal-600' },
+        { title: 'Năm nay', revenue: response.data.nam[0]?.doanhThu || 0, sold: response.data.nam[0]?.sanPhamDaBan || 0, orders: response.data.nam[0]?.tongSoDonHang || 0, bgColor: 'bg-teal-600' },
       ];
 
       topProducts.value = response.data.topProducts || [];
@@ -123,9 +123,35 @@ export function ThongKeJs() {
     }
   };
 
+  // Hàm xuất Excel
+  const exportExcel = async () => {
+    try {
+      const params = {
+        filterType: filterType.value, // Lấy giá trị từ combo box
+        ...(filterType.value === 'custom' && { startDate: startDate.value, endDate: endDate.value }) // Thêm startDate, endDate nếu là custom
+      };
+
+      const response = await axios.get('http://localhost:8080/dashboard/export-excel', {
+        params, // Truyền các tham số
+        responseType: 'blob' // Nhận dữ liệu dạng file
+      });
+
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `thong_ke_${filterType.value}.xlsx`); // Tùy chỉnh tên file theo filterType
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error exporting Excel:', error);
+    }
+  };
+
   const updateHangBanChayChart = () => {
     const ctx = document.getElementById('hangBanChayChart')?.getContext('2d');
-    if (!ctx || hangBanChayChart) return; // Chỉ tạo biểu đồ lần đầu
+    if (!ctx || hangBanChayChart) return;
 
     hangBanChayChart = new Chart(ctx, {
       type: 'doughnut',
@@ -153,7 +179,7 @@ export function ThongKeJs() {
 
   const updateLoaiHoaDonChart = () => {
     const ctx = document.getElementById('loaiHoaDonChart')?.getContext('2d');
-    if (!ctx || loaiHoaDonChart) return; // Chỉ tạo biểu đồ lần đầu
+    if (!ctx || loaiHoaDonChart) return;
 
     loaiHoaDonChart = new Chart(ctx, {
       type: 'doughnut',
@@ -243,6 +269,7 @@ export function ThongKeJs() {
     columnsSanPhamHetHang,
     changeSanPhamHetHangPage,
     sanPhamHetHangCurrentPage,
-    sanPhamHetHangTotalPages
+    sanPhamHetHangTotalPages,
+    exportExcel 
   };
 }

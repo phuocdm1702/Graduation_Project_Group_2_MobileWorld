@@ -163,7 +163,8 @@ public class PhieuGiamGiaService {
 
         PhieuGiamGia pgg = optionalPgg.get();
         pgg.setTrangThai(trangThai);
-        return convertToDTO(pgg);
+        PhieuGiamGia updatePGG = phieuGiamGiaRepository.save(pgg);
+        return convertToDTO(updatePGG);
 
     }
 

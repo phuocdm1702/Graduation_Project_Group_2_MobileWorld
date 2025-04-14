@@ -405,10 +405,13 @@ async function confirmAddKhachHang() {
 
 onMounted(async () => {
   try {
-    const response = await axios.get('https://provinces.open-api.vn/api/?depth=3');
+    const response = await axios.get('https://provinces.open-api.vn/api/?depth=3', {
+      withCredentials: false // Thêm dòng này để tránh lỗi CORS
+    });
     provinces.value = response.data;
   } catch (error) {
     console.error('Lỗi khi tải dữ liệu địa chỉ:', error);
+    toastRef.value.kshowToast('error', 'Không thể tải danh sách tỉnh/thành phố: ' + (error.response?.data?.error || error.message));
   }
 });
 
