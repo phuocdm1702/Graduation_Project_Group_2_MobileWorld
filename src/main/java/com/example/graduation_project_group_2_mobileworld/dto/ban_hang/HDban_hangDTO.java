@@ -3,15 +3,12 @@ package com.example.graduation_project_group_2_mobileworld.dto.ban_hang;
 import java.util.List;
 
 public class HDban_hangDTO {
-
     private Integer id;
-    private String ma;
-    private Short status;
+    private String maHoaDon;
+    private Short trangThai;
     private List<HDCTban_hangDTO> items;
 
-
     public HDban_hangDTO() {
-
     }
 
     public Integer getId() {
@@ -22,20 +19,20 @@ public class HDban_hangDTO {
         this.id = id;
     }
 
-    public String getMa() {
-        return ma;
+    public String getMaHoaDon() {
+        return maHoaDon;
     }
 
-    public void setMa(String ma) {
-        this.ma = ma;
+    public void setMaHoaDon(String maHoaDon) {
+        this.maHoaDon = maHoaDon;
     }
 
-    public Short getStatus() {
-        return status;
+    public Short getTrangThai() {
+        return trangThai;
     }
 
-    public void setStatus(Short status) {
-        this.status = status;
+    public void setTrangThai(Short trangThai) {
+        this.trangThai = trangThai;
     }
 
     public List<HDCTban_hangDTO> getItems() {

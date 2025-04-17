@@ -3,14 +3,13 @@ package com.example.graduation_project_group_2_mobileworld.dto.gio_hang;
 import java.util.List;
 
 public class GioHangDTO {
-
     private Integer id;
     private String ma;
     private Integer idKhachHang;
-    private List<ChiTietGioHangDTO> chiTietGioHangs;
+    private Short trangThai;
+    private List<ChiTietGioHangDTO> chiTietGioHangList;
 
-    public GioHangDTO(){
-
+    public GioHangDTO() {
     }
 
     public Integer getId() {
@@ -37,11 +36,19 @@ public class GioHangDTO {
         this.idKhachHang = idKhachHang;
     }
 
-    public List<ChiTietGioHangDTO> getChiTietGioHangs() {
-        return chiTietGioHangs;
+    public Short getTrangThai() {
+        return trangThai;
     }
 
-    public void setChiTietGioHangs(List<ChiTietGioHangDTO> chiTietGioHangs) {
-        this.chiTietGioHangs = chiTietGioHangs;
+    public void setTrangThai(Short trangThai) {
+        this.trangThai = trangThai;
+    }
+
+    public List<ChiTietGioHangDTO> getChiTietGioHangList() {
+        return chiTietGioHangList;
+    }
+
+    public void setChiTietGioHangList(List<ChiTietGioHangDTO> chiTietGioHangList) {
+        this.chiTietGioHangList = chiTietGioHangList;
     }
 }

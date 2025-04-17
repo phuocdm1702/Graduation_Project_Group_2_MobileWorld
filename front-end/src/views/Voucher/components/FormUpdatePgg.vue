@@ -159,7 +159,7 @@
 
       <div class="mt-6">
         <h4 class="text-lg font-semibold mb-2 text-gray-800">Khách Hàng Đã Chọn</h4>
-        <div class="table-container" style="max-height: 40vh; overflow-y: auto;">
+        <div class="table-container" style="max-height: 20vh; overflow-y: auto;">
           <table class="w-full text-sm">
             <thead>
             <tr class="bg-gray-100 sticky top-0">
@@ -177,7 +177,7 @@
             <tr v-else v-for="customer in selectedCustomerDetails" :key="customer.id" class="border-b hover:bg-gray-50">
               <td class="p-3">{{ customer.ma }}</td>
               <td class="p-3">{{ customer.ten }}</td>
-              <td class="p-3">{{ customer.gioiTih == "1" ? "Nam" : "Nữ" }}</td>
+              <td class="p-3">{{ customer.gioiTinh == "1" ? "Nam" : "Nữ" }}</td>
               <td class="p-3">{{ new Date(customer.ngaySinh).toLocaleDateString('vi-VN') }}</td>
               <td class="p-3">
                 <button

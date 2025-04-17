@@ -46,17 +46,17 @@ public class BHController {
 
     @PostMapping("/addHD")
     public ResponseEntity<HoaDon> addHD(@RequestBody HDban_hangDTO hd_dto) {
-        if (hd_dto.getMa() == null) {
+        if (hd_dto.getMaHoaDon() == null) {
             return ResponseEntity.badRequest().body(null);
         }
 
         HoaDon hd = new HoaDon();
-        hd.setMa(hd_dto.getMa());
-        hd.setTrangThai((short) 0);
-        hd.setTienSanPham(BigDecimal.valueOf(0));
+        hd.setMa(hd_dto.getMaHoaDon());
+        hd.setTrangThai(hd_dto.getTrangThai() != null ? hd_dto.getTrangThai() : (short) 0);
+        hd.setTienSanPham(BigDecimal.ZERO);
         hd.setLoaiDon("Tại quầy");
-        hd.setPhiVanChuyen(BigDecimal.valueOf(0));
-        hd.setTongTien(BigDecimal.valueOf(0));
+        hd.setPhiVanChuyen(BigDecimal.ZERO);
+        hd.setTongTien(BigDecimal.ZERO);
         hd.setTenKhachHang("Khách lẻ");
         hd.setDiaChiKhachHang("N/A");
         hd.setSoDienThoaiKhachHang("0000000000");
@@ -82,6 +82,7 @@ public class BHController {
             GioHangDTO result = banHangService.addGioHang(gioHangDTO);
             return ResponseEntity.ok(result);
         } catch (Exception e) {
+            System.out.println("Lỗi khi thêm giỏ hàng: " + e.getMessage());
             return ResponseEntity.status(500).body(null);
         }
     }
@@ -91,13 +92,24 @@ public class BHController {
         return banHangService.getAllCTSP();
     }
 
+    @GetMapping("/san-pham/{sanPhamId}/imeis")
+    public ResponseEntity<List<String>> getIMEIsBySanPhamId(@PathVariable Integer sanPhamId) {
+        try {
+            List<String> imeis = banHangService.getIMEIsBySanPhamId(sanPhamId);
+            return ResponseEntity.ok(imeis);
+        } catch (Exception e) {
+            System.out.println("Lỗi khi lấy danh sách IMEI: " + e.getMessage());
+            return ResponseEntity.status(500).body(null);
+        }
+    }
+
     @PostMapping("/gio-hang/{gioHangId}/chi-tiet")
     public ResponseEntity<ChiTietGioHangDTO> addCTGH(
             @PathVariable Integer gioHangId,
-            @RequestBody Map<String, Integer> requestBody) {
+            @RequestBody Map<String, Object> requestBody) {
         try {
-            Integer chiTietSanPhamId = requestBody.get("id");
-            Integer hoaDonId = requestBody.get("hoaDonId");
+            Integer chiTietSanPhamId = Integer.parseInt(requestBody.get("idChiTietSanPham").toString());
+            Integer hoaDonId = Integer.parseInt(requestBody.get("hoaDonId").toString());
             if (chiTietSanPhamId == null || hoaDonId == null) {
                 return ResponseEntity.badRequest().body(null);
             }

@@ -165,7 +165,7 @@
 
       <div class="mt-6">
         <h4 class="text-lg font-semibold mb-2 text-gray-800">Khách Hàng Đã Chọn</h4>
-        <div class="table-container" style="max-height: 40vh; overflow-y: auto;">
+        <div class="table-container" style="max-height: 20vh; overflow-y: auto;">
           <table class="w-full text-sm">
             <thead>
             <tr class="bg-gray-100 sticky top-0">
