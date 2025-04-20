@@ -7,6 +7,7 @@ import com.example.graduation_project_group_2_mobileworld.dto.gio_hang.ChiTietSP
 import com.example.graduation_project_group_2_mobileworld.dto.gio_hang.GioHangDTO;
 import com.example.graduation_project_group_2_mobileworld.entity.*;
 import com.example.graduation_project_group_2_mobileworld.entity.SanPham.ChiTietSanPham;
+import com.example.graduation_project_group_2_mobileworld.entity.SanPham.SanPham;
 import com.example.graduation_project_group_2_mobileworld.repository.gio_hang.ChiTietGioHangRepository;
 import com.example.graduation_project_group_2_mobileworld.repository.gio_hang.GioHangRepository;
 import com.example.graduation_project_group_2_mobileworld.repository.hinh_thuc_thanh_toan_repo.HinhThucThanhToanRepository;
@@ -59,7 +60,7 @@ public class BanHangService {
         return listHD.stream().map(this::mapToDTO).collect(Collectors.toList());
     }
 
-    public List<GioHangDTO> getAllGH(GioHangDTO gioHangDTO) {
+    public List<GioHangDTO> getAllGH() {
         return gioHangRepository.findAll().stream()
                 .filter(gioHang -> !gioHang.getDeleted())
                 .map(this::convertToGioHangDTO)
@@ -70,8 +71,8 @@ public class BanHangService {
         GioHang gioHang = new GioHang();
         gioHang.setMa(gioHangDTO.getMa());
 
-        KhachHang khachHang = khachHangRepository.findById(1)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy khách hàng mặc định"));
+        KhachHang khachHang = khachHangRepository.findById(gioHangDTO.getIdKhachHang() != null ? gioHangDTO.getIdKhachHang() : 1)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy khách hàng"));
         gioHang.setIdKhachHang(khachHang);
 
         gioHang.setDeleted(false);
@@ -86,20 +87,30 @@ public class BanHangService {
                 .collect(Collectors.toList());
     }
 
+    public List<String> getIMEIsBySanPhamId(Integer sanPhamId) {
+        return chiTietSanPhamRepository.findAll().stream()
+                .filter(ctsp -> ctsp.getIdSanPham().getId().equals(sanPhamId) && !ctsp.getDeleted())
+                .map(ctsp -> ctsp.getIdImel().getMa())
+                .collect(Collectors.toList());
+    }
+
     public ChiTietGioHangDTO addChiTietGioHang(Integer gioHangId, Integer chiTietSanPhamId, Integer hoaDonId) {
         GioHang gioHang = gioHangRepository.findById(gioHangId)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy giỏ hàng với ID: " + gioHangId));
         ChiTietSanPham chiTietSanPham = chiTietSanPhamRepository.findById(chiTietSanPhamId)
-                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy sản phẩm với ID: " + chiTietSanPhamId));
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy chi tiết sản phẩm với ID: " + chiTietSanPhamId));
         HoaDon hoaDon = hoaDonRepository.findById(hoaDonId)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy hóa đơn với ID: " + hoaDonId));
+
+        BigDecimal giaBan = chiTietSanPham.getGiaBan();
+        BigDecimal tongTien = giaBan; // Số lượng = 1 vì mỗi ChiTietSanPham tương ứng với 1 sản phẩm
 
         ChiTietGioHang chiTietGioHang = new ChiTietGioHang();
         chiTietGioHang.setIdGioHang(gioHang);
         chiTietGioHang.setIdChiTietSanPham(chiTietSanPham);
         chiTietGioHang.setMa("CTGH" + System.currentTimeMillis());
         chiTietGioHang.setTrangThai((short) 0);
-        chiTietGioHang.setTongTien(chiTietSanPham.getGiaBan());
+        chiTietGioHang.setTongTien(tongTien);
         chiTietGioHang.setDeleted(false);
         chiTietGioHang = chiTietGioHangRepository.save(chiTietGioHang);
 
@@ -107,8 +118,7 @@ public class BanHangService {
                 .hoaDon(hoaDon)
                 .idChiTietSanPham(chiTietSanPham)
                 .ma("HDCT" + System.currentTimeMillis())
-                .gia(chiTietSanPham.getGiaBan())
-                .trangThai((short) 0)
+                .gia(giaBan)
                 .deleted(false)
                 .build();
         hoaDonChiTietRepository.save(hoaDonChiTiet);
@@ -129,10 +139,10 @@ public class BanHangService {
         chiTietGioHang.setDeleted(true);
         chiTietGioHangRepository.save(chiTietGioHang);
 
-        // Cập nhật HoaDonChiTiet tương ứng (nếu cần)
-        HoaDonChiTiet hoaDonChiTiet = hoaDonChiTietRepository.findById(chiTietGioHangId)
-                .orElse(null);
-        if (hoaDonChiTiet != null) {
+        List<HoaDonChiTiet> hoaDonChiTiets = hoaDonChiTietRepository.findAll().stream()
+                .filter(hdct -> hdct.getIdChiTietSanPham().getId().equals(chiTietGioHangId))
+                .collect(Collectors.toList());
+        for (HoaDonChiTiet hoaDonChiTiet : hoaDonChiTiets) {
             hoaDonChiTiet.setDeleted(true);
             hoaDonChiTietRepository.save(hoaDonChiTiet);
         }
@@ -146,15 +156,13 @@ public class BanHangService {
         HoaDon hoaDon = hoaDonRepository.findById(hoaDonId)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy hóa đơn với ID: " + hoaDonId));
 
-        // Cập nhật thông tin hóa đơn
         hoaDon.setTongTien(BigDecimal.valueOf(totalPrice));
         hoaDon.setTongTienSauGiam(BigDecimal.valueOf(totalPrice - discount));
-        hoaDon.setTrangThai((short) 1); // 1: Đã thanh toán
+        hoaDon.setTrangThai((short) 1);
         hoaDon.setNgayThanhToan(new Date());
         hoaDon.setUpdatedAt(new Date());
         hoaDonRepository.save(hoaDon);
 
-        // Xác định kiểu thanh toán
         String kieuThanhToan;
         switch (paymentMethod) {
             case "transfer":
@@ -170,38 +178,50 @@ public class BanHangService {
                 throw new IllegalArgumentException("Phương thức thanh toán không hợp lệ: " + paymentMethod);
         }
 
-        // Tìm PhuongThucThanhToan theo kieuThanhToan
-        PhuongThucThanhToan phuongThucThanhToan = phuongThucThanhToanRepository.findByKieuThanhToan(kieuThanhToan)
-                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy phương thức thanh toán: " + kieuThanhToan));
+        PhuongThucThanhToan phuongThucThanhToan = new PhuongThucThanhToan();
+        phuongThucThanhToan.setMa("PTTT" + System.currentTimeMillis());
+        phuongThucThanhToan.setKieuThanhToan(kieuThanhToan);
+        phuongThucThanhToan.setDeleted(false);
+        phuongThucThanhToan = phuongThucThanhToanRepository.save(phuongThucThanhToan);
 
-        // Lưu phương thức thanh toán
         HinhThucThanhToan hinhThucThanhToan = new HinhThucThanhToan();
         hinhThucThanhToan.setHoaDon(hoaDon);
         hinhThucThanhToan.setIdPhuongThucThanhToan(phuongThucThanhToan);
-        hinhThucThanhToan.setMa("HTTT" + System.currentTimeMillis());
         hinhThucThanhToan.setTienChuyenKhoan(BigDecimal.valueOf(tienChuyenKhoan));
         hinhThucThanhToan.setTienMat(BigDecimal.valueOf(tienMat));
+        hinhThucThanhToan.setMa("HTTT" + System.currentTimeMillis());
         hinhThucThanhToan.setDeleted(false);
         hinhThucThanhToanRepository.save(hinhThucThanhToan);
+
+        List<HoaDonChiTiet> hoaDonChiTiets = hoaDonChiTietRepository.findAll().stream()
+                .filter(hdct -> hdct.getHoaDon().getId().equals(hoaDonId))
+                .collect(Collectors.toList());
+        for (HoaDonChiTiet hdct : hoaDonChiTiets) {
+            ChiTietSanPham ctsp = hdct.getIdChiTietSanPham();
+            ctsp.setDeleted(true);
+            chiTietSanPhamRepository.save(ctsp);
+        }
     }
 
-    private HDban_hangDTO mapToDTO(HoaDon hd) {
+    private HDban_hangDTO mapToDTO(HoaDon hoaDon) {
         HDban_hangDTO dto = new HDban_hangDTO();
-        dto.setId(hd.getId());
-        dto.setMa(hd.getMa());
-        dto.setStatus(hd.getTrangThai());
-        dto.setItems(hd.getChiTietHoaDon().stream().map(this::mapChiTietToDTO).collect(Collectors.toList()));
-        return dto;
-    }
+        dto.setId(hoaDon.getId());
+        dto.setMaHoaDon(hoaDon.getMa());
+        dto.setTrangThai(hoaDon.getTrangThai());
 
-    private HDCTban_hangDTO mapChiTietToDTO(HoaDonChiTiet chiTiet) {
-        HDCTban_hangDTO dto = new HDCTban_hangDTO();
-        dto.setId(chiTiet.getId());
-        dto.setName(chiTiet.getIdChiTietSanPham() != null && chiTiet.getIdChiTietSanPham().getIdSanPham() != null
-                ? chiTiet.getIdChiTietSanPham().getIdSanPham().getTenSanPham()
-                : "Unknown");
-        dto.setImei(chiTiet.getIdImelDaBan() != null ? chiTiet.getIdImelDaBan().getImel() : "N/A");
-        dto.setPrice(chiTiet.getGia() != null ? chiTiet.getGia().longValue() : 0L);
+        List<HDCTban_hangDTO> items = hoaDonChiTietRepository.findAll().stream()
+                .filter(hdct -> hdct.getHoaDon().getId().equals(hoaDon.getId()))
+                .map(hdct -> {
+                    HDCTban_hangDTO itemDTO = new HDCTban_hangDTO();
+                    itemDTO.setId(hdct.getId());
+                    itemDTO.setTenSanPham(hdct.getIdChiTietSanPham().getIdSanPham().getTenSanPham());
+                    itemDTO.setImei(hdct.getIdChiTietSanPham().getIdImel().getMa());
+                    itemDTO.setGiaBan(hdct.getGia());
+                    return itemDTO;
+                })
+                .collect(Collectors.toList());
+        dto.setItems(items);
+
         return dto;
     }
 
@@ -209,21 +229,14 @@ public class BanHangService {
         GioHangDTO dto = new GioHangDTO();
         dto.setId(gioHang.getId());
         dto.setMa(gioHang.getMa());
-        dto.setIdKhachHang(gioHang.getIdKhachHang() != null ? gioHang.getIdKhachHang().getId() : null);
-        dto.setChiTietGioHangs(chiTietGioHangRepository.findAll().stream()
-                .filter(ctgh -> ctgh.getIdGioHang().getId().equals(gioHang.getId()) && !ctgh.getDeleted())
-                .map(this::convertToChiTietGioHangDTO)
-                .collect(Collectors.toList()));
-        return dto;
-    }
-
-    private ChiTietSPDTO convertToChiTietSanPhamDTO(ChiTietSanPham chiTietSanPham) {
-        ChiTietSPDTO dto = new ChiTietSPDTO();
-        dto.setId(chiTietSanPham.getId());
-        dto.setMa(chiTietSanPham.getMa());
-        dto.setTenSanPham(chiTietSanPham.getIdSanPham().getTenSanPham());
-        dto.setGiaBan(chiTietSanPham.getGiaBan());
-        dto.setImel(chiTietSanPham.getIdImel().getMa());
+        dto.setIdKhachHang(gioHang.getIdKhachHang().getId());
+        dto.setTrangThai((short) 0);
+        dto.setChiTietGioHangList(
+                chiTietGioHangRepository.findAll().stream()
+                        .filter(ctgh -> ctgh.getIdGioHang().getId().equals(gioHang.getId()))
+                        .map(this::convertToChiTietGioHangDTO)
+                        .collect(Collectors.toList())
+        );
         return dto;
     }
 
@@ -234,8 +247,22 @@ public class BanHangService {
         dto.setIdChiTietSanPham(chiTietGioHang.getIdChiTietSanPham().getId());
         dto.setMa(chiTietGioHang.getMa());
         dto.setTenSanPham(chiTietGioHang.getIdChiTietSanPham().getIdSanPham().getTenSanPham());
+        dto.setImei(chiTietGioHang.getIdChiTietSanPham().getIdImel().getMa());
+        dto.setGiaBan(chiTietGioHang.getIdChiTietSanPham().getGiaBan());
         dto.setTongTien(chiTietGioHang.getTongTien());
-        dto.setImel(chiTietGioHang.getIdChiTietSanPham().getIdImel().getMa());
+        return dto;
+    }
+
+    private ChiTietSPDTO convertToChiTietSanPhamDTO(ChiTietSanPham chiTietSanPham) {
+        ChiTietSPDTO dto = new ChiTietSPDTO();
+        dto.setId(chiTietSanPham.getId());
+        dto.setMa(chiTietSanPham.getIdSanPham().getMa());
+        dto.setTenSanPham(chiTietSanPham.getIdSanPham().getTenSanPham());
+        dto.setGiaBan(chiTietSanPham.getGiaBan());
+        dto.setImei(chiTietSanPham.getIdImel().getMa());
+        dto.setMauSac(chiTietSanPham.getIdMauSac().getMauSac());
+        dto.setRam(chiTietSanPham.getIdRam().getDungLuongRam());
+        dto.setBoNhoTrong(chiTietSanPham.getIdBoNhoTrong().getDungLuongBoNhoTrong());
         return dto;
     }
 }

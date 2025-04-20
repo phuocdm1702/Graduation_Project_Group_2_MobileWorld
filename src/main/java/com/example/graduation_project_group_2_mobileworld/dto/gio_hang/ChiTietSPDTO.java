@@ -3,15 +3,16 @@ package com.example.graduation_project_group_2_mobileworld.dto.gio_hang;
 import java.math.BigDecimal;
 
 public class ChiTietSPDTO {
-
     private Integer id;
     private String ma;
-    private String tenSanPham; // Lấy từ SanPham.ten
+    private String tenSanPham;
     private BigDecimal giaBan;
-    private String imel;
+    private String imei;
+    private String mauSac;
+    private String ram;
+    private String boNhoTrong;
 
     public ChiTietSPDTO() {
-
     }
 
     public Integer getId() {
@@ -46,11 +47,35 @@ public class ChiTietSPDTO {
         this.giaBan = giaBan;
     }
 
-    public String getImel() {
-        return imel;
+    public String getImei() {
+        return imei;
     }
 
-    public void setImel(String imel) {
-        this.imel = imel;
+    public void setImei(String imei) {
+        this.imei = imei;
+    }
+
+    public String getMauSac() {
+        return mauSac;
+    }
+
+    public void setMauSac(String mauSac) {
+        this.mauSac = mauSac;
+    }
+
+    public String getRam() {
+        return ram;
+    }
+
+    public void setRam(String ram) {
+        this.ram = ram;
+    }
+
+    public String getBoNhoTrong() {
+        return boNhoTrong;
+    }
+
+    public void setBoNhoTrong(String boNhoTrong) {
+        this.boNhoTrong = boNhoTrong;
     }
 }

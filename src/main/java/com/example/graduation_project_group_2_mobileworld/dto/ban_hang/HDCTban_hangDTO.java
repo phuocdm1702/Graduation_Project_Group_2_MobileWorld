@@ -1,15 +1,14 @@
 package com.example.graduation_project_group_2_mobileworld.dto.ban_hang;
 
+import java.math.BigDecimal;
+
 public class HDCTban_hangDTO {
-
     private Integer id;
-    private String name;
+    private String tenSanPham;
     private String imei;
-    private Long price;
-
+    private BigDecimal giaBan;
 
     public HDCTban_hangDTO() {
-
     }
 
     public Integer getId() {
@@ -20,12 +19,12 @@ public class HDCTban_hangDTO {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
+    public String getTenSanPham() {
+        return tenSanPham;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setTenSanPham(String tenSanPham) {
+        this.tenSanPham = tenSanPham;
     }
 
     public String getImei() {
@@ -36,11 +35,11 @@ public class HDCTban_hangDTO {
         this.imei = imei;
     }
 
-    public Long getPrice() {
-        return price;
+    public BigDecimal getGiaBan() {
+        return giaBan;
     }
 
-    public void setPrice(Long price) {
-        this.price = price;
+    public void setGiaBan(BigDecimal giaBan) {
+        this.giaBan = giaBan;
     }
 }

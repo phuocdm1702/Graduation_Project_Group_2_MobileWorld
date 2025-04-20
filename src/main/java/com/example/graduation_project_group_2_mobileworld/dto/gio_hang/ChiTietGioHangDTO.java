@@ -3,19 +3,14 @@ package com.example.graduation_project_group_2_mobileworld.dto.gio_hang;
 import java.math.BigDecimal;
 
 public class ChiTietGioHangDTO {
-
     private Integer id;
     private Integer idGioHang;
     private Integer idChiTietSanPham;
     private String ma;
-    private String tenSanPham; // Lấy từ ChiTietSanPham -> SanPham.ten
+    private String tenSanPham;
+    private String imei;
+    private BigDecimal giaBan;
     private BigDecimal tongTien;
-
-    private String imel;
-
-    public ChiTietGioHangDTO() {
-
-    }
 
     public Integer getId() {
         return id;
@@ -57,19 +52,27 @@ public class ChiTietGioHangDTO {
         this.tenSanPham = tenSanPham;
     }
 
+    public String getImei() {
+        return imei;
+    }
+
+    public void setImei(String imei) {
+        this.imei = imei;
+    }
+
+    public BigDecimal getGiaBan() {
+        return giaBan;
+    }
+
+    public void setGiaBan(BigDecimal giaBan) {
+        this.giaBan = giaBan;
+    }
+
     public BigDecimal getTongTien() {
         return tongTien;
     }
 
     public void setTongTien(BigDecimal tongTien) {
         this.tongTien = tongTien;
-    }
-
-    public String getImel() {
-        return imel;
-    }
-
-    public void setImel(String imel) {
-        this.imel = imel;
     }
 }
