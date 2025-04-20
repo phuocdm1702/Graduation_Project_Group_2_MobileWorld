@@ -12,6 +12,9 @@ import java.util.List;
 @Setter
 public class ChiTietSanPhamDTO {
     private Integer id;
+    private Integer idMauSac;
+    private Integer idRam;
+    private Integer idBoNhoTrong;
     private Integer idSanPham;
     private String maSanPham;
     private Integer idNhaSanXuat;

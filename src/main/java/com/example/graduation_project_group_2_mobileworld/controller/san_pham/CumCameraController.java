@@ -8,6 +8,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/cum-camera")
 @CrossOrigin(origins = "http://localhost:3000", allowedHeaders = "*")
@@ -24,5 +26,10 @@ public class CumCameraController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size) {
         return ResponseEntity.ok(cumCameraService.getAllCumCamera(page, size));
+    }
+
+    @GetMapping("/all")
+    public ResponseEntity<List<CumCameraDTO>> getAllThuocTinh() {
+        return ResponseEntity.ok(cumCameraService.getAllCumCameraList());
     }
 }

@@ -1,8 +1,9 @@
-import {ref, onMounted, computed} from 'vue';
-import {useRoute, useRouter} from 'vue-router';
+import { ref, onMounted, onUnmounted, computed, nextTick } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import axios from 'axios';
 import debounce from 'lodash/debounce';
 import JsBarcode from 'jsbarcode';
+import '@/assets/sanPham.css';
 
 export default function useSanPhamChiTiet() {
   const route = useRoute();
@@ -15,6 +16,8 @@ export default function useSanPhamChiTiet() {
     idMauSac: '',
     idBoNhoTrong: '',
     idRam: '',
+    minPrice: 0,
+    maxPrice: 10000000,
   });
   const currentPage = ref(0);
   const pageSize = ref(5);
@@ -23,7 +26,8 @@ export default function useSanPhamChiTiet() {
   const showImeiModal = ref(false);
   const showEditImeiModal = ref(false);
   const selectedImeis = ref([]);
-  const editingImei = ref({id: null, imei: ''});
+  const editingImei = ref({ id: null, imei: '' });
+  const barcodeCache = ref({});
 
   const mauSacOptions = ref([]);
   const boNhoTrongOptions = ref([]);
@@ -32,8 +36,8 @@ export default function useSanPhamChiTiet() {
   const breadcrumbItems = computed(() => route.meta?.breadcrumb || ['Sản Phẩm Chi Tiết']);
 
   const columns = [
-    {key: '#', label: 'STT', formatter: (value, item, index) => currentPage.value * 5 + index + 1},
-    {key: 'maSanPham', label: 'Mã Sản Phẩm'},
+    { key: '#', label: 'STT', formatter: (value, item, index) => currentPage.value * 5 + index + 1 },
+    { key: 'maSanPham', label: 'Mã Sản Phẩm' },
     {
       key: 'variants[0].mauSac',
       label: 'Màu Sắc',
@@ -112,43 +116,41 @@ export default function useSanPhamChiTiet() {
     {
       key: '#',
       label: 'STT',
-      formatter: (value, item, index) => index + 1
+      formatter: (value, item, index) => index + 1,
     },
     {
       key: 'ma',
       label: 'Mã CTSP',
-      formatter: (value) => value || 'N/A'
+      formatter: (value) => value || 'N/A',
     },
     {
       key: 'imei',
       label: 'IMEI',
-      formatter: (value) => value || 'N/A'
+      formatter: (value) => value || 'N/A',
     },
     {
       key: 'barcode',
       label: 'Barcode',
       formatter: (value, item) => {
         const barcodeId = `barcode-${item.id}`;
-        setTimeout(() => {
+        const imei = item.imei || 'N/A';
+        if (!barcodeCache.value[imei]) {
           const canvas = document.createElement('canvas');
-          JsBarcode(canvas, item.imei || 'N/A', {
+          JsBarcode(canvas, imei, {
             format: 'CODE128',
             width: 2,
             height: 40,
-            displayValue: false
+            displayValue: false,
           });
-          const img = document.getElementById(barcodeId);
-          if (img) {
-            img.src = canvas.toDataURL('image/png');
-          }
-        }, 0);
-        return `<img id="${barcodeId}" class="h-10 w-auto" alt="Barcode" />`;
-      }
+          barcodeCache.value[imei] = canvas.toDataURL('image/png');
+        }
+        return `<img id="${barcodeId}" class="h-10 w-auto" src="${barcodeCache.value[imei]}" alt="Barcode" />`;
+      },
     },
     {
       key: 'status',
       label: 'Trạng Thái',
-      formatter: () => '<span class="inline-block px-3 py-1 border rounded-full text-sm font-semibold bg-gray-200 text-blue-600">Chưa bán</span>'
+      formatter: () => '<span class="inline-block px-3 py-1 border rounded-full text-sm font-semibold bg-gray-200 text-blue-600">Chưa bán</span>',
     },
     {
       key: 'actions',
@@ -156,22 +158,22 @@ export default function useSanPhamChiTiet() {
       formatter: (value, item) => {
         const safeItem = JSON.stringify(item);
         return `
-        <div class="space-x-4">
-          <button class="text-orange-500 hover:text-orange-700 transition" data-item='${safeItem}' onclick="document.dispatchEvent(new CustomEvent('viewImeis', { detail: JSON.parse(this.dataset.item) }))">
-            <i class="fa-solid fa-eye"></i>
-          </button>
-          <button class="text-orange-500 hover:text-orange-700 transition" data-id="${item.id}" onclick="document.dispatchEvent(new CustomEvent('editProduct', { detail: this.dataset.id }))">
-            <i class="fa-solid fa-edit"></i>
-          </button>
-        </div>
-      `;
+          <div class="space-x-4">
+            <button class="text-orange-500 hover:text-orange-700 transition" data-item='${safeItem}' onclick="document.dispatchEvent(new CustomEvent('editImei', { detail: JSON.parse(this.dataset.item) }))">
+              <i class="fa-solid fa-edit"></i>
+            </button>
+            <button class="text-blue-500 hover:text-blue-700 transition" data-barcode="${item.imei}" onclick="document.dispatchEvent(new CustomEvent('downloadBarcode', { detail: this.dataset.barcode }))">
+              <i class="fa-solid fa-download"></i>
+            </button>
+          </div>
+        `;
       },
     },
   ];
 
   const fetchProductDetails = async () => {
     try {
-      const {data} = await axios.get(`http://localhost:8080/chi-tiet-san-pham/${productId.value}/details`, {
+      const { data } = await axios.get(`http://localhost:8080/chi-tiet-san-pham/${productId.value}/details`, {
         params: {
           page: currentPage.value,
           size: pageSize.value,
@@ -180,6 +182,8 @@ export default function useSanPhamChiTiet() {
           idMauSac: searchFilters.value.idMauSac || undefined,
           idBoNhoTrong: searchFilters.value.idBoNhoTrong || undefined,
           idRam: searchFilters.value.idRam || undefined,
+          minPrice: searchFilters.value.minPrice || undefined,
+          maxPrice: searchFilters.value.maxPrice || undefined,
         },
       });
       productDetails.value = data.content || data;
@@ -205,12 +209,11 @@ export default function useSanPhamChiTiet() {
         return;
       }
       const response = await axios.put(`http://localhost:8080/chi-tiet-san-pham/${id}/update-price`, null, {
-        params: {newPrice: price},
+        params: { newPrice: price },
       });
-      const item = productDetails.value.find((item) => item.id === parsedId);
-      if (item) {
+      productDetails.value.forEach((item) => {
         item.giaBan = price;
-      }
+      });
       toast.value?.kshowToast('success', response.data.message || 'Cập nhật giá thành công!');
     } catch (error) {
       const errorMessage = error.response?.data?.message || 'Không thể cập nhật giá!';
@@ -229,7 +232,7 @@ export default function useSanPhamChiTiet() {
         giaBan: item.giaBan,
         expectedQuantity: item.variants[0].quantity,
       });
-      const {data} = await axios.get(`http://localhost:8080/chi-tiet-san-pham/${productId.value}/imeis`, {
+      const { data } = await axios.get(`http://localhost:8080/chi-tiet-san-pham/${productId.value}/imeis`, {
         params: {
           idMauSac: item.variants[0].idMauSac,
           idRam: item.variants[0].idRam,
@@ -244,6 +247,21 @@ export default function useSanPhamChiTiet() {
       }
       selectedImeis.value = data;
       showImeiModal.value = true;
+
+      await nextTick();
+      data.forEach((item) => {
+        const imei = item.imei || 'N/A';
+        if (!barcodeCache.value[imei]) {
+          const canvas = document.createElement('canvas');
+          JsBarcode(canvas, imei, {
+            format: 'CODE128',
+            width: 2,
+            height: 40,
+            displayValue: false,
+          });
+          barcodeCache.value[imei] = canvas.toDataURL('image/png');
+        }
+      });
     } catch (error) {
       toast.value?.kshowToast('error', 'Không thể tải danh sách IMEI!');
       console.error('Lỗi khi tải IMEI:', error);
@@ -252,7 +270,7 @@ export default function useSanPhamChiTiet() {
 
   const fetchImelDetail = async (id) => {
     try {
-      const {data} = await axios.get(`http://localhost:8080/imel/${id}`);
+      const { data } = await axios.get(`http://localhost:8080/imel/${id}`);
       return data;
     } catch (error) {
       console.error('Lỗi khi tải chi tiết IMEI:', error);
@@ -263,7 +281,7 @@ export default function useSanPhamChiTiet() {
   const checkExists = async (field, value, excludeId) => {
     try {
       const response = await axios.get(`http://localhost:8080/imel/exists/${field}`, {
-        params: {[field]: value, excludeId},
+        params: { [field]: value, excludeId },
       });
       return response.data;
     } catch (error) {
@@ -274,29 +292,28 @@ export default function useSanPhamChiTiet() {
 
   const updateImei = async () => {
     try {
-      const {id, imei} = editingImei.value;
-
-      // Validate input
+      const { id, imei } = editingImei.value;
       if (!id) throw new Error('ID IMEI không hợp lệ!');
       if (!imei || !/^\d{15}$/.test(imei)) {
         throw new Error('IMEI phải là chuỗi 15 chữ số!');
       }
-
-      // Chuẩn bị payload chỉ với trường cần cập nhật
-      const payload = {
-        imei: imei // Chỉ gửi trường imel cần cập nhật
-      };
-
-      console.log('Sending IMEI update:', {id, payload});
-
+      const payload = { imei };
+      console.log('Sending IMEI update:', { id, payload });
       const response = await axios.put(`http://localhost:8080/imel/${id}`, payload);
-
-      // Cập nhật UI
-      const index = selectedImeis.value.findIndex(i => i.id === id);
+      const index = selectedImeis.value.findIndex((i) => i.id === id);
       if (index !== -1) {
         selectedImeis.value[index].imei = imei;
       }
-
+      if (!barcodeCache.value[imei]) {
+        const canvas = document.createElement('canvas');
+        JsBarcode(canvas, imei, {
+          format: 'CODE128',
+          width: 2,
+          height: 40,
+          displayValue: false,
+        });
+        barcodeCache.value[imei] = canvas.toDataURL('image/png');
+      }
       toast.value?.kshowToast('success', 'Cập nhật IMEI thành công!');
       showEditImeiModal.value = false;
     } catch (error) {
@@ -307,20 +324,26 @@ export default function useSanPhamChiTiet() {
   };
 
   const downloadBarcode = (barcode) => {
-    const canvas = document.createElement('canvas');
-    JsBarcode(canvas, barcode, {format: 'CODE128', width: 2, height: 100});
+    let barcodeUrl = barcodeCache.value[barcode];
+    if (!barcodeUrl) {
+      const canvas = document.createElement('canvas');
+      JsBarcode(canvas, barcode, { format: 'CODE128', width: 2, height: 100 });
+      barcodeUrl = canvas.toDataURL('image/png');
+      barcodeCache.value[barcode] = barcodeUrl;
+    }
     const link = document.createElement('a');
-    link.href = canvas.toDataURL('image/png');
+    link.href = barcodeUrl;
     link.download = `barcode_${barcode}.png`;
     link.click();
+    link.remove();
   };
 
   const fetchOptions = async () => {
     try {
       const [mauSacRes, boNhoTrongRes, ramRes] = await Promise.all([
-        axios.get('http://localhost:8080/mau-sac'),
-        axios.get('http://localhost:8080/bo-nho-trong'),
-        axios.get('http://localhost:8080/ram'),
+        axios.get('http://localhost:8080/mau-sac/all'),
+        axios.get('http://localhost:8080/bo-nho-trong/all'),
+        axios.get('http://localhost:8080/ram/all'),
       ]);
       mauSacOptions.value = mauSacRes.data.content || mauSacRes.data || [];
       boNhoTrongOptions.value = boNhoTrongRes.data.content || boNhoTrongRes.data || [];
@@ -372,21 +395,39 @@ export default function useSanPhamChiTiet() {
     fetchProductDetails();
     fetchOptions();
     window.updatePrice = updatePrice;
-    document.addEventListener('viewImeis', (event) => {
+
+    const handleViewImeis = (event) => {
       fetchImeis(event.detail);
-    });
-    document.addEventListener('editProduct', (event) => {
+    };
+
+    const handleEditProduct = (event) => {
+      console.log('Navigating to edit with detailId:', event.detail);
       router.push(`/products/details/${productId.value}/edit/${event.detail}`);
-    });
-    document.addEventListener('editImei', (event) => {
+    };
+
+    const handleEditImei = (event) => {
       editingImei.value = {
         id: event.detail.id,
-        imei: event.detail.imei || ''
+        imei: event.detail.imei || '',
       };
       showEditImeiModal.value = true;
-    });
-    document.addEventListener('downloadBarcode', (event) => {
+    };
+
+    const handleDownloadBarcode = (event) => {
       downloadBarcode(event.detail);
+    };
+
+    document.addEventListener('viewImeis', handleViewImeis);
+    document.addEventListener('editProduct', handleEditProduct);
+    document.addEventListener('editImei', handleEditImei);
+    document.addEventListener('downloadBarcode', handleDownloadBarcode);
+
+    onUnmounted(() => {
+      document.removeEventListener('viewImeis', handleViewImeis);
+      document.removeEventListener('editProduct', handleEditProduct);
+      document.removeEventListener('editImei', handleEditImei);
+      document.removeEventListener('downloadBarcode', handleDownloadBarcode);
+      delete window.updatePrice;
     });
   });
 

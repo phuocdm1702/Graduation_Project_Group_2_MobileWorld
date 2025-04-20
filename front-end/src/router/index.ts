@@ -69,6 +69,7 @@ import SanPhamChiTiet from "@/views/Products/SanPham/SanPhamChiTiet.vue";
 // Phiếu Bảo Hành
 import LichSuPhieuBaoHanh from "../views/BaoHanh/LichSuPhieuBaoHanh.vue";
 import EditSanPham from "@/views/Products/SanPham/EditSanPham.vue";
+import EditSanPhamChiTiet from "@/views/Products/SanPham/EditSanPhamChiTiet.vue";
 
 const routes: Array<RouteRecordRaw> = [
   // Login
@@ -249,6 +250,13 @@ const routes: Array<RouteRecordRaw> = [
     name: "SanPhamChiTiet",
     component: SanPhamChiTiet,
     meta: { breadcrumb: ["Sản Phẩm", "Chi Tiết Sản Phẩm"] },
+  },
+
+  {
+    path: '/products/details/:id/edit/:detailId',
+    name: 'EditSanPhamChiTiet',
+    component: EditSanPhamChiTiet,
+    meta: { breadcrumb: ['Sản Phẩm', 'Chi Tiết Sản Phẩm', 'Sửa Chi Tiết Sản Phẩm'] }
   },
 
   // Thương hiệu

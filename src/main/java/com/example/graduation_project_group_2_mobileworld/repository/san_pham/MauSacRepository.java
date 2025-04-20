@@ -10,7 +10,6 @@ import java.util.List;
 
 @Repository
 public interface MauSacRepository extends JpaRepository<MauSac, Integer> {
-
-    List<MauSac> findByDeletedFalse();
     Page<MauSac> findByDeletedFalse(Pageable pageable);
+    List<MauSac> findByDeletedFalse();
 }

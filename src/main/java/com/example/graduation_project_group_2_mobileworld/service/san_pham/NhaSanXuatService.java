@@ -1,6 +1,7 @@
 package com.example.graduation_project_group_2_mobileworld.service.san_pham;
 
 import com.example.graduation_project_group_2_mobileworld.dto.san_pham.NhaSanXuatDTO;
+import com.example.graduation_project_group_2_mobileworld.dto.san_pham.PinDTO;
 import com.example.graduation_project_group_2_mobileworld.entity.SanPham.NhaSanXuat;
 import com.example.graduation_project_group_2_mobileworld.repository.san_pham.NhaSanXuatRepository;
 import jakarta.transaction.Transactional;
@@ -26,6 +27,12 @@ public class NhaSanXuatService {
     public Page<NhaSanXuatDTO> getAllNhaSanXuat(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         return repository.findByDeletedFalse(pageable).map(this::toDTO);
+    }
+
+    public List<NhaSanXuatDTO> getAllNhaSanXuatList() {
+        return repository.findByDeletedFalse().stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
     }
 
     public NhaSanXuatDTO getNhaSanXuatById(Integer id) {

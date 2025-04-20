@@ -1,6 +1,7 @@
 import { ref, computed, watch, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
+import '@/assets/sanPham.css';
 
 export default function sanPham(toast) {
   const router = useRouter();
@@ -98,16 +99,16 @@ export default function sanPham(toast) {
         simRes,
         congNgheMangRes,
       ] = await Promise.all([
-        axios.get('http://localhost:8080/nha-san-xuat'),
-        axios.get('http://localhost:8080/he-dieu-hanh'),
-        axios.get('http://localhost:8080/cong-nghe-man-hinh'),
-        axios.get('http://localhost:8080/pin'),
-        axios.get('http://localhost:8080/cum-camera'),
-        axios.get('http://localhost:8080/cpu'),
-        axios.get('http://localhost:8080/gpu'),
-        axios.get('http://localhost:8080/thiet-ke'),
-        axios.get('http://localhost:8080/sim'),
-        axios.get('http://localhost:8080/cong-nghe-mang'),
+        axios.get('http://localhost:8080/nha-san-xuat/all'),
+        axios.get('http://localhost:8080/he-dieu-hanh/all'),
+        axios.get('http://localhost:8080/cong-nghe-man-hinh/all'),
+        axios.get('http://localhost:8080/pin/all'),
+        axios.get('http://localhost:8080/cum-camera/all'),
+        axios.get('http://localhost:8080/cpu/all'),
+        axios.get('http://localhost:8080/gpu/all'),
+        axios.get('http://localhost:8080/thiet-ke/all'),
+        axios.get('http://localhost:8080/sim/all'),
+        axios.get('http://localhost:8080/cong-nghe-mang/all'),
       ]);
 
       console.log('nhaSanXuatRes:', nhaSanXuatRes.data);

@@ -1,0 +1,24 @@
+.vs__dropdown-menu {
+  max-height: 120px !important; /* Giới hạn chiều cao tối đa 50px */
+  overflow-y: auto; /* Thêm thanh cuộn dọc khi vượt quá */
+  scrollbar-width: thin; /* Tùy chỉnh thanh cuộn cho Firefox */
+  scrollbar-color: #cbd5e0 #edf2f7; /* Màu thanh cuộn cho Firefox */
+}
+
+/* Tùy chỉnh thanh cuộn cho Chrome, Safari, Edge */
+.vs__dropdown-menu::-webkit-scrollbar {
+  width: 8px; /* Độ rộng thanh cuộn */
+}
+
+.vs__dropdown-menu::-webkit-scrollbar-track {
+  background: #edf2f7; /* Màu nền của track */
+}
+
+.vs__dropdown-menu::-webkit-scrollbar-thumb {
+  background: #cbd5e0; /* Màu của thanh cuộn */
+  border-radius: 4px; /* Bo góc thanh cuộn */
+}
+
+.vs__dropdown-menu::-webkit-scrollbar-thumb:hover {
+  background: #a0aec0; /* Màu khi hover */
+}

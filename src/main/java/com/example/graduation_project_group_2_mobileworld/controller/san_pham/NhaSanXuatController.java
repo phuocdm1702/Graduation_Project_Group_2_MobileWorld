@@ -1,6 +1,7 @@
 package com.example.graduation_project_group_2_mobileworld.controller.san_pham;
 
 import com.example.graduation_project_group_2_mobileworld.dto.san_pham.NhaSanXuatDTO;
+import com.example.graduation_project_group_2_mobileworld.dto.san_pham.PinDTO;
 import com.example.graduation_project_group_2_mobileworld.service.san_pham.NhaSanXuatService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
@@ -37,6 +38,11 @@ public class NhaSanXuatController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size) {
         return ResponseEntity.ok(service.getAllNhaSanXuat(page, size));
+    }
+
+    @GetMapping("/all")
+    public ResponseEntity<List<NhaSanXuatDTO>> getAllThuocTinh() {
+        return ResponseEntity.ok(service.getAllNhaSanXuatList());
     }
 
     @GetMapping("/{id}")

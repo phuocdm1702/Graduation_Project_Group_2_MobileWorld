@@ -36,6 +36,7 @@
     "vue-qrcode-reader": "^5.7.1",
     "vue-router": "^4.0.3",
     "vue-select": "^4.0.0-beta.6",
+    "vue-slider-component": "^4.1.0-beta.7",
     "vue3-apexcharts": "^1.8.0",
     "vue3-qr-reader": "^1.0.0",
     "xlsx": "^0.18.5"

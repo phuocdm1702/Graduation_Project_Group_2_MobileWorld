@@ -8,6 +8,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 public class MauSacService {
 
@@ -20,6 +23,12 @@ public class MauSacService {
     public Page<MauSacDTO> getAllMauSac(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         return mauSacRepository.findByDeletedFalse(pageable).map(this::toDTO);
+    }
+
+    public List<MauSacDTO> getAllMauSacList() {
+        return mauSacRepository.findByDeletedFalse().stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
     }
 
     public MauSacDTO addMauSac(MauSacDTO mauSacDTO) {

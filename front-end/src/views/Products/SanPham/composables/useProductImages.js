@@ -26,7 +26,15 @@ export function useProductImages() {
       'xanh lam': 'blue',
       'xanh lá': 'green',
       'xanh dương': 'blue',
+      kem: 'cream',
+      'tím đậm': 'darkpurple',
+      'titan tự nhiên': 'naturaltitanium',
+      'xanh bạc hà': 'mintgreen',
+      'xanh dương đậm': 'darkblue',
+      'xanh dương nhạt': 'lightblue',
+      'vàng đồng': 'bronze',
     };
+
     const colorNameToHex = {
       black: '#000000',
       silver: '#C0C0C0',
@@ -41,7 +49,15 @@ export function useProductImages() {
       gray: '#808080',
       brown: '#A52A2A',
       blue: '#0000FF',
+      cream: '#FFFDD0',          // Màu kem (trắng nhạt)
+      darkpurple: '#4B0082',     // Tím đậm
+      lightblue: '#ADD8E6',
+      naturaltitanium: '#D3D3D3', // Titan tự nhiên (xám kim loại nhạt)
+      mintgreen: '#98FF98',      // Xanh bạc hà
+      darkblue: '#00008B',       // Xanh dương đậm
+      bronze: '#CD7F32',         // Vàng đồng
     };
+
     if (!colorName) return '#FFFFFF';
     const normalizedName = colorName.toLowerCase().trim();
     const englishColorName = vietnameseToEnglishColorMap[normalizedName] || normalizedName;
@@ -102,6 +118,6 @@ export function useProductImages() {
     getColorFromName,
     handleMainImageUpload,
     handleColorImageUpload,
-    resetImages
+    resetImages,
   };
 }

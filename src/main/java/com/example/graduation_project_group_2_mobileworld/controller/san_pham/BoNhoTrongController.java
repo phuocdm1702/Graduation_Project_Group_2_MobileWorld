@@ -1,11 +1,14 @@
 package com.example.graduation_project_group_2_mobileworld.controller.san_pham;
 
 import com.example.graduation_project_group_2_mobileworld.dto.san_pham.BoNhoTrongDTO;
+import com.example.graduation_project_group_2_mobileworld.dto.san_pham.ChiSoKhangBuiVaNuocDTO;
 import com.example.graduation_project_group_2_mobileworld.service.san_pham.BoNhoTrongService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/bo-nho-trong")
@@ -24,6 +27,11 @@ public class BoNhoTrongController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size) {
         return ResponseEntity.ok(boNhoTrongService.getAllBoNhoTrongs(page, size));
+    }
+
+    @GetMapping("/all")
+    public ResponseEntity<List<BoNhoTrongDTO>> getAllThuocTinh() {
+        return ResponseEntity.ok(boNhoTrongService.getAllBoNhoTrongsList());
     }
 
     @PostMapping

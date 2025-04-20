@@ -825,7 +825,7 @@
 
       <!-- Color Selection Modal -->
       <div v-if="showColorModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
-        <div class="bg-white rounded-lg shadow-lg p-6 w-1/2">
+        <div class="bg-white rounded-lg shadow-lg p-6 w-3/4">
           <div class="flex justify-between items-center mb-4">
             <h3 class="text-lg font-medium text-gray-700">Chọn màu sắc</h3>
             <button @click="closeColorModal" class="text-gray-500 hover:text-gray-700">✕</button>
@@ -842,7 +842,7 @@
                 class="w-16 h-8 rounded border border-gray-300"
                 :style="{ backgroundColor: getColorFromName(mau.tenMau) || '#FFFFFF' }"
               ></span>
-              <span class="text-sm text-gray-700">{{ mau.tenMau }}</span>
+              <span class="text-sm text-gray-700 whitespace-nowrap">{{ mau.tenMau }}</span>
             </label>
           </div>
           <div class="flex justify-between">
@@ -927,6 +927,7 @@ import FormModal from '@/components/FormModal.vue';
 import BreadcrumbWrapper from '@/components/BreadcrumbWrapper.vue';
 import VSelect from 'vue-select';
 import 'vue-select/dist/vue-select.css';
+import '@/assets/sanPham.css';
 
 import { useProductData } from './composables/useProductData';
 import { useProductVariants } from './composables/useProductVariants';

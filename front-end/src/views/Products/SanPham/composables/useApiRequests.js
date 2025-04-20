@@ -20,33 +20,54 @@ export function useApiRequests(toast) {
 
   const fetchOptions = async () => {
     try {
-      const [        heDieuHanhRes, congNgheManHinhRes, nhaSanXuatRes, cumCameraRes, simRes,        thietKeRes, pinRes, cpuRes, gpuRes, congNgheMangRes,        hoTroCongNgheSacRes, chiSoKhangBuiVaNuocRes, ramRes,        boNhoTrongRes, mauSacRes,      ] = await Promise.all([        axios.get('http://localhost:8080/he-dieu-hanh'),        axios.get('http://localhost:8080/cong-nghe-man-hinh'),        axios.get('http://localhost:8080/nha-san-xuat'),        axios.get('http://localhost:8080/cum-camera'),        axios.get('http://localhost:8080/sim'),        axios.get('http://localhost:8080/thiet-ke'),        axios.get('http://localhost:8080/pin'),        axios.get('http://localhost:8080/cpu'),        axios.get('http://localhost:8080/gpu'),        axios.get('http://localhost:8080/cong-nghe-mang'),        axios.get('http://localhost:8080/ho-tro-cong-nghe-sac'),        axios.get('http://localhost:8080/chi-so-khang-bui-va-nuoc'),        axios.get('http://localhost:8080/ram'),        axios.get('http://localhost:8080/bo-nho-trong'),        axios.get('http://localhost:8080/mau-sac'),      ]);
+      const requests = [
+        { key: 'heDieuHanh', url: 'http://localhost:8080/he-dieu-hanh/all', ref: heDieuHanhOptions },
+        { key: 'congNgheManHinh', url: 'http://localhost:8080/cong-nghe-man-hinh/all', ref: congNgheManHinhOptions },
+        { key: 'nhaSanXuat', url: 'http://localhost:8080/nha-san-xuat/all', ref: nhaSanXuatOptions },
+        { key: 'cumCamera', url: 'http://localhost:8080/cum-camera/all', ref: cumCameraOptions },
+        { key: 'sim', url: 'http://localhost:8080/sim/all', ref: simOptions },
+        { key: 'thietKe', url: 'http://localhost:8080/thiet-ke/all', ref: thietKeOptions },
+        { key: 'pin', url: 'http://localhost:8080/pin/all', ref: pinOptions },
+        { key: 'cpu', url: 'http://localhost:8080/cpu/all', ref: cpuOptions },
+        { key: 'gpu', url: 'http://localhost:8080/gpu/all', ref: gpuOptions },
+        { key: 'congNgheMang', url: 'http://localhost:8080/cong-nghe-mang/all', ref: congNgheMangOptions },
+        { key: 'hoTroCongNgheSac', url: 'http://localhost:8080/ho-tro-cong-nghe-sac/all', ref: hoTroCongNgheSacOptions },
+        { key: 'chiSoKhangBuiVaNuoc', url: 'http://localhost:8080/chi-so-khang-bui-va-nuoc/all', ref: chiSoKhangBuiVaNuocOptions },
+        { key: 'ram', url: 'http://localhost:8080/ram/all', ref: ramOptions },
+        { key: 'boNhoTrong', url: 'http://localhost:8080/bo-nho-trong/all', ref: boNhoTrongOptions },
+        { key: 'mauSac', url: 'http://localhost:8080/mau-sac/all', ref: mauSacOptions },
+      ];
 
-      heDieuHanhOptions.value = heDieuHanhRes.data.content || [];
-      congNgheManHinhOptions.value = congNgheManHinhRes.data.content || [];
-      nhaSanXuatOptions.value = nhaSanXuatRes.data.content || [];
-      cumCameraOptions.value = cumCameraRes.data.content || [];
-      simOptions.value = simRes.data.content || [];
-      thietKeOptions.value = thietKeRes.data.content || [];
-      pinOptions.value = pinRes.data.content || [];
-      cpuOptions.value = cpuRes.data.content || [];
-      gpuOptions.value = gpuRes.data.content || [];
-      congNgheMangOptions.value = congNgheMangRes.data.content || [];
-      hoTroCongNgheSacOptions.value = hoTroCongNgheSacRes.data.content || [];
-      chiSoKhangBuiVaNuocOptions.value = chiSoKhangBuiVaNuocRes.data.content || [];
-      ramOptions.value = ramRes.data.content || [];
-      boNhoTrongOptions.value = boNhoTrongRes.data.content || [];
-      mauSacOptions.value = mauSacRes.data.content || [];
+      const results = await Promise.allSettled(requests.map(req => axios.get(req.url)));
+
+      results.forEach((result, index) => {
+        const { key, ref } = requests[index];
+        if (result.status === 'fulfilled') {
+          const data = result.value?.data;
+          ref.value = Array.isArray(data?.content) ? data.content : Array.isArray(data) ? data : [];
+          if (!ref.value.length) {
+            console.warn(`Dữ liệu rỗng hoặc không đúng định dạng cho ${key}:`, data);
+          }
+        } else {
+          console.error(`Lỗi khi tải ${key} từ ${requests[index].url}:`, result.reason?.response?.data || result.reason?.message);
+          if (toast.value && typeof toast.value.kshowToast === 'function') {
+            toast.value.kshowToast('error', `Lỗi khi tải danh sách ${key}: ${result.reason?.message || 'Không xác định'}`);
+          }
+          ref.value = [];
+        }
+      });
     } catch (error) {
-      toast.value?.kshowToast('error', 'Lỗi khi tải danh sách tùy chọn!');
-      console.error('Fetch options error:', error);
+      console.error('Lỗi chung khi tải danh sách tùy chọn:', error);
+      if (toast.value && typeof toast.value.kshowToast === 'function') {
+        toast.value.kshowToast('error', 'Lỗi khi tải danh sách tùy chọn!');
+      }
     }
   };
 
   const handleAddAttribute = async (currentAttribute, data, productData, currentVariant) => {
     try {
       let response;
-      switch (currentAttribute) { // Removed .value since currentAttribute is a string
+      switch (currentAttribute) {
         case 'heDieuHanh':
           response = await axios.post('http://localhost:8080/he-dieu-hanh', {
             heDieuHanh: data.heDieuHanh,
@@ -64,13 +85,11 @@ export function useApiRequests(toast) {
           productData.value.congNgheManHinh = response.data.id;
           break;
         case 'nhaSanXuat':
-          console.log('Adding manufacturer:', data.nhaSanXuat);
           response = await axios.post('http://localhost:8080/nha-san-xuat', {
             nhaSanXuat: data.nhaSanXuat,
-            ma: "NSX0010",
+            ma: 'NSX0010',
             trangThai: 1,
           });
-          console.log('API response:', response.data);
           nhaSanXuatOptions.value.unshift(response.data);
           productData.value.idNhaSanXuat = response.data.id;
           break;
@@ -171,11 +190,15 @@ export function useApiRequests(toast) {
           return false;
       }
 
-      toast.value?.kshowToast('success', `Thêm ${currentAttribute} thành công!`);
+      if (toast.value && typeof toast.value.kshowToast === 'function') {
+        toast.value.kshowToast('success', `Thêm ${currentAttribute} thành công!`);
+      }
       return true;
     } catch (error) {
       const errorMessage = error.response?.data?.error || error.message;
-      toast.value?.kshowToast('error', `Lỗi khi thêm ${currentAttribute}: ${errorMessage}`);
+      if (toast.value && typeof toast.value.kshowToast === 'function') {
+        toast.value.kshowToast('error', `Lỗi khi thêm ${currentAttribute}: ${errorMessage}`);
+      }
       console.error(`Add ${currentAttribute} error:`, error);
       return false;
     }

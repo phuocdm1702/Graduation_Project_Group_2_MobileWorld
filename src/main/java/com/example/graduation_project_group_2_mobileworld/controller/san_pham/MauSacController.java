@@ -7,6 +7,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/mau-sac")
 @CrossOrigin(origins = "http://localhost:3000", allowedHeaders = "*")
@@ -24,6 +26,11 @@ public class MauSacController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size) {
         return ResponseEntity.ok(mauSacService.getAllMauSac(page, size));
+    }
+
+    @GetMapping("/all")
+    public ResponseEntity<List<MauSacDTO>> getAllMauSac() {
+        return ResponseEntity.ok(mauSacService.getAllMauSacList());
     }
 
     @PostMapping

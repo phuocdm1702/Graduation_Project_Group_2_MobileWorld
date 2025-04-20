@@ -123,16 +123,44 @@ public class ChiTietSanPhamService {
         );
     }
 
-    public void updatePrice(Integer id, BigDecimal newPrice) {
-        if (newPrice == null) {
-            throw new IllegalArgumentException("Giá không hợp lệ: " + newPrice);
-        }
+    public void updateChiTietSanPham(Integer id, ChiTietSanPhamDTO dto) {
         ChiTietSanPham chiTietSanPham = chiTietSanPhamRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy chi tiết sản phẩm với ID: " + id));
-        chiTietSanPham.setGiaBan(newPrice);
+
+        // Cập nhật các trường
+        if (dto.getIdMauSac() != null) {
+            chiTietSanPham.setIdMauSac(getEntity(mauSacRepository, dto.getIdMauSac(), "Màu sắc"));
+        }
+        if (dto.getIdRam() != null) {
+            chiTietSanPham.setIdRam(getEntity(ramRepository, dto.getIdRam(), "RAM"));
+        }
+        if (dto.getIdBoNhoTrong() != null) {
+            chiTietSanPham.setIdBoNhoTrong(getEntity(boNhoTrongRepository, dto.getIdBoNhoTrong(), "Bộ nhớ trong"));
+        }
+        if (dto.getGiaBan() != null) {
+            chiTietSanPham.setGiaBan(dto.getGiaBan());
+        }
+
         chiTietSanPham.setUpdatedAt(new Date());
-        chiTietSanPham.setUpdatedBy(1);
+        chiTietSanPham.setUpdatedBy(1); // Giả sử user ID là 1, thay đổi theo logic thực tế
+
         chiTietSanPhamRepository.save(chiTietSanPham);
+    }
+
+    public void updatePrice(Integer id, BigDecimal newPrice) {
+        if (newPrice == null || newPrice.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Giá không hợp lệ: " + newPrice);
+        }
+        List<ChiTietSanPham> chiTietSanPhams = chiTietSanPhamRepository.findByIdSanPhamIdAndDeletedFalse(id, false);
+        if (chiTietSanPhams.isEmpty()) {
+            throw new RuntimeException("Không tìm thấy sản phẩm với ID: " + id);
+        }
+        for (ChiTietSanPham chiTietSanPham : chiTietSanPhams) {
+            chiTietSanPham.setGiaBan(newPrice);
+            chiTietSanPham.setUpdatedAt(new Date());
+            chiTietSanPham.setUpdatedBy(1);
+        }
+        chiTietSanPhamRepository.saveAll(chiTietSanPhams);
     }
 
     private void validateInput(ChiTietSanPhamDTO dto, List<MultipartFile> images) {

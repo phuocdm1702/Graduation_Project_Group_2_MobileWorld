@@ -1,6 +1,7 @@
 package com.example.graduation_project_group_2_mobileworld.controller.san_pham;
 
 import com.example.graduation_project_group_2_mobileworld.dto.san_pham.CongNgheManHinhDTO;
+import com.example.graduation_project_group_2_mobileworld.dto.san_pham.CpuDTO;
 import com.example.graduation_project_group_2_mobileworld.service.san_pham.CongNgheManHinhService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
@@ -29,6 +30,11 @@ public class CongNgheManHinhController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size) {
         return ResponseEntity.ok(service.getAllCongNgheManHinh(page, size));
+    }
+
+    @GetMapping("/all")
+    public ResponseEntity<List<CongNgheManHinhDTO>> getAllThuocTinh() {
+        return ResponseEntity.ok(service.getAllCongNgheManHinhList());
     }
 
     @PostMapping

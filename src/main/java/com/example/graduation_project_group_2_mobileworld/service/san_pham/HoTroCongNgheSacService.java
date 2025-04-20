@@ -10,6 +10,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 public class HoTroCongNgheSacService {
 
@@ -22,6 +25,12 @@ public class HoTroCongNgheSacService {
     public Page<HoTroCongNgheSacDTO> getAllCongNgheSac(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         return hoTroCongNgheSacRepository.findByDeletedFalse(pageable).map(this::toDTO);
+    }
+
+    public List<HoTroCongNgheSacDTO> getAllCongNgheSacList() {
+        return hoTroCongNgheSacRepository.findByDeletedFalse().stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
     }
 
     private HoTroCongNgheSacDTO toDTO(HoTroCongNgheSac entity) {

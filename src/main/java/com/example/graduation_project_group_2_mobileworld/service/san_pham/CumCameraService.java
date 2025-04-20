@@ -1,12 +1,16 @@
 package com.example.graduation_project_group_2_mobileworld.service.san_pham;
 
 import com.example.graduation_project_group_2_mobileworld.dto.san_pham.CumCameraDTO;
+import com.example.graduation_project_group_2_mobileworld.dto.san_pham.GpuDTO;
 import com.example.graduation_project_group_2_mobileworld.entity.SanPham.CumCamera;
 import com.example.graduation_project_group_2_mobileworld.repository.san_pham.CumCameraRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class CumCameraService {
@@ -22,17 +26,10 @@ public class CumCameraService {
         return cumCameraRepository.findByDeletedFalse(pageable).map(this::toDTO);
     }
 
-    public Page<CumCameraDTO> getCameraDetails(int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
-        Page<Object[]> results = cumCameraRepository.findCameraDetails(pageable);
-        return results.map(result -> {
-            CumCameraDTO dto = new CumCameraDTO();
-            dto.setId((Integer) result[0]);           // cumCameraId
-            dto.setMa((String) result[1]);            // cumCameraMa
-            dto.setCameraTruoc((String) result[2]);   // cameraTruoc
-            dto.setCameraSau((String) result[3]);     // cameraSau
-            return dto;
-        });
+    public List<CumCameraDTO> getAllCumCameraList() {
+        return cumCameraRepository.findByDeletedFalse().stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
     }
 
     private CumCameraDTO toDTO(CumCamera entity) {

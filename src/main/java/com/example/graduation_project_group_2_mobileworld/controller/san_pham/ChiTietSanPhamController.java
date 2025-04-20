@@ -158,4 +158,25 @@ public class ChiTietSanPhamController {
         System.out.println("Returning IMEIs: " + imeis);
         return ResponseEntity.ok(imeis);
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Map<String, String>> updateChiTietSanPham(
+            @PathVariable Integer id,
+            @RequestBody ChiTietSanPhamDTO dto) {
+        Map<String, String> response = new HashMap<>();
+        try {
+            chiTietSanPhamService.updateChiTietSanPham(id, dto);
+            response.put("status", "success");
+            response.put("message", "Cập nhật chi tiết sản phẩm thành công!");
+            return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e) {
+            response.put("status", "error");
+            response.put("message", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        } catch (Exception e) {
+            response.put("status", "error");
+            response.put("message", "Lỗi khi cập nhật chi tiết sản phẩm: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
 }

@@ -1,6 +1,7 @@
 package com.example.graduation_project_group_2_mobileworld.service.san_pham;
 
 import com.example.graduation_project_group_2_mobileworld.dto.san_pham.CongNgheManHinhDTO;
+import com.example.graduation_project_group_2_mobileworld.dto.san_pham.CpuDTO;
 import com.example.graduation_project_group_2_mobileworld.entity.SanPham.CongNgheManHinh;
 import com.example.graduation_project_group_2_mobileworld.repository.san_pham.CongNgheManHinhRepository;
 import jakarta.transaction.Transactional;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class CongNgheManHinhService {
@@ -24,6 +26,12 @@ public class CongNgheManHinhService {
     public Page<CongNgheManHinhDTO> getAllCongNgheManHinh(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         return repository.findByDeletedFalse(pageable).map(this::toDTO);
+    }
+
+    public List<CongNgheManHinhDTO> getAllCongNgheManHinhList() {
+        return repository.findByDeletedFalse().stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
     }
 
     @Transactional
