@@ -1,24 +1,25 @@
 package com.example.graduation_project_group_2_mobileworld.controller.san_pham;
 
 import com.example.graduation_project_group_2_mobileworld.dto.san_pham.ChiTietSanPhamDTO;
+import com.example.graduation_project_group_2_mobileworld.entity.SanPham.ChiTietSanPham;
+import com.example.graduation_project_group_2_mobileworld.repository.san_pham.ChiTietSanPhamRepository;
 import com.example.graduation_project_group_2_mobileworld.service.san_pham.ChiTietSanPhamService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import jakarta.persistence.criteria.Predicate;
+
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/chi-tiet-san-pham")
@@ -26,14 +27,19 @@ import java.util.Map;
 public class ChiTietSanPhamController {
 
     private final ChiTietSanPhamService chiTietSanPhamService;
+    private final ChiTietSanPhamRepository chiTietSanPhamRepository;
     private final ObjectMapper objectMapper;
 
     @Value("${file.upload-dir}")
     private String uploadDir;
 
     @Autowired
-    public ChiTietSanPhamController(ChiTietSanPhamService chiTietSanPhamService, ObjectMapper objectMapper) {
+    public ChiTietSanPhamController(
+            ChiTietSanPhamService chiTietSanPhamService,
+            ChiTietSanPhamRepository chiTietSanPhamRepository,
+            ObjectMapper objectMapper) {
         this.chiTietSanPhamService = chiTietSanPhamService;
+        this.chiTietSanPhamRepository = chiTietSanPhamRepository;
         this.objectMapper = objectMapper;
     }
 
@@ -98,7 +104,6 @@ public class ChiTietSanPhamController {
                 response.put("message", "ID sản phẩm không hợp lệ!");
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
             }
-
             Integer id;
             try {
                 id = Integer.parseInt(idStr);
@@ -107,7 +112,6 @@ public class ChiTietSanPhamController {
                 response.put("message", "ID sản phẩm phải là một số nguyên hợp lệ!");
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
             }
-
             chiTietSanPhamService.updatePrice(id, newPrice);
             response.put("status", "success");
             response.put("message", "Cập nhật giá thành công!");
@@ -117,5 +121,41 @@ public class ChiTietSanPhamController {
             response.put("message", "Không thể cập nhật giá: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
+    }
+
+    @GetMapping("/{id}/imeis")
+    public ResponseEntity<List<Map<String, Object>>> getImeisByVariant(
+            @PathVariable Integer id,
+            @RequestParam Integer idMauSac,
+            @RequestParam Integer idRam,
+            @RequestParam Integer idBoNhoTrong,
+            @RequestParam BigDecimal giaBan) {
+        System.out.println("Received request for IMEIs with params: idSanPham=" + id +
+                ", idMauSac=" + idMauSac + ", idRam=" + idRam + ", idBoNhoTrong=" + idBoNhoTrong +
+                ", giaBan=" + giaBan);
+        Specification<ChiTietSanPham> spec = (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            predicates.add(cb.equal(root.get("idSanPham").get("id"), id));
+            predicates.add(cb.equal(root.get("idMauSac").get("id"), idMauSac));
+            predicates.add(cb.equal(root.get("idRam").get("id"), idRam));
+            predicates.add(cb.equal(root.get("idBoNhoTrong").get("id"), idBoNhoTrong));
+            predicates.add(cb.equal(root.get("giaBan"), giaBan));
+            predicates.add(cb.equal(root.get("deleted"), false));
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+        List<ChiTietSanPham> chiTietSanPhams = chiTietSanPhamRepository.findAll(spec);
+        List<Map<String, Object>> imeis = chiTietSanPhams.stream()
+                .map(ctsp -> {
+                    Map<String, Object> imeiData = new HashMap<>();
+                    imeiData.put("id", ctsp.getIdImel().getId());
+                    imeiData.put("imei", ctsp.getIdImel().getImel());
+                    imeiData.put("ma", ctsp.getMa());
+                    imeiData.put("deleted", ctsp.getDeleted());
+                    return imeiData;
+                })
+                .filter(data -> data.get("imei") != null)
+                .collect(Collectors.toList());
+        System.out.println("Returning IMEIs: " + imeis);
+        return ResponseEntity.ok(imeis);
     }
 }

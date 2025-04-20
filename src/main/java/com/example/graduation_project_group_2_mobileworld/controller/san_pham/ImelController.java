@@ -65,18 +65,29 @@ public class ImelController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> update(
+    public ResponseEntity<?> updateImei(
             @PathVariable Integer id,
-            @Valid @RequestBody ImelDTO dto,
-            BindingResult result) {
-        if (result.hasErrors()) {
-            return ResponseEntity.badRequest().body(getErrorMap(result));
-        }
+            @RequestBody Map<String, String> requestBody) {
+
         try {
+            String newImei = requestBody.get("imei");
+            if (newImei == null) {
+                return ResponseEntity.badRequest().body(Map.of(
+                        "error", "Thiếu trường imei trong request"
+                ));
+            }
+
+            // Tạo DTO đơn giản chỉ chứa imei
+            ImelDTO dto = new ImelDTO();
+            dto.setImel(newImei);
+
             ImelDTO updated = service.updateImel(id, dto);
             return ResponseEntity.ok(updated);
+
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+            return ResponseEntity.badRequest().body(Map.of(
+                    "error", e.getMessage()
+            ));
         }
     }
 

@@ -1,7 +1,8 @@
-import { ref, onMounted, computed } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import {ref, onMounted, computed} from 'vue';
+import {useRoute, useRouter} from 'vue-router';
 import axios from 'axios';
 import debounce from 'lodash/debounce';
+import JsBarcode from 'jsbarcode';
 
 export default function useSanPhamChiTiet() {
   const route = useRoute();
@@ -19,6 +20,10 @@ export default function useSanPhamChiTiet() {
   const pageSize = ref(5);
   const totalItems = ref(0);
   const productId = computed(() => route.params.id);
+  const showImeiModal = ref(false);
+  const showEditImeiModal = ref(false);
+  const selectedImeis = ref([]);
+  const editingImei = ref({id: null, imei: ''});
 
   const mauSacOptions = ref([]);
   const boNhoTrongOptions = ref([]);
@@ -27,8 +32,8 @@ export default function useSanPhamChiTiet() {
   const breadcrumbItems = computed(() => route.meta?.breadcrumb || ['Sản Phẩm Chi Tiết']);
 
   const columns = [
-    { key: '#', label: 'STT', formatter: (value, item, index) => currentPage.value * 5 + index + 1 },
-    { key: 'ma', label: 'Mã Sản Phẩm' },
+    {key: '#', label: 'STT', formatter: (value, item, index) => currentPage.value * 5 + index + 1},
+    {key: 'maSanPham', label: 'Mã Sản Phẩm'},
     {
       key: 'variants[0].mauSac',
       label: 'Màu Sắc',
@@ -45,9 +50,9 @@ export default function useSanPhamChiTiet() {
       formatter: (value) => (value ? `${value}` : 'N/A'),
     },
     {
-      key: 'variants[0].idImel.imel',
-      label: 'IMEI',
-      formatter: (value) => value || 'N/A',
+      key: 'variants[0].quantity',
+      label: 'Số Lượng',
+      formatter: (value) => value || 0,
     },
     {
       key: 'giaBan',
@@ -84,11 +89,89 @@ export default function useSanPhamChiTiet() {
           : '<span class="inline-block px-3 py-1 border rounded-full text-sm font-semibold bg-gray-200 text-green-600">Hoạt động</span>';
       },
     },
+    {
+      key: 'actions',
+      label: 'Hành động',
+      formatter: (value, item) => {
+        const safeItem = JSON.stringify(item);
+        return `
+            <div class="space-x-4">
+              <button class="text-orange-500 hover:text-orange-700 transition" data-item='${safeItem}' onclick="document.dispatchEvent(new CustomEvent('viewImeis', { detail: JSON.parse(this.dataset.item) }))">
+                <i class="fa-solid fa-eye"></i>
+              </button>
+              <button class="text-orange-500 hover:text-orange-700 transition" data-id="${item.id}" onclick="document.dispatchEvent(new CustomEvent('editProduct', { detail: this.dataset.id }))">
+                <i class="fa-solid fa-edit"></i>
+              </button>
+            </div>
+          `;
+      },
+    },
+  ];
+
+  const imeiColumns = [
+    {
+      key: '#',
+      label: 'STT',
+      formatter: (value, item, index) => index + 1
+    },
+    {
+      key: 'ma',
+      label: 'Mã CTSP',
+      formatter: (value) => value || 'N/A'
+    },
+    {
+      key: 'imei',
+      label: 'IMEI',
+      formatter: (value) => value || 'N/A'
+    },
+    {
+      key: 'barcode',
+      label: 'Barcode',
+      formatter: (value, item) => {
+        const barcodeId = `barcode-${item.id}`;
+        setTimeout(() => {
+          const canvas = document.createElement('canvas');
+          JsBarcode(canvas, item.imei || 'N/A', {
+            format: 'CODE128',
+            width: 2,
+            height: 40,
+            displayValue: false
+          });
+          const img = document.getElementById(barcodeId);
+          if (img) {
+            img.src = canvas.toDataURL('image/png');
+          }
+        }, 0);
+        return `<img id="${barcodeId}" class="h-10 w-auto" alt="Barcode" />`;
+      }
+    },
+    {
+      key: 'status',
+      label: 'Trạng Thái',
+      formatter: () => '<span class="inline-block px-3 py-1 border rounded-full text-sm font-semibold bg-gray-200 text-blue-600">Chưa bán</span>'
+    },
+    {
+      key: 'actions',
+      label: 'Hành động',
+      formatter: (value, item) => {
+        const safeItem = JSON.stringify(item);
+        return `
+        <div class="space-x-4">
+          <button class="text-orange-500 hover:text-orange-700 transition" data-item='${safeItem}' onclick="document.dispatchEvent(new CustomEvent('viewImeis', { detail: JSON.parse(this.dataset.item) }))">
+            <i class="fa-solid fa-eye"></i>
+          </button>
+          <button class="text-orange-500 hover:text-orange-700 transition" data-id="${item.id}" onclick="document.dispatchEvent(new CustomEvent('editProduct', { detail: this.dataset.id }))">
+            <i class="fa-solid fa-edit"></i>
+          </button>
+        </div>
+      `;
+      },
+    },
   ];
 
   const fetchProductDetails = async () => {
     try {
-      const { data } = await axios.get(`http://localhost:8080/chi-tiet-san-pham/${productId.value}/details`, {
+      const {data} = await axios.get(`http://localhost:8080/chi-tiet-san-pham/${productId.value}/details`, {
         params: {
           page: currentPage.value,
           size: pageSize.value,
@@ -116,28 +199,120 @@ export default function useSanPhamChiTiet() {
         toast.value?.kshowToast('error', 'ID sản phẩm không hợp lệ!');
         return;
       }
-
       const price = parseFloat(newPrice);
       if (isNaN(price)) {
         toast.value?.kshowToast('error', 'Giá không hợp lệ!');
         return;
       }
-
       const response = await axios.put(`http://localhost:8080/chi-tiet-san-pham/${id}/update-price`, null, {
-        params: { newPrice: price },
+        params: {newPrice: price},
       });
-
       const item = productDetails.value.find((item) => item.id === parsedId);
       if (item) {
         item.giaBan = price;
       }
-
       toast.value?.kshowToast('success', response.data.message || 'Cập nhật giá thành công!');
     } catch (error) {
       const errorMessage = error.response?.data?.message || 'Không thể cập nhật giá!';
       toast.value?.kshowToast('error', errorMessage);
       console.error('Lỗi cập nhật giá:', error);
     }
+  };
+
+  const fetchImeis = async (item) => {
+    try {
+      console.log('Fetching IMEIs with params:', {
+        idSanPham: productId.value,
+        idMauSac: item.variants[0].idMauSac,
+        idRam: item.variants[0].idRam,
+        idBoNhoTrong: item.variants[0].idBoNhoTrong,
+        giaBan: item.giaBan,
+        expectedQuantity: item.variants[0].quantity,
+      });
+      const {data} = await axios.get(`http://localhost:8080/chi-tiet-san-pham/${productId.value}/imeis`, {
+        params: {
+          idMauSac: item.variants[0].idMauSac,
+          idRam: item.variants[0].idRam,
+          idBoNhoTrong: item.variants[0].idBoNhoTrong,
+          giaBan: item.giaBan,
+        },
+      });
+      console.log('Received IMEIs:', data);
+      if (data.length !== item.variants[0].quantity) {
+        console.warn(`Số lượng IMEI (${data.length}) không khớp với số lượng dự kiến (${item.variants[0].quantity})`);
+        toast.value?.kshowToast('warning', `Số lượng IMEI (${data.length}) không khớp với số lượng dự kiến (${item.variants[0].quantity})`);
+      }
+      selectedImeis.value = data;
+      showImeiModal.value = true;
+    } catch (error) {
+      toast.value?.kshowToast('error', 'Không thể tải danh sách IMEI!');
+      console.error('Lỗi khi tải IMEI:', error);
+    }
+  };
+
+  const fetchImelDetail = async (id) => {
+    try {
+      const {data} = await axios.get(`http://localhost:8080/imel/${id}`);
+      return data;
+    } catch (error) {
+      console.error('Lỗi khi tải chi tiết IMEI:', error);
+      throw new Error('Không thể tải chi tiết IMEI!');
+    }
+  };
+
+  const checkExists = async (field, value, excludeId) => {
+    try {
+      const response = await axios.get(`http://localhost:8080/imel/exists/${field}`, {
+        params: {[field]: value, excludeId},
+      });
+      return response.data;
+    } catch (error) {
+      console.error(`Lỗi khi kiểm tra ${field}:`, error);
+      return false;
+    }
+  };
+
+  const updateImei = async () => {
+    try {
+      const {id, imei} = editingImei.value;
+
+      // Validate input
+      if (!id) throw new Error('ID IMEI không hợp lệ!');
+      if (!imei || !/^\d{15}$/.test(imei)) {
+        throw new Error('IMEI phải là chuỗi 15 chữ số!');
+      }
+
+      // Chuẩn bị payload chỉ với trường cần cập nhật
+      const payload = {
+        imei: imei // Chỉ gửi trường imel cần cập nhật
+      };
+
+      console.log('Sending IMEI update:', {id, payload});
+
+      const response = await axios.put(`http://localhost:8080/imel/${id}`, payload);
+
+      // Cập nhật UI
+      const index = selectedImeis.value.findIndex(i => i.id === id);
+      if (index !== -1) {
+        selectedImeis.value[index].imei = imei;
+      }
+
+      toast.value?.kshowToast('success', 'Cập nhật IMEI thành công!');
+      showEditImeiModal.value = false;
+    } catch (error) {
+      console.error('Update error:', error.response?.data);
+      const errorMsg = error.response?.data?.error || error.message;
+      toast.value?.kshowToast('error', errorMsg || 'Lỗi khi cập nhật IMEI');
+    }
+  };
+
+  const downloadBarcode = (barcode) => {
+    const canvas = document.createElement('canvas');
+    JsBarcode(canvas, barcode, {format: 'CODE128', width: 2, height: 100});
+    const link = document.createElement('a');
+    link.href = canvas.toDataURL('image/png');
+    link.download = `barcode_${barcode}.png`;
+    link.click();
   };
 
   const fetchOptions = async () => {
@@ -147,7 +322,6 @@ export default function useSanPhamChiTiet() {
         axios.get('http://localhost:8080/bo-nho-trong'),
         axios.get('http://localhost:8080/ram'),
       ]);
-
       mauSacOptions.value = mauSacRes.data.content || mauSacRes.data || [];
       boNhoTrongOptions.value = boNhoTrongRes.data.content || boNhoTrongRes.data || [];
       ramOptions.value = ramRes.data.content || ramRes.data || [];
@@ -198,6 +372,22 @@ export default function useSanPhamChiTiet() {
     fetchProductDetails();
     fetchOptions();
     window.updatePrice = updatePrice;
+    document.addEventListener('viewImeis', (event) => {
+      fetchImeis(event.detail);
+    });
+    document.addEventListener('editProduct', (event) => {
+      router.push(`/products/details/${productId.value}/edit/${event.detail}`);
+    });
+    document.addEventListener('editImei', (event) => {
+      editingImei.value = {
+        id: event.detail.id,
+        imei: event.detail.imei || ''
+      };
+      showEditImeiModal.value = true;
+    });
+    document.addEventListener('downloadBarcode', (event) => {
+      downloadBarcode(event.detail);
+    });
   });
 
   return {
@@ -212,10 +402,16 @@ export default function useSanPhamChiTiet() {
     ramOptions,
     breadcrumbItems,
     columns,
+    imeiColumns,
     goToPage,
     debouncedSearch,
     searchProductDetails,
     goBack,
     getNestedValue,
+    showImeiModal,
+    showEditImeiModal,
+    selectedImeis,
+    editingImei,
+    updateImei,
   };
 }

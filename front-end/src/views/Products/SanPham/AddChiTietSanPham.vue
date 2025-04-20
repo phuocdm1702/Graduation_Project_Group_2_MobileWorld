@@ -52,7 +52,7 @@
                 :reduce="option => option.id"
                 placeholder="Chọn Hệ Điều Hành"
                 class="input-field w-3/5"
-                
+                :disabled="isProductSelected"
               />
               <button
                 @click="openAddModal('heDieuHanh')"
@@ -70,7 +70,7 @@
                 :reduce="option => option.id"
                 placeholder="Chọn Màn Hình"
                 class="input-field w-3/5"
-                
+                :disabled="isProductSelected"
               />
               <button
                 @click="openAddModal('congNgheManHinh')"
@@ -88,7 +88,7 @@
                 :reduce="option => option.id"
                 placeholder="Chọn Nhà Sản Xuất"
                 class="input-field w-3/5"
-                
+                :disabled="isProductSelected"
               />
               <button
                 @click="openAddModal('nhaSanXuat')"
@@ -110,7 +110,7 @@
                 :reduce="option => option.id"
                 placeholder="Chọn Cụm Camera"
                 class="input-field w-3/5"
-                
+                :disabled="isProductSelected"
               />
               <button
                 @click="openAddModal('cumCamera')"
@@ -128,7 +128,7 @@
                 :reduce="option => option.id"
                 placeholder="Chọn Sim"
                 class="input-field w-3/5"
-                
+                :disabled="isProductSelected"
               />
               <button
                 @click="openAddModal('sim')"
@@ -146,7 +146,7 @@
                 :reduce="option => option.id"
                 placeholder="Chọn Thiết Kế"
                 class="input-field w-3/5"
-                
+                :disabled="isProductSelected"
               />
               <button
                 @click="openAddModal('thietKe')"
@@ -168,7 +168,7 @@
                 :reduce="option => option.id"
                 placeholder="Chọn Pin"
                 class="input-field w-3/5"
-                
+                :disabled="isProductSelected"
               />
               <button
                 @click="openAddModal('pin')"
@@ -186,7 +186,7 @@
                 :reduce="option => option.id"
                 placeholder="Chọn CPU"
                 class="input-field w-3/5"
-                
+                :disabled="isProductSelected"
               />
               <button
                 @click="openAddModal('cpu')"
@@ -204,7 +204,7 @@
                 :reduce="option => option.id"
                 placeholder="Chọn GPU"
                 class="input-field w-3/5"
-                
+                :disabled="isProductSelected"
               />
               <button
                 @click="openAddModal('gpu')"
@@ -222,7 +222,7 @@
                 :reduce="option => option.id"
                 placeholder="Chọn Công Nghệ Mạng"
                 class="input-field"
-                
+                :disabled="isProductSelected"
               />
               <button
                 @click="openAddModal('congNgheMang')"
@@ -240,7 +240,7 @@
                 :reduce="option => option.id"
                 placeholder="Chọn Hỗ Trợ Công Nghệ Sạc"
                 class="input-field w-3/5"
-                
+                :disabled="isProductSelected"
               />
               <button
                 @click="openAddModal('hoTroCongNgheSac')"
@@ -258,7 +258,7 @@
                 :reduce="option => option.id"
                 placeholder="Chọn Kháng Bụi Nước"
                 class="input-field w-3/5"
-                
+                :disabled="isProductSelected"
               />
               <button
                 @click="openAddModal('chiSoKhangBuiVaNuoc')"
@@ -988,7 +988,7 @@ export default defineComponent({
       handleExcelImport,
       resetModals,
       downloadImeiTemplate,
-    } = useModals(dropdownOpen, toggleDropdown);
+    } = useModals(dropdownOpen, toggleDropdown, toast);
 
     const {
       productVariants,
@@ -1044,6 +1044,7 @@ export default defineComponent({
     const productNameOptions = ref([]);
     const filteredProductNameOptions = ref([]);
     const showProductDropdown = ref(false);
+    const isProductSelected = ref(false);
 
     const fetchProductNames = async () => {
       try {
@@ -1087,11 +1088,13 @@ export default defineComponent({
       } else {
         filteredProductNameOptions.value = productNameOptions.value;
       }
+      isProductSelected.value = false; // Reset flag when user types a new name
     };
 
     const selectProduct = async (product) => {
       productData.value.tenSanPham = product.tenSanPham;
       showProductDropdown.value = false;
+      isProductSelected.value = true; // Set flag to true when product is selected
 
       try {
         const response = await axios.get(`http://localhost:8080/san-pham/${product.id}`);
@@ -1210,6 +1213,7 @@ export default defineComponent({
       resetVariants();
       resetImages();
       resetModals();
+      isProductSelected.value = false; // Reset the flag
     };
 
     const isLoading = ref(true);
@@ -1313,6 +1317,7 @@ export default defineComponent({
       delayHideProductDropdown,
       downloadImeiTemplate,
       deleteOption,
+      isProductSelected,
     };
   },
 });
@@ -1328,7 +1333,7 @@ export default defineComponent({
 }
 
 .input-field :deep(.vs__dropdown-toggle) {
-  @apply border border-gray-300 rounded-lg h-14;
+  @apply border border-gray-300 rounded-lg h-14 overflow-hidden;
 }
 
 .input-field :deep(.vs__search) {

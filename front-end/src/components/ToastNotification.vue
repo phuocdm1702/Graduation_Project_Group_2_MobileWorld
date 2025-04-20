@@ -53,7 +53,9 @@ defineExpose({ kshowToast });
   position: fixed;
   top: 30px;
   right: 20px;
+  z-index: 9999; /* Đảm bảo toast luôn hiển thị trên cùng */
 }
+
 .toast {
   display: flex;
   align-items: center;
@@ -64,23 +66,24 @@ defineExpose({ kshowToast });
   border-radius: 4px;
   justify-content: space-between;
   animation: show_toast 0.5s ease forwards;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
+
 .toast i {
   font-size: 1.5rem;
   margin-right: 10px;
 }
+
 .toast.success { border-left: 5px solid #00b894; }
 .toast.error { border-left: 5px solid #d63031; }
 .toast.warning { border-left: 5px solid #fdcb6e; }
 .toast.info { border-left: 5px solid #0984e3; }
 
-/* Màu icon theo màu thông báo */
 .success-icon { color: #00b894; }
 .error-icon { color: #d63031; }
 .warning-icon { color: #fdcb6e; }
 .info-icon { color: #0984e3; }
 
-/* Icon đóng */
 .close-icon {
   cursor: pointer;
   font-size: 1.2rem;
@@ -93,5 +96,13 @@ defineExpose({ kshowToast });
 @keyframes show_toast {
   0% { transform: translateX(100%); }
   100% { transform: translateX(0); }
+}
+
+/* Thêm hiệu ứng mờ dần khi toast biến mất */
+.toast-leave-active {
+  transition: opacity 0.5s ease;
+}
+.toast-leave-to {
+  opacity: 0;
 }
 </style>

@@ -36,29 +36,25 @@ public class ImelService {
 
     @Transactional
     public ImelDTO createImel(ImelDTO dto) {
-        if (repository.existsByMaAndDeletedFalse(dto.getMa())) {
-            throw new RuntimeException("Mã Imel đã tồn tại!");
-        }
+        // Validate IMEI format
+        validateImelFormat(dto.getImel());
+
+        // Kiểm tra trùng IMEI
         if (repository.existsByImelAndDeletedFalse(dto.getImel())) {
-            throw new RuntimeException("Tên Imel đã tồn tại!");
+            throw new RuntimeException("IMEI đã tồn tại trong hệ thống!");
         }
 
-        Optional<Imel> existingImelByMa = repository.findByMaAndDeletedTrue(dto.getMa());
-        Optional<Imel> existingImelByName = repository.findByImelAndDeletedTrue(dto.getImel());
+        // Kiểm tra nếu IMEI đã tồn tại nhưng bị xóa (deleted = true)
+        Optional<Imel> existingDeletedImel = repository.findByImelAndDeletedTrue(dto.getImel());
 
-        if (existingImelByMa.isPresent()) {
-            Imel entity = existingImelByMa.get();
+        if (existingDeletedImel.isPresent()) {
+            // Khôi phục bản ghi đã xóa
+            Imel entity = existingDeletedImel.get();
             entity.setDeleted(false);
-            entity.setImel(dto.getImel());
-            return toDTO(repository.save(entity));
-        } else if (existingImelByName.isPresent()) {
-            Imel entity = existingImelByName.get();
-            entity.setDeleted(false);
-            entity.setMa(dto.getMa());
             return toDTO(repository.save(entity));
         } else {
+            // Tạo mới IMEI
             Imel entity = new Imel();
-            entity.setMa(dto.getMa());
             entity.setImel(dto.getImel());
             entity.setDeleted(false);
             return toDTO(repository.save(entity));
@@ -67,19 +63,23 @@ public class ImelService {
 
     @Transactional
     public ImelDTO updateImel(Integer id, ImelDTO dto) {
-        Imel entity = repository.findByIdAndDeletedFalse(id)
-                .orElseThrow(() -> new RuntimeException("Imel không tồn tại hoặc đã bị xóa!"));
+        // Validate IMEI format
+        validateImelFormat(dto.getImel());
 
-        if (!entity.getMa().equals(dto.getMa()) && repository.existsByMaAndDeletedFalse(dto.getMa(), id)) {
-            throw new RuntimeException("Mã Imel đã tồn tại!");
+        // Tìm IMEI cần cập nhật
+        Imel entity = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Imel không tồn tại!"));
+
+        // Kiểm tra trùng IMEI (nếu có thay đổi)
+        if (!entity.getImel().equals(dto.getImel())) {
+            if (repository.existsByImelAndIdNot(dto.getImel(), id)) {
+                throw new RuntimeException("IMEI đã tồn tại trong hệ thống!");
+            }
         }
 
-        if (!entity.getImel().equals(dto.getImel()) && repository.existsByImelAndDeletedFalse(dto.getImel(), id)) {
-            throw new RuntimeException("Tên Imel đã tồn tại!");
-        }
-
-        entity.setMa(dto.getMa());
+        // Chỉ cập nhật trường imel (giữ nguyên các trường khác)
         entity.setImel(dto.getImel());
+
         return toDTO(repository.save(entity));
     }
 
@@ -162,6 +162,12 @@ public class ImelService {
     }
 
     private ImelDTO toDTO(Imel entity) {
-        return new ImelDTO(entity.getId(), entity.getMa(), entity.getImel(), entity.getDeleted());
+        return new ImelDTO(entity.getId(), entity.getImel(), entity.getDeleted());
+    }
+
+    private void validateImelFormat(String imel) {
+        if (imel == null || !imel.matches("\\d{15}")) {
+            throw new RuntimeException("IMEI phải là chuỗi 15 chữ số!");
+        }
     }
 }

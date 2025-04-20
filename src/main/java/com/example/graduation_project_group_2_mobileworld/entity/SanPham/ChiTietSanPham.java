@@ -80,5 +80,4 @@ public class ChiTietSanPham {
 
     @Column(name = "updated_by")
     private Integer updatedBy;
-
 }

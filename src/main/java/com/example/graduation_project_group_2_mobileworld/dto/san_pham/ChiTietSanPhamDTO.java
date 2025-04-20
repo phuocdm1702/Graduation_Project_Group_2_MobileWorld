@@ -13,9 +13,10 @@ import java.util.List;
 public class ChiTietSanPhamDTO {
     private Integer id;
     private Integer idSanPham;
+    private String maSanPham;
     private Integer idNhaSanXuat;
     private Integer idPin;
-    private Integer congNgheManHinh; // Thay idManHinh
+    private Integer congNgheManHinh;
     private Integer idHoTroBoNhoNgoai;
     private Integer idCpu;
     private Integer idGpu;
@@ -52,5 +53,6 @@ public class ChiTietSanPhamDTO {
         private BigDecimal donGia;
         private Integer imageIndex;
         private List<String> imeiList;
+        private Integer quantity; // Thêm trường số lượng
     }
 }

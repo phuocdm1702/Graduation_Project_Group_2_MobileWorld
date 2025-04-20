@@ -1,7 +1,7 @@
 import { ref } from 'vue';
 import * as XLSX from 'xlsx';
 
-export function useModals(dropdownOpen, toggleDropdown) {
+export function useModals(dropdownOpen, toggleDropdown, toast) {
   const showFormModal = ref(false);
   const currentAttribute = ref('');
   const showColorModal = ref(false);
@@ -22,7 +22,6 @@ export function useModals(dropdownOpen, toggleDropdown) {
 
   const openColorModal = () => {
     showColorModal.value = true;
-    // Đóng tất cả các dropdown khi mở modal màu sắc
     dropdownOpen.value.ram = false;
     dropdownOpen.value.boNhoTrong = false;
     dropdownOpen.value.mauSac = false;
@@ -44,21 +43,39 @@ export function useModals(dropdownOpen, toggleDropdown) {
     currentVariantIndex.value = null;
   };
 
+  const validateImei = (imei) => {
+    return /^\d{15}$/.test(imei);
+  };
+
   const saveImei = () => {
     if (currentVariantIndex.value === null) return;
 
-    // Tách các IMEI thành mảng, loại bỏ các dòng trống
     const imeis = imeiInput.value
       .split('\n')
       .map(imei => imei.trim())
       .filter(imei => imei.length > 0);
 
-    // Lưu tất cả IMEI vào variant hiện tại
+    const invalidImeis = [];
+    const validImeis = imeis.filter(imei => {
+      const isValid = validateImei(imei);
+      if (!isValid) invalidImeis.push(imei);
+      return isValid;
+    });
+
+    if (invalidImeis.length > 0) {
+      toast.value.kshowToast(
+        'error',
+        `${invalidImeis.length} IMEI không hợp lệ. IMEI phải có đúng 15 chữ số.`
+      );
+      return;
+    }
+
     variantImeis.value = {
       ...variantImeis.value,
-      [currentVariantIndex.value]: imeis
+      [currentVariantIndex.value]: validImeis
     };
 
+    toast.value.kshowToast('success', 'Lưu IMEI thành công!');
     closeImeiModal();
   };
 
@@ -74,27 +91,34 @@ export function useModals(dropdownOpen, toggleDropdown) {
         const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
         const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
 
-        // Bỏ qua dòng đầu tiên (header), đọc từ dòng thứ hai
         const imeis = jsonData
-          .slice(1) // Bỏ qua dòng đầu tiên
-          .map(row => row[0]?.toString().trim()) // Lấy giá trị cột đầu tiên
-          .filter(imei => imei && imei.length > 0); // Loại bỏ giá trị rỗng hoặc không hợp lệ
+          .slice(1)
+          .map(row => row[0]?.toString().trim())
+          .filter(imei => imei && imei.length > 0);
 
         if (imeis.length === 0) {
-          console.warn('Không tìm thấy IMEI nào trong file Excel.');
-          alert('Không tìm thấy IMEI hợp lệ trong file Excel. Vui lòng kiểm tra lại.');
+          toast.value.kshowToast('error', 'Không tìm thấy IMEI nào trong file Excel.');
           return;
         }
 
+        const invalidImeis = imeis.filter(imei => !validateImei(imei));
+        if (invalidImeis.length > 0) {
+          toast.value.kshowToast(
+            'warning',
+            `File chứa ${invalidImeis.length} IMEI không hợp lệ. IMEI phải có đúng 15 chữ số.`
+          );
+        }
+
         imeiInput.value = imeis.join('\n');
+        toast.value.kshowToast('success', `Đã nhập ${imeis.length} IMEI từ file Excel.`);
       } catch (error) {
         console.error('Error reading Excel file:', error);
-        alert('Lỗi khi đọc file Excel: ' + error.message);
+        toast.value.kshowToast('error', 'Lỗi khi đọc file Excel: ' + error.message);
       }
     };
     reader.onerror = (error) => {
       console.error('Error loading file:', error);
-      alert('Không thể tải file: ' + error.message);
+      toast.value.kshowToast('error', 'Không thể tải file: ' + error.message);
     };
     reader.readAsArrayBuffer(file);
   };
@@ -113,15 +137,11 @@ export function useModals(dropdownOpen, toggleDropdown) {
   };
 
   const downloadImeiTemplate = () => {
-    // Tạo dữ liệu mẫu với tiêu đề cột IMEI
-    const wsData = [['IMEI']]; // Chỉ một cột tiêu đề
+    const wsData = [['IMEI']];
     const ws = XLSX.utils.aoa_to_sheet(wsData);
-
-    // Tạo workbook và thêm worksheet
+    ws['!cols'] = [{ wch: 20, style: { numFmt: '@' } }];
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'IMEI Template');
-
-    // Xuất file Excel
     XLSX.writeFile(wb, 'imei_template.xlsx');
   };
 

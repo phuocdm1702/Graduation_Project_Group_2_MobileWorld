@@ -39,11 +39,8 @@ public interface ImelRepository extends JpaRepository<Imel, Integer> {
     @Query("UPDATE Imel i SET i.deleted = true WHERE i.id IN :ids AND i.deleted = false")
     int softDeleteByIds(@Param("ids") List<Integer> ids);
 
-    @Query("SELECT COUNT(i) > 0 FROM Imel i WHERE i.ma = :ma AND i.deleted = true")
-    boolean existsByMaAndDeletedTrue(@Param("ma") String ma);
-
-    @Query("SELECT COUNT(i) > 0 FROM Imel i WHERE i.imel = :imel AND i.deleted = true")
-    boolean existsByImelAndDeletedTrue(@Param("imel") String imel);
+    @Query("SELECT COUNT(i) > 0 FROM Imel i WHERE i.imel = :imel AND i.id <> :id AND i.deleted = false")
+    boolean existsByImelAndIdNot(@Param("imel") String imel, @Param("id") Integer id);
 
     @Query("SELECT i FROM Imel i WHERE i.ma = :ma AND i.deleted = true")
     Optional<Imel> findByMaAndDeletedTrue(@Param("ma") String ma);
