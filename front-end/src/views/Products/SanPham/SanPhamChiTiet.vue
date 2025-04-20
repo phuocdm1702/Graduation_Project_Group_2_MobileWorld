@@ -1,12 +1,11 @@
 <template>
   <div>
     <BreadcrumbWrapper :breadcrumb-items="breadcrumbItems" />
-    <div class="mt-2 mx-auto">
+    <div>
       <ToastNotification ref="toast" />
 
       <!-- Form lọc -->
       <div class="bg-white shadow-lg rounded-lg p-5 mb-4 space-y-4 form-container">
-
         <!-- Dòng 1: Tìm kiếm + Khoảng giá -->
         <div class="flex flex-wrap items-end gap-4">
           <!-- Tìm kiếm -->
@@ -29,9 +28,9 @@
               <div
                 class="slider-range"
                 :style="{
-            left: `${((priceRange[0] - minPrice) / (maxPrice - minPrice) * 100)}%`,
-            width: `${((priceRange[1] - priceRange[0]) / (maxPrice - minPrice) * 100)}%`
-          }"
+                  left: `${((priceRange[0] - minPrice) / (maxPrice - minPrice) * 100)}%`,
+                  width: `${((priceRange[1] - priceRange[0]) / (maxPrice - minPrice) * 100)}%`
+                }"
               ></div>
 
               <div
@@ -46,8 +45,20 @@
                 @mousedown="(e) => startDrag('max', e)"
               ></div>
 
-              <input type="range" v-model="priceRange[0]" :min="minPrice" :max="priceRange[1]" class="absolute opacity-0 w-full h-full">
-              <input type="range" v-model="priceRange[1]" :min="priceRange[0]" :max="maxPrice" class="absolute opacity-0 w-full h-full">
+              <input
+                type="range"
+                v-model="priceRange[0]"
+                :min="minPrice"
+                :max="priceRange[1]"
+                class="absolute opacity-0 w-full h-full"
+              />
+              <input
+                type="range"
+                v-model="priceRange[1]"
+                :min="priceRange[0]"
+                :max="maxPrice"
+                class="absolute opacity-0 w-full h-full"
+              />
             </div>
             <div class="flex justify-between text-sm text-gray-600 mt-1">
               <span>{{ formatPrice(priceRange[0]) }}</span>
@@ -110,8 +121,19 @@
             @click="resetAllFilters"
             class="flex items-center gap-2 px-4 py-2 bg-orange-500 text-white font-semibold rounded-lg shadow hover:bg-orange-600 transition"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-5 w-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+              />
             </svg>
             Đặt lại
           </button>
@@ -123,7 +145,6 @@
           </button>
         </div>
       </div>
-
 
       <!-- Thông báo khi không có dữ liệu -->
       <div v-if="productDetails.length === 0" class="text-center text-gray-500 py-4">
@@ -142,12 +163,18 @@
       </div>
 
       <!-- Phân trang -->
-      <footer v-if="productDetails.length > 0" class="bg-white shadow-lg rounded-lg p-4 flex justify-center items-center mt-2 form-container">
+      <footer
+        v-if="productDetails.length > 0"
+        class="bg-white shadow-lg rounded-lg p-4 flex justify-center items-center mt-2 form-container"
+      >
         <Pagination :current-page="currentPage" :total-pages="totalPages" @page-changed="goToPage" />
       </footer>
 
       <!-- Modal hiển thị danh sách IMEI -->
-      <div v-if="showImeiModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50 w-full">
+      <div
+        v-if="showImeiModal"
+        class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50 w-full"
+      >
         <div class="bg-white rounded-lg p-6 w-full max-w-4xl">
           <h2 class="text-lg font-semibold mb-4">Danh sách IMEI</h2>
           <DynamicTable
@@ -171,7 +198,10 @@
       </div>
 
       <!-- Modal chỉnh sửa IMEI -->
-      <div v-if="showEditImeiModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
+      <div
+        v-if="showEditImeiModal"
+        class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50"
+      >
         <div class="bg-white rounded-lg p-6 w-full max-w-md">
           <div class="flex justify-between items-center mb-4">
             <h2 class="text-lg font-semibold">Chỉnh sửa IMEI</h2>
@@ -199,7 +229,9 @@
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Trạng Thái</label>
-              <span class="inline-block px-3 py-1 border rounded-full text-sm font-semibold bg-gray-200 text-blue-600">
+              <span
+                class="inline-block px-3 py-1 border rounded-full text-sm font-semibold bg-gray-200 text-blue-600"
+              >
                 Chưa bán
               </span>
             </div>
@@ -236,7 +268,7 @@ import '@vueform/slider/themes/default.css';
 import 'vue-select/dist/vue-select.css';
 import JsBarcode from 'jsbarcode';
 import axios from 'axios';
-import useSanPhamChiTiet from "@/views/Products/SanPham/composables/sanPhamChiTiet";
+import useSanPhamChiTiet from '@/views/Products/SanPham/composables/sanPhamChiTiet';
 
 export default {
   name: 'SanPhamChiTiet',
@@ -292,12 +324,21 @@ export default {
         const response = await axios.get(`http://localhost:8080/chi-tiet-san-pham/${productId}/price-range`);
         minPrice.value = Number(response.data.minPrice) || 0;
         maxPrice.value = Number(response.data.maxPrice) || 10000000;
+        if (minPrice.value > maxPrice.value) {
+          minPrice.value = 0;
+          maxPrice.value = 10000000;
+        }
         priceRange.value = [minPrice.value, maxPrice.value];
         searchFilters.value.minPrice = minPrice.value;
         searchFilters.value.maxPrice = maxPrice.value;
+        updatePriceFilter();
       } catch (error) {
         toast.value?.kshowToast('error', 'Không thể tải khoảng giá!');
         console.error('Lỗi khi tải khoảng giá:', error);
+        minPrice.value = 0;
+        maxPrice.value = 10000000;
+        priceRange.value = [0, 10000000];
+        updatePriceFilter();
       }
     };
 
@@ -365,7 +406,6 @@ export default {
       }
     };
 
-    // Thêm vào setup()
     const startDrag = (type, event) => {
       const slider = event.currentTarget.closest('.slider-container');
       const rect = slider.getBoundingClientRect();
@@ -376,9 +416,11 @@ export default {
         const value = Math.round(rawValue / 100000) * 100000;
 
         if (type === 'min') {
-          priceRange.value[0] = Math.min(value, priceRange.value[1]);
+          const newMin = Math.max(value, minPrice.value);
+          priceRange.value[0] = Math.min(newMin, priceRange.value[1]);
         } else {
-          priceRange.value[1] = Math.max(value, priceRange.value[0]);
+          const newMax = Math.min(value, maxPrice.value);
+          priceRange.value[1] = Math.max(newMax, priceRange.value[0]);
         }
 
         updatePriceFilter();
@@ -395,7 +437,9 @@ export default {
 
     onMounted(() => {
       document.addEventListener('mousedown', handleMouseDown);
-      fetchPriceRange();
+      fetchPriceRange().then(() => {
+        searchProductDetails();
+      });
     });
 
     onUnmounted(() => {
