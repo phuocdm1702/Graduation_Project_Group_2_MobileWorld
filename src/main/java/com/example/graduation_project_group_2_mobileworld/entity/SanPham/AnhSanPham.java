@@ -31,7 +31,7 @@ public class AnhSanPham {
     @Size(max = 255)
     @NotNull
     @Nationalized
-    @Column(name = "duong_dan", nullable = false)
+    @Column(name = "duong_dan", length = 500)
     private String duongDan;
 
     @NotNull

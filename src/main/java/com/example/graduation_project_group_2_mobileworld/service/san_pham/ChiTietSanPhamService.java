@@ -1,5 +1,7 @@
 package com.example.graduation_project_group_2_mobileworld.service.san_pham;
 
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import com.example.graduation_project_group_2_mobileworld.dto.san_pham.ChiTietSanPhamDTO;
 import com.example.graduation_project_group_2_mobileworld.entity.SanPham.*;
 import com.example.graduation_project_group_2_mobileworld.repository.san_pham.*;
@@ -17,13 +19,9 @@ import org.springframework.web.multipart.MultipartFile;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.criteria.Predicate;
+
 import java.io.IOException;
-import java.io.InputStream;
 import java.math.BigDecimal;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -50,7 +48,7 @@ public class ChiTietSanPhamService {
     private final HoTroCongNgheSacRepository hoTroCongNgheSacRepository;
     private final ChiSoKhangBuiVaNuocRepository chiSoKhangBuiVaNuocRepository;
     private final HoTroBoNhoNgoaiRepository hoTroBoNhoNgoaiRepository;
-
+    private final Cloudinary cloudinary;
     @PersistenceContext
     private EntityManager entityManager;
 
@@ -77,7 +75,7 @@ public class ChiTietSanPhamService {
             CongNgheManHinhRepository congNgheManHinhRepository,
             NhaSanXuatRepository nhaSanXuatRepository,
             HoTroCongNgheSacRepository hoTroCongNgheSacRepository,
-            CumCameraRepository cumCameraRepository) {
+            CumCameraRepository cumCameraRepository, Cloudinary cloudinary) {
         this.heDieuHanhRepository = heDieuHanhRepository;
         this.sanPhamRepository = sanPhamRepository;
         this.pinRepository = pinRepository;
@@ -98,6 +96,7 @@ public class ChiTietSanPhamService {
         this.nhaSanXuatRepository = nhaSanXuatRepository;
         this.hoTroCongNgheSacRepository = hoTroCongNgheSacRepository;
         this.cumCameraRepository = cumCameraRepository;
+        this.cloudinary = cloudinary;
     }
 
     public ChiTietSanPhamResponse createChiTietSanPham(ChiTietSanPhamDTO dto, List<MultipartFile> images) throws IOException {
@@ -268,31 +267,66 @@ public class ChiTietSanPhamService {
                 .orElseThrow(() -> new IllegalArgumentException(entityName + " với ID " + id + " không tồn tại"));
     }
 
+    //    private List<AnhSanPham> uploadAndSaveImages(List<MultipartFile> images) throws IOException {
+//        Path uploadPath = Paths.get(uploadDir);
+//        if (!Files.exists(uploadPath)) {
+//            Files.createDirectories(uploadPath);
+//        }
+//        List<AnhSanPham> anhSanPhams = new ArrayList<>();
+//        for (MultipartFile image : images) {
+//            if (image.isEmpty()) {
+//                continue;
+//            }
+//            validateImage(image);
+//            String originalFilename = StringUtils.cleanPath(image.getOriginalFilename());
+//            String fileExtension = originalFilename.substring(originalFilename.lastIndexOf("."));
+//            String uniqueFilename = UUID.randomUUID().toString() + fileExtension;
+//            Path filePath = uploadPath.resolve(uniqueFilename);
+//            try (InputStream inputStream = image.getInputStream()) {
+//                Files.copy(inputStream, filePath, StandardCopyOption.REPLACE_EXISTING);
+//            }
+//            AnhSanPham anh = new AnhSanPham();
+//            anh.setMa(null);
+//            anh.setTenAnh(originalFilename);
+//            anh.setDuongDan(filePath.toString());
+//            anh.setDeleted(false);
+//            anhSanPhams.add(anh);
+//        }
+//        return anhSanPhamRepository.saveAll(anhSanPhams);
+//    }
     private List<AnhSanPham> uploadAndSaveImages(List<MultipartFile> images) throws IOException {
-        Path uploadPath = Paths.get(uploadDir);
-        if (!Files.exists(uploadPath)) {
-            Files.createDirectories(uploadPath);
-        }
         List<AnhSanPham> anhSanPhams = new ArrayList<>();
+
         for (MultipartFile image : images) {
             if (image.isEmpty()) {
                 continue;
             }
             validateImage(image);
+
             String originalFilename = StringUtils.cleanPath(image.getOriginalFilename());
             String fileExtension = originalFilename.substring(originalFilename.lastIndexOf("."));
             String uniqueFilename = UUID.randomUUID().toString() + fileExtension;
-            Path filePath = uploadPath.resolve(uniqueFilename);
-            try (InputStream inputStream = image.getInputStream()) {
-                Files.copy(inputStream, filePath, StandardCopyOption.REPLACE_EXISTING);
+
+            try {
+                Map<String, Object> uploadResult = cloudinary.uploader().upload(image.getBytes(),
+                        ObjectUtils.asMap(
+                                "public_id", "products/" + uniqueFilename,
+                                "resource_type", "image"
+                        ));
+
+                String imageUrl = (String) uploadResult.get("secure_url");
+
+                AnhSanPham anh = new AnhSanPham();
+                anh.setMa(null);
+                anh.setTenAnh(originalFilename);
+                anh.setDuongDan(imageUrl);
+                anh.setDeleted(false);
+                anhSanPhams.add(anh);
+            } catch (Exception e) {
+                throw new IOException("Lỗi khi upload ảnh lên Cloudinary: " + e.getMessage(), e);
             }
-            AnhSanPham anh = new AnhSanPham();
-            anh.setMa(null);
-            anh.setTenAnh(originalFilename);
-            anh.setDuongDan(filePath.toString());
-            anh.setDeleted(false);
-            anhSanPhams.add(anh);
         }
+
         return anhSanPhamRepository.saveAll(anhSanPhams);
     }
 
@@ -568,5 +602,7 @@ public class ChiTietSanPhamService {
         }).collect(Collectors.toList());
     }
 
-    public record ChiTietSanPhamResponse(Integer sanPhamId, List<Integer> chiTietSanPhamIds, List<Integer> anhSanPhamIds) {}
+    public record ChiTietSanPhamResponse(Integer sanPhamId, List<Integer> chiTietSanPhamIds,
+                                         List<Integer> anhSanPhamIds) {
+    }
 }
