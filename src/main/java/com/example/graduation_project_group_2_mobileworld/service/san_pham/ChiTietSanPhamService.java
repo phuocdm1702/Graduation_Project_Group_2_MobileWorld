@@ -450,9 +450,27 @@ public class ChiTietSanPhamService {
             List<Predicate> predicates = new ArrayList<>();
             predicates.add(cb.equal(root.get("idSanPham").get("id"), sanPhamId));
             predicates.add(cb.equal(root.get("deleted"), status == null || "active".equals(status) ? false : true));
+
+            // Search across multiple fields
             if (keyword != null && !keyword.isEmpty()) {
-                predicates.add(cb.like(cb.lower(root.get("ma")), "%" + keyword.toLowerCase() + "%"));
+                String keywordPattern = "%" + keyword.toLowerCase() + "%";
+                List<Predicate> keywordPredicates = new ArrayList<>();
+                // Search in product code
+                keywordPredicates.add(cb.like(cb.lower(root.get("ma")), keywordPattern));
+                // Search in product name (from SanPham)
+                keywordPredicates.add(cb.like(cb.lower(root.get("idSanPham").get("tenSanPham")), keywordPattern));
+                // Search in color name
+                keywordPredicates.add(cb.like(cb.lower(root.get("idMauSac").get("mauSac")), keywordPattern));
+                // Search in RAM capacity
+                keywordPredicates.add(cb.like(cb.lower(root.get("idRam").get("dungLuongRam")), keywordPattern));
+                // Search in ROM capacity
+                keywordPredicates.add(cb.like(cb.lower(root.get("idBoNhoTrong").get("dungLuongBoNhoTrong")), keywordPattern));
+                // Search in price (cast to string for pattern matching)
+                keywordPredicates.add(cb.like(cb.lower(root.get("giaBan").as(String.class)), keywordPattern));
+                // Combine keyword predicates with OR
+                predicates.add(cb.or(keywordPredicates.toArray(new Predicate[0])));
             }
+
             if (idMauSac != null) {
                 predicates.add(cb.equal(root.get("idMauSac").get("id"), idMauSac));
             }
@@ -468,11 +486,14 @@ public class ChiTietSanPhamService {
             if (maxPrice != null) {
                 predicates.add(cb.lessThanOrEqualTo(root.get("giaBan"), maxPrice));
             }
+
             return cb.and(predicates.toArray(new Predicate[0]));
         };
-        // Lấy toàn bộ bản ghi thỏa mãn spec thay vì chỉ lấy trang hiện tại
+
+        // Fetch all records satisfying the specification
         List<ChiTietSanPham> allChiTietSanPhams = chiTietSanPhamRepository.findAll(spec);
-        // Gộp các sản phẩm chi tiết có cùng RAM, ROM, màu sắc và giá
+
+        // Group products by RAM, ROM, color, and price
         Map<String, List<ChiTietSanPham>> grouped = allChiTietSanPhams.stream()
                 .collect(Collectors.groupingBy(ctsp ->
                         ctsp.getIdRam().getId() + "_" +
@@ -480,7 +501,8 @@ public class ChiTietSanPhamService {
                                 ctsp.getIdMauSac().getId() + "_" +
                                 ctsp.getGiaBan().toString()
                 ));
-        // Chuyển đổi dữ liệu gộp thành DTO
+
+        // Convert grouped data to DTOs
         List<ChiTietSanPhamDTO> dtos = grouped.entrySet().stream().map(entry -> {
             List<ChiTietSanPham> group = entry.getValue();
             ChiTietSanPham first = group.get(0);
@@ -531,7 +553,8 @@ public class ChiTietSanPhamService {
             dto.setVariants(List.of(variantDTO));
             return dto;
         }).collect(Collectors.toList());
-        // Áp dụng phân trang cho danh sách DTO
+
+        // Apply pagination to the DTO list
         int start = Math.min(page * size, dtos.size());
         int end = Math.min(start + size, dtos.size());
         List<ChiTietSanPhamDTO> pagedDtos = dtos.subList(start, end);

@@ -548,9 +548,13 @@
           </button>
           <button
             @click="handleSubmit"
-            class="px-5 py-2 bg-orange-500 text-white font-medium rounded-lg hover:bg-orange-600 transition duration-300"
+            :disabled="isSubmitting"
+            :class="[
+        'px-5 py-2 font-medium rounded-lg transition duration-300',
+        isSubmitting ? 'bg-gray-400 cursor-not-allowed' : 'bg-orange-500 text-white hover:bg-orange-600'
+      ]"
           >
-            Thêm sản phẩm
+            {{ isSubmitting ? 'Đang xử lý...' : 'Thêm sản phẩm' }}
           </button>
         </div>
       </div>
@@ -914,13 +918,43 @@
           </div>
         </div>
       </div>
+
+      <!-- Lớp phủ tải -->
+      <div
+        v-if="isSubmitting"
+        class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50"
+      >
+        <div class="bg-white rounded-lg p-6 flex items-center gap-4">
+          <svg
+            class="animate-spin h-8 w-8 text-orange-500"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              class="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              stroke-width="4"
+            ></circle>
+            <path
+              class="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            ></path>
+          </svg>
+          <span class="text-lg font-medium text-gray-700">Đang xử lý...</span>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
-import { defineComponent, computed, ref, onMounted, watch } from 'vue';
-import { useRoute } from 'vue-router';
+import {defineComponent, computed, ref, onMounted, watch} from 'vue';
+import {useRoute} from 'vue-router';
 import axios from 'axios';
 import ToastNotification from '@/components/ToastNotification.vue';
 import FormModal from '@/components/FormModal.vue';
@@ -929,13 +963,13 @@ import VSelect from 'vue-select';
 import 'vue-select/dist/vue-select.css';
 import '@/assets/sanPham.css';
 
-import { useProductData } from './composables/useProductData';
-import { useProductVariants } from './composables/useProductVariants';
-import { useProductImages } from './composables/useProductImages';
-import { useDropdowns } from './composables/useDropdowns';
-import { useModals } from './composables/useModals';
-import { useFormHandling } from './composables/useFormHandling';
-import { useApiRequests } from './composables/useApiRequests';
+import {useProductData} from './composables/useProductData';
+import {useProductVariants} from './composables/useProductVariants';
+import {useProductImages} from './composables/useProductImages';
+import {useDropdowns} from './composables/useDropdowns';
+import {useModals} from './composables/useModals';
+import {useFormHandling} from './composables/useFormHandling';
+import {useApiRequests} from './composables/useApiRequests';
 
 export default defineComponent({
   name: 'AddChiTietSanPham',
@@ -948,8 +982,9 @@ export default defineComponent({
   setup() {
     const route = useRoute();
     const toast = ref(null);
+    const isSubmitting = ref(false);
 
-    const { productData, resetProductData, setDefaultValues } = useProductData();
+    const {productData, resetProductData, setDefaultValues} = useProductData();
     const {
       heDieuHanhOptions,
       congNgheManHinhOptions,
@@ -970,7 +1005,7 @@ export default defineComponent({
       handleAddAttribute,
     } = useApiRequests(toast);
 
-    const { dropdownOpen, toggleDropdown } = useDropdowns();
+    const {dropdownOpen, toggleDropdown} = useDropdowns();
     const {
       showFormModal,
       currentAttribute,
@@ -1020,7 +1055,7 @@ export default defineComponent({
       resetImages,
     } = useProductImages();
 
-    const { handleSubmit } = useFormHandling(
+    const {handleSubmit} = useFormHandling(
       toast,
       productData,
       productVariants,
@@ -1031,12 +1066,16 @@ export default defineComponent({
 
     // Ghi đè handleSubmit để thêm thông báo thành công
     const handleSubmitWithSuccess = async () => {
+      if (isSubmitting.value) return;
+
+      isSubmitting.value = true;
       try {
         await handleSubmit();
-        // Nếu không có lỗi (tức là submit thành công)
         toast.value?.kshowToast('success', 'Thêm mới sản phẩm thành công!');
       } catch (error) {
-        // Lỗi đã được xử lý trong handleSubmit, không cần thêm gì ở đây
+        // Lỗi đã được xử lý trong handleSubmit
+      } finally {
+        isSubmitting.value = false;
       }
     };
 
@@ -1139,7 +1178,7 @@ export default defineComponent({
           const groupKey = `${group.ram}/${group.rom}`;
           if (!(groupKey in allSelected.value)) {
             allSelected.value[groupKey] = false;
-            groupCommonValues.value[groupKey] = { price: '' };
+            groupCommonValues.value[groupKey] = {price: ''};
             toggleAllVariants(group, false);
           }
         });
@@ -1246,7 +1285,7 @@ export default defineComponent({
       (newValue) => {
         console.log('productData cập nhật:', newValue);
       },
-      { deep: true }
+      {deep: true}
     );
 
     return {
@@ -1309,6 +1348,7 @@ export default defineComponent({
       handleExcelImport,
       handleMainImageUpload,
       handleColorImageUpload,
+      isSubmitting,
       handleSubmit: handleSubmitWithSuccess,
       resetForm,
       getColorFromName,
