@@ -1,6 +1,7 @@
 package com.example.graduation_project_group_2_mobileworld.controller.ban_hang;
 
 import com.example.graduation_project_group_2_mobileworld.dto.ban_hang.HDban_hangDTO;
+import com.example.graduation_project_group_2_mobileworld.dto.ban_hang.ThanhToanRequestDTO;
 import com.example.graduation_project_group_2_mobileworld.dto.gio_hang.ChiTietGioHangDTO;
 import com.example.graduation_project_group_2_mobileworld.dto.gio_hang.ChiTietSPDTO;
 import com.example.graduation_project_group_2_mobileworld.dto.gio_hang.GioHangDTO;
@@ -146,14 +147,20 @@ public class BHController {
     @PostMapping("/thanh-toan/{hoaDonId}")
     public ResponseEntity<String> thanhToan(
             @PathVariable Integer hoaDonId,
-            @RequestBody Map<String, Object> requestBody) {
+            @RequestBody ThanhToanRequestDTO request) {
         try {
-            Long totalPrice = Long.parseLong(requestBody.get("totalPrice").toString());
-            Long discount = Long.parseLong(requestBody.get("discount").toString());
-            String paymentMethod = requestBody.get("paymentMethod").toString();
-            Long tienChuyenKhoan = requestBody.get("tienChuyenKhoan") != null ? Long.parseLong(requestBody.get("tienChuyenKhoan").toString()) : 0L;
-            Long tienMat = requestBody.get("tienMat") != null ? Long.parseLong(requestBody.get("tienMat").toString()) : 0L;
-            banHangService.thanhToan(hoaDonId, totalPrice, discount, paymentMethod, tienChuyenKhoan, tienMat);
+            // Validate dữ liệu đầu vào
+            if (request.getTotalPrice() == null || request.getDiscount() == null) {
+                return ResponseEntity.badRequest().body("Tổng tiền và giảm giá không được để trống");
+            }
+            if (request.getIsDelivery() != null && request.getIsDelivery() && request.getReceiver() != null) {
+                ThanhToanRequestDTO.ReceiverDTO receiver = request.getReceiver();
+                if (receiver.getName() == null || receiver.getPhone() == null) {
+                    return ResponseEntity.badRequest().body("Tên và số điện thoại người nhận không được để trống khi giao hàng");
+                }
+            }
+
+            banHangService.thanhToan(hoaDonId, request);
             return ResponseEntity.ok("Thanh toán thành công!");
         } catch (IllegalArgumentException e) {
             System.out.println("Lỗi dữ liệu: " + e.getMessage());

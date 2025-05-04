@@ -278,19 +278,19 @@ public class ThongKeService {
             Long soLuong = (Long) entry.get("soLuong");
             if (trangThai != null) {
                 switch (trangThai) {
-                    case 1:
+                    case 0:
                         statusStats.put("Chờ xác nhận", soLuong);
                         break;
-                    case 2:
+                    case 1:
                         statusStats.put("Chờ giao hàng", soLuong);
                         break;
-                    case 3:
+                    case 2:
                         statusStats.put("Đang giao", soLuong);
                         break;
-                    case 4:
+                    case 3:
                         statusStats.put("Hoàn thành", soLuong);
                         break;
-                    case 5:
+                    case 4:
                         statusStats.put("Đã hủy", soLuong);
                         break;
                 }

@@ -2,11 +2,13 @@ package com.example.graduation_project_group_2_mobileworld.service.ban_hang_serv
 
 import com.example.graduation_project_group_2_mobileworld.dto.ban_hang.HDCTban_hangDTO;
 import com.example.graduation_project_group_2_mobileworld.dto.ban_hang.HDban_hangDTO;
+import com.example.graduation_project_group_2_mobileworld.dto.ban_hang.ThanhToanRequestDTO;
 import com.example.graduation_project_group_2_mobileworld.dto.gio_hang.ChiTietGioHangDTO;
 import com.example.graduation_project_group_2_mobileworld.dto.gio_hang.ChiTietSPDTO;
 import com.example.graduation_project_group_2_mobileworld.dto.gio_hang.GioHangDTO;
 import com.example.graduation_project_group_2_mobileworld.entity.*;
 import com.example.graduation_project_group_2_mobileworld.entity.SanPham.ChiTietSanPham;
+import com.example.graduation_project_group_2_mobileworld.entity.SanPham.ImelDaBan;
 import com.example.graduation_project_group_2_mobileworld.entity.SanPham.SanPham;
 import com.example.graduation_project_group_2_mobileworld.repository.gio_hang.ChiTietGioHangRepository;
 import com.example.graduation_project_group_2_mobileworld.repository.gio_hang.GioHangRepository;
@@ -17,8 +19,11 @@ import com.example.graduation_project_group_2_mobileworld.repository.khach_hang.
 import com.example.graduation_project_group_2_mobileworld.repository.phuong_thuc_thanh_toan.PhuongThucThanhToanRepository;
 import com.example.graduation_project_group_2_mobileworld.repository.san_pham.ChiTietSanPhamRepository;
 import com.example.graduation_project_group_2_mobileworld.repository.san_pham.SanPhamRepository;
+import com.example.graduation_project_group_2_mobileworld.repository.hoa_don.LichSuHoaDonRepository;
+import com.example.graduation_project_group_2_mobileworld.repository.san_pham.ImelDaBanRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -54,6 +59,12 @@ public class BanHangService {
 
     @Autowired
     private PhuongThucThanhToanRepository phuongThucThanhToanRepository;
+
+    @Autowired
+    private LichSuHoaDonRepository lichSuHoaDonRepository;
+
+    @Autowired
+    private ImelDaBanRepository imelDaBanRepository;
 
     public List<HDban_hangDTO> getAllHD() {
         List<HoaDon> listHD = hoaDonRepository.findAllHDNotConfirm();
@@ -119,6 +130,7 @@ public class BanHangService {
                 .idChiTietSanPham(chiTietSanPham)
                 .ma("HDCT" + System.currentTimeMillis())
                 .gia(giaBan)
+                .trangThai((short) 0)
                 .deleted(false)
                 .build();
         hoaDonChiTietRepository.save(hoaDonChiTiet);
@@ -152,19 +164,63 @@ public class BanHangService {
         return hoaDonRepository.save(hoaDon);
     }
 
-    public void thanhToan(Integer hoaDonId, Long totalPrice, Long discount, String paymentMethod, Long tienChuyenKhoan, Long tienMat) {
+    @Transactional
+    public void thanhToan(Integer hoaDonId, ThanhToanRequestDTO request) {
         HoaDon hoaDon = hoaDonRepository.findById(hoaDonId)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy hóa đơn với ID: " + hoaDonId));
 
-        hoaDon.setTongTien(BigDecimal.valueOf(totalPrice));
-        hoaDon.setTongTienSauGiam(BigDecimal.valueOf(totalPrice - discount));
-        hoaDon.setTrangThai((short) 1);
+        // Cập nhật thông tin hóa đơn
+        hoaDon.setTongTien(BigDecimal.valueOf(request.getTotalPrice()));
+        hoaDon.setTongTienSauGiam(BigDecimal.valueOf(request.getTotalPrice() - request.getDiscount()));
+        hoaDon.setTrangThai((short) 1); // Trạng thái mặc định là 1
         hoaDon.setNgayThanhToan(new Date());
         hoaDon.setUpdatedAt(new Date());
+
+        // Xử lý thông tin giao hàng
+        if (Boolean.TRUE.equals(request.getIsDelivery()) && request.getReceiver() != null) {
+            ThanhToanRequestDTO.ReceiverDTO receiver = request.getReceiver();
+            hoaDon.setTenKhachHang(receiver.getName() != null ? receiver.getName() : "Khách lẻ");
+            hoaDon.setSoDienThoaiKhachHang(receiver.getPhone() != null ? receiver.getPhone() : "N/A");
+            hoaDon.setEmail(receiver.getEmail());
+            // Kết hợp các trường địa chỉ
+            StringBuilder diaChi = new StringBuilder();
+            if (receiver.getCity() != null && !receiver.getCity().isEmpty()) {
+                diaChi.append(receiver.getCity());
+            }
+            if (receiver.getDistrict() != null && !receiver.getDistrict().isEmpty()) {
+                diaChi.append(", ").append(receiver.getDistrict());
+            }
+            if (receiver.getWard() != null && !receiver.getWard().isEmpty()) {
+                diaChi.append(", ").append(receiver.getWard());
+            }
+            if (receiver.getAddress() != null && !receiver.getAddress().isEmpty()) {
+                diaChi.append(", ").append(receiver.getAddress());
+            }
+            hoaDon.setDiaChiKhachHang(diaChi.length() > 0 ? diaChi.toString() : "N/A");
+            hoaDon.setLoaiDon("online");
+        } else {
+            hoaDon.setTenKhachHang("Khách lẻ");
+            hoaDon.setSoDienThoaiKhachHang("N/A");
+            hoaDon.setEmail(null);
+            hoaDon.setDiaChiKhachHang("N/A");
+            hoaDon.setLoaiDon("Tại quầy");
+            hoaDon.setTrangThai((short) 3);
+        }
+
         hoaDonRepository.save(hoaDon);
 
+        // Tạo bản ghi lịch sử hóa đơn
+        LichSuHoaDon lichSuHoaDon = new LichSuHoaDon();
+        lichSuHoaDon.setHoaDon(hoaDon);
+        lichSuHoaDon.setMa("LSHD" + System.currentTimeMillis());
+        lichSuHoaDon.setHanhDong("Thanh toán hóa đơn");
+        lichSuHoaDon.setThoiGian(new java.sql.Date(new java.util.Date().getTime()));
+        lichSuHoaDon.setDeleted(false);
+        lichSuHoaDonRepository.save(lichSuHoaDon);
+
+        // Lưu phương thức thanh toán
         String kieuThanhToan;
-        switch (paymentMethod) {
+        switch (request.getPaymentMethod() != null ? request.getPaymentMethod() : "") {
             case "transfer":
                 kieuThanhToan = "Chuyển khoản";
                 break;
@@ -175,7 +231,8 @@ public class BanHangService {
                 kieuThanhToan = "Cả hai phương thức";
                 break;
             default:
-                throw new IllegalArgumentException("Phương thức thanh toán không hợp lệ: " + paymentMethod);
+                kieuThanhToan = Boolean.TRUE.equals(request.getIsDelivery()) ? "Thanh toán khi nhận" : "Không xác định";
+                break;
         }
 
         PhuongThucThanhToan phuongThucThanhToan = new PhuongThucThanhToan();
@@ -187,17 +244,39 @@ public class BanHangService {
         HinhThucThanhToan hinhThucThanhToan = new HinhThucThanhToan();
         hinhThucThanhToan.setHoaDon(hoaDon);
         hinhThucThanhToan.setIdPhuongThucThanhToan(phuongThucThanhToan);
-        hinhThucThanhToan.setTienChuyenKhoan(BigDecimal.valueOf(tienChuyenKhoan));
-        hinhThucThanhToan.setTienMat(BigDecimal.valueOf(tienMat));
+        hinhThucThanhToan.setTienChuyenKhoan(BigDecimal.valueOf(request.getTienChuyenKhoan() != null ? request.getTienChuyenKhoan() : 0));
+        hinhThucThanhToan.setTienMat(BigDecimal.valueOf(request.getTienMat() != null ? request.getTienMat() : 0));
         hinhThucThanhToan.setMa("HTTT" + System.currentTimeMillis());
         hinhThucThanhToan.setDeleted(false);
         hinhThucThanhToanRepository.save(hinhThucThanhToan);
 
+        // Tạo bản ghi imel_da_ban cho mỗi sản phẩm trong hóa đơn
         List<HoaDonChiTiet> hoaDonChiTiets = hoaDonChiTietRepository.findAll().stream()
-                .filter(hdct -> hdct.getHoaDon().getId().equals(hoaDonId))
+                .filter(hdct -> hdct.getHoaDon().getId().equals(hoaDonId) && !hdct.getDeleted())
                 .collect(Collectors.toList());
         for (HoaDonChiTiet hdct : hoaDonChiTiets) {
             ChiTietSanPham ctsp = hdct.getIdChiTietSanPham();
+            if (ctsp.getIdImel() == null || ctsp.getIdImel().getMa() == null) {
+                throw new IllegalStateException("IMEI của sản phẩm không hợp lệ (null) cho ChiTietSanPham ID: " + ctsp.getId());
+            }
+
+            ImelDaBan imelDaBan = new ImelDaBan();
+            String maxMa = imelDaBanRepository.findMaxMa();
+            String newMa;
+            if (maxMa == null) {
+                newMa = "IMDB00001";
+            } else {
+                int number = Integer.parseInt(maxMa.substring(4)) + 1;
+                newMa = String.format("IMDB%05d", number);
+            }
+            imelDaBan.setMa(newMa);
+            imelDaBan.setImel(ctsp.getIdImel().getMa());
+            imelDaBan.setNgayBan(new java.sql.Date(new java.util.Date().getTime()));
+            imelDaBan.setGhiChu("Bán qua hóa đơn " + hoaDon.getMa());
+            imelDaBan.setDeleted(false);
+            imelDaBanRepository.save(imelDaBan);
+
+            // Đánh dấu sản phẩm đã bán
             ctsp.setDeleted(true);
             chiTietSanPhamRepository.save(ctsp);
         }
