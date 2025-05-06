@@ -274,7 +274,11 @@ public class BanHangService {
             imelDaBan.setNgayBan(new java.sql.Date(new java.util.Date().getTime()));
             imelDaBan.setGhiChu("Bán qua hóa đơn " + hoaDon.getMa());
             imelDaBan.setDeleted(false);
-            imelDaBanRepository.save(imelDaBan);
+            imelDaBan = imelDaBanRepository.save(imelDaBan); // Lưu và lấy bản ghi đã lưu
+
+            // Gán ImelDaBan cho HoaDonChiTiet
+            hdct.setIdImelDaBan(imelDaBan);
+            hoaDonChiTietRepository.save(hdct); // Lưu lại HoaDonChiTiet để cập nhật mối quan hệ
 
             // Đánh dấu sản phẩm đã bán
             ctsp.setDeleted(true);
@@ -294,7 +298,7 @@ public class BanHangService {
                     HDCTban_hangDTO itemDTO = new HDCTban_hangDTO();
                     itemDTO.setId(hdct.getId());
                     itemDTO.setTenSanPham(hdct.getIdChiTietSanPham().getIdSanPham().getTenSanPham());
-                    itemDTO.setImei(hdct.getIdChiTietSanPham().getIdImel().getMa());
+                    itemDTO.setImei(""+hdct.getIdChiTietSanPham().getIdImel().getId());
                     itemDTO.setGiaBan(hdct.getGia());
                     return itemDTO;
                 })
