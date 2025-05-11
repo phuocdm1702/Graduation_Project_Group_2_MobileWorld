@@ -7,8 +7,6 @@ export default function useLogin() {
   const tenDangNhap = ref("");
   const matKhau = ref("");
   const error = ref("");
-  const showConfirmModal = ref(false);
-  const confirmMessage = ref("");
 
   async function login() {
     try {
@@ -18,12 +16,11 @@ export default function useLogin() {
           tenDangNhap: tenDangNhap.value,
           matKhau: matKhau.value,
         },
-        { withCredentials: true } // Gửi cookie/session nếu dùng Spring Security
+        { withCredentials: true }
       );
 
       if (response.status === 200 && response.data) {
-        confirmMessage.value = "Đăng nhập thành công! Chuyển tới dashboard?";
-        showConfirmModal.value = true;
+        router.push("/dashboard"); // Chuyển hướng trực tiếp tới dashboard
       } else {
         error.value = "Tên đăng nhập hoặc mật khẩu không đúng!";
       }
@@ -33,24 +30,10 @@ export default function useLogin() {
     }
   }
 
-  function executeConfirmedAction() {
-    router.push("/dashboard");
-    closeConfirmModal();
-  }
-
-  function closeConfirmModal() {
-    showConfirmModal.value = false;
-    confirmMessage.value = "";
-  }
-
   return {
     tenDangNhap,
     matKhau,
     error,
-    showConfirmModal,
-    confirmMessage,
     login,
-    executeConfirmedAction,
-    closeConfirmModal,
   };
 }
