@@ -458,7 +458,7 @@
 
 <script setup>
 import {ref, computed, onMounted, watch} from "vue";
-import {useRoute} from "vue-router";
+import {useRoute, useRouter} from "vue-router";
 import DynamicTable from "@/components/DynamicTable.vue";
 import ToastNotification from "@/components/ToastNotification.vue";
 import BreadcrumbWrapper from "@/components/BreadcrumbWrapper.vue";
@@ -466,6 +466,7 @@ import FormModal from "@/components/FormModal.vue";
 import axios from "axios";
 
 const route = useRoute();
+const router = useRouter();
 const breadcrumbItems = computed(() => {
   if (typeof route.meta.breadcrumb === "function") {
     return route.meta.breadcrumb(route);
@@ -718,10 +719,31 @@ const createNewPendingInvoice = async () => {
   };
 
   try {
-    const gioHangResponse = await axios.post("http://localhost:8080/ban-hang/addGioHang", {
-      ma: `GH_${newInvoice.maHoaDon}`,
-      idKhachHang: 1,
-    });
+    let attempts = 3; // Thử tối đa 3 lần để tránh vòng lặp vô hạn
+    let gioHangCreated = false;
+    let gioHangResponse;
+
+    while (attempts > 0 && !gioHangCreated) {
+      try {
+        gioHangResponse = await axios.post("http://localhost:8080/ban-hang/addGioHang", {
+          ma: `GH_${newInvoice.maHoaDon}`,
+          idKhachHang: 1,
+        });
+        gioHangCreated = true;
+      } catch (error) {
+        if (error.response?.data?.includes("Mã giỏ hàng")) {
+          // Mã trùng, tạo mã mới và thử lại
+          newInvoice.maHoaDon = generateRandomCode();
+          attempts--;
+          if (attempts === 0) {
+            throw new Error("Không thể tạo mã giỏ hàng duy nhất sau nhiều lần thử");
+          }
+        } else {
+          throw error; 
+        }
+      }
+    }
+
     gioHangId.value = gioHangResponse.data.id;
     localStorage.setItem("gioHangId", gioHangId.value);
 
@@ -736,7 +758,7 @@ const createNewPendingInvoice = async () => {
     if (toast.value) toast.value.kshowToast("success", `Đã tạo hóa đơn chờ mới: ${response.data.ma}`);
   } catch (error) {
     console.error("Lỗi khi tạo hóa đơn mới:", error);
-    if (toast.value) toast.value.kshowToast("error", "Không thể tạo hóa đơn mới!");
+    if (toast.value) toast.value.kshowToast("error", "Không thể tạo hóa đơn mới: " + error.message);
   }
 };
 
@@ -745,12 +767,38 @@ const loadPendingInvoice = async (invoice) => {
   localStorage.setItem("activeInvoiceId", invoice.id);
 
   if (!gioHangId.value) {
-    const gioHangResponse = await axios.post("http://localhost:8080/ban-hang/addGioHang", {
-      ma: `GH_${invoice.code}`,
-      idKhachHang: 1,
-    });
-    gioHangId.value = gioHangResponse.data.id;
-    localStorage.setItem("gioHangId", gioHangId.value);
+    try {
+      let attempts = 3;
+      let gioHangCreated = false;
+      let gioHangResponse;
+
+      while (attempts > 0 && !gioHangCreated) {
+        try {
+          gioHangResponse = await axios.post("http://localhost:8080/ban-hang/addGioHang", {
+            ma: `GH_${invoice.code}`,
+            idKhachHang: 1,
+          });
+          gioHangCreated = true;
+        } catch (error) {
+          if (error.response?.data?.includes("Mã giỏ hàng")) {
+            invoice.code = generateRandomCode();
+            attempts--;
+            if (attempts === 0) {
+              throw new Error("Không thể tạo mã giỏ hàng duy nhất sau nhiều lần thử");
+            }
+          } else {
+            throw error;
+          }
+        }
+      }
+
+      gioHangId.value = gioHangResponse.data.id;
+      localStorage.setItem("gioHangId", gioHangId.value);
+    } catch (error) {
+      console.error("Lỗi khi tạo giỏ hàng:", error);
+      // if (toast.value) toast.value.kshowToast("error", "Không thể tạo giỏ hàng: " + error.message);
+      return;
+    }
   }
 
   try {
@@ -769,6 +817,7 @@ const loadPendingInvoice = async (invoice) => {
   } catch (error) {
     console.error("Lỗi khi tải sản phẩm của hóa đơn:", error);
     cartItems.value = [];
+    if (toast.value) toast.value.kshowToast("error", `Không thể tải giỏ hàng: ${error.response?.data?.message || error.message}`);
   }
 
   if (toast.value) toast.value.kshowToast("info", `Đã tải hóa đơn chờ: ${invoice.code}`);
@@ -1015,7 +1064,6 @@ const createOrder = async () => {
     }
   }
 
-  // Biến payload được định nghĩa tại đây
   const payload = {
     totalPrice: totalPrice.value,
     discount: discount.value,
@@ -1036,6 +1084,7 @@ const createOrder = async () => {
 
   try {
     await axios.post(`http://localhost:8080/ban-hang/thanh-toan/${activeInvoiceId.value}`, payload);
+    const invoiceId = activeInvoiceId.value; // Lưu ID hóa đơn trước khi xóa
     pendingInvoices.value = pendingInvoices.value.filter((i) => i.id !== activeInvoiceId.value);
     activeInvoiceId.value = null;
     localStorage.removeItem("activeInvoiceId");
@@ -1053,6 +1102,10 @@ const createOrder = async () => {
     tienMat.value = 0;
     receiver.value = { name: "", phone: "", city: "", district: "", ward: "", address: "", email: "" };
     if (toast.value) toast.value.kshowToast("success", "Thanh toán thành công!");
+    // Thêm độ trễ 1 giây trước khi chuyển hướng
+    setTimeout(() => {
+      router.push(`/show-hoa-don/${invoiceId}`);
+    }, 1000);
   } catch (error) {
     console.error("Lỗi khi thanh toán:", error);
     if (toast.value) toast.value.kshowToast("error", "Thanh toán thất bại: " + (error.response?.data || error.message));
