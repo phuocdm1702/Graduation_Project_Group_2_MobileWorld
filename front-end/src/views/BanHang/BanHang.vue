@@ -796,7 +796,7 @@ const loadPendingInvoice = async (invoice) => {
       localStorage.setItem("gioHangId", gioHangId.value);
     } catch (error) {
       console.error("Lỗi khi tạo giỏ hàng:", error);
-      // if (toast.value) toast.value.kshowToast("error", "Không thể tạo giỏ hàng: " + error.message);
+      if (toast.value) toast.value.kshowToast("error", "Không thể tạo giỏ hàng: " + error.message);
       return;
     }
   }
