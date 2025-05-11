@@ -11,9 +11,18 @@ public class ChiTietSPDTO {
     private String mauSac;
     private String ram;
     private String boNhoTrong;
+    private Integer soLuong; // Add this field
 
 
     public ChiTietSPDTO() {
+    }
+
+    public Integer getSoLuong() {
+        return soLuong;
+    }
+
+    public void setSoLuong(Integer soLuong) {
+        this.soLuong = soLuong;
     }
 
     public Integer getId() {

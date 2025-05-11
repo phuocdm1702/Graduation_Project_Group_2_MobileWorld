@@ -14,6 +14,7 @@ import com.example.graduation_project_group_2_mobileworld.repository.khach_hang.
 import com.example.graduation_project_group_2_mobileworld.repository.nhan_vien.NhanVienRepository;
 import com.example.graduation_project_group_2_mobileworld.service.ban_hang_service.BanHangService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -50,13 +51,15 @@ public class BHController {
     }
 
     @GetMapping("/data")
-    public List<HDban_hangDTO> fetchDataHD() {
-        List<HDban_hangDTO> listHD = banHangService.getAllHD();
-        if (listHD == null) {
-            System.out.println("Danh sách hóa đơn trả về null!");
-            return Collections.emptyList();
+    public ResponseEntity<List<HDban_hangDTO>> fetchDataHD() {
+        try {
+            List<HDban_hangDTO> listHD = banHangService.getAllHD();
+            return ResponseEntity.ok(listHD != null ? listHD : Collections.emptyList());
+        } catch (Exception e) {
+            System.out.println("Lỗi khi lấy danh sách hóa đơn: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Collections.emptyList());
         }
-        return listHD;
     }
 
     @PostMapping("/addHD")
@@ -98,21 +101,16 @@ public class BHController {
             return ResponseEntity.ok(result);
         } catch (Exception e) {
             System.out.println("Lỗi khi thêm giỏ hàng: " + e.getMessage());
-            return ResponseEntity.status(500).body(null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
 
-        @GetMapping("/san-pham")
-    public List<ChiTietSPDTO> dsSanPham() {
-        return banHangService.getAllCTSP();
+    @GetMapping("/san-pham")
+    public Page<ChiTietSPDTO> getSanPham(@RequestParam(defaultValue = "0") int page,
+                                         @RequestParam(defaultValue = "10") int size,
+                                         @RequestParam(defaultValue = "") String keyword) {
+        return banHangService.getAllCTSP(page, size, keyword);
     }
-//    @GetMapping("/san-pham")
-//    public List<ChiTietSPDTO> getAllSanPham(
-//            @RequestParam(value = "keyword", required = false) String keyword,
-//            @RequestParam(value = "page", defaultValue = "0") int page,
-//            @RequestParam(value = "size", defaultValue = "10") int size) {
-//        return banHangService.getAllCTSP(keyword, page, size);
-//    }
 
     @GetMapping("/san-pham/{sanPhamId}/imeis")
     public ResponseEntity<List<String>> getIMEIsBySanPhamId(@PathVariable Integer sanPhamId) {
@@ -121,7 +119,7 @@ public class BHController {
             return ResponseEntity.ok(imeis);
         } catch (Exception e) {
             System.out.println("Lỗi khi lấy danh sách IMEI: " + e.getMessage());
-            return ResponseEntity.status(500).body(null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
 
@@ -142,13 +140,20 @@ public class BHController {
             return ResponseEntity.badRequest().body(null);
         } catch (Exception e) {
             System.out.println("Lỗi server: " + e.getMessage());
-            return ResponseEntity.status(500).body(null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
 
     @GetMapping("/gio-hang/{gioHangId}/chi-tiet")
-    public List<ChiTietGioHangDTO> getChiTietGioHang(@PathVariable Integer gioHangId) {
-        return banHangService.getChiTietGioHangByGioHangId(gioHangId);
+    public ResponseEntity<List<ChiTietGioHangDTO>> getChiTietGioHang(@PathVariable Integer gioHangId) {
+        try {
+            List<ChiTietGioHangDTO> chiTietGioHang = banHangService.getChiTietGioHangByGioHangId(gioHangId);
+            return ResponseEntity.ok(chiTietGioHang != null ? chiTietGioHang : Collections.emptyList());
+        } catch (Exception e) {
+            System.out.println("Lỗi khi lấy chi tiết giỏ hàng: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Collections.emptyList());
+        }
     }
 
     @DeleteMapping("/gio-hang/chi-tiet/{chiTietGioHangId}")
@@ -161,7 +166,7 @@ public class BHController {
             return ResponseEntity.badRequest().body("Lỗi: " + e.getMessage());
         } catch (Exception e) {
             System.out.println("Lỗi server: " + e.getMessage());
-            return ResponseEntity.status(500).body("Lỗi server: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Lỗi server: " + e.getMessage());
         }
     }
 
@@ -170,7 +175,6 @@ public class BHController {
             @PathVariable Integer hoaDonId,
             @RequestBody ThanhToanRequestDTO request) {
         try {
-            // Validate dữ liệu đầu vào
             if (request.getTotalPrice() == null || request.getDiscount() == null) {
                 return ResponseEntity.badRequest().body("Tổng tiền và giảm giá không được để trống");
             }
@@ -188,7 +192,7 @@ public class BHController {
             return ResponseEntity.badRequest().body("Lỗi: " + e.getMessage());
         } catch (Exception e) {
             System.out.println("Lỗi server: " + e.getMessage());
-            return ResponseEntity.status(500).body("Lỗi server: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Lỗi server: " + e.getMessage());
         }
     }
 }

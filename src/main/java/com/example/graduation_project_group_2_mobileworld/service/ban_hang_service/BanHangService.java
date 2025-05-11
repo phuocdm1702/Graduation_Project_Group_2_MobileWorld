@@ -9,7 +9,6 @@ import com.example.graduation_project_group_2_mobileworld.dto.gio_hang.GioHangDT
 import com.example.graduation_project_group_2_mobileworld.entity.*;
 import com.example.graduation_project_group_2_mobileworld.entity.SanPham.ChiTietSanPham;
 import com.example.graduation_project_group_2_mobileworld.entity.SanPham.ImelDaBan;
-import com.example.graduation_project_group_2_mobileworld.entity.SanPham.SanPham;
 import com.example.graduation_project_group_2_mobileworld.repository.gio_hang.ChiTietGioHangRepository;
 import com.example.graduation_project_group_2_mobileworld.repository.gio_hang.GioHangRepository;
 import com.example.graduation_project_group_2_mobileworld.repository.hinh_thuc_thanh_toan_repo.HinhThucThanhToanRepository;
@@ -22,6 +21,11 @@ import com.example.graduation_project_group_2_mobileworld.repository.san_pham.Sa
 import com.example.graduation_project_group_2_mobileworld.repository.hoa_don.LichSuHoaDonRepository;
 import com.example.graduation_project_group_2_mobileworld.repository.san_pham.ImelDaBanRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,6 +36,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class BanHangService {
+
 
     @Autowired
     private HoaDonRepository hoaDonRepository;
@@ -91,18 +96,24 @@ public class BanHangService {
         return convertToGioHangDTO(gioHang);
     }
 
-    public List<ChiTietSPDTO> getAllCTSP() {
-        return chiTietSanPhamRepository.findAll().stream()
-                .filter(chiTietSanPham -> !chiTietSanPham.getDeleted())
-                .map(this::convertToChiTietSanPhamDTO)
-                .collect(Collectors.toList());
+    @Cacheable(value = "sanPhamCache", key = "#page + '-' + #size + '-' + #keyword")
+    public Page<ChiTietSPDTO> getAllCTSP(int page, int size, String keyword) {
+        Pageable pageable = PageRequest.of(page, size);
+        return chiTietSanPhamRepository.findByDeletedFalse(pageable)
+                .map(this::convertToChiTietSanPhamDTO);
+    }
+
+    @CacheEvict(value = "sanPhamCache", allEntries = true)
+    public void clearSanPhamCache() {
+        // Gọi khi sản phẩm được thêm/sửa/xóa
+    }
+
+    public int getSoLuongBySanPhamId(Integer sanPhamId) {
+        return (int) chiTietSanPhamRepository.countBySanPhamIdAndNotDeleted(sanPhamId);
     }
 
     public List<String> getIMEIsBySanPhamId(Integer sanPhamId) {
-        return chiTietSanPhamRepository.findAll().stream()
-                .filter(ctsp -> ctsp.getIdSanPham().getId().equals(sanPhamId) && !ctsp.getDeleted())
-                .map(ctsp -> ctsp.getIdImel().getMa())
-                .collect(Collectors.toList());
+        return chiTietSanPhamRepository.findIMEIsBySanPhamIdAndNotDeleted(sanPhamId);
     }
 
     public ChiTietGioHangDTO addChiTietGioHang(Integer gioHangId, Integer chiTietSanPhamId, Integer hoaDonId) {
@@ -114,7 +125,7 @@ public class BanHangService {
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy hóa đơn với ID: " + hoaDonId));
 
         BigDecimal giaBan = chiTietSanPham.getGiaBan();
-        BigDecimal tongTien = giaBan; // Số lượng = 1 vì mỗi ChiTietSanPham tương ứng với 1 sản phẩm
+        BigDecimal tongTien = giaBan;
 
         ChiTietGioHang chiTietGioHang = new ChiTietGioHang();
         chiTietGioHang.setIdGioHang(gioHang);
@@ -169,20 +180,17 @@ public class BanHangService {
         HoaDon hoaDon = hoaDonRepository.findById(hoaDonId)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy hóa đơn với ID: " + hoaDonId));
 
-        // Cập nhật thông tin hóa đơn
         hoaDon.setTongTien(BigDecimal.valueOf(request.getTotalPrice()));
         hoaDon.setTongTienSauGiam(BigDecimal.valueOf(request.getTotalPrice() - request.getDiscount()));
-        hoaDon.setTrangThai((short) 1); // Trạng thái mặc định là 1
+        hoaDon.setTrangThai((short) 1);
         hoaDon.setNgayThanhToan(new Date());
         hoaDon.setUpdatedAt(new Date());
 
-        // Xử lý thông tin giao hàng
         if (Boolean.TRUE.equals(request.getIsDelivery()) && request.getReceiver() != null) {
             ThanhToanRequestDTO.ReceiverDTO receiver = request.getReceiver();
             hoaDon.setTenKhachHang(receiver.getName() != null ? receiver.getName() : "Khách lẻ");
             hoaDon.setSoDienThoaiKhachHang(receiver.getPhone() != null ? receiver.getPhone() : "N/A");
             hoaDon.setEmail(receiver.getEmail());
-            // Kết hợp các trường địa chỉ
             StringBuilder diaChi = new StringBuilder();
             if (receiver.getCity() != null && !receiver.getCity().isEmpty()) {
                 diaChi.append(receiver.getCity());
@@ -209,7 +217,6 @@ public class BanHangService {
 
         hoaDonRepository.save(hoaDon);
 
-        // Tạo bản ghi lịch sử hóa đơn
         LichSuHoaDon lichSuHoaDon = new LichSuHoaDon();
         lichSuHoaDon.setHoaDon(hoaDon);
         lichSuHoaDon.setMa("LSHD" + System.currentTimeMillis());
@@ -218,7 +225,6 @@ public class BanHangService {
         lichSuHoaDon.setDeleted(false);
         lichSuHoaDonRepository.save(lichSuHoaDon);
 
-        // Lưu phương thức thanh toán
         String kieuThanhToan;
         switch (request.getPaymentMethod() != null ? request.getPaymentMethod() : "") {
             case "transfer":
@@ -250,7 +256,6 @@ public class BanHangService {
         hinhThucThanhToan.setDeleted(false);
         hinhThucThanhToanRepository.save(hinhThucThanhToan);
 
-
         List<HoaDonChiTiet> hoaDonChiTiets = hoaDonChiTietRepository.findAll().stream()
                 .filter(hdct -> hdct.getHoaDon().getId().equals(hoaDonId) && !hdct.getDeleted())
                 .collect(Collectors.toList());
@@ -274,13 +279,11 @@ public class BanHangService {
             imelDaBan.setNgayBan(new java.sql.Date(new java.util.Date().getTime()));
             imelDaBan.setGhiChu("Bán qua hóa đơn " + hoaDon.getMa());
             imelDaBan.setDeleted(false);
-            imelDaBan = imelDaBanRepository.save(imelDaBan); // Lưu và lấy bản ghi đã lưu
+            imelDaBan = imelDaBanRepository.save(imelDaBan);
 
-            // Gán ImelDaBan cho HoaDonChiTiet
             hdct.setIdImelDaBan(imelDaBan);
-            hoaDonChiTietRepository.save(hdct); // Lưu lại HoaDonChiTiet để cập nhật mối quan hệ
+            hoaDonChiTietRepository.save(hdct);
 
-            // Đánh dấu sản phẩm đã bán
             ctsp.setDeleted(true);
             chiTietSanPhamRepository.save(ctsp);
         }
@@ -298,7 +301,7 @@ public class BanHangService {
                     HDCTban_hangDTO itemDTO = new HDCTban_hangDTO();
                     itemDTO.setId(hdct.getId());
                     itemDTO.setTenSanPham(hdct.getIdChiTietSanPham().getIdSanPham().getTenSanPham());
-                    itemDTO.setImei(""+hdct.getIdChiTietSanPham().getIdImel().getId());
+                    itemDTO.setImei("" + hdct.getIdChiTietSanPham().getIdImel().getImel());
                     itemDTO.setGiaBan(hdct.getGia());
                     return itemDTO;
                 })
@@ -330,7 +333,7 @@ public class BanHangService {
         dto.setIdChiTietSanPham(chiTietGioHang.getIdChiTietSanPham().getId());
         dto.setMa(chiTietGioHang.getMa());
         dto.setTenSanPham(chiTietGioHang.getIdChiTietSanPham().getIdSanPham().getTenSanPham());
-        dto.setImei(chiTietGioHang.getIdChiTietSanPham().getIdImel().getMa());
+        dto.setImei(chiTietGioHang.getIdChiTietSanPham().getIdImel().getImel());
         dto.setGiaBan(chiTietGioHang.getIdChiTietSanPham().getGiaBan());
         dto.setTongTien(chiTietGioHang.getTongTien());
         return dto;
@@ -342,10 +345,10 @@ public class BanHangService {
         dto.setMa(chiTietSanPham.getIdSanPham().getMa());
         dto.setTenSanPham(chiTietSanPham.getIdSanPham().getTenSanPham());
         dto.setGiaBan(chiTietSanPham.getGiaBan());
-        dto.setImei(chiTietSanPham.getIdImel().getMa());
+        dto.setImei(chiTietSanPham.getIdImel().getImel());
         dto.setMauSac(chiTietSanPham.getIdMauSac().getMauSac());
-        dto.setRam(chiTietSanPham.getIdRam().getDungLuongRam());
-        dto.setBoNhoTrong(chiTietSanPham.getIdBoNhoTrong().getDungLuongBoNhoTrong());
+        long soLuong = chiTietSanPhamRepository.countBySanPhamIdAndNotDeleted(chiTietSanPham.getIdSanPham().getId());
+        dto.setSoLuong((int) soLuong);
         return dto;
     }
 }

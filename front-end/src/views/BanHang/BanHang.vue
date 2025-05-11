@@ -8,7 +8,12 @@
       <div class="bg-white rounded-lg shadow mb-4 p-4">
         <div class="flex justify-between items-center mb-4">
           <h2 class="text-lg font-semibold text-orange-500">Hóa đơn chờ</h2>
-          <button @click="createNewPendingInvoice" class="p-1 bg-orange-500 text-white rounded hover:bg-orange-600">
+          <button
+            @click="createNewPendingInvoice"
+            class="p-2 bg-orange-500 text-white rounded hover:bg-orange-600 transition"
+            title="Tạo hóa đơn mới"
+            :disabled="isCreatingInvoice"
+          >
             <i class="fas fa-plus"></i>
           </button>
         </div>
@@ -17,7 +22,10 @@
             v-for="invoice in pendingInvoices"
             :key="invoice.id"
             @click="loadPendingInvoice(invoice)"
-            :class="{ 'bg-orange-100 border-orange-400': activeInvoiceId === invoice.id, 'border-gray-300': activeInvoiceId !== invoice.id }"
+            :class="{
+              'bg-orange-100 border-orange-400': activeInvoiceId === invoice.id,
+              'border-gray-300': activeInvoiceId !== invoice.id,
+            }"
             class="p-2 border rounded cursor-pointer hover:bg-gray-100 min-w-[150px] flex-shrink-0"
           >
             <div class="flex justify-between items-center">
@@ -36,8 +44,18 @@
         <div class="flex justify-between items-center mb-4">
           <h2 class="text-lg font-semibold text-orange-500">Giỏ hàng</h2>
           <div class="flex space-x-2">
-            <button @click="scanQR" class="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600">Quét QR</button>
-            <button @click="openProductModal" class="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600">
+            <button
+              @click="scanQR"
+              class="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600 transition"
+              :disabled="!activeInvoiceId"
+            >
+              Quét QR
+            </button>
+            <button
+              @click="openProductModal"
+              class="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600 transition"
+              :disabled="!activeInvoiceId"
+            >
               Thêm sản phẩm
             </button>
           </div>
@@ -55,6 +73,7 @@
               <button
                 @click="removeItem(item)"
                 class="bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600 transition"
+                title="Xóa sản phẩm"
               >
                 <i class="fa-solid fa-trash"></i>
               </button>
@@ -72,65 +91,100 @@
         v-if="showProductModal"
         class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50"
       >
-        <div class="bg-white rounded-lg shadow-lg w-full max-w-screen-2xl p-6">
+        <div class="bg-white rounded-lg shadow-lg w-full max-w-5xl p-6">
           <div class="flex justify-between items-center mb-4">
             <h2 class="text-lg font-semibold text-orange-500">Chọn sản phẩm</h2>
-            <button @click="closeProductModal" class="text-gray-500 hover:text-gray-700">
-              <i class="fas fa-times"></i>
-            </button>
+            <div class="flex space-x-2">
+              <button
+                @click="refreshProducts"
+                class="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
+                title="Làm mới danh sách"
+                :disabled="isLoadingMore"
+              >
+                Làm mới
+              </button>
+              <button
+                @click="closeProductModal"
+                class="text-gray-500 hover:text-gray-700 transition"
+                title="Đóng"
+              >
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
           </div>
-          <div class="mb-4">
-            <label class="block text-sm font-medium text-gray-700">Tìm kiếm sản phẩm</label>
-            <input
-              v-model="productSearchQuery"
-              @input="searchProducts"
-              type="text"
-              class="mt-1 p-2 w-full border rounded"
-              placeholder="Nhập tên hoặc mã sản phẩm"
-            />
+          <div v-if="!isProductsLoaded" class="text-center p-4">
+            <p class="text-gray-600">Đang tải sản phẩm...</p>
           </div>
-          <div class="max-h-96 overflow-y-auto">
-            <table class="w-full">
-              <thead>
-              <tr class="bg-gray-100">
-                <th class="p-4 text-left">STT</th>
-                <th class="p-4 text-left min-w-[200px]">Tên sản phẩm</th>
-                <th class="p-4 text-left min-w-[150px]">Mã</th>
-                <th class="p-4 text-left min-w-[150px]">Màu</th>
-                <th class="p-4 text-left min-w-[120px]">Số lượng</th>
-                <th class="p-4 text-left min-w-[150px]">Giá</th>
-                <th class="p-4 text-right min-w-[120px]"></th>
-              </tr>
-              </thead>
-              <tbody>
-              <tr v-for="(product, index) in filteredProducts" :key="product.id" class="border-b">
-                <td class="p-4">{{ index + 1 }}</td>
-                <td class="p-4">{{ product.tenSanPham }}</td>
-                <td class="p-4">{{ product.ma }}</td>
-                <td class="p-4">{{ product.mauSac || 'N/A' }}</td>
-                <td class="p-4">{{ product.soLuong || 0 }}</td>
-                <td class="p-4">{{ product.giaBan.toLocaleString() }} đ</td>
-                <td class="p-4 text-right">
-                  <button
-                    @click="showIMEIList(product)"
-                    class="px-3 py-1 bg-orange-500 text-white rounded hover:bg-orange-600"
-                  >
-                    Chọn
-                  </button>
-                </td>
-              </tr>
-              </tbody>
-            </table>
+          <div v-else>
+            <div class="mb-4">
+              <label class="block text-sm font-medium text-gray-700">Tìm kiếm sản phẩm</label>
+              <input
+                v-model="productSearchQuery"
+                @input="searchProducts"
+                type="text"
+                class="mt-1 p-2 w-full border rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
+                placeholder="Nhập tên hoặc mã sản phẩm"
+              />
+            </div>
+            <div class="max-h-96 overflow-y-auto" @scroll="handleScroll">
+              <table class="w-full" v-memo="[filteredProducts]">
+                <thead>
+                <tr class="bg-gray-100">
+                  <th class="p-4 text-left">STT</th>
+                  <th class="p-4 text-left min-w-[200px]">Tên sản phẩm</th>
+                  <th class="p-4 text-left min-w-[150px]">Mã</th>
+                  <th class="p-4 text-left min-w-[150px]">Màu</th>
+                  <th class="p-4 text-left min-w-[120px]">Số lượng</th>
+                  <th class="p-4 text-left min-w-[150px]">Giá</th>
+                  <th class="p-4 text-right min-w-[120px]"></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr
+                  v-for="(product, index) in filteredProducts"
+                  :key="product.id"
+                  class="border-b hover:bg-gray-50"
+                >
+                  <td class="p-4">{{ index + 1 }}</td>
+                  <td class="p-4">{{ product.tenSanPham }}</td>
+                  <td class="p-4">{{ product.ma }}</td>
+                  <td class="p-4">{{ product.mauSac || 'N/A' }}</td>
+                  <td class="p-4">{{ product.soLuong || 0 }}</td>
+                  <td class="p-4">{{ product.giaBan.toLocaleString() }} đ</td>
+                  <td class="p-4 text-right">
+                    <button
+                      @click="showIMEIList(product)"
+                      class="px-3 py-1 bg-orange-500 text-white rounded hover:bg-orange-600 transition"
+                    >
+                      Chọn
+                    </button>
+                  </td>
+                </tr>
+                </tbody>
+              </table>
+              <div v-if="isLoadingMore" class="text-center p-4">
+                <p class="text-gray-600">Đang tải thêm...</p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
       <!-- Modal chọn IMEI -->
-      <div v-if="showIMEIModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
-        <div class="bg-white rounded-lg shadow-lg w-full max-w-screen-xl p-6">
+      <div
+        v-if="showIMEIModal"
+        class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50"
+      >
+        <div class="bg-white rounded-lg shadow-lg w-full max-w-2xl p-6">
           <div class="flex justify-between items-center mb-4">
-            <h2 class="text-lg font-semibold text-orange-500">Chọn IMEI cho {{ selectedProduct?.tenSanPham }}</h2>
-            <button @click="closeIMEIModal" class="text-gray-500 hover:text-gray-700">
+            <h2 class="text-lg font-semibold text-orange-500">
+              Chọn IMEI cho {{ selectedProduct?.tenSanPham }}
+            </h2>
+            <button
+              @click="closeIMEIModal"
+              class="text-gray-500 hover:text-gray-700 transition"
+              title="Đóng"
+            >
               <i class="fas fa-times"></i>
             </button>
           </div>
@@ -139,11 +193,16 @@
               <thead>
               <tr class="bg-gray-100">
                 <th class="p-2 text-left">IMEI</th>
+                <th class="p-2 text-left">Mã</th>
                 <th class="p-2 text-right">Chọn</th>
               </tr>
               </thead>
               <tbody>
-              <tr v-for="(imei, index) in availableIMEIs" :key="index" class="border-b">
+              <tr
+                v-for="(imei, index) in availableIMEIs"
+                :key="index"
+                class="border-b hover:bg-gray-50"
+              >
                 <td class="p-2">{{ imei.imei }}</td>
                 <td class="p-2 text-right">
                   <input
@@ -167,7 +226,7 @@
             <button
               @click="addProductWithIMEIs"
               :disabled="selectedIMEIs.length === 0"
-              class="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600 disabled:bg-gray-400"
+              class="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600 disabled:bg-gray-400 transition"
             >
               Thêm vào giỏ hàng
             </button>
@@ -184,13 +243,16 @@
             <input
               v-model="searchCustomer"
               type="text"
-              class="mt-1 p-2 w-full border rounded"
+              class="mt-1 p-2 w-full border rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
               placeholder="Nhập tên hoặc số điện thoại"
               @input="searchCustomers"
             />
           </div>
           <div class="flex items-end">
-            <button @click="openCustomerModal" class="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600">
+            <button
+              @click="openCustomerModal"
+              class="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600 transition"
+            >
               Thêm mới khách hàng
             </button>
           </div>
@@ -201,7 +263,7 @@
             <input
               v-model="customer.name"
               type="text"
-              class="mt-1 p-2 w-full border rounded"
+              class="mt-1 p-2 w-full border rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
               placeholder="Nguyễn Oanh"
             />
           </div>
@@ -210,7 +272,7 @@
             <input
               v-model="customer.phone"
               type="text"
-              class="mt-1 p-2 w-full border rounded"
+              class="mt-1 p-2 w-full border rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
               placeholder="0985357224"
             />
           </div>
@@ -236,7 +298,7 @@
                 <input
                   v-model="receiver.name"
                   type="text"
-                  class="mt-1 p-2 w-full border rounded"
+                  class="mt-1 p-2 w-full border rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
                   placeholder="Nguyễn Oanh"
                   :disabled="!isReceiverEditable"
                 />
@@ -246,7 +308,7 @@
                 <input
                   v-model="receiver.phone"
                   type="text"
-                  class="mt-1 p-2 w-full border rounded"
+                  class="mt-1 p-2 w-full border rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
                   placeholder="0985357224"
                   :disabled="!isReceiverEditable"
                 />
@@ -256,7 +318,7 @@
                 <input
                   v-model="receiver.city"
                   type="text"
-                  class="mt-1 p-2 w-full border rounded"
+                  class="mt-1 p-2 w-full border rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
                   :disabled="!isReceiverEditable"
                 />
               </div>
@@ -265,7 +327,7 @@
                 <input
                   v-model="receiver.district"
                   type="text"
-                  class="mt-1 p-2 w-full border rounded"
+                  class="mt-1 p-2 w-full border rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
                   :disabled="!isReceiverEditable"
                 />
               </div>
@@ -274,7 +336,7 @@
                 <input
                   v-model="receiver.ward"
                   type="text"
-                  class="mt-1 p-2 w-full border rounded"
+                  class="mt-1 p-2 w-full border rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
                   :disabled="!isReceiverEditable"
                 />
               </div>
@@ -284,14 +346,18 @@
               <input
                 v-model="receiver.address"
                 type="text"
-                class="mt-1 p-2 w-full border rounded"
+                class="mt-1 p-2 w-full border rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
                 placeholder="Xóm Bình Yên"
                 :disabled="!isReceiverEditable"
               />
             </div>
             <div class="mt-4">
               <label class="block text-sm font-medium text-gray-700">Ghi chú</label>
-              <textarea v-model="orderNotes" class="mt-1 p-2 w-full border rounded" rows="3"></textarea>
+              <textarea
+                v-model="orderNotes"
+                class="mt-1 p-2 w-full border rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
+                rows="3"
+              ></textarea>
             </div>
           </div>
 
@@ -303,12 +369,12 @@
                 <input
                   v-model="discountCode"
                   type="text"
-                  class="p-2 w-full border rounded"
+                  class="p-2 w-full border rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
                   placeholder="Mừng Quốc Khánh 2/9"
                 />
                 <button
                   @click="applyDiscount"
-                  class="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600"
+                  class="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600 transition"
                 >
                   Áp dụng
                 </button>
@@ -326,22 +392,31 @@
               <div class="flex flex-wrap gap-2">
                 <button
                   @click="selectPayment('transfer')"
-                  :class="{ 'bg-blue-600': paymentMethod === 'transfer', 'bg-blue-500': paymentMethod !== 'transfer' }"
-                  class="px-4 py-2 text-white rounded hover:bg-blue-600"
+                  :class="{
+                    'bg-blue-600': paymentMethod === 'transfer',
+                    'bg-blue-500': paymentMethod !== 'transfer',
+                  }"
+                  class="px-4 py-2 text-white rounded hover:bg-blue-600 transition"
                 >
                   Chuyển khoản
                 </button>
                 <button
                   @click="selectPayment('cash')"
-                  :class="{ 'bg-gray-600': paymentMethod === 'cash', 'bg-gray-500': paymentMethod !== 'cash' }"
-                  class="px-4 py-2 text-white rounded hover:bg-gray-600"
+                  :class="{
+                    'bg-gray-600': paymentMethod === 'cash',
+                    'bg-gray-500': paymentMethod !== 'cash',
+                  }"
+                  class="px-4 py-2 text-white rounded hover:bg-gray-600 transition"
                 >
                   Tiền mặt
                 </button>
                 <button
                   @click="selectPayment('both')"
-                  :class="{ 'bg-purple-600': paymentMethod === 'both', 'bg-purple-500': paymentMethod !== 'both' }"
-                  class="px-4 py-2 text-white rounded hover:bg-purple-600"
+                  :class="{
+                    'bg-purple-600': paymentMethod === 'both',
+                    'bg-purple-500': paymentMethod !== 'both',
+                  }"
+                  class="px-4 py-2 text-white rounded hover:bg-purple-600 transition"
                 >
                   Cả hai
                 </button>
@@ -350,19 +425,21 @@
                 <div>
                   <label class="block text-sm font-medium text-gray-700">Tiền chuyển khoản</label>
                   <input
-                    v-model="tienChuyenKhoan"
+                    v-model.number="tienChuyenKhoan"
                     type="number"
-                    class="mt-1 p-2 w-full border rounded"
+                    class="mt-1 p-2 w-full border rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
                     placeholder="Nhập số tiền chuyển khoản"
+                    min="0"
                   />
                 </div>
                 <div>
                   <label class="block text-sm font-medium text-gray-700">Tiền mặt</label>
                   <input
-                    v-model="tienMat"
+                    v-model.number="tienMat"
                     type="number"
-                    class="mt-1 p-2 w-full border rounded"
+                    class="mt-1 p-2 w-full border rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
                     placeholder="Nhập số tiền mặt"
+                    min="0"
                   />
                 </div>
               </div>
@@ -376,7 +453,8 @@
             <div class="text-right">
               <button
                 @click="createOrder"
-                class="px-6 py-2 bg-orange-500 text-white rounded hover:bg-orange-600"
+                :disabled="!activeInvoiceId || cartItems.length === 0 || isCreatingOrder"
+                class="px-6 py-2 bg-orange-500 text-white rounded hover:bg-orange-600 disabled:bg-gray-400 transition"
               >
                 Thanh toán
               </button>
@@ -402,7 +480,7 @@
           <input
             v-model="entityData.name"
             type="text"
-            class="mt-1 p-2 w-full border rounded"
+            class="mt-1 p-2 w-full border rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
             placeholder="Nhập tên khách hàng"
             required
           />
@@ -412,7 +490,7 @@
           <input
             v-model="entityData.phone"
             type="text"
-            class="mt-1 p-2 w-full border rounded"
+            class="mt-1 p-2 w-full border rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
             placeholder="Nhập số điện thoại"
             required
             pattern="\d{10}"
@@ -423,7 +501,7 @@
           <label class="block text-sm font-medium text-gray-700">Tỉnh/Thành phố</label>
           <select
             v-model="entityData.city"
-            class="mt-1 p-2 w-full border rounded"
+            class="mt-1 p-2 w-full border rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
             required
             @change="handleProvinceChange(entityData)"
           >
@@ -437,7 +515,7 @@
           <label class="block text-sm font-medium text-gray-700">Quận/Huyện</label>
           <select
             v-model="entityData.district"
-            class="mt-1 p-2 w-full border rounded"
+            class="mt-1 p-2 w-full border rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
             required
             @change="handleDistrictChange(entityData)"
             :disabled="!entityData.city"
@@ -452,7 +530,7 @@
           <label class="block text-sm font-medium text-gray-700">Phường/Xã</label>
           <select
             v-model="entityData.ward"
-            class="mt-1 p-2 w-full border rounded"
+            class="mt-1 p-2 w-full border rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
             required
             :disabled="!entityData.district"
           >
@@ -467,7 +545,7 @@
           <input
             v-model="entityData.address"
             type="text"
-            class="mt-1 p-2 w-full border rounded"
+            class="mt-1 p-2 w-full border rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
             placeholder="Nhập địa chỉ cụ thể"
             required
           />
@@ -478,14 +556,13 @@
 </template>
 
 <script setup>
-import { useRoute } from 'vue-router';
+import { ref } from 'vue';
 import DynamicTable from '@/components/DynamicTable.vue';
 import ToastNotification from '@/components/ToastNotification.vue';
 import BreadcrumbWrapper from '@/components/BreadcrumbWrapper.vue';
 import FormModal from '@/components/FormModal.vue';
-import useBanHang from "@/views/BanHang/BanHang";
+import useBanHang from '@/views/BanHang/BanHang';
 
-const route = useRoute();
 const {
   toast,
   breadcrumbItems,
@@ -524,6 +601,10 @@ const {
   tienMat,
   isReceiverEditable,
   totalPrice,
+  isProductsLoaded,
+  isLoadingMore,
+  currentPage,
+  pageSize,
   getNestedValue,
   editItem,
   toggleStatus,
@@ -542,7 +623,22 @@ const {
   applyDiscount,
   selectPayment,
   createOrder,
+  fetchProducts,
+  refreshProducts,
 } = useBanHang();
+
+const isCreatingInvoice = ref(false);
+const isCreatingOrder = ref(false);
+
+const handleScroll = (event) => {
+  const element = event.target;
+  if (
+    element.scrollHeight - element.scrollTop <= element.clientHeight + 100 &&
+    !isLoadingMore.value
+  ) {
+    fetchProducts(true); // Tải thêm dữ liệu khi cuộn đến cuối
+  }
+};
 </script>
 
 <style scoped>
@@ -573,19 +669,15 @@ const {
   background-color: #e5e7eb;
 }
 
-.max-w-2xl {
-  max-width: 100%;
-  overflow-x: hidden;
-}
-
 table {
   border-collapse: collapse;
   width: 100%;
   table-layout: auto;
 }
 
-th, td {
-  padding: 1.5rem;
+th,
+td {
+  padding: 1rem;
   text-align: left;
   vertical-align: middle;
 }
