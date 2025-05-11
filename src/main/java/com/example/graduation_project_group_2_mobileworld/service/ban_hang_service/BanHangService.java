@@ -250,7 +250,7 @@ public class BanHangService {
         hinhThucThanhToan.setDeleted(false);
         hinhThucThanhToanRepository.save(hinhThucThanhToan);
 
-        // Tạo bản ghi imel_da_ban cho mỗi sản phẩm trong hóa đơn
+
         List<HoaDonChiTiet> hoaDonChiTiets = hoaDonChiTietRepository.findAll().stream()
                 .filter(hdct -> hdct.getHoaDon().getId().equals(hoaDonId) && !hdct.getDeleted())
                 .collect(Collectors.toList());
@@ -270,7 +270,7 @@ public class BanHangService {
                 newMa = String.format("IMDB%05d", number);
             }
             imelDaBan.setMa(newMa);
-            imelDaBan.setImel(ctsp.getIdImel().getMa());
+            imelDaBan.setImel(ctsp.getIdImel().getImel());
             imelDaBan.setNgayBan(new java.sql.Date(new java.util.Date().getTime()));
             imelDaBan.setGhiChu("Bán qua hóa đơn " + hoaDon.getMa());
             imelDaBan.setDeleted(false);

@@ -5,21 +5,21 @@ import com.example.graduation_project_group_2_mobileworld.dto.ban_hang.ThanhToan
 import com.example.graduation_project_group_2_mobileworld.dto.gio_hang.ChiTietGioHangDTO;
 import com.example.graduation_project_group_2_mobileworld.dto.gio_hang.ChiTietSPDTO;
 import com.example.graduation_project_group_2_mobileworld.dto.gio_hang.GioHangDTO;
+import com.example.graduation_project_group_2_mobileworld.entity.GioHang;
 import com.example.graduation_project_group_2_mobileworld.entity.HoaDon;
 import com.example.graduation_project_group_2_mobileworld.entity.KhachHang;
 import com.example.graduation_project_group_2_mobileworld.entity.NhanVien;
+import com.example.graduation_project_group_2_mobileworld.repository.gio_hang.GioHangRepository;
 import com.example.graduation_project_group_2_mobileworld.repository.khach_hang.KhachHangRepository;
 import com.example.graduation_project_group_2_mobileworld.repository.nhan_vien.NhanVienRepository;
 import com.example.graduation_project_group_2_mobileworld.service.ban_hang_service.BanHangService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @RestController
 @RequestMapping("/ban-hang")
@@ -34,6 +34,20 @@ public class BHController {
 
     @Autowired
     private KhachHangRepository khachHangRepository;
+
+    @Autowired
+    private GioHangRepository gioHangRepository;
+
+    @GetMapping("/gio-hang/by-hoa-don/{hoaDonId}")
+    public ResponseEntity<?> getGioHangByHoaDonId(@PathVariable Long hoaDonId) {
+        try {
+            Optional<GioHang> gioHang = gioHangRepository.findByHoaDonId(hoaDonId);
+            return ResponseEntity.ok(gioHang.orElse(null));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Lỗi khi lấy giỏ hàng: " + e.getMessage());
+        }
+    }
 
     @GetMapping("/data")
     public List<HDban_hangDTO> fetchDataHD() {
