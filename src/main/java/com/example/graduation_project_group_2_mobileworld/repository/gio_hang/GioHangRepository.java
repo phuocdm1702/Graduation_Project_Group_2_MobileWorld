@@ -7,6 +7,4 @@ import org.springframework.data.jpa.repository.Query;
 import java.util.List;
 
 public interface GioHangRepository extends JpaRepository<GioHang, Integer> {
-    @Query("SELECT gh FROM GioHang gh WHERE gh.deleted = false")
-    List<GioHang> findByDeletedFalse();
 }

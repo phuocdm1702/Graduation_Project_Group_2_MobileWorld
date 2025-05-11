@@ -22,26 +22,4 @@ public interface ChiTietSanPhamRepository extends JpaRepository<ChiTietSanPham, 
 
     Page<ChiTietSanPham> findAll(org.springframework.data.jpa.domain.Specification<ChiTietSanPham> spec, Pageable pageable);
 
-    @Query("SELECT ctsp FROM ChiTietSanPham ctsp " +
-            "JOIN FETCH ctsp.idSanPham sp " +
-            "JOIN FETCH ctsp.idImel im " +
-            "JOIN FETCH ctsp.idMauSac ms " +
-            "JOIN FETCH ctsp.idRam ram " +
-            "JOIN FETCH ctsp.idBoNhoTrong bnt " +
-            "WHERE ctsp.deleted = false")
-    Page<ChiTietSanPham> findByDeletedFalse(Pageable pageable);
-
-    @Query("SELECT ctsp FROM ChiTietSanPham ctsp " +
-            "JOIN FETCH ctsp.idSanPham sp " +
-            "JOIN FETCH ctsp.idImel im " +
-            "JOIN FETCH ctsp.idMauSac ms " +
-            "JOIN FETCH ctsp.idRam ram " +
-            "JOIN FETCH ctsp.idBoNhoTrong bnt " +
-            "WHERE ctsp.deleted = false AND (sp.tenSanPham LIKE %:keyword% OR sp.ma LIKE %:keyword%)")
-    Page<ChiTietSanPham> findByKeywordAndDeletedFalse(@Param("keyword") String keyword, Pageable pageable);
-
-    @Query("SELECT im.ma FROM ChiTietSanPham ctsp " +
-            "JOIN ctsp.idImel im " +
-            "WHERE ctsp.idSanPham.id = :sanPhamId AND ctsp.deleted = false")
-    List<String> findIMEIsBySanPhamId(@Param("sanPhamId") Integer sanPhamId);
 }

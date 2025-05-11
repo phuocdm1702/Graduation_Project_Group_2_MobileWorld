@@ -88,17 +88,17 @@ public class BHController {
         }
     }
 
-    //    @GetMapping("/san-pham")
-//    public List<ChiTietSPDTO> dsSanPham() {
-//        return banHangService.getAllCTSP();
-//    }
-    @GetMapping("/san-pham")
-    public List<ChiTietSPDTO> getAllSanPham(
-            @RequestParam(value = "keyword", required = false) String keyword,
-            @RequestParam(value = "page", defaultValue = "0") int page,
-            @RequestParam(value = "size", defaultValue = "10") int size) {
-        return banHangService.getAllCTSP(keyword, page, size);
+        @GetMapping("/san-pham")
+    public List<ChiTietSPDTO> dsSanPham() {
+        return banHangService.getAllCTSP();
     }
+//    @GetMapping("/san-pham")
+//    public List<ChiTietSPDTO> getAllSanPham(
+//            @RequestParam(value = "keyword", required = false) String keyword,
+//            @RequestParam(value = "page", defaultValue = "0") int page,
+//            @RequestParam(value = "size", defaultValue = "10") int size) {
+//        return banHangService.getAllCTSP(keyword, page, size);
+//    }
 
     @GetMapping("/san-pham/{sanPhamId}/imeis")
     public ResponseEntity<List<String>> getIMEIsBySanPhamId(@PathVariable Integer sanPhamId) {

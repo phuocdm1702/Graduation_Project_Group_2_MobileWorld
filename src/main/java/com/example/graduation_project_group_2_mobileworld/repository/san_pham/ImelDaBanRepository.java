@@ -16,7 +16,4 @@ public interface ImelDaBanRepository extends JpaRepository<ImelDaBan, Integer> {
 
     @Query("SELECT MAX(i.ma) FROM ImelDaBan i WHERE i.ma LIKE 'IMDB%'")
     String findMaxMa();
-
-    @Query("SELECT hd FROM HoaDon hd WHERE hd.trangThai = 0 AND hd.deleted = false")
-    List<HoaDon> findAllHDNotConfirm();
 }

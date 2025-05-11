@@ -22,20 +22,9 @@ import com.example.graduation_project_group_2_mobileworld.repository.san_pham.Sa
 import com.example.graduation_project_group_2_mobileworld.repository.hoa_don.LichSuHoaDonRepository;
 import com.example.graduation_project_group_2_mobileworld.repository.san_pham.ImelDaBanRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.example.graduation_project_group_2_mobileworld.entity.HoaDon;
-import com.example.graduation_project_group_2_mobileworld.entity.KhachHang;
-import org.springframework.web.bind.annotation.*;
 
-import java.math.BigDecimal;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
@@ -83,7 +72,8 @@ public class BanHangService {
     }
 
     public List<GioHangDTO> getAllGH() {
-        return gioHangRepository.findByDeletedFalse().stream()
+        return gioHangRepository.findAll().stream()
+                .filter(gioHang -> !gioHang.getDeleted())
                 .map(this::convertToGioHangDTO)
                 .collect(Collectors.toList());
     }
@@ -101,23 +91,18 @@ public class BanHangService {
         return convertToGioHangDTO(gioHang);
     }
 
-    public List<ChiTietSPDTO> getAllCTSP(String keyword, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
-        Page<ChiTietSanPham> chiTietSanPhams;
-
-        if (keyword != null && !keyword.isEmpty()) {
-            chiTietSanPhams = chiTietSanPhamRepository.findByKeywordAndDeletedFalse(keyword, pageable);
-        } else {
-            chiTietSanPhams = chiTietSanPhamRepository.findByDeletedFalse(pageable);
-        }
-
-        return chiTietSanPhams.stream()
+    public List<ChiTietSPDTO> getAllCTSP() {
+        return chiTietSanPhamRepository.findAll().stream()
+                .filter(chiTietSanPham -> !chiTietSanPham.getDeleted())
                 .map(this::convertToChiTietSanPhamDTO)
                 .collect(Collectors.toList());
     }
 
     public List<String> getIMEIsBySanPhamId(Integer sanPhamId) {
-        return chiTietSanPhamRepository.findIMEIsBySanPhamId(sanPhamId);
+        return chiTietSanPhamRepository.findAll().stream()
+                .filter(ctsp -> ctsp.getIdSanPham().getId().equals(sanPhamId) && !ctsp.getDeleted())
+                .map(ctsp -> ctsp.getIdImel().getMa())
+                .collect(Collectors.toList());
     }
 
     public ChiTietGioHangDTO addChiTietGioHang(Integer gioHangId, Integer chiTietSanPhamId, Integer hoaDonId) {
@@ -154,7 +139,8 @@ public class BanHangService {
     }
 
     public List<ChiTietGioHangDTO> getChiTietGioHangByGioHangId(Integer gioHangId) {
-        return chiTietGioHangRepository.findByGioHangIdAndNotDeleted(gioHangId).stream()
+        return chiTietGioHangRepository.findAll().stream()
+                .filter(ctgh -> ctgh.getIdGioHang().getId().equals(gioHangId) && !ctgh.getDeleted())
                 .map(this::convertToChiTietGioHangDTO)
                 .collect(Collectors.toList());
     }
@@ -165,7 +151,9 @@ public class BanHangService {
         chiTietGioHang.setDeleted(true);
         chiTietGioHangRepository.save(chiTietGioHang);
 
-        List<HoaDonChiTiet> hoaDonChiTiets = hoaDonChiTietRepository.findByChiTietSanPhamId(chiTietGioHang.getIdChiTietSanPham().getId());
+        List<HoaDonChiTiet> hoaDonChiTiets = hoaDonChiTietRepository.findAll().stream()
+                .filter(hdct -> hdct.getIdChiTietSanPham().getId().equals(chiTietGioHangId))
+                .collect(Collectors.toList());
         for (HoaDonChiTiet hoaDonChiTiet : hoaDonChiTiets) {
             hoaDonChiTiet.setDeleted(true);
             hoaDonChiTietRepository.save(hoaDonChiTiet);
@@ -263,7 +251,9 @@ public class BanHangService {
         hinhThucThanhToanRepository.save(hinhThucThanhToan);
 
         // Tạo bản ghi imel_da_ban cho mỗi sản phẩm trong hóa đơn
-        List<HoaDonChiTiet> hoaDonChiTiets = hoaDonChiTietRepository.findByHoaDonIdAndNotDeleted(hoaDonId);
+        List<HoaDonChiTiet> hoaDonChiTiets = hoaDonChiTietRepository.findAll().stream()
+                .filter(hdct -> hdct.getHoaDon().getId().equals(hoaDonId) && !hdct.getDeleted())
+                .collect(Collectors.toList());
         for (HoaDonChiTiet hdct : hoaDonChiTiets) {
             ChiTietSanPham ctsp = hdct.getIdChiTietSanPham();
             if (ctsp.getIdImel() == null || ctsp.getIdImel().getMa() == null) {
@@ -284,11 +274,13 @@ public class BanHangService {
             imelDaBan.setNgayBan(new java.sql.Date(new java.util.Date().getTime()));
             imelDaBan.setGhiChu("Bán qua hóa đơn " + hoaDon.getMa());
             imelDaBan.setDeleted(false);
-            imelDaBan = imelDaBanRepository.save(imelDaBan);
+            imelDaBan = imelDaBanRepository.save(imelDaBan); // Lưu và lấy bản ghi đã lưu
 
+            // Gán ImelDaBan cho HoaDonChiTiet
             hdct.setIdImelDaBan(imelDaBan);
-            hoaDonChiTietRepository.save(hdct);
+            hoaDonChiTietRepository.save(hdct); // Lưu lại HoaDonChiTiet để cập nhật mối quan hệ
 
+            // Đánh dấu sản phẩm đã bán
             ctsp.setDeleted(true);
             chiTietSanPhamRepository.save(ctsp);
         }
@@ -300,12 +292,13 @@ public class BanHangService {
         dto.setMaHoaDon(hoaDon.getMa());
         dto.setTrangThai(hoaDon.getTrangThai());
 
-        List<HDCTban_hangDTO> items = hoaDonChiTietRepository.findByHoaDonIdAndNotDeleted(hoaDon.getId()).stream()
+        List<HDCTban_hangDTO> items = hoaDonChiTietRepository.findAll().stream()
+                .filter(hdct -> hdct.getHoaDon().getId().equals(hoaDon.getId()))
                 .map(hdct -> {
                     HDCTban_hangDTO itemDTO = new HDCTban_hangDTO();
                     itemDTO.setId(hdct.getId());
                     itemDTO.setTenSanPham(hdct.getIdChiTietSanPham().getIdSanPham().getTenSanPham());
-                    itemDTO.setImei("" + hdct.getIdChiTietSanPham().getIdImel().getId());
+                    itemDTO.setImei(""+hdct.getIdChiTietSanPham().getIdImel().getId());
                     itemDTO.setGiaBan(hdct.getGia());
                     return itemDTO;
                 })
@@ -322,7 +315,8 @@ public class BanHangService {
         dto.setIdKhachHang(gioHang.getIdKhachHang().getId());
         dto.setTrangThai((short) 0);
         dto.setChiTietGioHangList(
-                chiTietGioHangRepository.findByGioHangIdAndNotDeleted(gioHang.getId()).stream()
+                chiTietGioHangRepository.findAll().stream()
+                        .filter(ctgh -> ctgh.getIdGioHang().getId().equals(gioHang.getId()))
                         .map(this::convertToChiTietGioHangDTO)
                         .collect(Collectors.toList())
         );
