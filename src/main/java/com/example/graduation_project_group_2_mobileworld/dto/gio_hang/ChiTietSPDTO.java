@@ -12,6 +12,7 @@ public class ChiTietSPDTO {
     private String ram;
     private String boNhoTrong;
 
+
     public ChiTietSPDTO() {
     }
 

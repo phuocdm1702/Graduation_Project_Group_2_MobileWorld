@@ -29,6 +29,7 @@ export default function useBanHang() {
 
   const imeiColumns = ref([
     {key: 'imei', label: 'IMEI'},
+    {key: 'imei', label: 'IMEI2'},
     {key: 'actions', label: 'Chọn', cellSlot: 'imeiActionsSlot'},
   ]);
 
@@ -165,13 +166,17 @@ export default function useBanHang() {
         },
       });
 
-      products.value = response.data.map((p) => ({
-        id: p.id,
-        tenSanPham: p.tenSanPham,
-        ma: p.ma,
-        mauSac: p.mauSac || 'N/A',
-        soLuong: 0, // Backend không trả về số lượng IMEI, sẽ lấy khi cần
-        giaBan: p.giaBan,
+      products.value = await Promise.all(response.data.map(async (p) => {
+        // Gọi API để lấy danh sách IMEI cho sản phẩm
+        const imeiResponse = await axios.get(`http://localhost:8080/ban-hang/san-pham/${p.id}/imeis`);
+        return {
+          id: p.id,
+          tenSanPham: p.tenSanPham,
+          ma: p.ma,
+          mauSac: p.mauSac || 'N/A',
+          soLuong: imeiResponse.data.length, // Tính số lượng dựa trên độ dài danh sách IMEI
+          giaBan: p.giaBan,
+        };
       }));
       filteredProducts.value = products.value;
     } catch (error) {
@@ -179,6 +184,32 @@ export default function useBanHang() {
       if (toast.value) toast.value.kshowToast('error', 'Không thể tải danh sách sản phẩm!');
     }
   };
+
+  // const fetchProducts = async () => {
+  //   try {
+  //     const response = await axios.get('http://localhost:8080/ban-hang/san-pham', {
+  //       params: {
+  //         keyword: productSearchQuery.value,
+  //         page: 0,
+  //         size: 10,
+  //       },
+  //     });
+  //
+  //     products.value = response.data.map((p) => ({
+  //      
+  //       id: p.id,
+  //       tenSanPham: p.tenSanPham,
+  //       ma: p.ma,
+  //       mauSac: p.mauSac || 'N/A',
+  //       soLuong: 0, // Backend không trả về số lượng IMEI, sẽ lấy khi cần
+  //       giaBan: p.giaBan,
+  //     }));
+  //     filteredProducts.value = products.value;
+  //   } catch (error) {
+  //     console.error('Lỗi khi lấy danh sách sản phẩm:', error);
+  //     if (toast.value) toast.value.kshowToast('error', 'Không thể tải danh sách sản phẩm!');
+  //   }
+  // };
 
   const fetchCartItems = async () => {
     const storedGioHangId = localStorage.getItem('gioHangId');
