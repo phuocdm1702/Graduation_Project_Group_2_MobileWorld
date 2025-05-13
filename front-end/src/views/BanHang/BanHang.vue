@@ -91,7 +91,7 @@
         v-if="showProductModal"
         class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50"
       >
-        <div class="bg-white rounded-lg shadow-lg w-full max-w-5xl p-6">
+        <div class="bg-white rounded-lg shadow-lg w-full max-w-fit p-6">
           <div class="flex justify-between items-center mb-4">
             <h2 class="text-lg font-semibold text-orange-500">Chọn sản phẩm</h2>
             <div class="flex space-x-2">
@@ -134,6 +134,8 @@
                   <th class="p-4 text-left min-w-[200px]">Tên sản phẩm</th>
                   <th class="p-4 text-left min-w-[150px]">Mã</th>
                   <th class="p-4 text-left min-w-[150px]">Màu</th>
+                  <th class="p-4 text-left min-w-[150px]">Ram</th>
+                  <th class="p-4 text-left min-w-[150px]">Bộ nhớ trong</th>
                   <th class="p-4 text-left min-w-[120px]">Số lượng</th>
                   <th class="p-4 text-left min-w-[150px]">Giá</th>
                   <th class="p-4 text-right min-w-[120px]"></th>
@@ -142,13 +144,15 @@
                 <tbody>
                 <tr
                   v-for="(product, index) in filteredProducts"
-                  :key="product.id"
+                  :key="index"
                   class="border-b hover:bg-gray-50"
                 >
                   <td class="p-4">{{ index + 1 }}</td>
                   <td class="p-4">{{ product.tenSanPham }}</td>
                   <td class="p-4">{{ product.ma }}</td>
                   <td class="p-4">{{ product.mauSac || 'N/A' }}</td>
+                  <td class="p-4">{{ product.dungLuongRam || 'N/A' }}</td>
+                  <td class="p-4">{{ product.dungLuongBoNhoTrong || 'N/A' }}</td>
                   <td class="p-4">{{ product.soLuong || 0 }}</td>
                   <td class="p-4">{{ product.giaBan.toLocaleString() }} đ</td>
                   <td class="p-4 text-right">
@@ -178,7 +182,7 @@
         <div class="bg-white rounded-lg shadow-lg w-full max-w-2xl p-6">
           <div class="flex justify-between items-center mb-4">
             <h2 class="text-lg font-semibold text-orange-500">
-              Chọn IMEI cho {{ selectedProduct?.tenSanPham }}
+              Chọn IMEI cho {{ selectedProduct?.tenSanPham }} ({{ selectedProduct?.mauSac }}, {{ selectedProduct?.dungLuongRam }}, {{ selectedProduct?.dungLuongBoNhoTrong }})
             </h2>
             <button
               @click="closeIMEIModal"
@@ -193,7 +197,6 @@
               <thead>
               <tr class="bg-gray-100">
                 <th class="p-2 text-left">IMEI</th>
-                <th class="p-2 text-left">Mã</th>
                 <th class="p-2 text-right">Chọn</th>
               </tr>
               </thead>
@@ -210,6 +213,7 @@
                     :value="imei.imei"
                     v-model="selectedIMEIs"
                     class="form-checkbox h-5 w-5 text-orange-500"
+                    @change="handleIMEISelection"
                   />
                 </td>
               </tr>
@@ -636,8 +640,13 @@ const handleScroll = (event) => {
     element.scrollHeight - element.scrollTop <= element.clientHeight + 100 &&
     !isLoadingMore.value
   ) {
-    fetchProducts(true); // Tải thêm dữ liệu khi cuộn đến cuối
+    fetchProducts(true);
   }
+};
+
+// Thêm hàm để ghi log khi checkbox IMEI thay đổi
+const handleIMEISelection = () => {
+  console.log('Selected IMEIs:', selectedIMEIs.value);
 };
 </script>
 

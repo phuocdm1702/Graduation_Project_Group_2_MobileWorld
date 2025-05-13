@@ -1,10 +1,10 @@
 package com.example.graduation_project_group_2_mobileworld.service.ban_hang_service;
 
+import com.example.graduation_project_group_2_mobileworld.dto.ban_hang.ChiTietSanPhamGroupDTO;
 import com.example.graduation_project_group_2_mobileworld.dto.ban_hang.HDCTban_hangDTO;
 import com.example.graduation_project_group_2_mobileworld.dto.ban_hang.HDban_hangDTO;
 import com.example.graduation_project_group_2_mobileworld.dto.ban_hang.ThanhToanRequestDTO;
 import com.example.graduation_project_group_2_mobileworld.dto.gio_hang.ChiTietGioHangDTO;
-import com.example.graduation_project_group_2_mobileworld.dto.gio_hang.ChiTietSPDTO;
 import com.example.graduation_project_group_2_mobileworld.dto.gio_hang.GioHangDTO;
 import com.example.graduation_project_group_2_mobileworld.entity.*;
 import com.example.graduation_project_group_2_mobileworld.entity.SanPham.ChiTietSanPham;
@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -36,8 +37,6 @@ import java.util.stream.Collectors;
 
 @Service
 public class BanHangService {
-
-
     @Autowired
     private HoaDonRepository hoaDonRepository;
 
@@ -97,10 +96,26 @@ public class BanHangService {
     }
 
     @Cacheable(value = "sanPhamCache", key = "#page + '-' + #size + '-' + #keyword")
-    public Page<ChiTietSPDTO> getAllCTSP(int page, int size, String keyword) {
+    public Page<ChiTietSanPhamGroupDTO> getAllCTSP(int page, int size, String keyword) {
         Pageable pageable = PageRequest.of(page, size);
-        return chiTietSanPhamRepository.findByDeletedFalse(pageable)
-                .map(this::convertToChiTietSanPhamDTO);
+        List<Object[]> results = chiTietSanPhamRepository.findGroupedProductsBySanPhamId(null); // Lấy tất cả sản phẩm
+        List<ChiTietSanPhamGroupDTO> dtos = results.stream().map(this::convertToChiTietSanPhamGroupDTO).collect(Collectors.toList());
+
+        // Lọc theo từ khóa nếu có
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            String lowerKeyword = keyword.toLowerCase();
+            dtos = dtos.stream()
+                    .filter(dto -> dto.getTenSanPham().toLowerCase().contains(lowerKeyword) ||
+                            dto.getMa().toLowerCase().contains(lowerKeyword))
+                    .collect(Collectors.toList());
+        }
+
+        // Phân trang thủ công
+        int start = Math.min((page * size), dtos.size());
+        int end = Math.min(((page + 1) * size), dtos.size());
+        List<ChiTietSanPhamGroupDTO> pagedDtos = dtos.subList(start, end);
+
+        return new PageImpl<>(pagedDtos, pageable, dtos.size());
     }
 
     @CacheEvict(value = "sanPhamCache", allEntries = true)
@@ -109,11 +124,17 @@ public class BanHangService {
     }
 
     public int getSoLuongBySanPhamId(Integer sanPhamId) {
-        return (int) chiTietSanPhamRepository.countBySanPhamIdAndNotDeleted(sanPhamId);
+        Long count = chiTietSanPhamRepository.countByIdSanPhamIdAndDeletedFalseAndNotSold(sanPhamId);
+        return count.intValue();
     }
 
-    public List<String> getIMEIsBySanPhamId(Integer sanPhamId) {
-        return chiTietSanPhamRepository.findIMEIsBySanPhamIdAndNotDeleted(sanPhamId);
+    public List<String> getIMEIsBySanPhamIdAndAttributes(Integer sanPhamId, String mauSac, String dungLuongRam, String dungLuongBoNhoTrong) {
+        return chiTietSanPhamRepository.findIMEIsBySanPhamIdAndAttributes(sanPhamId, mauSac, dungLuongRam, dungLuongBoNhoTrong);
+    }
+
+    public ChiTietSanPham findChiTietSanPhamByIMEI(String imei) {
+        return chiTietSanPhamRepository.findByIdImelImelAndDeletedFalse(imei)
+                .orElse(null);
     }
 
     public ChiTietGioHangDTO addChiTietGioHang(Integer gioHangId, Integer chiTietSanPhamId, Integer hoaDonId) {
@@ -126,6 +147,9 @@ public class BanHangService {
 
         BigDecimal giaBan = chiTietSanPham.getGiaBan();
         BigDecimal tongTien = giaBan;
+
+        chiTietSanPham.setDeleted(true);
+        chiTietSanPhamRepository.save(chiTietSanPham);
 
         ChiTietGioHang chiTietGioHang = new ChiTietGioHang();
         chiTietGioHang.setIdGioHang(gioHang);
@@ -162,8 +186,12 @@ public class BanHangService {
         chiTietGioHang.setDeleted(true);
         chiTietGioHangRepository.save(chiTietGioHang);
 
+        ChiTietSanPham chiTietSanPham = chiTietGioHang.getIdChiTietSanPham();
+        chiTietSanPham.setDeleted(false);
+        chiTietSanPhamRepository.save(chiTietSanPham);
+
         List<HoaDonChiTiet> hoaDonChiTiets = hoaDonChiTietRepository.findAll().stream()
-                .filter(hdct -> hdct.getIdChiTietSanPham().getId().equals(chiTietGioHangId))
+                .filter(hdct -> hdct.getIdChiTietSanPham().getId().equals(chiTietSanPham.getId()) && !hdct.getDeleted())
                 .collect(Collectors.toList());
         for (HoaDonChiTiet hoaDonChiTiet : hoaDonChiTiets) {
             hoaDonChiTiet.setDeleted(true);
@@ -283,9 +311,6 @@ public class BanHangService {
 
             hdct.setIdImelDaBan(imelDaBan);
             hoaDonChiTietRepository.save(hdct);
-
-            ctsp.setDeleted(true);
-            chiTietSanPhamRepository.save(ctsp);
         }
     }
 
@@ -296,12 +321,12 @@ public class BanHangService {
         dto.setTrangThai(hoaDon.getTrangThai());
 
         List<HDCTban_hangDTO> items = hoaDonChiTietRepository.findAll().stream()
-                .filter(hdct -> hdct.getHoaDon().getId().equals(hoaDon.getId()))
+                .filter(hdct -> hdct.getHoaDon().getId().equals(hoaDon.getId()) && !hdct.getDeleted())
                 .map(hdct -> {
                     HDCTban_hangDTO itemDTO = new HDCTban_hangDTO();
                     itemDTO.setId(hdct.getId());
                     itemDTO.setTenSanPham(hdct.getIdChiTietSanPham().getIdSanPham().getTenSanPham());
-                    itemDTO.setImei("" + hdct.getIdChiTietSanPham().getIdImel().getImel());
+                    itemDTO.setImei(hdct.getIdChiTietSanPham().getIdImel().getImel());
                     itemDTO.setGiaBan(hdct.getGia());
                     return itemDTO;
                 })
@@ -319,7 +344,7 @@ public class BanHangService {
         dto.setTrangThai((short) 0);
         dto.setChiTietGioHangList(
                 chiTietGioHangRepository.findAll().stream()
-                        .filter(ctgh -> ctgh.getIdGioHang().getId().equals(gioHang.getId()))
+                        .filter(ctgh -> ctgh.getIdGioHang().getId().equals(gioHang.getId()) && !ctgh.getDeleted())
                         .map(this::convertToChiTietGioHangDTO)
                         .collect(Collectors.toList())
         );
@@ -339,16 +364,16 @@ public class BanHangService {
         return dto;
     }
 
-    private ChiTietSPDTO convertToChiTietSanPhamDTO(ChiTietSanPham chiTietSanPham) {
-        ChiTietSPDTO dto = new ChiTietSPDTO();
-        dto.setId(chiTietSanPham.getId());
-        dto.setMa(chiTietSanPham.getIdSanPham().getMa());
-        dto.setTenSanPham(chiTietSanPham.getIdSanPham().getTenSanPham());
-        dto.setGiaBan(chiTietSanPham.getGiaBan());
-        dto.setImei(chiTietSanPham.getIdImel().getImel());
-        dto.setMauSac(chiTietSanPham.getIdMauSac().getMauSac());
-        long soLuong = chiTietSanPhamRepository.countBySanPhamIdAndNotDeleted(chiTietSanPham.getIdSanPham().getId());
-        dto.setSoLuong((int) soLuong);
+    private ChiTietSanPhamGroupDTO convertToChiTietSanPhamGroupDTO(Object[] result) {
+        ChiTietSanPhamGroupDTO dto = new ChiTietSanPhamGroupDTO();
+        dto.setTenSanPham((String) result[0]);
+        dto.setMa((String) result[1]);
+        dto.setMauSac((String) result[2]);
+        dto.setDungLuongRam((String) result[3]);
+        dto.setDungLuongBoNhoTrong((String) result[4]);
+        dto.setSoLuong(((Number) result[5]).intValue());
+        dto.setGiaBan((BigDecimal) result[6]);
+        dto.setIdSanPham(((Number) result[7]).intValue());
         return dto;
     }
 }

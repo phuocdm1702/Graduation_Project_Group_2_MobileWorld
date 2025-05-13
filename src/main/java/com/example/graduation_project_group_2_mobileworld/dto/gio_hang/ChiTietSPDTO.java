@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 
 public class ChiTietSPDTO {
     private Integer id;
+    private Integer idSanPham;
     private String ma;
     private String tenSanPham;
     private BigDecimal giaBan;
@@ -15,6 +16,14 @@ public class ChiTietSPDTO {
 
 
     public ChiTietSPDTO() {
+    }
+
+    public Integer getIdSanPham() {
+        return idSanPham;
+    }
+
+    public void setIdSanPham(Integer idSanPham) {
+        this.idSanPham = idSanPham;
     }
 
     public Integer getSoLuong() {

@@ -1,5 +1,6 @@
 package com.example.graduation_project_group_2_mobileworld.controller.ban_hang;
 
+import com.example.graduation_project_group_2_mobileworld.dto.ban_hang.ChiTietSanPhamGroupDTO;
 import com.example.graduation_project_group_2_mobileworld.dto.ban_hang.HDban_hangDTO;
 import com.example.graduation_project_group_2_mobileworld.dto.ban_hang.ThanhToanRequestDTO;
 import com.example.graduation_project_group_2_mobileworld.dto.gio_hang.ChiTietGioHangDTO;
@@ -9,6 +10,7 @@ import com.example.graduation_project_group_2_mobileworld.entity.GioHang;
 import com.example.graduation_project_group_2_mobileworld.entity.HoaDon;
 import com.example.graduation_project_group_2_mobileworld.entity.KhachHang;
 import com.example.graduation_project_group_2_mobileworld.entity.NhanVien;
+import com.example.graduation_project_group_2_mobileworld.entity.SanPham.ChiTietSanPham;
 import com.example.graduation_project_group_2_mobileworld.repository.gio_hang.GioHangRepository;
 import com.example.graduation_project_group_2_mobileworld.repository.khach_hang.KhachHangRepository;
 import com.example.graduation_project_group_2_mobileworld.repository.nhan_vien.NhanVienRepository;
@@ -26,7 +28,6 @@ import java.util.*;
 @RequestMapping("/ban-hang")
 @CrossOrigin(origins = "http://localhost:3000")
 public class BHController {
-
     @Autowired
     private BanHangService banHangService;
 
@@ -106,19 +107,42 @@ public class BHController {
     }
 
     @GetMapping("/san-pham")
-    public Page<ChiTietSPDTO> getSanPham(@RequestParam(defaultValue = "0") int page,
-                                         @RequestParam(defaultValue = "10") int size,
-                                         @RequestParam(defaultValue = "") String keyword) {
+    public Page<ChiTietSanPhamGroupDTO> getSanPham(@RequestParam(defaultValue = "0") int page,
+                                                   @RequestParam(defaultValue = "10") int size,
+                                                   @RequestParam(defaultValue = "") String keyword) {
         return banHangService.getAllCTSP(page, size, keyword);
     }
 
     @GetMapping("/san-pham/{sanPhamId}/imeis")
-    public ResponseEntity<List<String>> getIMEIsBySanPhamId(@PathVariable Integer sanPhamId) {
+    public ResponseEntity<List<String>> getIMEIsBySanPhamId(@PathVariable Integer sanPhamId,
+                                                            @RequestParam String mauSac,
+                                                            @RequestParam String dungLuongRam,
+                                                            @RequestParam String dungLuongBoNhoTrong) {
         try {
-            List<String> imeis = banHangService.getIMEIsBySanPhamId(sanPhamId);
+            List<String> imeis = banHangService.getIMEIsBySanPhamIdAndAttributes(sanPhamId, mauSac, dungLuongRam, dungLuongBoNhoTrong);
             return ResponseEntity.ok(imeis);
         } catch (Exception e) {
             System.out.println("Lỗi khi lấy danh sách IMEI: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
+
+    @GetMapping("/san-pham/by-imei/{imei}")
+    public ResponseEntity<ChiTietSPDTO> getChiTietSanPhamByIMEI(@PathVariable String imei) {
+        try {
+            ChiTietSanPham chiTietSanPham = banHangService.findChiTietSanPhamByIMEI(imei);
+            if (chiTietSanPham == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            }
+            ChiTietSPDTO dto = new ChiTietSPDTO();
+            dto.setId(chiTietSanPham.getId());
+            dto.setIdSanPham(chiTietSanPham.getIdSanPham().getId());
+            dto.setTenSanPham(chiTietSanPham.getIdSanPham().getTenSanPham());
+            dto.setGiaBan(chiTietSanPham.getGiaBan());
+            dto.setImei(imei);
+            return ResponseEntity.ok(dto);
+        } catch (Exception e) {
+            System.out.println("Lỗi khi lấy chi tiết sản phẩm bằng IMEI: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
