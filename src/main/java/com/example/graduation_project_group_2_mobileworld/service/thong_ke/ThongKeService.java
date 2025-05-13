@@ -70,27 +70,69 @@ public class ThongKeService {
         Date startDate = null;
         Date endDate = null;
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        sdf.setTimeZone(TimeZone.getTimeZone("Asia/Ho_Chi_Minh"));
 
         Calendar cal = Calendar.getInstance();
-        if ("day".equals(filterType)) {
-            startDate = new Date();
-            endDate = startDate;
-        } else if ("month".equals(filterType)) {
-            cal.set(Calendar.DAY_OF_MONTH, 1);
-            startDate = cal.getTime();
-            endDate = new Date();
-        } else if ("year".equals(filterType)) {
-            cal.set(Calendar.MONTH, 0);
-            cal.set(Calendar.DAY_OF_MONTH, 1);
-            startDate = cal.getTime();
-            endDate = new Date();
-        } else if ("custom".equals(filterType) && startDateStr != null && endDateStr != null) {
-            try {
+        cal.setTimeZone(TimeZone.getTimeZone("Asia/Ho_Chi_Minh"));
+
+        try {
+            if ("day".equals(filterType)) {
+                cal.set(Calendar.HOUR_OF_DAY, 0);
+                cal.set(Calendar.MINUTE, 0);
+                cal.set(Calendar.SECOND, 0);
+                cal.set(Calendar.MILLISECOND, 0);
+                startDate = cal.getTime();
+                cal.set(Calendar.HOUR_OF_DAY, 23);
+                cal.set(Calendar.MINUTE, 59);
+                cal.set(Calendar.SECOND, 59);
+                cal.set(Calendar.MILLISECOND, 999);
+                endDate = cal.getTime();
+            } else if ("month".equals(filterType)) {
+                cal.set(Calendar.DAY_OF_MONTH, 1);
+                cal.set(Calendar.HOUR_OF_DAY, 0);
+                cal.set(Calendar.MINUTE, 0);
+                cal.set(Calendar.SECOND, 0);
+                cal.set(Calendar.MILLISECOND, 0);
+                startDate = cal.getTime();
+                cal.setTime(new Date());
+                cal.set(Calendar.HOUR_OF_DAY, 23);
+                cal.set(Calendar.MINUTE, 59);
+                cal.set(Calendar.SECOND, 59);
+                cal.set(Calendar.MILLISECOND, 999);
+                endDate = cal.getTime();
+            } else if ("year".equals(filterType)) {
+                cal.set(Calendar.MONTH, 0);
+                cal.set(Calendar.DAY_OF_MONTH, 1);
+                cal.set(Calendar.HOUR_OF_DAY, 0);
+                cal.set(Calendar.MINUTE, 0);
+                cal.set(Calendar.SECOND, 0);
+                cal.set(Calendar.MILLISECOND, 0);
+                startDate = cal.getTime();
+                cal.setTime(new Date());
+                cal.set(Calendar.HOUR_OF_DAY, 23);
+                cal.set(Calendar.MINUTE, 59);
+                cal.set(Calendar.SECOND, 59);
+                cal.set(Calendar.MILLISECOND, 999);
+                endDate = cal.getTime();
+            } else if ("custom".equals(filterType)) {
+                if (startDateStr == null || startDateStr.isEmpty() || endDateStr == null || endDateStr.isEmpty()) {
+                    throw new IllegalArgumentException("Start date and end date are required for custom filter");
+                }
                 startDate = sdf.parse(startDateStr);
                 endDate = sdf.parse(endDateStr);
-            } catch (ParseException e) {
-                throw new RuntimeException("Invalid date format");
+
+                // Đảm bảo endDate bao gồm cả ngày
+                cal.setTime(endDate);
+                cal.set(Calendar.HOUR_OF_DAY, 23);
+                cal.set(Calendar.MINUTE, 59);
+                cal.set(Calendar.SECOND, 59);
+                cal.set(Calendar.MILLISECOND, 999);
+                endDate = cal.getTime();
+            } else {
+                throw new IllegalArgumentException("Invalid filter type: " + filterType);
             }
+        } catch (ParseException e) {
+            throw new RuntimeException("Invalid date format for startDateStr=" + startDateStr + ", endDateStr=" + endDateStr, e);
         }
 
         Pageable pageable = PageRequest.of(page, size, Sort.by("soLuongBan").descending());
