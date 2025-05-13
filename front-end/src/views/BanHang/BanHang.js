@@ -1,7 +1,7 @@
-import { ref, computed, onMounted, watch } from 'vue';
-import { useRouter } from 'vue-router';
+import {ref, computed, onMounted, watch} from 'vue';
+import {useRouter} from 'vue-router';
 import axios from 'axios';
-import { debounce } from 'lodash';
+import {debounce} from 'lodash';
 
 export default function useBanHang() {
   const toast = ref(null);
@@ -19,33 +19,33 @@ export default function useBanHang() {
 
   const cartItems = ref([]);
   const cartColumns = ref([
-    { key: 'index', formatter: (_, __, index) => index + 1, label: 'STT' },
-    { key: 'name', label: 'Sản phẩm' },
-    { key: 'price', label: 'Đơn giá', formatter: (value) => `${value.toLocaleString()} đ` },
-    { key: 'imei', label: 'IMEI', formatter: (value) => value || 'N/A' },
-    { key: 'actions', label: 'Xóa', cellSlot: 'actionsSlot' },
+    {key: 'index', formatter: (_, __, index) => index + 1, label: 'STT'},
+    {key: 'name', label: 'Sản phẩm'},
+    {key: 'price', label: 'Đơn giá', formatter: (value) => `${value.toLocaleString()} đ`},
+    {key: 'imei', label: 'IMEI', formatter: (value) => value || 'N/A'},
+    {key: 'actions', label: 'Xóa', cellSlot: 'actionsSlot'},
   ]);
 
   const productColumns = ref([
-    { key: 'index', formatter: (_, __, index) => index + 1, label: 'STT' },
-    { key: 'tenSanPham', label: 'Tên sản phẩm' },
-    { key: 'ma', label: 'Mã' },
-    { key: 'mauSac', label: 'Màu', formatter: (value) => value || 'N/A' },
-    { key: 'dungLuongRam', label: 'Ram', formatter: (value) => value || 'N/A' },
-    { key: 'dungLuongBoNhoTrong', label: 'Bộ nhớ trong', formatter: (value) => value || 'N/A' },
-    { key: 'soLuong', label: 'Số lượng', formatter: (value) => value || 0 },
-    { key: 'giaBan', label: 'Giá', formatter: (value) => `${value.toLocaleString()} đ` },
-    { key: 'actions', label: 'Thao tác', cellSlot: 'productActionsSlot' },
+    {key: 'index', formatter: (_, __, index) => index + 1, label: 'STT'},
+    {key: 'tenSanPham', label: 'Tên sản phẩm'},
+    {key: 'ma', label: 'Mã'},
+    {key: 'mauSac', label: 'Màu', formatter: (value) => value || 'N/A'},
+    {key: 'dungLuongRam', label: 'Ram', formatter: (value) => value || 'N/A'},
+    {key: 'dungLuongBoNhoTrong', label: 'Bộ nhớ trong', formatter: (value) => value || 'N/A'},
+    {key: 'soLuong', label: 'Số lượng', formatter: (value) => value || 0},
+    {key: 'giaBan', label: 'Giá', formatter: (value) => `${value.toLocaleString()} đ`},
+    {key: 'actions', label: 'Thao tác', cellSlot: 'productActionsSlot'},
   ]);
 
   const imeiColumns = ref([
-    { key: 'imei', label: 'IMEI' },
-    { key: 'actions', label: 'Chọn', cellSlot: 'imeiActionsSlot' },
+    {key: 'imei', label: 'IMEI'},
+    {key: 'actions', label: 'Chọn', cellSlot: 'imeiActionsSlot'},
   ]);
 
   const searchCustomer = ref('');
   const selectedCustomer = ref(null);
-  const customer = ref({ name: '', phone: '', city: '', district: '', ward: '', address: '' });
+  const customer = ref({name: '', phone: '', city: '', district: '', ward: '', address: ''});
   const receiver = ref({
     name: '',
     phone: '',
@@ -238,7 +238,7 @@ export default function useBanHang() {
         },
       });
       if (response.status === 200 && response.data) {
-        availableIMEIs.value = response.data.map((imei) => ({ imei }));
+        availableIMEIs.value = response.data.map((imei) => ({imei}));
         showIMEIModal.value = true;
       }
     } catch (error) {
@@ -453,20 +453,47 @@ export default function useBanHang() {
   const selectPayment = (method) => {
     paymentMethod.value = method;
   };
-
-  // Create order
+// In BanHang.js, replace the createOrder function with:
   const createOrder = async () => {
+    if (!paymentMethod.value && !payOnDelivery.value) {
+      toast.value.kshowToast('error', 'Vui lòng chọn phương thức thanh toán hoặc thanh toán khi nhận hàng');
+      return;
+    }
+
     if (!activeInvoiceId.value || cartItems.value.length === 0) {
       toast.value.kshowToast('error', 'Vui lòng chọn hóa đơn và thêm sản phẩm vào giỏ hàng.');
       return;
     }
 
-    isCreatingOrder.value = true;
+    if (payOnDelivery.value) {
+      if (
+        !receiver.value.name ||
+        !receiver.value.phone ||
+        !receiver.value.city ||
+        !receiver.value.district ||
+        !receiver.value.ward ||
+        !receiver.value.address
+      ) {
+        toast.value.kshowToast('error', 'Vui lòng điền đầy đủ thông tin người nhận khi chọn bán giao hàng');
+        return;
+      }
+    }
+
+    if (paymentMethod.value === 'both') {
+      const finalAmount = totalPrice.value - discount.value;
+      if (tienChuyenKhoan.value + tienMat.value !== finalAmount) {
+        toast.value.kshowToast('error', 'Tổng tiền chuyển khoản và tiền mặt phải bằng tổng tiền hóa đơn!');
+        return;
+      }
+    }
+
     try {
-      const requestBody = {
+      const payload = {
         totalPrice: totalPrice.value,
         discount: discount.value,
         paymentMethod: paymentMethod.value,
+        tienChuyenKhoan: tienChuyenKhoan.value,
+        tienMat: tienMat.value,
         isDelivery: payOnDelivery.value,
         receiver: payOnDelivery.value
           ? {
@@ -476,18 +503,27 @@ export default function useBanHang() {
             district: receiver.value.district,
             ward: receiver.value.ward,
             address: receiver.value.address,
-            email: receiver.value.email,
+            email: receiver.value.email || null,
           }
           : null,
-        tienChuyenKhoan: tienChuyenKhoan.value,
-        tienMat: tienMat.value,
+        customer: selectedCustomer.value
+          ? {
+            name: customer.value.name,
+            phone: customer.value.phone,
+            city: customer.value.city,
+            district: customer.value.district,
+            ward: customer.value.ward,
+            address: customer.value.address,
+          }
+          : null,
+        orderNotes: orderNotes.value || '',
       };
 
-      const response = await axios.post(`http://localhost:8080/ban-hang/thanh-toan/${activeInvoiceId.value}`, requestBody);
+      const response = await axios.post(`http://localhost:8080/ban-hang/thanh-toan/${activeInvoiceId.value}`, payload);
       if (response.status === 200) {
         toast.value.kshowToast('success', 'Thanh toán thành công!');
 
-        // Lưu ID hóa đơn trước khi reset
+        // Store invoice ID for redirection
         const invoiceId = activeInvoiceId.value;
 
         // Reset state
@@ -495,18 +531,85 @@ export default function useBanHang() {
         activeInvoiceId.value = null;
         gioHangId.value = null;
         localStorage.removeItem('activeInvoiceId');
+        localStorage.removeItem('gioHangId');
+        selectedCustomer.value = null;
+        searchCustomer.value = '';
+        discountCode.value = '';
+        discount.value = 0;
+        orderNotes.value = '';
+        paymentMethod.value = '';
+        payOnDelivery.value = false;
+        tienChuyenKhoan.value = 0;
+        tienMat.value = 0;
+        customer.value = {name: '', phone: '', city: '', district: '', ward: '', address: ''};
+        receiver.value = {name: '', phone: '', city: '', district: '', ward: '', address: '', email: ''};
+
+        // Refresh pending invoices
         await fetchPendingInvoices();
 
-        // Chuyển hướng đến màn hình chi tiết hóa đơn
+        // Redirect to invoice details
         router.push(`/show-hoa-don/${invoiceId}`);
       }
     } catch (error) {
       console.error('Error processing payment:', error);
-      toast.value.kshowToast('error', 'Thanh toán thất bại. Vui lòng thử lại.');
+      toast.value.kshowToast('error', 'Thanh toán thất bại: ' + (error.response?.data || error.message));
     } finally {
       isCreatingOrder.value = false;
     }
   };
+  // Create order
+  // const createOrder = async () => {
+  //   if (!activeInvoiceId.value || cartItems.value.length === 0) {
+  //     toast.value.kshowToast('error', 'Vui lòng chọn hóa đơn và thêm sản phẩm vào giỏ hàng.');
+  //     return;
+  //   }
+  //
+  //   isCreatingOrder.value = true;
+  //   try {
+  //     const requestBody = {
+  //       totalPrice: totalPrice.value,
+  //       discount: discount.value,
+  //       paymentMethod: paymentMethod.value,
+  //       isDelivery: payOnDelivery.value,
+  //       receiver: payOnDelivery.value
+  //         ? {
+  //           name: receiver.value.name,
+  //           phone: receiver.value.phone,
+  //           city: receiver.value.city,
+  //           district: receiver.value.district,
+  //           ward: receiver.value.ward,
+  //           address: receiver.value.address,
+  //           email: receiver.value.email,
+  //         }
+  //         : null,
+  //       tienChuyenKhoan: tienChuyenKhoan.value,
+  //       tienMat: tienMat.value,
+  //     };
+  //
+  //     const response = await axios.post(`http://localhost:8080/ban-hang/thanh-toan/${activeInvoiceId.value}`, requestBody);
+  //     if (response.status === 200) {
+  //       toast.value.kshowToast('success', 'Thanh toán thành công!');
+  //
+  //       // Lưu ID hóa đơn trước khi reset
+  //       const invoiceId = activeInvoiceId.value;
+  //
+  //       // Reset state
+  //       cartItems.value = [];
+  //       activeInvoiceId.value = null;
+  //       gioHangId.value = null;
+  //       localStorage.removeItem('activeInvoiceId');
+  //       await fetchPendingInvoices();
+  //
+  //       // Chuyển hướng đến màn hình chi tiết hóa đơn
+  //       router.push(`/show-hoa-don/${invoiceId}`);
+  //     }
+  //   } catch (error) {
+  //     console.error('Error processing payment:', error);
+  //     toast.value.kshowToast('error', 'Thanh toán thất bại. Vui lòng thử lại.');
+  //   } finally {
+  //     isCreatingOrder.value = false;
+  //   }
+  // };
 
   // Apply discount
   const applyDiscount = () => {
@@ -633,8 +736,8 @@ export default function useBanHang() {
   onMounted(() => {
     fetchPendingInvoices();
     provinces.value = [
-      { name: 'Hà Nội', districts: [{ name: 'Ba Đình', wards: [{ name: 'Trúc Bạch' }] }] },
-      { name: 'TP.HCM', districts: [{ name: 'Quận 1', wards: [{ name: 'Bến Nghé' }] }] },
+      {name: 'Hà Nội', districts: [{name: 'Ba Đình', wards: [{name: 'Trúc Bạch'}]}]},
+      {name: 'TP.HCM', districts: [{name: 'Quận 1', wards: [{name: 'Bến Nghé'}]}]},
     ];
   });
 
