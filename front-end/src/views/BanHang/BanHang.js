@@ -340,12 +340,23 @@ export default function useBanHang() {
     }
   };
 
+
+  const generateRandomCode = () => {
+    const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    let randomCode = "";
+    for (let i = 0; i < 5; i++) {
+      const randomIndex = Math.floor(Math.random() * characters.length);
+      randomCode += characters[randomIndex];
+    }
+    return `HD${randomCode}`;
+  };
+
   // Create new pending invoice
   const createNewPendingInvoice = async () => {
     isCreatingInvoice.value = true;
     try {
       const response = await axios.post('http://localhost:8080/ban-hang/addHD', {
-        maHoaDon: `HD${Date.now()}`,
+        maHoaDon: generateRandomCode(),
         trangThai: 0,
       });
       if (response.status === 200 && response.data) {
@@ -452,6 +463,22 @@ export default function useBanHang() {
   // Select payment method
   const selectPayment = (method) => {
     paymentMethod.value = method;
+    const finalAmount = totalPrice.value - discount.value;
+    switch (method) {
+      case "transfer":
+        tienChuyenKhoan.value = finalAmount;
+        tienMat.value = 0;
+        break;
+      case "cash":
+        tienMat.value = finalAmount;
+        tienChuyenKhoan.value = 0;
+        break;
+      case "both":
+        tienChuyenKhoan.value = 0;
+        tienMat.value = 0;
+        break;
+    }
+    if (toast.value) toast.value.kshowToast("info", `Đã chọn phương thức thanh toán: ${method}`);
   };
 // In BanHang.js, replace the createOrder function with:
   const createOrder = async () => {
