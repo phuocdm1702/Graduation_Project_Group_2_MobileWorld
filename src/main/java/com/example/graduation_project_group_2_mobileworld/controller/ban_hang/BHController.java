@@ -1,30 +1,33 @@
 package com.example.graduation_project_group_2_mobileworld.controller.ban_hang;
 
+import com.example.graduation_project_group_2_mobileworld.dto.ban_hang.ChiTietSanPhamGroupDTO;
 import com.example.graduation_project_group_2_mobileworld.dto.ban_hang.HDban_hangDTO;
+import com.example.graduation_project_group_2_mobileworld.dto.ban_hang.ThanhToanRequestDTO;
 import com.example.graduation_project_group_2_mobileworld.dto.gio_hang.ChiTietGioHangDTO;
 import com.example.graduation_project_group_2_mobileworld.dto.gio_hang.ChiTietSPDTO;
 import com.example.graduation_project_group_2_mobileworld.dto.gio_hang.GioHangDTO;
+import com.example.graduation_project_group_2_mobileworld.entity.GioHang;
 import com.example.graduation_project_group_2_mobileworld.entity.HoaDon;
 import com.example.graduation_project_group_2_mobileworld.entity.KhachHang;
 import com.example.graduation_project_group_2_mobileworld.entity.NhanVien;
+import com.example.graduation_project_group_2_mobileworld.entity.SanPham.ChiTietSanPham;
+import com.example.graduation_project_group_2_mobileworld.repository.gio_hang.GioHangRepository;
 import com.example.graduation_project_group_2_mobileworld.repository.khach_hang.KhachHangRepository;
 import com.example.graduation_project_group_2_mobileworld.repository.nhan_vien.NhanVienRepository;
 import com.example.graduation_project_group_2_mobileworld.service.ban_hang_service.BanHangService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @RestController
 @RequestMapping("/ban-hang")
 @CrossOrigin(origins = "http://localhost:3000")
 public class BHController {
-
     @Autowired
     private BanHangService banHangService;
 
@@ -34,14 +37,30 @@ public class BHController {
     @Autowired
     private KhachHangRepository khachHangRepository;
 
-    @GetMapping("/data")
-    public List<HDban_hangDTO> fetchDataHD() {
-        List<HDban_hangDTO> listHD = banHangService.getAllHD();
-        if (listHD == null) {
-            System.out.println("Danh sách hóa đơn trả về null!");
-            return Collections.emptyList();
+    @Autowired
+    private GioHangRepository gioHangRepository;
+
+    @GetMapping("/gio-hang/by-hoa-don/{hoaDonId}")
+    public ResponseEntity<?> getGioHangByHoaDonId(@PathVariable Long hoaDonId) {
+        try {
+            Optional<GioHang> gioHang = gioHangRepository.findByHoaDonId(hoaDonId);
+            return ResponseEntity.ok(gioHang.orElse(null));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Lỗi khi lấy giỏ hàng: " + e.getMessage());
         }
-        return listHD;
+    }
+
+    @GetMapping("/data")
+    public ResponseEntity<List<HDban_hangDTO>> fetchDataHD() {
+        try {
+            List<HDban_hangDTO> listHD = banHangService.getAllHD();
+            return ResponseEntity.ok(listHD != null ? listHD : Collections.emptyList());
+        } catch (Exception e) {
+            System.out.println("Lỗi khi lấy danh sách hóa đơn: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Collections.emptyList());
+        }
     }
 
     @PostMapping("/addHD")
@@ -83,23 +102,48 @@ public class BHController {
             return ResponseEntity.ok(result);
         } catch (Exception e) {
             System.out.println("Lỗi khi thêm giỏ hàng: " + e.getMessage());
-            return ResponseEntity.status(500).body(null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
 
     @GetMapping("/san-pham")
-    public List<ChiTietSPDTO> dsSanPham() {
-        return banHangService.getAllCTSP();
+    public Page<ChiTietSanPhamGroupDTO> getSanPham(@RequestParam(defaultValue = "0") int page,
+                                                   @RequestParam(defaultValue = "10") int size,
+                                                   @RequestParam(defaultValue = "") String keyword) {
+        return banHangService.getAllCTSP(page, size, keyword);
     }
 
     @GetMapping("/san-pham/{sanPhamId}/imeis")
-    public ResponseEntity<List<String>> getIMEIsBySanPhamId(@PathVariable Integer sanPhamId) {
+    public ResponseEntity<List<String>> getIMEIsBySanPhamId(@PathVariable Integer sanPhamId,
+                                                            @RequestParam String mauSac,
+                                                            @RequestParam String dungLuongRam,
+                                                            @RequestParam String dungLuongBoNhoTrong) {
         try {
-            List<String> imeis = banHangService.getIMEIsBySanPhamId(sanPhamId);
+            List<String> imeis = banHangService.getIMEIsBySanPhamIdAndAttributes(sanPhamId, mauSac, dungLuongRam, dungLuongBoNhoTrong);
             return ResponseEntity.ok(imeis);
         } catch (Exception e) {
             System.out.println("Lỗi khi lấy danh sách IMEI: " + e.getMessage());
-            return ResponseEntity.status(500).body(null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
+
+    @GetMapping("/san-pham/by-imei/{imei}")
+    public ResponseEntity<ChiTietSPDTO> getChiTietSanPhamByIMEI(@PathVariable String imei) {
+        try {
+            ChiTietSanPham chiTietSanPham = banHangService.findChiTietSanPhamByIMEI(imei);
+            if (chiTietSanPham == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            }
+            ChiTietSPDTO dto = new ChiTietSPDTO();
+            dto.setId(chiTietSanPham.getId());
+            dto.setIdSanPham(chiTietSanPham.getIdSanPham().getId());
+            dto.setTenSanPham(chiTietSanPham.getIdSanPham().getTenSanPham());
+            dto.setGiaBan(chiTietSanPham.getGiaBan());
+            dto.setImei(imei);
+            return ResponseEntity.ok(dto);
+        } catch (Exception e) {
+            System.out.println("Lỗi khi lấy chi tiết sản phẩm bằng IMEI: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
 
@@ -120,13 +164,20 @@ public class BHController {
             return ResponseEntity.badRequest().body(null);
         } catch (Exception e) {
             System.out.println("Lỗi server: " + e.getMessage());
-            return ResponseEntity.status(500).body(null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
 
     @GetMapping("/gio-hang/{gioHangId}/chi-tiet")
-    public List<ChiTietGioHangDTO> getChiTietGioHang(@PathVariable Integer gioHangId) {
-        return banHangService.getChiTietGioHangByGioHangId(gioHangId);
+    public ResponseEntity<List<ChiTietGioHangDTO>> getChiTietGioHang(@PathVariable Integer gioHangId) {
+        try {
+            List<ChiTietGioHangDTO> chiTietGioHang = banHangService.getChiTietGioHangByGioHangId(gioHangId);
+            return ResponseEntity.ok(chiTietGioHang != null ? chiTietGioHang : Collections.emptyList());
+        } catch (Exception e) {
+            System.out.println("Lỗi khi lấy chi tiết giỏ hàng: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Collections.emptyList());
+        }
     }
 
     @DeleteMapping("/gio-hang/chi-tiet/{chiTietGioHangId}")
@@ -139,28 +190,33 @@ public class BHController {
             return ResponseEntity.badRequest().body("Lỗi: " + e.getMessage());
         } catch (Exception e) {
             System.out.println("Lỗi server: " + e.getMessage());
-            return ResponseEntity.status(500).body("Lỗi server: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Lỗi server: " + e.getMessage());
         }
     }
 
     @PostMapping("/thanh-toan/{hoaDonId}")
     public ResponseEntity<String> thanhToan(
             @PathVariable Integer hoaDonId,
-            @RequestBody Map<String, Object> requestBody) {
+            @RequestBody ThanhToanRequestDTO request) {
         try {
-            Long totalPrice = Long.parseLong(requestBody.get("totalPrice").toString());
-            Long discount = Long.parseLong(requestBody.get("discount").toString());
-            String paymentMethod = requestBody.get("paymentMethod").toString();
-            Long tienChuyenKhoan = requestBody.get("tienChuyenKhoan") != null ? Long.parseLong(requestBody.get("tienChuyenKhoan").toString()) : 0L;
-            Long tienMat = requestBody.get("tienMat") != null ? Long.parseLong(requestBody.get("tienMat").toString()) : 0L;
-            banHangService.thanhToan(hoaDonId, totalPrice, discount, paymentMethod, tienChuyenKhoan, tienMat);
+            if (request.getTotalPrice() == null || request.getDiscount() == null) {
+                return ResponseEntity.badRequest().body("Tổng tiền và giảm giá không được để trống");
+            }
+            if (request.getIsDelivery() != null && request.getIsDelivery() && request.getReceiver() != null) {
+                ThanhToanRequestDTO.ReceiverDTO receiver = request.getReceiver();
+                if (receiver.getName() == null || receiver.getPhone() == null) {
+                    return ResponseEntity.badRequest().body("Tên và số điện thoại người nhận không được để trống khi giao hàng");
+                }
+            }
+
+            banHangService.thanhToan(hoaDonId, request);
             return ResponseEntity.ok("Thanh toán thành công!");
         } catch (IllegalArgumentException e) {
             System.out.println("Lỗi dữ liệu: " + e.getMessage());
             return ResponseEntity.badRequest().body("Lỗi: " + e.getMessage());
         } catch (Exception e) {
             System.out.println("Lỗi server: " + e.getMessage());
-            return ResponseEntity.status(500).body("Lỗi server: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Lỗi server: " + e.getMessage());
         }
     }
 }

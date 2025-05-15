@@ -77,32 +77,14 @@
           </p>
         </transition>
       </form>
-
-      <!-- Confirm Modal -->
-      <ConfirmModal
-        :show="showConfirmModal"
-        :message="confirmMessage"
-        @confirm="executeConfirmedAction"
-        @cancel="closeConfirmModal"
-      />
     </div>
   </div>
 </template>
 
 <script setup>
 import useLogin from "@/views/LoginView/Login.js";
-import ConfirmModal from "@/components/ConfirmModal.vue";
 
-const {
-  tenDangNhap,
-  matKhau,
-  error,
-  showConfirmModal,
-  confirmMessage,
-  login,
-  executeConfirmedAction,
-  closeConfirmModal,
-} = useLogin();
+const { tenDangNhap, matKhau, error, login } = useLogin();
 </script>
 
 <style scoped>

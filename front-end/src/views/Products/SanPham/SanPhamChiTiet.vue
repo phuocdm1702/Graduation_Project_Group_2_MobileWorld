@@ -15,7 +15,7 @@
               v-model.trim="searchKeyword"
               @input="debouncedSearch"
               type="text"
-              placeholder="Tìm kiếm theo mã sản phẩm..."
+              placeholder="Tìm kiếm theo mã, tên, màu, RAM, ROM, giá..."
               class="input-field p-2 border border-gray-300 w-full"
             />
           </div>

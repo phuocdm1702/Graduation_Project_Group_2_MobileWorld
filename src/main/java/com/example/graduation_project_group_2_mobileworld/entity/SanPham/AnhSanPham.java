@@ -3,13 +3,17 @@ package com.example.graduation_project_group_2_mobileworld.entity.SanPham;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.Nationalized;
 
 @Getter
 @Setter
 @Entity
+@AllArgsConstructor
+@NoArgsConstructor
 @Table(name = "anh_san_pham")
 public class AnhSanPham {
     @Id
@@ -38,4 +42,8 @@ public class AnhSanPham {
     @Column(name = "deleted", nullable = false)
     private Boolean deleted = false;
 
+    @Column(name = "hash")
+    private String hash;
+    @Column(name = "product_group_key")
+    private String productGroupKey;
 }

@@ -173,6 +173,12 @@ export default function useSanPhamChiTiet() {
 
   const fetchProductDetails = async () => {
     try {
+      console.log('Fetching product details with params:', {
+        page: currentPage.value,
+        size: pageSize.value,
+        keyword: searchKeyword.value,
+        ...searchFilters.value,
+      });
       const { data } = await axios.get(`http://localhost:8080/chi-tiet-san-pham/${productId.value}/details`, {
         params: {
           page: currentPage.value,
@@ -188,6 +194,9 @@ export default function useSanPhamChiTiet() {
       });
       productDetails.value = data.content || data;
       totalItems.value = data.totalElements || productDetails.value.length;
+      if (productDetails.value.length === 0 && searchKeyword.value) {
+        toast.value?.kshowToast('info', 'Không tìm thấy kết quả phù hợp với từ khóa!');
+      }
     } catch (error) {
       toast.value?.kshowToast('error', 'Không thể tải dữ liệu!');
       console.error('Lỗi khi tải chi tiết sản phẩm:', error);

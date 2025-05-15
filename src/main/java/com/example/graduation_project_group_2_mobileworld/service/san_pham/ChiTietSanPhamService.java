@@ -22,6 +22,10 @@ import jakarta.persistence.criteria.Predicate;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -99,13 +103,42 @@ public class ChiTietSanPhamService {
         this.cloudinary = cloudinary;
     }
 
+//    public ChiTietSanPhamResponse createChiTietSanPham(ChiTietSanPhamDTO dto, List<MultipartFile> images) throws IOException {
+//        validateInput(dto, images);
+//        SanPham sanPham = createOrUpdateProduct(dto);
+//        if (sanPham == null || sanPham.getId() == null) {
+//            throw new IllegalStateException("Không thể tạo hoặc cập nhật sản phẩm");
+//        }
+//        List<AnhSanPham> anhSanPhams = uploadAndSaveImages(images);
+//        if (anhSanPhams == null || anhSanPhams.isEmpty()) {
+//            throw new IllegalStateException("Không có ảnh nào được lưu");
+//        }
+//        List<Imel> imels = createAndSaveImels(dto.getVariants());
+//        List<ChiTietSanPham> chiTietSanPhams = createVariants(dto, sanPham, anhSanPhams, imels);
+//        List<ChiTietSanPham> savedChiTietSanPhams = chiTietSanPhamRepository.saveAll(chiTietSanPhams);
+//        if (savedChiTietSanPhams == null || savedChiTietSanPhams.isEmpty()) {
+//            throw new IllegalStateException("Không thể lưu các biến thể sản phẩm");
+//        }
+//        return new ChiTietSanPhamResponse(
+//                sanPham.getId(),
+//                savedChiTietSanPhams.stream().map(ChiTietSanPham::getId).collect(Collectors.toList()),
+//                anhSanPhams.stream().map(AnhSanPham::getId).collect(Collectors.toList())
+//        );
+//    }
+
     public ChiTietSanPhamResponse createChiTietSanPham(ChiTietSanPhamDTO dto, List<MultipartFile> images) throws IOException {
         validateInput(dto, images);
         SanPham sanPham = createOrUpdateProduct(dto);
         if (sanPham == null || sanPham.getId() == null) {
             throw new IllegalStateException("Không thể tạo hoặc cập nhật sản phẩm");
         }
-        List<AnhSanPham> anhSanPhams = uploadAndSaveImages(images);
+
+        // Tạo productGroupKey dựa trên tên sản phẩm và một số thuộc tính (ví dụ: màu sắc)
+        String productGroupKey = generateProductGroupKey(dto);
+        System.out.println("Generated productGroupKey: " + productGroupKey); // Logging để debug
+
+        // Gọi uploadAndSaveImages với productGroupKey
+        List<AnhSanPham> anhSanPhams = uploadAndSaveImages(images, productGroupKey);
         if (anhSanPhams == null || anhSanPhams.isEmpty()) {
             throw new IllegalStateException("Không có ảnh nào được lưu");
         }
@@ -120,6 +153,22 @@ public class ChiTietSanPhamService {
                 savedChiTietSanPhams.stream().map(ChiTietSanPham::getId).collect(Collectors.toList()),
                 anhSanPhams.stream().map(AnhSanPham::getId).collect(Collectors.toList())
         );
+    }
+
+    private String generateProductGroupKey(ChiTietSanPhamDTO dto) {
+        String tenSanPham = dto.getTenSanPham() != null ? dto.getTenSanPham().toLowerCase().replace(" ", "_") : "unknown";
+        String mauSac = "";
+        String model = ""; // Add model information if available
+        if (dto.getVariants() != null && !dto.getVariants().isEmpty()) {
+            Integer idMauSac = dto.getVariants().get(0).getIdMauSac();
+            if (idMauSac != null) {
+                MauSac mauSacEntity = mauSacRepository.findById(idMauSac).orElse(null);
+                mauSac = mauSacEntity != null ? mauSacEntity.getMauSac().toLowerCase().replace(" ", "_") : "unknown";
+            }
+        }
+        // Assuming tenSanPham contains the model (e.g., "iPhone 14"), you can split or parse it
+        // For simplicity, let's assume tenSanPham is something like "iPhone 14"
+        return tenSanPham + "_" + mauSac; // e.g., "iphone_14_silver"
     }
 
     public void updateChiTietSanPham(Integer id, ChiTietSanPhamDTO dto) {
@@ -294,49 +343,188 @@ public class ChiTietSanPhamService {
 //        }
 //        return anhSanPhamRepository.saveAll(anhSanPhams);
 //    }
-    private List<AnhSanPham> uploadAndSaveImages(List<MultipartFile> images) throws IOException {
+//    private List<AnhSanPham> uploadAndSaveImages(List<MultipartFile> images) throws IOException {
+//        List<AnhSanPham> anhSanPhams = new ArrayList<>();
+//
+//        for (MultipartFile image : images) {
+//            if (image.isEmpty()) {
+//                continue;
+//            }
+//            validateImage(image);
+//
+//            String originalFilename = StringUtils.cleanPath(image.getOriginalFilename());
+//            String fileExtension = originalFilename.substring(originalFilename.lastIndexOf("."));
+//            String uniqueFilename = UUID.randomUUID().toString() + fileExtension;
+//
+//            try {
+//                Map<String, Object> uploadResult = cloudinary.uploader().upload(image.getBytes(),
+//                        ObjectUtils.asMap(
+//                                "public_id", "products/" + uniqueFilename,
+//                                "resource_type", "image"
+//                        ));
+//
+//                String imageUrl = (String) uploadResult.get("secure_url");
+//
+//                AnhSanPham anh = new AnhSanPham();
+//                anh.setMa(null);
+//                anh.setTenAnh(originalFilename);
+//                anh.setDuongDan(imageUrl);
+//                anh.setDeleted(false);
+//                anhSanPhams.add(anh);
+//            } catch (Exception e) {
+//                throw new IOException("Lỗi khi upload ảnh lên Cloudinary: " + e.getMessage(), e);
+//            }
+//        }
+//
+//        return anhSanPhamRepository.saveAll(anhSanPhams);
+//    }
+//
+//    private void validateImage(MultipartFile file) {
+//        String contentType = file.getContentType();
+//        if (!"image/jpeg".equals(contentType) && !"image/png".equals(contentType)) {
+//            throw new IllegalArgumentException("Chỉ chấp nhận file ảnh JPEG hoặc PNG");
+//        }
+//        if (file.getSize() > 10 * 1024 * 1024) {
+//            throw new IllegalArgumentException("File không được vượt quá 10MB");
+//        }
+//    }
+    private List<AnhSanPham> uploadAndSaveImages(List<MultipartFile> images, String productGroupKey) throws IOException {
         List<AnhSanPham> anhSanPhams = new ArrayList<>();
 
-        for (MultipartFile image : images) {
-            if (image.isEmpty()) {
-                continue;
-            }
-            validateImage(image);
+        if (images == null || images.isEmpty()) {
+            System.out.println("No images provided for upload.");
+            return anhSanPhams;
+        }
 
-            String originalFilename = StringUtils.cleanPath(image.getOriginalFilename());
+        MultipartFile representativeImage = images.get(0);
+        if (representativeImage.isEmpty()) {
+            System.out.println("Representative image is empty.");
+            return anhSanPhams;
+        }
+
+        validateImage(representativeImage);
+
+        // Calculate image hash
+        String imageHash = calculateImageHash(representativeImage.getBytes());
+        System.out.println("Calculated image hash: " + imageHash);
+
+        // Check database for existing image
+        String imageUrl = checkExistingImage(imageHash, productGroupKey);
+
+        if (imageUrl == null) {
+            // Check Cloudinary directly by searching with productGroupKey as a tag
+            imageUrl = checkCloudinaryForExistingImage(productGroupKey);
+        }
+
+        if (imageUrl == null) {
+            // No existing image found, upload the new image
+            String originalFilename = StringUtils.cleanPath(representativeImage.getOriginalFilename());
             String fileExtension = originalFilename.substring(originalFilename.lastIndexOf("."));
             String uniqueFilename = UUID.randomUUID().toString() + fileExtension;
 
             try {
-                Map<String, Object> uploadResult = cloudinary.uploader().upload(image.getBytes(),
-                        ObjectUtils.asMap(
-                                "public_id", "products/" + uniqueFilename,
-                                "resource_type", "image"
-                        ));
+                Map<String, Object> uploadParams = ObjectUtils.asMap(
+                        "public_id", "products/" + uniqueFilename,
+                        "resource_type", "image",
+                        "tags", Arrays.asList(productGroupKey)
+                );
 
-                String imageUrl = (String) uploadResult.get("secure_url");
+                Map<String, Object> uploadResult = cloudinary.uploader().upload(representativeImage.getBytes(), uploadParams);
+                imageUrl = (String) uploadResult.get("secure_url");
+                System.out.println("Uploaded new image to Cloudinary: " + imageUrl);
 
                 AnhSanPham anh = new AnhSanPham();
-                anh.setMa(null);
+                anh.setMa(UUID.randomUUID().toString());
                 anh.setTenAnh(originalFilename);
                 anh.setDuongDan(imageUrl);
+                anh.setHash(imageHash);
+                anh.setProductGroupKey(productGroupKey);
                 anh.setDeleted(false);
                 anhSanPhams.add(anh);
             } catch (Exception e) {
+                System.err.println("Error while uploading image to Cloudinary: " + e.getMessage());
+                e.printStackTrace();
                 throw new IOException("Lỗi khi upload ảnh lên Cloudinary: " + e.getMessage(), e);
             }
+        } else {
+            // Reuse the existing image
+            Optional<AnhSanPham> existingAnhSanPham = anhSanPhamRepository.findByDuongDan(imageUrl);
+            AnhSanPham anh;
+            if (existingAnhSanPham.isPresent()) {
+                anh = existingAnhSanPham.get();
+                System.out.println("Reused existing AnhSanPham entity: " + anh.getId());
+            } else {
+                anh = new AnhSanPham();
+                anh.setMa(UUID.randomUUID().toString());
+                anh.setTenAnh(representativeImage.getOriginalFilename());
+                anh.setDuongDan(imageUrl);
+                anh.setHash(imageHash);
+                anh.setProductGroupKey(productGroupKey);
+                anh.setDeleted(false);
+            }
+            anhSanPhams.add(anh);
+            System.out.println("Reused existing image: " + imageUrl);
         }
 
         return anhSanPhamRepository.saveAll(anhSanPhams);
     }
 
-    private void validateImage(MultipartFile file) {
-        String contentType = file.getContentType();
-        if (!"image/jpeg".equals(contentType) && !"image/png".equals(contentType)) {
-            throw new IllegalArgumentException("Chỉ chấp nhận file ảnh JPEG hoặc PNG");
+
+    // Hàm tính hash của ảnh
+    private String calculateImageHash(byte[] imageBytes) throws IOException {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest(imageBytes);
+            return Base64.getEncoder().encodeToString(hash);
+        } catch (NoSuchAlgorithmException e) {
+            throw new IOException("Lỗi khi tính hash ảnh: " + e.getMessage(), e);
         }
-        if (file.getSize() > 10 * 1024 * 1024) {
-            throw new IllegalArgumentException("File không được vượt quá 10MB");
+    }
+
+    private String checkExistingImage(String imageHash, String productGroupKey) throws IOException {
+        try {
+            // Kiểm tra ảnh trùng lặp trong cơ sở dữ liệu
+            Optional<AnhSanPham> existingImage = anhSanPhamRepository.findByHashAndProductGroupKey(imageHash, productGroupKey);
+            if (existingImage.isPresent()) {
+                String imageUrl = existingImage.get().getDuongDan();
+                System.out.println("Found existing image in database: " + imageUrl); // Logging để debug
+                return imageUrl;
+            }
+            return null;
+        } catch (Exception e) {
+            System.err.println("Error while checking image in database: " + e.getMessage());
+            e.printStackTrace();
+            throw new IOException("Lỗi khi kiểm tra ảnh trong cơ sở dữ liệu: " + e.getMessage(), e);
+        }
+    }
+    private String checkCloudinaryForExistingImage(String productGroupKey) throws IOException {
+        try {
+            // Search Cloudinary for images with the given tag
+            Map<String, Object> searchParams = ObjectUtils.asMap(
+                    "expression", "tags:" + productGroupKey,
+                    "max_results", 1
+            );
+
+            Map<String, Object> searchResult = cloudinary.search().expression("tags:" + productGroupKey).maxResults(1).execute();
+            List<Map<String, Object>> resources = (List<Map<String, Object>>) searchResult.get("resources");
+
+            if (!resources.isEmpty()) {
+                String imageUrl = (String) resources.get(0).get("secure_url");
+                System.out.println("Found existing image in Cloudinary: " + imageUrl);
+                return imageUrl;
+            }
+            return null;
+        } catch (Exception e) {
+            System.err.println("Error while searching Cloudinary: " + e.getMessage());
+            e.printStackTrace();
+            throw new IOException("Lỗi khi tìm kiếm ảnh trên Cloudinary: " + e.getMessage(), e);
+        }
+    }
+    // Hàm validate ảnh
+    private void validateImage(MultipartFile image) throws IOException {
+        if (!image.getContentType().startsWith("image/")) {
+            System.err.println("Invalid image file: " + image.getOriginalFilename() + ", content type: " + image.getContentType());
+            throw new IOException("File không phải là ảnh hợp lệ");
         }
     }
 
@@ -450,9 +638,27 @@ public class ChiTietSanPhamService {
             List<Predicate> predicates = new ArrayList<>();
             predicates.add(cb.equal(root.get("idSanPham").get("id"), sanPhamId));
             predicates.add(cb.equal(root.get("deleted"), status == null || "active".equals(status) ? false : true));
+
+            // Search across multiple fields
             if (keyword != null && !keyword.isEmpty()) {
-                predicates.add(cb.like(cb.lower(root.get("ma")), "%" + keyword.toLowerCase() + "%"));
+                String keywordPattern = "%" + keyword.toLowerCase() + "%";
+                List<Predicate> keywordPredicates = new ArrayList<>();
+                // Search in product code
+                keywordPredicates.add(cb.like(cb.lower(root.get("ma")), keywordPattern));
+                // Search in product name (from SanPham)
+                keywordPredicates.add(cb.like(cb.lower(root.get("idSanPham").get("tenSanPham")), keywordPattern));
+                // Search in color name
+                keywordPredicates.add(cb.like(cb.lower(root.get("idMauSac").get("mauSac")), keywordPattern));
+                // Search in RAM capacity
+                keywordPredicates.add(cb.like(cb.lower(root.get("idRam").get("dungLuongRam")), keywordPattern));
+                // Search in ROM capacity
+                keywordPredicates.add(cb.like(cb.lower(root.get("idBoNhoTrong").get("dungLuongBoNhoTrong")), keywordPattern));
+                // Search in price (cast to string for pattern matching)
+                keywordPredicates.add(cb.like(cb.lower(root.get("giaBan").as(String.class)), keywordPattern));
+                // Combine keyword predicates with OR
+                predicates.add(cb.or(keywordPredicates.toArray(new Predicate[0])));
             }
+
             if (idMauSac != null) {
                 predicates.add(cb.equal(root.get("idMauSac").get("id"), idMauSac));
             }
@@ -468,11 +674,14 @@ public class ChiTietSanPhamService {
             if (maxPrice != null) {
                 predicates.add(cb.lessThanOrEqualTo(root.get("giaBan"), maxPrice));
             }
+
             return cb.and(predicates.toArray(new Predicate[0]));
         };
-        // Lấy toàn bộ bản ghi thỏa mãn spec thay vì chỉ lấy trang hiện tại
+
+        // Fetch all records satisfying the specification
         List<ChiTietSanPham> allChiTietSanPhams = chiTietSanPhamRepository.findAll(spec);
-        // Gộp các sản phẩm chi tiết có cùng RAM, ROM, màu sắc và giá
+
+        // Group products by RAM, ROM, color, and price
         Map<String, List<ChiTietSanPham>> grouped = allChiTietSanPhams.stream()
                 .collect(Collectors.groupingBy(ctsp ->
                         ctsp.getIdRam().getId() + "_" +
@@ -480,7 +689,8 @@ public class ChiTietSanPhamService {
                                 ctsp.getIdMauSac().getId() + "_" +
                                 ctsp.getGiaBan().toString()
                 ));
-        // Chuyển đổi dữ liệu gộp thành DTO
+
+        // Convert grouped data to DTOs
         List<ChiTietSanPhamDTO> dtos = grouped.entrySet().stream().map(entry -> {
             List<ChiTietSanPham> group = entry.getValue();
             ChiTietSanPham first = group.get(0);
@@ -531,7 +741,8 @@ public class ChiTietSanPhamService {
             dto.setVariants(List.of(variantDTO));
             return dto;
         }).collect(Collectors.toList());
-        // Áp dụng phân trang cho danh sách DTO
+
+        // Apply pagination to the DTO list
         int start = Math.min(page * size, dtos.size());
         int end = Math.min(start + size, dtos.size());
         List<ChiTietSanPhamDTO> pagedDtos = dtos.subList(start, end);

@@ -192,13 +192,6 @@
                 Ngày
               </button>
               <button
-                @click="chartFilterType = 'week'; fetchOrderStatusStats()"
-                :class="chartFilterType === 'week' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'"
-                class="px-3 py-1 border-r border-gray-300 hover:bg-blue-600 hover:text-white transition-colors text-sm"
-              >
-                Tuần
-              </button>
-              <button
                 @click="chartFilterType = 'month'; fetchOrderStatusStats()"
                 :class="chartFilterType === 'month' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'"
                 class="px-3 py-1 border-r border-gray-300 hover:bg-blue-600 hover:text-white transition-colors text-sm"
