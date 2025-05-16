@@ -1,5 +1,6 @@
 package com.example.graduation_project_group_2_mobileworld.service.ban_hang_service;
 
+import com.example.graduation_project_group_2_mobileworld.controller.ban_hang.EmailSendBH;
 import com.example.graduation_project_group_2_mobileworld.dto.ban_hang.ChiTietSanPhamGroupDTO;
 import com.example.graduation_project_group_2_mobileworld.dto.ban_hang.HDCTban_hangDTO;
 import com.example.graduation_project_group_2_mobileworld.dto.ban_hang.HDban_hangDTO;
@@ -31,8 +32,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 @Service
@@ -69,6 +72,9 @@ public class BanHangService {
 
     @Autowired
     private ImelDaBanRepository imelDaBanRepository;
+
+    @Autowired
+    private EmailSendBH emailSendBH;
 
     public List<HDban_hangDTO> getAllHD() {
         List<HoaDon> listHD = hoaDonRepository.findAllHDNotConfirm();
@@ -253,27 +259,29 @@ public class BanHangService {
         lichSuHoaDon.setDeleted(false);
         lichSuHoaDonRepository.save(lichSuHoaDon);
 
-        String kieuThanhToan;
+        PhuongThucThanhToan phuongThucThanhToan;
+
         switch (request.getPaymentMethod() != null ? request.getPaymentMethod() : "") {
-            case "transfer":
-                kieuThanhToan = "Chuyển khoản";
-                break;
             case "cash":
-                kieuThanhToan = "Tiền mặt";
+                phuongThucThanhToan = phuongThucThanhToanRepository.findById(1)
+                        .orElseThrow(() -> new IllegalStateException("Phương thức Tiền mặt không tồn tại"));
+                break;
+            case "transfer":
+                phuongThucThanhToan = phuongThucThanhToanRepository.findById(2)
+                        .orElseThrow(() -> new IllegalStateException("Phương thức Chuyển khoản không tồn tại"));
                 break;
             case "both":
-                kieuThanhToan = "Cả hai phương thức";
+                phuongThucThanhToan = phuongThucThanhToanRepository.findById(3)
+                        .orElseThrow(() -> new IllegalStateException("Phương thức Cả hai không tồn tại"));
                 break;
             default:
-                kieuThanhToan = Boolean.TRUE.equals(request.getIsDelivery()) ? "Thanh toán khi nhận" : "Không xác định";
+                phuongThucThanhToan = Boolean.TRUE.equals(request.getIsDelivery()) ?
+                        phuongThucThanhToanRepository.findById(2)
+                        .orElseThrow(() -> new IllegalStateException("Phương thức Chuyển khoản không tồn tại"))
+                 : phuongThucThanhToanRepository.findById(3)
+                        .orElseThrow(() -> new IllegalStateException("Phương thức Cả hai không tồn tại"));
                 break;
         }
-
-        PhuongThucThanhToan phuongThucThanhToan = new PhuongThucThanhToan();
-        phuongThucThanhToan.setMa("PTTT" + System.currentTimeMillis());
-        phuongThucThanhToan.setKieuThanhToan(kieuThanhToan);
-        phuongThucThanhToan.setDeleted(false);
-        phuongThucThanhToan = phuongThucThanhToanRepository.save(phuongThucThanhToan);
 
         HinhThucThanhToan hinhThucThanhToan = new HinhThucThanhToan();
         hinhThucThanhToan.setHoaDon(hoaDon);
@@ -311,6 +319,25 @@ public class BanHangService {
 
             hdct.setIdImelDaBan(imelDaBan);
             hoaDonChiTietRepository.save(hdct);
+        }
+
+        if(hoaDon.getEmail() != null && !hoaDon.getEmail().isEmpty()) {
+            try {
+                SimpleDateFormat dateFormat = new SimpleDateFormat("hh:mm a Z, EEEE, dd/MM/yyyy", new Locale("vi", "VN"));
+                String formattedDate = dateFormat.format(hoaDon.getNgayThanhToan());
+
+                String formattedTotalAmount = String.format("%,.0f", hoaDon.getTongTienSauGiam());
+
+                emailSendBH.sendPaymentConfirmationEmail(
+                        hoaDon.getEmail(),
+                        hoaDon.getMa(),
+                        formattedTotalAmount,
+                        phuongThucThanhToan.getKieuThanhToan(),
+                        formattedDate
+                );
+            } catch (Exception e) {
+                System.err.println("Lỗi khi gửi email xác nhận thanh toán: " + e.getMessage());
+            }
         }
     }
 

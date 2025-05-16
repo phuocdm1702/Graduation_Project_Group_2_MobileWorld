@@ -175,6 +175,7 @@
       </div>
 
       <!-- Modal chọn IMEI -->
+      <!-- Modal chọn IMEI -->
       <div
         v-if="showIMEIModal"
         class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50"
@@ -221,10 +222,25 @@
             </table>
           </div>
           <div v-if="selectedIMEIs.length > 0" class="mt-4">
-            <h3 class="text-md font-semibold text-gray-700">IMEI đã chọn:</h3>
-            <ul class="list-disc pl-5">
-              <li v-for="imei in selectedIMEIs" :key="imei" class="text-gray-600">{{ imei }}</li>
-            </ul>
+            <h3 class="text-md font-semibold text-gray-700 mb-2">IMEI đã chọn:</h3>
+            <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 max-h-40 overflow-y-auto">
+              <div class="flex flex-wrap gap-2">
+          <span
+            v-for="imei in selectedIMEIs"
+            :key="imei"
+            class="inline-flex items-center px-3 py-1 bg-orange-100 text-orange-800 rounded-full text-sm font-medium transition-all hover:bg-orange-200"
+          >
+            {{ imei }}
+            <button
+              @click="removeIMEI(imei)"
+              class="ml-2 text-orange-600 hover:text-orange-800 focus:outline-none"
+              title="Xóa IMEI"
+            >
+              <i class="fas fa-times text-xs"></i>
+            </button>
+          </span>
+              </div>
+            </div>
           </div>
           <div class="mt-4 text-right">
             <button
