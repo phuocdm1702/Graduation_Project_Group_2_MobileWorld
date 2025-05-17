@@ -175,7 +175,6 @@
       </div>
 
       <!-- Modal chọn IMEI -->
-      <!-- Modal chọn IMEI -->
       <div
         v-if="showIMEIModal"
         class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50"
@@ -387,11 +386,15 @@
               <h3 class="text-md font-medium text-orange-500">Mã giảm giá</h3>
               <div class="flex space-x-4">
                 <input
-                  v-model="discountCode"
-                  type="text"
+                  v-model="discountCodeInput"
                   class="p-2 w-full border rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
-                  placeholder="Mừng Quốc Khánh 2/9"
+                  list="languages"
+                  placeholder="Chọn hoặc nhập mã giảm giá"
+                  @focus="fetchDiscountCodes"
                 />
+                <datalist id="languages">
+                  <option v-for="code in discountCodes" :key="code.id" :value="code.ma" />
+                </datalist>
                 <button
                   @click="applyDiscount"
                   class="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600 transition"
@@ -583,7 +586,10 @@ import BreadcrumbWrapper from '@/components/BreadcrumbWrapper.vue';
 import FormModal from '@/components/FormModal.vue';
 import useBanHang from '@/views/BanHang/BanHang';
 
+
+
 const {
+  idKhachHang, // Đảm bảo trả về idKhachHang
   toast,
   breadcrumbItems,
   provinces,
@@ -650,6 +656,27 @@ const {
 const isCreatingInvoice = ref(false);
 const isCreatingOrder = ref(false);
 
+// Hàm tải danh sách mã giảm giá từ API
+const discountCodes = ref([]);
+const discountCodeInput = ref('');
+
+const fetchDiscountCodes = async () => {
+  try {
+    let url = 'http://localhost:8080/ban-hang/PGG';
+    if (idKhachHang.value) {
+      url = `http://localhost:8080/ban-hang/by-khach-hang/${idKhachHang.value}`; // API lấy PGG theo id_khach_hang
+    }
+    const response = await fetch(url);
+    const data = await response.json();
+    discountCodes.value = data;
+  } catch (error) {
+    console.error('Lỗi khi tải mã giảm giá:', error);
+    discountCodes.value = []; // Reset danh sách nếu có lỗi
+  }
+};
+
+
+
 const handleScroll = (event) => {
   const element = event.target;
   if (
@@ -660,7 +687,6 @@ const handleScroll = (event) => {
   }
 };
 
-// Thêm hàm để ghi log khi checkbox IMEI thay đổi
 const handleIMEISelection = () => {
   console.log('Selected IMEIs:', selectedIMEIs.value);
 };

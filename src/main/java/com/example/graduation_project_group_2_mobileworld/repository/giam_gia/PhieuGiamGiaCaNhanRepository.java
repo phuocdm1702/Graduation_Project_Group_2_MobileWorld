@@ -17,4 +17,6 @@ public interface PhieuGiamGiaCaNhanRepository extends JpaRepository<PhieuGiamGia
     List<PhieuGiamGiaCaNhan> findByIdPhieuGiamGia(PhieuGiamGia phieuGiamGia);
 
     List<PhieuGiamGiaCaNhan> findByIdPhieuGiamGia_Id(Integer pggId);
+
+    List<PhieuGiamGiaCaNhan> findByIdKhachHangId(Integer idKhachHang);
 }

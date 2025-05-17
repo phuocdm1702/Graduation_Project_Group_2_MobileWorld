@@ -39,4 +39,7 @@ public class PhieuGiamGiaCaNhanService {
         return phieuGiamGiaCaNhanRepository.findByIdPhieuGiamGia_Id(pggId);
     }
 
+    public List<PhieuGiamGiaCaNhan> getall() {
+        return phieuGiamGiaCaNhanRepository.findAll();
+    }
 }

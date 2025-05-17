@@ -10,6 +10,7 @@ import com.example.graduation_project_group_2_mobileworld.dto.gio_hang.GioHangDT
 import com.example.graduation_project_group_2_mobileworld.entity.*;
 import com.example.graduation_project_group_2_mobileworld.entity.SanPham.ChiTietSanPham;
 import com.example.graduation_project_group_2_mobileworld.entity.SanPham.ImelDaBan;
+import com.example.graduation_project_group_2_mobileworld.repository.giam_gia.PhieuGiamGiaCaNhanRepository;
 import com.example.graduation_project_group_2_mobileworld.repository.gio_hang.ChiTietGioHangRepository;
 import com.example.graduation_project_group_2_mobileworld.repository.gio_hang.GioHangRepository;
 import com.example.graduation_project_group_2_mobileworld.repository.hinh_thuc_thanh_toan_repo.HinhThucThanhToanRepository;
@@ -42,6 +43,10 @@ import java.util.stream.Collectors;
 public class BanHangService {
     @Autowired
     private HoaDonRepository hoaDonRepository;
+
+    @Autowired
+    private PhieuGiamGiaCaNhanRepository phieuGiamGiaCaNhanRepository;
+
 
     @Autowired
     private GioHangRepository gioHangRepository;
@@ -403,4 +408,8 @@ public class BanHangService {
         dto.setIdSanPham(((Number) result[7]).intValue());
         return dto;
     }
+    public List<PhieuGiamGiaCaNhan> findByKhachHangId(Integer idKhachHang) {
+        return phieuGiamGiaCaNhanRepository.findByIdKhachHangId(idKhachHang);
+    }
+
 }

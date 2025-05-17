@@ -4,9 +4,7 @@ import axios from 'axios';
 import {debounce} from 'lodash';
 
 export default function useBanHang() {
-  const toast = ref(null);
   const router = useRouter();
-  const isProductsLoaded = ref(false);
   const currentPage = ref(0);
   const pageSize = ref(10);
   const isLoadingMore = ref(false);
@@ -639,16 +637,21 @@ export default function useBanHang() {
   // };
 
   // Apply discount
-  const applyDiscount = () => {
-    calculateDiscount();
-  };
+  
 
   // Search customers
+  // Trong useBanHang
+  const idKhachHang = ref(null); // Khai báo idKhachHang
+  const toast = ref(null);
+  const isProductsLoaded = ref(false);
+  // ... các biến khác
+
   const searchCustomers = debounce(async () => {
     if (!searchCustomer.value.trim()) {
       selectedCustomer.value = null;
-      customer.value = {name: "", phone: "", city: "", district: "", ward: "", address: ""};
-      receiver.value = {name: "", phone: "", city: "", district: "", ward: "", address: ""};
+      customer.value = { name: "", phone: "", city: "", district: "", ward: "", address: "" };
+      receiver.value = { name: "", phone: "", city: "", district: "", ward: "", address: "" };
+      idKhachHang.value = null; // Reset id_khach_hang
       return;
     }
 
@@ -657,6 +660,7 @@ export default function useBanHang() {
       if (response.data && response.data.length > 0) {
         const firstCustomer = response.data[0];
         selectedCustomer.value = true;
+        idKhachHang.value = firstCustomer.id; // Lưu id_khach_hang
         customer.value = {
           name: firstCustomer.ten || "",
           phone: firstCustomer.idTaiKhoan?.soDienThoai || "",
@@ -675,20 +679,20 @@ export default function useBanHang() {
         };
       } else {
         selectedCustomer.value = null;
-        customer.value = {name: "", phone: "", city: "", district: "", ward: "", address: ""};
-        receiver.value = {name: "", phone: "", city: "", district: "", ward: "", address: ""};
+        customer.value = { name: "", phone: "", city: "", district: "", ward: "", address: "" };
+        receiver.value = { name: "", phone: "", city: "", district: "", ward: "", address: "" };
+        idKhachHang.value = null;
         if (toast.value) toast.value.kshowToast("info", "Không tìm thấy khách hàng phù hợp");
       }
     } catch (error) {
       console.error("Lỗi khi tìm kiếm khách hàng:", error);
       selectedCustomer.value = null;
-      customer.value = {name: "", phone: "", city: "", district: "", ward: "", address: ""};
-      receiver.value = {name: "", phone: "", city: "", district: "", ward: "", address: ""};
+      customer.value = { name: "", phone: "", city: "", district: "", ward: "", address: "" };
+      receiver.value = { name: "", phone: "", city: "", district: "", ward: "", address: "" };
+      idKhachHang.value = null;
       if (toast.value) toast.value.kshowToast("error", "Không thể tìm kiếm khách hàng: " + (error.response?.data?.error || error.message));
     }
-    console.log('Searching customer:', searchCustomer.value);
   }, 300);
-
   // Add new customer
   const addNewCustomer = async (data) => {
     const customerData = {
@@ -769,6 +773,7 @@ export default function useBanHang() {
   });
 
   return {
+    idKhachHang, // Đảm bảo trả về idKhachHang
     toast,
     breadcrumbItems,
     provinces,
@@ -825,7 +830,7 @@ export default function useBanHang() {
     addProductWithIMEIs,
     searchCustomers,
     addNewCustomer,
-    applyDiscount,
+    // applyDiscount,
     selectPayment,
     createOrder,
     fetchProducts,

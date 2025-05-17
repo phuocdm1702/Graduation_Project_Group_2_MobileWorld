@@ -6,14 +6,12 @@ import com.example.graduation_project_group_2_mobileworld.dto.ban_hang.ThanhToan
 import com.example.graduation_project_group_2_mobileworld.dto.gio_hang.ChiTietGioHangDTO;
 import com.example.graduation_project_group_2_mobileworld.dto.gio_hang.ChiTietSPDTO;
 import com.example.graduation_project_group_2_mobileworld.dto.gio_hang.GioHangDTO;
-import com.example.graduation_project_group_2_mobileworld.entity.GioHang;
-import com.example.graduation_project_group_2_mobileworld.entity.HoaDon;
-import com.example.graduation_project_group_2_mobileworld.entity.KhachHang;
-import com.example.graduation_project_group_2_mobileworld.entity.NhanVien;
+import com.example.graduation_project_group_2_mobileworld.entity.*;
 import com.example.graduation_project_group_2_mobileworld.entity.SanPham.ChiTietSanPham;
 import com.example.graduation_project_group_2_mobileworld.repository.gio_hang.GioHangRepository;
 import com.example.graduation_project_group_2_mobileworld.repository.khach_hang.KhachHangRepository;
 import com.example.graduation_project_group_2_mobileworld.repository.nhan_vien.NhanVienRepository;
+import com.example.graduation_project_group_2_mobileworld.service.PhieuGiamGia.PhieuGiamGiaCaNhanService;
 import com.example.graduation_project_group_2_mobileworld.service.ban_hang_service.BanHangService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -39,6 +37,8 @@ public class BHController {
 
     @Autowired
     private GioHangRepository gioHangRepository;
+    @Autowired
+    private PhieuGiamGiaCaNhanService phieuGiamGiaCaNhanService;
 
     @GetMapping("/gio-hang/by-hoa-don/{hoaDonId}")
     public ResponseEntity<?> getGioHangByHoaDonId(@PathVariable Long hoaDonId) {
@@ -218,5 +218,14 @@ public class BHController {
             System.out.println("Lỗi server: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Lỗi server: " + e.getMessage());
         }
+    }
+    @GetMapping("/PGG")
+    public List<PhieuGiamGiaCaNhan> getall(){
+        return phieuGiamGiaCaNhanService.getall();
+    }
+    @GetMapping("/by-khach-hang/{idKhachHang}")
+    public ResponseEntity<List<PhieuGiamGiaCaNhan>> getByKhachHang(@PathVariable Integer idKhachHang) {
+        List<PhieuGiamGiaCaNhan> phieuGiamGias = banHangService.findByKhachHangId(idKhachHang);
+        return ResponseEntity.ok(phieuGiamGias);
     }
 }
