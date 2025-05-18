@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface PhieuGiamGiaCaNhanRepository extends JpaRepository<PhieuGiamGiaCaNhan, Integer> {
     @Modifying
@@ -19,4 +20,6 @@ public interface PhieuGiamGiaCaNhanRepository extends JpaRepository<PhieuGiamGia
     List<PhieuGiamGiaCaNhan> findByIdPhieuGiamGia_Id(Integer pggId);
 
     List<PhieuGiamGiaCaNhan> findByIdKhachHangId(Integer idKhachHang);
+
+    Optional<PhieuGiamGiaCaNhan> findByMa(String ma);
 }

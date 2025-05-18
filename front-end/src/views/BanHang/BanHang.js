@@ -772,7 +772,119 @@ export default function useBanHang() {
     ];
   });
 
+  const applyDiscount = async () => {
+    if (!discountCodeInput.value.trim()) {
+      toast.value.kshowToast('error', 'Vui lòng nhập hoặc chọn mã giảm giá.');
+      return;
+    }
+
+    try {
+      const response = await axios.get(`http://localhost:8080/ban-hang/pgg/check?ma=${encodeURIComponent(discountCodeInput.value.trim())}`);
+      if (response.status === 200 && response.data) {
+        const discountData = response.data;
+
+        // Kiểm tra trạng thái của phiếu giảm giá cá nhân và PhieuGiamGia liên kết
+        if (!discountData.trangThai || !discountData.idPhieuGiamGia?.trangThai) {
+          toast.value.kshowToast('error', 'Mã giảm giá không hợp lệ hoặc đã bị vô hiệu hóa.');
+          discount.value = 0;
+          discountCode.value = '';
+          return;
+        }
+
+        // Kiểm tra ngày hết hạn
+        const ngayHetHan = new Date(discountData.ngayHetHan);
+        if (ngayHetHan < new Date()) {
+          toast.value.kshowToast('error', 'Mã giảm giá đã hết hạn.');
+          discount.value = 0;
+          discountCode.value = '';
+          return;
+        }
+
+        // Kiểm tra giá trị đơn hàng tối thiểu
+        const hoaDonToiThieu = discountData.idPhieuGiamGia.hoaDonToiThieu || 0;
+        if (totalPrice.value < hoaDonToiThieu) {
+          toast.value.kshowToast('error', `Đơn hàng phải từ ${hoaDonToiThieu.toLocaleString()} đ để áp dụng mã này.`);
+          discount.value = 0;
+          discountCode.value = '';
+          return;
+        }
+
+        // Tính toán giảm giá dựa trên loaiPhieuGiamGia
+        let discountAmount = discountData.idPhieuGiamGia.soTienGiamToiDa || 0;
+        if (discountData.idPhieuGiamGia.loaiPhieuGiamGia === 'PERCENTAGE' && discountData.idPhieuGiamGia.phanTramGiamGia) {
+          const calculatedDiscount = (totalPrice.value * discountData.idPhieuGiamGia.phanTramGiamGia) / 100;
+          discountAmount = Math.min(calculatedDiscount, discountData.idPhieuGiamGia.soTienGiamToiDa);
+        }
+
+        // Áp dụng giảm giá
+        discount.value = discountAmount;
+        discountCode.value = discountCodeInput.value;
+        toast.value.kshowToast('success', `Áp dụng mã giảm giá thành công! Giảm ${discountAmount.toLocaleString()} đ.`);
+      } else {
+        toast.value.kshowToast('error', 'Mã giảm giá không hợp lệ.');
+        discount.value = 0;
+        discountCode.value = '';
+      }
+    } catch (error) {
+      console.error('Lỗi khi áp dụng mã giảm giá:', error);
+      if (error.response?.status === 404) {
+        toast.value.kshowToast('error', `Mã giảm giá "${discountCodeInput.value.trim()}" không tồn tại.`);
+      } else {
+        toast.value.kshowToast('error', 'Lỗi khi áp dụng mã giảm giá: ' + (error.response?.data?.message || error.message));
+      }
+      discount.value = 0;
+      discountCode.value = '';
+    }
+  };
+
+  // Hàm tải danh sách mã giảm giá từ API
+  const discountCodes = ref([]);
+  const discountCodeInput = ref('');
+
+  const fetchDiscountCodes = async () => {
+    if (!idKhachHang.value) {
+      discountCodes.value = [];
+      toast.value.kshowToast('info', 'Vui lòng chọn khách hàng trước khi tải mã giảm giá.');
+      return;
+    }
+    try {
+      const url = `http://localhost:8080/ban-hang/by-khach-hang/${idKhachHang.value}`;
+      const response = await axios.get(url);
+      if (response.status === 200 && response.data) {
+        discountCodes.value = response.data.map(item => ({
+          id: item.id,
+          ma: item.ma,
+          idPhieuGiamGia: item.idPhieuGiamGia?.id,
+          tenPhieuGiamGia: item.idPhieuGiamGia?.tenPhieuGiamGia,
+          loaiPhieuGiamGia: item.idPhieuGiamGia?.loaiPhieuGiamGia,
+          phanTramGiamGia: item.idPhieuGiamGia?.phanTramGiamGia,
+          soTienGiamToiDa: item.idPhieuGiamGia?.soTienGiamToiDa,
+          hoaDonToiThieu: item.idPhieuGiamGia?.hoaDonToiThieu,
+          ngayHetHan: item.ngayHetHan,
+          trangThai: item.trangThai,
+          riengTu: item.idPhieuGiamGia?.riengTu
+        }));
+      } else {
+        discountCodes.value = [];
+        toast.value.kshowToast('info', 'Không tìm thấy mã giảm giá cho khách hàng này.');
+      }
+    } catch (error) {
+      console.error('Lỗi khi tải mã giảm giá:', error);
+      discountCodes.value = [];
+      toast.value.kshowToast('error', 'Không thể tải danh sách mã giảm giá.');
+    }
+  };
+
+  const selectDiscountCode = async (ma) => {
+    discountCodeInput.value = ma;
+    await applyDiscount();
+  };
+
   return {
+    discountCodes,
+    selectDiscountCode,
+    discountCodeInput,
+    fetchDiscountCodes,
     idKhachHang, // Đảm bảo trả về idKhachHang
     toast,
     breadcrumbItems,
@@ -830,10 +942,11 @@ export default function useBanHang() {
     addProductWithIMEIs,
     searchCustomers,
     addNewCustomer,
-    // applyDiscount,
+    applyDiscount,
     selectPayment,
     createOrder,
     fetchProducts,
     refreshProducts,
+    
   };
 }

@@ -585,6 +585,7 @@ import ToastNotification from '@/components/ToastNotification.vue';
 import BreadcrumbWrapper from '@/components/BreadcrumbWrapper.vue';
 import FormModal from '@/components/FormModal.vue';
 import useBanHang from '@/views/BanHang/BanHang';
+import axios from "axios";
 
 
 
@@ -651,29 +652,14 @@ const {
   createOrder,
   fetchProducts,
   refreshProducts,
+  discountCodes,
+  discountCodeInput,
+  fetchDiscountCodes,
+  selectDiscountCode,
 } = useBanHang();
 
 const isCreatingInvoice = ref(false);
 const isCreatingOrder = ref(false);
-
-// Hàm tải danh sách mã giảm giá từ API
-const discountCodes = ref([]);
-const discountCodeInput = ref('');
-
-const fetchDiscountCodes = async () => {
-  try {
-    let url = 'http://localhost:8080/ban-hang/PGG';
-    if (idKhachHang.value) {
-      url = `http://localhost:8080/ban-hang/by-khach-hang/${idKhachHang.value}`; // API lấy PGG theo id_khach_hang
-    }
-    const response = await fetch(url);
-    const data = await response.json();
-    discountCodes.value = data;
-  } catch (error) {
-    console.error('Lỗi khi tải mã giảm giá:', error);
-    discountCodes.value = []; // Reset danh sách nếu có lỗi
-  }
-};
 
 
 

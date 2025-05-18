@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -41,5 +43,17 @@ public class PhieuGiamGiaCaNhanService {
 
     public List<PhieuGiamGiaCaNhan> getall() {
         return phieuGiamGiaCaNhanRepository.findAll();
+    }
+
+    public Optional<PhieuGiamGiaCaNhan> checkDiscountCode(String ma) {
+        Optional<PhieuGiamGiaCaNhan> optional = phieuGiamGiaCaNhanRepository.findByMa(ma);
+        if (optional.isPresent()) {
+            PhieuGiamGiaCaNhan pgg = optional.get();
+            if (pgg.getTrangThai() && pgg.getIdPhieuGiamGia().getTrangThai() &&
+                    pgg.getNgayHetHan().after(new Date())) {
+                return optional;
+            }
+        }
+        return Optional.empty();
     }
 }
