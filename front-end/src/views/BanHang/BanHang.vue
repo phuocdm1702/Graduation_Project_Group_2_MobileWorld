@@ -475,7 +475,7 @@
             </div>
             <div class="text-right">
               <button
-                @click="createOrder"
+                @click="ThanhToan"
                 :disabled="!activeInvoiceId || cartItems.length === 0 || isCreatingOrder"
                 class="px-6 py-2 bg-orange-500 text-white rounded hover:bg-orange-600 disabled:bg-gray-400 transition"
               >
@@ -576,16 +576,27 @@
       </div>
     </template>
   </FormModal>
+  
+  <ConfirmModal
+    :show="showConfirmModal"
+    :message="'Bạn có chắc chắn muốn thanh toán chưa?'"
+    @confirm="createOrder"
+    @cancel="showConfirmModal = false"
+  />
+  
 </template>
 
 <script setup>
 import { ref } from 'vue';
+import ConfirmModal from "@/components/ConfirmModal.vue";
 import DynamicTable from '@/components/DynamicTable.vue';
 import ToastNotification from '@/components/ToastNotification.vue';
 import BreadcrumbWrapper from '@/components/BreadcrumbWrapper.vue';
 import FormModal from '@/components/FormModal.vue';
 import useBanHang from '@/views/BanHang/BanHang';
 import axios from "axios";
+
+
 
 
 
@@ -676,6 +687,12 @@ const handleScroll = (event) => {
 const handleIMEISelection = () => {
   console.log('Selected IMEIs:', selectedIMEIs.value);
 };
+
+const showConfirmModal = ref(false);
+
+const ThanhToan = () => {
+  showConfirmModal.value = true;
+}
 </script>
 
 <style scoped>
