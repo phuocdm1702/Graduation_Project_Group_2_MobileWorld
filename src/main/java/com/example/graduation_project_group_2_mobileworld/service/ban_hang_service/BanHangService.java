@@ -259,7 +259,7 @@ public class BanHangService {
             }
 
             if (taiKhoan == null || khachHang == null) {
-                hoaDon.setIdKhachHang(defaultKhachHang); // Sử dụng KhachHang mặc định
+                hoaDon.setIdKhachHang(khachHang);
                 hoaDon.setTenKhachHang(tenKhachHang);
                 hoaDon.setSoDienThoaiKhachHang(soDienThoai);
                 hoaDon.setEmail(email);
