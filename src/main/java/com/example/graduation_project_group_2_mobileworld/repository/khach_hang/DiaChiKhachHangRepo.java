@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 
-public interface diaChiKhachHangRepo extends JpaRepository<DiaChiKhachHang,Integer> {
+public interface DiaChiKhachHangRepo extends JpaRepository<DiaChiKhachHang,Integer> {
     @Query("SELECT MAX(CAST(SUBSTRING(n.ma, 5, LEN(n.ma) - 4) AS int)) FROM DiaChiKhachHang n WHERE LEN(n.ma) >= 5")
     Integer findMaxMa();
 

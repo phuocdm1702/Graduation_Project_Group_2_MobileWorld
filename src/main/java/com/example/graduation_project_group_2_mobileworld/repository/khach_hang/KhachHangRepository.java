@@ -1,6 +1,7 @@
 package com.example.graduation_project_group_2_mobileworld.repository.khach_hang;
 
 import com.example.graduation_project_group_2_mobileworld.entity.KhachHang;
+import com.example.graduation_project_group_2_mobileworld.entity.TaiKhoan;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -29,4 +30,8 @@ public interface KhachHangRepository extends JpaRepository<KhachHang, Integer> {
     List<KhachHang> searchBh(String keyword);
 
     Optional<KhachHang> findByMa(String ma);
+
+    List<KhachHang> findByIdTaiKhoan(TaiKhoan taiKhoan);
+
+
 }

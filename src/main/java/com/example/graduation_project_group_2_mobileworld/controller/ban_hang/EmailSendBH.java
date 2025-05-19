@@ -171,10 +171,7 @@ public class EmailSendBH {
             }
             """;
 
-    // Các phương thức hiện có (giữ nguyên)
-
-    // Phương thức mới cho thanh toán kèm lời chúc
-    public void sendPaymentConfirmationEmail(String toEmail, String orderCode, String totalAmount, String paymentMethod, String date) {
+    public void sendPaymentConfirmationEmail(String toEmail, String orderCode, String totalAmount, String paymentMethod, String date, String productDetails) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
@@ -209,6 +206,7 @@ public class EmailSendBH {
                                     <p><strong>Tổng tiền:</strong> %s đ</p>
                                     <p><strong>Phương thức thanh toán:</strong> %s</p>
                                     <p><strong>Thời gian thanh toán:</strong> %s</p>
+                                    <p><strong>Chi tiết sản phẩm:</strong><br>%s</p>
                                     <p>Chúng tôi đã ghi nhận giao dịch của bạn. Vui lòng kiểm tra thông tin và liên hệ nếu có thắc mắc.</p>
                                 </div>
                                 <p>
@@ -223,7 +221,7 @@ public class EmailSendBH {
                         </div>
                     </body>
                     </html>
-                    """.formatted(EMAIL_CSS, orderCode, totalAmount, paymentMethod, date);
+                    """.formatted(EMAIL_CSS, orderCode, totalAmount, paymentMethod, date, productDetails);
 
             String plainTextContent = """
                     Cảm ơn bạn đã mua sắm tại MobileWorld!
@@ -234,6 +232,8 @@ public class EmailSendBH {
                     - Tổng tiền: %s đ
                     - Phương thức thanh toán: %s
                     - Thời gian thanh toán: %s
+                    - Chi tiết sản phẩm:
+                    %s
 
                     Chúng tôi đã ghi nhận giao dịch của bạn. Vui lòng kiểm tra thông tin và liên hệ nếu có thắc mắc.
                     Nhấn vào liên kết để xem đơn hàng: http://localhost:3000/don-hang
@@ -241,7 +241,7 @@ public class EmailSendBH {
                     Trân trọng,
                     MobileWorld
                     Liên hệ: support@mobileworld.com.vn
-                    """.formatted(orderCode, totalAmount, paymentMethod, date);
+                    """.formatted(orderCode, totalAmount, paymentMethod, date, productDetails.replace("<br>", "\n"));
 
             helper.setText(plainTextContent, htmlContent);
             mailSender.send(message);
@@ -251,5 +251,4 @@ public class EmailSendBH {
             e.printStackTrace();
         }
     }
-
 }

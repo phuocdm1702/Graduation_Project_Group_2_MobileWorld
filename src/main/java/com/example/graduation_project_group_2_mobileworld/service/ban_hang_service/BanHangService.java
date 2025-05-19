@@ -22,6 +22,7 @@ import com.example.graduation_project_group_2_mobileworld.repository.san_pham.Ch
 import com.example.graduation_project_group_2_mobileworld.repository.san_pham.SanPhamRepository;
 import com.example.graduation_project_group_2_mobileworld.repository.hoa_don.LichSuHoaDonRepository;
 import com.example.graduation_project_group_2_mobileworld.repository.san_pham.ImelDaBanRepository;
+import com.example.graduation_project_group_2_mobileworld.repository.tai_khoan.TaiKhoanRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.CacheEvict;
@@ -80,6 +81,8 @@ public class BanHangService {
 
     @Autowired
     private EmailSendBH emailSendBH;
+    @Autowired
+    private TaiKhoanRepository taiKhoanRepository;
 
     public List<HDban_hangDTO> getAllHD() {
         List<HoaDon> listHD = hoaDonRepository.findAllHDNotConfirm();
@@ -225,33 +228,94 @@ public class BanHangService {
         hoaDon.setNgayThanhToan(new Date());
         hoaDon.setUpdatedAt(new Date());
 
+        System.out.println("IsDelivery: " + request.getIsDelivery());
+        System.out.println("Receiver: " + (request.getReceiver() != null ? request.getReceiver().toString() : "null"));
+
+        // Lấy KhachHang mặc định với id = 1
+        final Integer DEFAULT_KHACH_HANG_ID = 1;
+        KhachHang defaultKhachHang = khachHangRepository.findById(DEFAULT_KHACH_HANG_ID)
+                .orElseThrow(() -> new IllegalStateException("Khách hàng mặc định với ID = 1 không tồn tại"));
+
         if (Boolean.TRUE.equals(request.getIsDelivery()) && request.getReceiver() != null) {
+            // Trường hợp 1: Bán online
             ThanhToanRequestDTO.ReceiverDTO receiver = request.getReceiver();
-            hoaDon.setTenKhachHang(receiver.getName() != null ? receiver.getName() : "Khách lẻ");
-            hoaDon.setSoDienThoaiKhachHang(receiver.getPhone() != null ? receiver.getPhone() : "N/A");
-            hoaDon.setEmail(receiver.getEmail());
+            String tenKhachHang = receiver.getName() != null && !receiver.getName().isEmpty() ? receiver.getName() : "Khách lẻ";
+            String soDienThoai = receiver.getPhone() != null && !receiver.getPhone().isEmpty() ? receiver.getPhone() : "N/A";
+            String email = receiver.getEmail() != null && !receiver.getEmail().isEmpty() ? receiver.getEmail() : null;
             StringBuilder diaChi = new StringBuilder();
-            if (receiver.getCity() != null && !receiver.getCity().isEmpty()) {
-                diaChi.append(receiver.getCity());
+            if (receiver.getCity() != null && !receiver.getCity().isEmpty()) diaChi.append(receiver.getCity());
+            if (receiver.getDistrict() != null && !receiver.getDistrict().isEmpty()) diaChi.append(", ").append(receiver.getDistrict());
+            if (receiver.getWard() != null && !receiver.getWard().isEmpty()) diaChi.append(", ").append(receiver.getWard());
+            if (receiver.getAddress() != null && !receiver.getAddress().isEmpty()) diaChi.append(", ").append(receiver.getAddress());
+            String diaChiKhachHang = diaChi.length() > 0 ? diaChi.toString() : "N/A";
+
+            List<TaiKhoan> taiKhoanList = taiKhoanRepository.findBySoDienThoai(soDienThoai);
+            TaiKhoan taiKhoan = taiKhoanList.isEmpty() ? null : taiKhoanList.get(0);
+
+            KhachHang khachHang = null;
+            if (taiKhoan != null) {
+                List<KhachHang> khachHangList = khachHangRepository.findByIdTaiKhoan(taiKhoan);
+                khachHang = khachHangList.isEmpty() ? null : khachHangList.get(0);
             }
-            if (receiver.getDistrict() != null && !receiver.getDistrict().isEmpty()) {
-                diaChi.append(", ").append(receiver.getDistrict());
+
+            if (taiKhoan == null || khachHang == null) {
+                hoaDon.setIdKhachHang(defaultKhachHang); // Sử dụng KhachHang mặc định
+                hoaDon.setTenKhachHang(tenKhachHang);
+                hoaDon.setSoDienThoaiKhachHang(soDienThoai);
+                hoaDon.setEmail(email);
+                hoaDon.setDiaChiKhachHang(diaChiKhachHang);
+                hoaDon.setLoaiDon("online");
+            } else {
+                hoaDon.setIdKhachHang(khachHang);
+                hoaDon.setTenKhachHang(khachHang.getTen());
+                hoaDon.setSoDienThoaiKhachHang(taiKhoan.getSoDienThoai());
+                hoaDon.setEmail(taiKhoan.getEmail());
+                hoaDon.setDiaChiKhachHang(khachHang.getIdDiaChiKH() != null ? khachHang.getIdDiaChiKH().getDiaChiCuThe() : diaChiKhachHang);
+                hoaDon.setLoaiDon("online");
             }
-            if (receiver.getWard() != null && !receiver.getWard().isEmpty()) {
-                diaChi.append(", ").append(receiver.getWard());
-            }
-            if (receiver.getAddress() != null && !receiver.getAddress().isEmpty()) {
-                diaChi.append(", ").append(receiver.getAddress());
-            }
-            hoaDon.setDiaChiKhachHang(diaChi.length() > 0 ? diaChi.toString() : "N/A");
-            hoaDon.setLoaiDon("online");
         } else {
-            hoaDon.setTenKhachHang("Khách lẻ");
-            hoaDon.setSoDienThoaiKhachHang("N/A");
-            hoaDon.setEmail(null);
-            hoaDon.setDiaChiKhachHang("N/A");
-            hoaDon.setLoaiDon("Tại quầy");
-            hoaDon.setTrangThai((short) 3);
+            // Trường hợp 2 & 3: Bán tại quầy
+            ThanhToanRequestDTO.ReceiverDTO receiver = request.getReceiver();
+            String soDienThoai = receiver != null && receiver.getPhone() != null && !receiver.getPhone().isEmpty() ? receiver.getPhone() : null;
+
+            if (soDienThoai == null) {
+                // Trường hợp 2: Khách mới (không có số điện thoại)
+                hoaDon.setIdKhachHang(defaultKhachHang); // Sử dụng KhachHang mặc định
+                hoaDon.setTenKhachHang("Khách lẻ");
+                hoaDon.setSoDienThoaiKhachHang("N/A");
+                hoaDon.setEmail(null);
+                hoaDon.setDiaChiKhachHang("N/A");
+                hoaDon.setLoaiDon("Tại quầy");
+                hoaDon.setTrangThai((short) 3);
+            } else {
+                // Trường hợp 3: Khách cũ (có số điện thoại)
+                List<TaiKhoan> taiKhoanList = taiKhoanRepository.findBySoDienThoai(soDienThoai);
+                TaiKhoan taiKhoan = taiKhoanList.isEmpty() ? null : taiKhoanList.get(0);
+
+                KhachHang khachHang = null;
+                if (taiKhoan != null) {
+                    List<KhachHang> khachHangList = khachHangRepository.findByIdTaiKhoan(taiKhoan);
+                    khachHang = khachHangList.isEmpty() ? null : khachHangList.get(0);
+                }
+
+                if (taiKhoan == null || khachHang == null) {
+                    // Nếu không tìm thấy khách hàng, sử dụng KhachHang mặc định
+                    hoaDon.setIdKhachHang(defaultKhachHang);
+                    hoaDon.setTenKhachHang("Khách lẻ");
+                    hoaDon.setSoDienThoaiKhachHang("N/A");
+                    hoaDon.setEmail(null);
+                    hoaDon.setDiaChiKhachHang("N/A");
+                } else {
+                    // Nếu tìm thấy, lấy thông tin khách hàng
+                    hoaDon.setIdKhachHang(khachHang);
+                    hoaDon.setTenKhachHang(khachHang.getTen());
+                    hoaDon.setSoDienThoaiKhachHang(taiKhoan.getSoDienThoai());
+                    hoaDon.setEmail(taiKhoan.getEmail());
+                    hoaDon.setDiaChiKhachHang(khachHang.getIdDiaChiKH() != null ? khachHang.getIdDiaChiKH().getDiaChiCuThe() : "N/A");
+                }
+                hoaDon.setLoaiDon("Tại quầy");
+                hoaDon.setTrangThai((short) 3);
+            }
         }
 
         hoaDonRepository.save(hoaDon);
@@ -265,7 +329,6 @@ public class BanHangService {
         lichSuHoaDonRepository.save(lichSuHoaDon);
 
         PhuongThucThanhToan phuongThucThanhToan;
-
         switch (request.getPaymentMethod() != null ? request.getPaymentMethod() : "") {
             case "cash":
                 phuongThucThanhToan = phuongThucThanhToanRepository.findById(1)
@@ -282,8 +345,8 @@ public class BanHangService {
             default:
                 phuongThucThanhToan = Boolean.TRUE.equals(request.getIsDelivery()) ?
                         phuongThucThanhToanRepository.findById(2)
-                        .orElseThrow(() -> new IllegalStateException("Phương thức Chuyển khoản không tồn tại"))
-                 : phuongThucThanhToanRepository.findById(3)
+                                .orElseThrow(() -> new IllegalStateException("Phương thức Chuyển khoản không tồn tại"))
+                        : phuongThucThanhToanRepository.findById(3)
                         .orElseThrow(() -> new IllegalStateException("Phương thức Cả hai không tồn tại"));
                 break;
         }
@@ -321,24 +384,31 @@ public class BanHangService {
             imelDaBan.setGhiChu("Bán qua hóa đơn " + hoaDon.getMa());
             imelDaBan.setDeleted(false);
             imelDaBan = imelDaBanRepository.save(imelDaBan);
-
             hdct.setIdImelDaBan(imelDaBan);
             hoaDonChiTietRepository.save(hdct);
         }
 
-        if(hoaDon.getEmail() != null && !hoaDon.getEmail().isEmpty()) {
+        if (hoaDon.getEmail() != null && !hoaDon.getEmail().isEmpty()) {
             try {
                 SimpleDateFormat dateFormat = new SimpleDateFormat("hh:mm a Z, EEEE, dd/MM/yyyy", new Locale("vi", "VN"));
                 String formattedDate = dateFormat.format(hoaDon.getNgayThanhToan());
-
                 String formattedTotalAmount = String.format("%,.0f", hoaDon.getTongTienSauGiam());
+
+                StringBuilder productDetails = new StringBuilder();
+                for (HoaDonChiTiet hdct : hoaDonChiTiets) {
+                    ChiTietSanPham ctsp = hdct.getIdChiTietSanPham();
+                    String tenSanPham = ctsp.getIdSanPham().getTenSanPham();
+                    String mauSac = ctsp.getIdMauSac().getMauSac() != null ? ctsp.getIdMauSac().getMauSac() : "Không xác định";
+                    productDetails.append(String.format("- %s (Màu: %s)<br>", tenSanPham, mauSac));
+                }
 
                 emailSendBH.sendPaymentConfirmationEmail(
                         hoaDon.getEmail(),
                         hoaDon.getMa(),
                         formattedTotalAmount,
                         phuongThucThanhToan.getKieuThanhToan(),
-                        formattedDate
+                        formattedDate,
+                        productDetails.toString()
                 );
             } catch (Exception e) {
                 System.err.println("Lỗi khi gửi email xác nhận thanh toán: " + e.getMessage());

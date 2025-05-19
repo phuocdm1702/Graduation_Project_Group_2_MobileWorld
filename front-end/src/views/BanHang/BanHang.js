@@ -544,6 +544,8 @@ export default function useBanHang() {
         orderNotes: orderNotes.value || '',
       };
 
+      console.log("Payload receiver:", payload.receiver);
+
       const response = await axios.post(`http://localhost:8080/ban-hang/thanh-toan/${activeInvoiceId.value}`, payload);
       if (response.status === 200) {
         toast.value.kshowToast('success', 'Thanh toán thành công!');

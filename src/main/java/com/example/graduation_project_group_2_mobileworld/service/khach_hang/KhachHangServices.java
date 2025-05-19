@@ -3,10 +3,9 @@ package com.example.graduation_project_group_2_mobileworld.service.khach_hang;
 import com.example.graduation_project_group_2_mobileworld.dto.khach_hang.KhachHangDTO;
 import com.example.graduation_project_group_2_mobileworld.entity.*;
 import com.example.graduation_project_group_2_mobileworld.repository.khach_hang.KhachHangRepository;
-import com.example.graduation_project_group_2_mobileworld.repository.khach_hang.diaChiKhachHangRepo;
+import com.example.graduation_project_group_2_mobileworld.repository.khach_hang.DiaChiKhachHangRepo;
 import com.example.graduation_project_group_2_mobileworld.repository.tai_khoan.TaiKhoanRepository;
 import com.example.graduation_project_group_2_mobileworld.service.nhan_vien.EmailServices;
-import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import java.text.Normalizer;
@@ -19,9 +18,9 @@ import java.util.stream.Collectors;
 public class KhachHangServices {
     private final KhachHangRepository khachHangRepository;
     private final TaiKhoanRepository taiKhoanRepository;
-    private final diaChiKhachHangRepo diaChiKhachHangRepo;
+    private final DiaChiKhachHangRepo diaChiKhachHangRepo;
     private final EmailServices emailServices;
-    public KhachHangServices(KhachHangRepository khachHangRepository, TaiKhoanRepository taiKhoanRepository, com.example.graduation_project_group_2_mobileworld.repository.khach_hang.diaChiKhachHangRepo diaChiKhachHangRepo, EmailServices emailServices) {
+    public KhachHangServices(KhachHangRepository khachHangRepository, TaiKhoanRepository taiKhoanRepository, DiaChiKhachHangRepo diaChiKhachHangRepo, EmailServices emailServices) {
         this.khachHangRepository = khachHangRepository;
         this.taiKhoanRepository = taiKhoanRepository;
         this.diaChiKhachHangRepo = diaChiKhachHangRepo;
@@ -109,7 +108,7 @@ public class KhachHangServices {
         if (taiKhoanRepository.findByEmail(khachHangDTO.getEmail()).isPresent()) {
             throw new RuntimeException("Email đã được sử dụng!");
         }
-        if (taiKhoanRepository.findBySoDienThoai(khachHangDTO.getSoDienThoai()).isPresent()) {
+        if (taiKhoanRepository.findBySoDienThoai(khachHangDTO.getSoDienThoai()).isEmpty()) {
             throw new RuntimeException("SDT đã được sử dụng!");
         }
         QuyenHan quyenHan = new QuyenHan();

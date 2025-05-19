@@ -318,7 +318,6 @@
                   v-model="receiver.name"
                   type="text"
                   class="mt-1 p-2 w-full border rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
-                  placeholder="Nguyễn Oanh"
                   :disabled="!isReceiverEditable"
                 />
               </div>
@@ -328,7 +327,6 @@
                   v-model="receiver.phone"
                   type="text"
                   class="mt-1 p-2 w-full border rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
-                  placeholder="0985357224"
                   :disabled="!isReceiverEditable"
                 />
               </div>
@@ -366,7 +364,6 @@
                 v-model="receiver.address"
                 type="text"
                 class="mt-1 p-2 w-full border rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
-                placeholder="Xóm Bình Yên"
                 :disabled="!isReceiverEditable"
               />
             </div>
@@ -465,12 +462,6 @@
                     min="0"
                   />
                 </div>
-              </div>
-              <div class="mt-2">
-                <label class="flex items-center">
-                  <input type="checkbox" v-model="payOnDelivery" class="mr-2" />
-                  <span>Thanh toán khi nhận hàng</span>
-                </label>
               </div>
             </div>
             <div class="text-right">

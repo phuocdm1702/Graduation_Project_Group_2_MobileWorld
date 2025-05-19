@@ -1,25 +1,22 @@
 package com.example.graduation_project_group_2_mobileworld.service.khach_hang;
 
 import com.example.graduation_project_group_2_mobileworld.dto.DiaChi.DiaChiDTO;
-import com.example.graduation_project_group_2_mobileworld.dto.khach_hang.KhachHangDTO;
 import com.example.graduation_project_group_2_mobileworld.entity.DiaChiKhachHang;
 import com.example.graduation_project_group_2_mobileworld.entity.KhachHang;
-import com.example.graduation_project_group_2_mobileworld.entity.TaiKhoan;
 import com.example.graduation_project_group_2_mobileworld.repository.khach_hang.KhachHangRepository;
-import com.example.graduation_project_group_2_mobileworld.repository.khach_hang.diaChiKhachHangRepo;
+import com.example.graduation_project_group_2_mobileworld.repository.khach_hang.DiaChiKhachHangRepo;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 public class DiaChiKhachHangServices {
-    private final diaChiKhachHangRepo diaChiRepo;
+    private final DiaChiKhachHangRepo diaChiRepo;
     private final KhachHangRepository khachHangRepository;
 
 
-    public DiaChiKhachHangServices(diaChiKhachHangRepo diaChiRepo, KhachHangRepository khachHangRepository) {
+    public DiaChiKhachHangServices(DiaChiKhachHangRepo diaChiRepo, KhachHangRepository khachHangRepository) {
         this.diaChiRepo = diaChiRepo;
         this.khachHangRepository = khachHangRepository;
     }

@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface TaiKhoanRepository extends JpaRepository<TaiKhoan, Integer> {
@@ -22,7 +23,7 @@ public interface TaiKhoanRepository extends JpaRepository<TaiKhoan, Integer> {
     //checkEmail
     Optional<TaiKhoan> findByEmail(String email);
     Optional<TaiKhoan> findBytenDangNhap(String tenDangNhap);
-    Optional<TaiKhoan> findBySoDienThoai(String soDienThoai);
+    List<TaiKhoan> findBySoDienThoai(String soDienThoai);
 
     boolean existsByEmail(String email);
 }

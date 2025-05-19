@@ -94,7 +94,7 @@ public class NhanVienServices {
         if (taiKhoanRepository.findByEmail(dto.getEmail()).isPresent()) {
             throw new RuntimeException("Email đã được sử dụng!");
         }
-        if (taiKhoanRepository.findBySoDienThoai(dto.getSoDienThoai()).isPresent()) {
+        if (taiKhoanRepository.findBySoDienThoai(dto.getSoDienThoai()).isEmpty()) {
             throw new RuntimeException("SDT đã được sử dụng!");
         }
         QuyenHan quyenHan = new QuyenHan();;
