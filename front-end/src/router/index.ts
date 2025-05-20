@@ -8,7 +8,6 @@ import Voucher from "../views/Voucher/AppVoucher.vue";
 import DotVoucher from "../views/Voucher/DotVoucher.vue";
 import FormAddPgg from "../views/Voucher/components/FormAddPgg.vue";
 import FormUpdatePgg from "@/views/Voucher/components/FormUpdatePgg.vue";
-import PhieuBaoHanh from "../views/BaoHanh/PhieuBaoHanh.vue";
 
 // View Login
 import Login from "../views/LoginView/AppLogin.vue";
@@ -66,8 +65,6 @@ import SanPham from "@/views/Products/SanPham/SanPham.vue";
 import AddChiTietSanPham from "@/views/Products/SanPham/AddChiTietSanPham.vue";
 import SanPhamChiTiet from "@/views/Products/SanPham/SanPhamChiTiet.vue";
 
-// Phiếu Bảo Hành
-import LichSuPhieuBaoHanh from "../views/BaoHanh/LichSuPhieuBaoHanh.vue";
 import EditSanPham from "@/views/Products/SanPham/EditSanPham.vue";
 import EditSanPhamChiTiet from "@/views/Products/SanPham/EditSanPhamChiTiet.vue";
 
@@ -120,18 +117,6 @@ const routes: Array<RouteRecordRaw> = [
     name: "Voucher",
     component: Voucher,
     meta: { breadcrumb: ["Phiếu Giảm Giá", "Phiếu giảm giá"] },
-  },
-  {
-    path: "/phieu-bao-hanh",
-    name: "PhieuBaoHanh",
-    component: PhieuBaoHanh,
-    meta: { breadcrumb: ["Bảo hành", "Phiếu bảo hành"] },
-  },
-  {
-    path: "/lich-su-bao-hanh",
-    name: "LichSuPhieuBaoHanh",
-    component: LichSuPhieuBaoHanh,
-    meta: { breadcrumb: ["Bảo hành", "Lịch sử phiếu bảo hành"] },
   },
   {
     path: "/dot-giam-gia",

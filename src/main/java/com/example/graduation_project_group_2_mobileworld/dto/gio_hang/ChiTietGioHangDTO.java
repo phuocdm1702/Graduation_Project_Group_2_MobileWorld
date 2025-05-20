@@ -8,9 +8,18 @@ public class ChiTietGioHangDTO {
     private Integer idChiTietSanPham;
     private String ma;
     private String tenSanPham;
+    private String mauSac;
     private String imei;
     private BigDecimal giaBan;
     private BigDecimal tongTien;
+
+    public String getMauSac() {
+        return mauSac;
+    }
+
+    public void setMauSac(String mauSac) {
+        this.mauSac = mauSac;
+    }
 
     public Integer getId() {
         return id;

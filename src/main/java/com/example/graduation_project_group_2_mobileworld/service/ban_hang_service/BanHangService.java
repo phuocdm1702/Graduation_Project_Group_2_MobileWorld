@@ -460,6 +460,7 @@ public class BanHangService {
         dto.setIdChiTietSanPham(chiTietGioHang.getIdChiTietSanPham().getId());
         dto.setMa(chiTietGioHang.getMa());
         dto.setTenSanPham(chiTietGioHang.getIdChiTietSanPham().getIdSanPham().getTenSanPham());
+        dto.setMauSac(chiTietGioHang.getIdChiTietSanPham().getIdMauSac().getMauSac());
         dto.setImei(chiTietGioHang.getIdChiTietSanPham().getIdImel().getImel());
         dto.setGiaBan(chiTietGioHang.getIdChiTietSanPham().getGiaBan());
         dto.setTongTien(chiTietGioHang.getTongTien());

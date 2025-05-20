@@ -138,8 +138,10 @@ public class BHController {
             dto.setId(chiTietSanPham.getId());
             dto.setIdSanPham(chiTietSanPham.getIdSanPham().getId());
             dto.setTenSanPham(chiTietSanPham.getIdSanPham().getTenSanPham());
+            dto.setMa(chiTietSanPham.getMa() != null ? chiTietSanPham.getMa() : "N/A");
             dto.setGiaBan(chiTietSanPham.getGiaBan());
             dto.setImei(imei);
+            dto.setMauSac(chiTietSanPham.getIdMauSac() != null ? chiTietSanPham.getIdMauSac().getMauSac() : "N/A");
             return ResponseEntity.ok(dto);
         } catch (Exception e) {
             System.out.println("Lỗi khi lấy chi tiết sản phẩm bằng IMEI: " + e.getMessage());
