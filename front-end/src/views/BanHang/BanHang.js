@@ -823,6 +823,7 @@ export default function useBanHang() {
   onMounted(() => {
     fetchPendingInvoices();
     fetchProvinces(); // Tải danh sách tỉnh khi khởi tạo
+    resetReceiver();
   });
   
   // Add new customer
@@ -875,15 +876,19 @@ export default function useBanHang() {
           ward: response.data.idDiaChiKH?.phuong || '',
           address: response.data.idDiaChiKH?.diaChiCuThe || '',
         };
-        receiver.value = {
-          name: customer.value.name,
-          phone: customer.value.phone,
-          city: customer.value.city,
-          district: customer.value.district,
-          ward: customer.value.ward,
-          address: customer.value.address,
-          email: response.data.email || '',
-        };
+        if (isDelivery.value) {
+          receiver.value = {
+            name: customer.value.name,
+            phone: customer.value.phone,
+            city: customer.value.city,
+            district: customer.value.district,
+            ward: customer.value.ward,
+            address: customer.value.address,
+            email: response.data.email || '',
+          };
+        } else {
+          resetReceiver();
+        }
         await fetchDiscountCodes();
         if (toast.value) toast.value.kshowToast('success', `Đã thêm thành công khách hàng: ${customer.value.name}`);
       }
@@ -1050,6 +1055,31 @@ export default function useBanHang() {
     }
   };
 
+  //bbien de an di thong tin nguoi
+  const isDelivery = ref(false);
+
+  const resetReceiver = () => {
+    receiver.value = {
+      name: '',
+      phone: '',
+      city: '',
+      district: '',
+      ward: '',
+      address: '',
+      email: '',
+    };
+  };
+
+  const toggleDelivery = (value) => {
+    isDelivery.value = value;
+    if (!isDelivery.value) {
+      resetReceiver(); // Reset thông tin người nhận khi bỏ chọn
+    } else {
+      // Nếu cần, sao chép thông tin khách hàng sang người nhận khi chọn "Bán giao hàng"
+      receiver.value = { ...customer.value };
+    }
+  };
+  
   const selectDiscountCode = async (ma) => {
     discountCodeInput.value = ma;
     await applyDiscount();
@@ -1124,5 +1154,7 @@ export default function useBanHang() {
     createOrder,
     fetchProducts,
     refreshProducts,
+    isDelivery, // Trả về isDelivery để sử dụng trong giao diện
+    toggleDelivery, // Trả về hàm toggleDelivery
   };
 }
