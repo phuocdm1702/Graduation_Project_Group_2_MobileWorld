@@ -303,13 +303,23 @@
         <div class="flex justify-between items-center mb-4">
           <h2 class="text-lg font-semibold text-orange-500">Thông tin đơn hàng</h2>
           <label class="flex items-center">
-            <input type="checkbox" v-model="payOnDelivery" class="mr-2" />
-            <span>Bán giao hàng</span>
+            <!-- From Uiverse.io by gharsh11032000 -->
+            <label class="switch">
+              <input type="checkbox"  v-model="isDelivery" @change="toggleDelivery($event.target.checked)">
+              <span class="slider"></span>
+            </label>
+            <span class="ml-3 text-gray-800 font-medium">Bán giao hàng</span>
+<!--            <input-->
+<!--              type="checkbox"-->
+<!--              v-model="isDelivery"-->
+<!--              @change="toggleDelivery($event.target.checked)"-->
+<!--              class="mr-2"-->
+<!--            />            -->
           </label>
         </div>
 
-        <div class="grid grid-cols-2 gap-4">
-          <div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div v-if="isDelivery">
             <h3 class="text-md font-medium text-orange-500 mb-2">Thông tin người nhận</h3>
             <div class="grid grid-cols-2 gap-4">
               <div>
@@ -377,7 +387,7 @@
             </div>
           </div>
 
-          <div>
+          <div :class="{'md:col-start-2': !isDelivery}">
             <div class="border-t border-gray-300 mb-4"></div>
             <div class="mb-4">
               <h3 class="text-md font-medium text-orange-500">Mã giảm giá</h3>
@@ -413,31 +423,27 @@
                 <button
                   @click="selectPayment('transfer')"
                   :class="{
-                    'bg-blue-600': paymentMethod === 'transfer',
-                    'bg-blue-500': paymentMethod !== 'transfer',
-                  }"
-                  class="px-4 py-2 text-white rounded hover:bg-blue-600 transition"
-                >
+                  'bg-orange-100 border-orange-500 text-orange-600': paymentMethod === 'transfer',
+                  'bg-transparent border-orange-400 text-orange-500': paymentMethod !== 'transfer'}"
+                  class="px-4 py-2 border rounded transition hover:bg-orange-100">
                   Chuyển khoản
                 </button>
+
                 <button
                   @click="selectPayment('cash')"
                   :class="{
-                    'bg-gray-600': paymentMethod === 'cash',
-                    'bg-gray-500': paymentMethod !== 'cash',
-                  }"
-                  class="px-4 py-2 text-white rounded hover:bg-gray-600 transition"
-                >
-                  Tiền mặt
+                   'bg-orange-100 border-orange-500 text-orange-600': paymentMethod === 'cash',
+                   'bg-transparent border-orange-400 text-orange-500': paymentMethod !== 'cash'}"
+                    class="px-4 py-2 border rounded transition hover:bg-orange-100">
+                    Tiền mặt
                 </button>
+
                 <button
                   @click="selectPayment('both')"
                   :class="{
-                    'bg-purple-600': paymentMethod === 'both',
-                    'bg-purple-500': paymentMethod !== 'both',
-                  }"
-                  class="px-4 py-2 text-white rounded hover:bg-purple-600 transition"
-                >
+                  'bg-orange-100 border-orange-500 text-orange-600': paymentMethod === 'both',
+                  'bg-transparent border-orange-400 text-orange-500': paymentMethod !== 'both'}"
+                  class="px-4 py-2 border rounded transition hover:bg-orange-100">
                   Cả hai
                 </button>
               </div>
@@ -658,6 +664,8 @@ const {
   discountCodeInput,
   fetchDiscountCodes,
   selectDiscountCode,
+  isDelivery,
+  toggleDelivery,
 } = useBanHang();
 
 const isCreatingInvoice = ref(false);
@@ -744,5 +752,60 @@ tr:hover {
 
 td {
   border-bottom: 1px solid #e5e7eb;
+}
+
+/* From Uiverse.io by gharsh11032000 */
+/* The switch - the box around the slider */
+.switch {
+  font-size: 17px;
+  position: relative;
+  display: inline-block;
+  width: 3.5em;
+  height: 2em;
+}
+
+/* Hide default HTML checkbox */
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* The slider */
+.slider {
+  position: absolute;
+  cursor: pointer;
+  inset: 0;
+  background: #f59e0b;
+  border-radius: 50px;
+  transition: all 0.4s cubic-bezier(0.23, 1, 0.320, 1);
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 1.4em;
+  width: 1.4em;
+  left: 0.3em;
+  bottom: 0.3em;
+  background-color: white;
+  border-radius: 50px;
+  box-shadow: 0 0px 20px rgba(0,0,0,0.4);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.switch input:checked + .slider {
+  background: #f59e0b;
+}
+
+.switch input:focus + .slider {
+  box-shadow: 0 0 1px #f59e0b;
+}
+
+.switch input:checked + .slider:before {
+  transform: translateX(1.6em);
+  width: 2em;
+  height: 2em;
+  bottom: 0;
 }
 </style>
