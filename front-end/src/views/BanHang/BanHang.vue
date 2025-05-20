@@ -423,31 +423,27 @@
                 <button
                   @click="selectPayment('transfer')"
                   :class="{
-                    'bg-blue-600': paymentMethod === 'transfer',
-                    'bg-blue-500': paymentMethod !== 'transfer',
-                  }"
-                  class="px-4 py-2 text-white rounded hover:bg-blue-600 transition"
-                >
+                  'bg-orange-100 border-orange-500 text-orange-600': paymentMethod === 'transfer',
+                  'bg-transparent border-orange-400 text-orange-500': paymentMethod !== 'transfer'}"
+                  class="px-4 py-2 border rounded transition hover:bg-orange-100">
                   Chuyển khoản
                 </button>
+
                 <button
                   @click="selectPayment('cash')"
                   :class="{
-                    'bg-gray-600': paymentMethod === 'cash',
-                    'bg-gray-500': paymentMethod !== 'cash',
-                  }"
-                  class="px-4 py-2 text-white rounded hover:bg-gray-600 transition"
-                >
-                  Tiền mặt
+                   'bg-orange-100 border-orange-500 text-orange-600': paymentMethod === 'cash',
+                   'bg-transparent border-orange-400 text-orange-500': paymentMethod !== 'cash'}"
+                    class="px-4 py-2 border rounded transition hover:bg-orange-100">
+                    Tiền mặt
                 </button>
+
                 <button
                   @click="selectPayment('both')"
                   :class="{
-                    'bg-purple-600': paymentMethod === 'both',
-                    'bg-purple-500': paymentMethod !== 'both',
-                  }"
-                  class="px-4 py-2 text-white rounded hover:bg-purple-600 transition"
-                >
+                  'bg-orange-100 border-orange-500 text-orange-600': paymentMethod === 'both',
+                  'bg-transparent border-orange-400 text-orange-500': paymentMethod !== 'both'}"
+                  class="px-4 py-2 border rounded transition hover:bg-orange-100">
                   Cả hai
                 </button>
               </div>
