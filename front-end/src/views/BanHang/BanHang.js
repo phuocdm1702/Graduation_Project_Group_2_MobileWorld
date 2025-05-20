@@ -10,10 +10,7 @@ export default function useBanHang() {
   const isLoadingMore = ref(false);
   const isCreatingInvoice = ref(false);
   const isCreatingOrder = ref(false);
-
-  const provinces = ref([]);
-  const districts = ref([]);
-  const wards = ref([]);
+  
 
   const cartItems = ref([]);
   const cartColumns = ref([
@@ -85,23 +82,7 @@ export default function useBanHang() {
     return cartItems.value.reduce((total, item) => total + (item.price || 0), 0);
   });
 
-  // Handle province change
-  const handleProvinceChange = (entityData) => {
-    const province = provinces.value.find((prov) => prov.name === entityData.city);
-    districts.value = province ? province.districts : [];
-    entityData.district = '';
-    entityData.ward = '';
-    wards.value = [];
-  };
-
-  // Handle district change
-  const handleDistrictChange = (entityData) => {
-    const district = districts.value.find((dist) => dist.name === entityData.district);
-    wards.value = district ? district.wards : [];
-    entityData.ward = '';
-  };
-
-  // Calculate discount
+  
 
   // Fetch pending invoices
   const fetchPendingInvoices = async () => {
@@ -766,48 +747,157 @@ export default function useBanHang() {
       }
     }
   };
+
+  const provinces = ref([]);
+  const districts = ref([]);
+  const wards = ref([]);
+
+  const fetchProvinces = async () => {
+    try {
+      const response = await axios.get('https://provinces.open-api.vn/api/p/', {
+        withCredentials: false, // Tắt withCredentials
+      });
+      provinces.value = response.data.map(province => ({
+        name: province.name,
+        code: province.code,
+        districts: [],
+      }));
+    } catch (error) {
+      console.error('Lỗi khi lấy danh sách tỉnh:', error);
+      if (toast.value) toast.value.kshowToast('error', 'Không thể tải danh sách tỉnh/thành phố.');
+    }
+  };
+
+  // Hàm lấy danh sách quận/huyện theo tỉnh
+  const handleProvinceChange = async (entityData) => {
+    const province = provinces.value.find((prov) => prov.name === entityData.city);
+    if (!province) {
+      districts.value = [];
+      wards.value = [];
+      entityData.district = '';
+      entityData.ward = '';
+      return;
+    }
+
+    try {
+      const response = await axios.get(`https://provinces.open-api.vn/api/p/${province.code}?depth=2`,{
+        withCredentials: false,
+      });
+      districts.value = response.data.districts.map(district => ({
+        name: district.name,
+        code: district.code,
+        wards: [], // Sẽ được điền khi chọn quận
+      }));
+      entityData.district = '';
+      entityData.ward = '';
+      wards.value = [];
+    } catch (error) {
+      console.error('Lỗi khi lấy danh sách quận/huyện:', error);
+      if (toast.value) toast.value.kshowToast('error', 'Không thể tải danh sách quận/huyện.');
+    }
+  };
+
+  const handleDistrictChange = async (entityData) => {
+    const district = districts.value.find((dist) => dist.name === entityData.district);
+    if (!district) {
+      wards.value = [];
+      entityData.ward = '';
+      return;
+    }
+
+    try {
+      const response = await axios.get(`https://provinces.open-api.vn/api/d/${district.code}?depth=2`,{
+        withCredentials: false,
+      });
+      wards.value = response.data.wards.map(ward => ({
+        name: ward.name,
+        code: ward.code,
+      }));
+      entityData.ward = '';
+    } catch (error) {
+      console.error('Lỗi khi lấy danh sách phường/xã:', error);
+      if (toast.value) toast.value.kshowToast('error', 'Không thể tải danh sách phường/xã.');
+    }
+  };
+
+  onMounted(() => {
+    fetchPendingInvoices();
+    fetchProvinces(); // Tải danh sách tỉnh khi khởi tạo
+  });
+  
   // Add new customer
   const addNewCustomer = async (data) => {
+    const selectedProvince = provinces.value.find(p => p.name === data.city);
+    const selectedDistrict = districts.value.find(d => d.name === data.district);
+    const selectedWard = wards.value.find(w => w.name === data.ward);
+
     const customerData = {
-      tenKH: newCustomer.name?.trim(),
-      soDienThoai: newCustomer.phone,
-      thanhPho: newCustomer.city,
-      quan: newCustomer.district,
-      phuong: newCustomer.ward,
-      diaChiCuThe: newCustomer.address,
+      tenKH: data.name?.trim(),
+      soDienThoai: data.phone?.trim(),
+      thanhPho: data.city?.trim(),
+      quan: data.district?.trim(),
+      phuong: data.ward?.trim(),
+      diaChiCuThe: data.address?.trim(),
+      // Nếu backend yêu cầu mã code
+      provinceCode: selectedProvince?.code || null,
+      districtCode: selectedDistrict?.code || null,
+      wardCode: selectedWard?.code || null,
     };
 
+    // Kiểm tra dữ liệu đầu vào
     if (!customerData.tenKH || !customerData.soDienThoai || !customerData.thanhPho ||
       !customerData.quan || !customerData.phuong || !customerData.diaChiCuThe) {
       console.error('Dữ liệu không đầy đủ:', customerData);
-      if (toast.value) toast.value.kshowToast('error', 'Vui lòng điền đầy đủ thông tin khách hàng');
+      if (toast.value) toast.value.kshowToast('error', 'Vui lòng điền đầy đủ thông tin khách hàng.');
+      return;
+    }
+
+    // Kiểm tra định dạng số điện thoại
+    const phoneRegex = /^\d{10}$/;
+    if (!phoneRegex.test(customerData.soDienThoai)) {
+      if (toast.value) toast.value.kshowToast('error', 'Số điện thoại phải có đúng 10 chữ số.');
       return;
     }
 
     try {
       const response = await axios.post('http://localhost:8080/khach-hang/addBh', customerData, {
-        headers: {'Content-Type': 'application/json'},
+        headers: { 'Content-Type': 'application/json' },
       });
-      selectedCustomer.value = true;
-      customer.value = {
-        name: response.data.ten,
-        phone: response.data.soDienThoai || response.data.idTaiKhoan?.soDienThoai || '',
-        city: response.data.idDiaChiKH?.thanhPho,
-        district: response.data.idDiaChiKH?.quan,
-        ward: response.data.idDiaChiKH?.phuong,
-        address: response.data.idDiaChiKH?.diaChiCuThe,
-      };
-      if (toast.value) toast.value.kshowToast("success", `Đã thêm thành công khách hàng: ${response.data.ten}`);
+
+      if (response.status === 200 && response.data) {
+        selectedCustomer.value = true;
+        idKhachHang.value = response.data.id;
+        customer.value = {
+          name: response.data.ten || response.data.tenKH || '',
+          phone: response.data.soDienThoai || response.data.idTaiKhoan?.soDienThoai || '',
+          city: response.data.idDiaChiKH?.thanhPho || '',
+          district: response.data.idDiaChiKH?.quan || '',
+          ward: response.data.idDiaChiKH?.phuong || '',
+          address: response.data.idDiaChiKH?.diaChiCuThe || '',
+        };
+        receiver.value = {
+          name: customer.value.name,
+          phone: customer.value.phone,
+          city: customer.value.city,
+          district: customer.value.district,
+          ward: customer.value.ward,
+          address: customer.value.address,
+          email: response.data.email || '',
+        };
+        await fetchDiscountCodes();
+        if (toast.value) toast.value.kshowToast('success', `Đã thêm thành công khách hàng: ${customer.value.name}`);
+      }
     } catch (error) {
       console.error('Lỗi khi thêm khách hàng:', error);
-      let errorMessage = 'Không thể thêm khách hàng';
+      let errorMessage = 'Không thể thêm khách hàng.';
       if (error.response?.status === 400 && error.response?.data?.includes('constraint [UQ__')) {
         errorMessage = 'Số điện thoại đã tồn tại. Vui lòng sử dụng số khác.';
+      } else if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
       } else {
-        errorMessage = error.response?.data || error.message;
+        errorMessage = error.message;
       }
       if (toast.value) toast.value.kshowToast('error', errorMessage);
-      return;
     }
   };
 
@@ -964,6 +1054,8 @@ export default function useBanHang() {
     discountCodeInput.value = ma;
     await applyDiscount();
   };
+  
+  
 
   return {
     discountCodes,
