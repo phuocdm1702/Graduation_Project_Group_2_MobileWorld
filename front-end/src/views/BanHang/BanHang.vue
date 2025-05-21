@@ -120,10 +120,10 @@
               <label class="block text-sm font-medium text-gray-700">Tìm kiếm sản phẩm</label>
               <input
                 v-model="productSearchQuery"
-                @input="searchProducts"
+                @input="searchProductsWithIMEI"
                 type="text"
                 class="mt-1 p-2 w-full border rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
-                placeholder="Nhập tên hoặc mã sản phẩm"
+                placeholder="Nhập tên, mã sản phẩm hoặc IMEI"
               />
             </div>
             <div class="max-h-96 overflow-y-auto" @scroll="handleScroll">
@@ -303,18 +303,11 @@
         <div class="flex justify-between items-center mb-4">
           <h2 class="text-lg font-semibold text-orange-500">Thông tin đơn hàng</h2>
           <label class="flex items-center">
-            <!-- From Uiverse.io by gharsh11032000 -->
             <label class="switch">
-              <input type="checkbox"  v-model="isDelivery" @change="toggleDelivery($event.target.checked)">
+              <input type="checkbox" v-model="isDelivery" @change="toggleDelivery($event.target.checked)">
               <span class="slider"></span>
             </label>
             <span class="ml-3 text-gray-800 font-medium">Bán giao hàng</span>
-<!--            <input-->
-<!--              type="checkbox"-->
-<!--              v-model="isDelivery"-->
-<!--              @change="toggleDelivery($event.target.checked)"-->
-<!--              class="mr-2"-->
-<!--            />            -->
           </label>
         </div>
 
@@ -434,8 +427,8 @@
                   :class="{
                    'bg-orange-100 border-orange-500 text-orange-600': paymentMethod === 'cash',
                    'bg-transparent border-orange-400 text-orange-500': paymentMethod !== 'cash'}"
-                    class="px-4 py-2 border rounded transition hover:bg-orange-100">
-                    Tiền mặt
+                  class="px-4 py-2 border rounded transition hover:bg-orange-100">
+                  Tiền mặt
                 </button>
 
                 <button
@@ -573,14 +566,13 @@
       </div>
     </template>
   </FormModal>
-  
+
   <ConfirmModal
     :show="showConfirmModal"
     :message="'Bạn có chắc chắn muốn thanh toán chưa?'"
     @confirm="createOrder"
     @cancel="showConfirmModal = false"
   />
-  
 </template>
 
 <script setup>
@@ -593,12 +585,8 @@ import FormModal from '@/components/FormModal.vue';
 import useBanHang from '@/views/BanHang/BanHang';
 import axios from "axios";
 
-
-
-
-
 const {
-  idKhachHang, // Đảm bảo trả về idKhachHang
+  idKhachHang,
   toast,
   breadcrumbItems,
   provinces,
@@ -651,7 +639,7 @@ const {
   closeProductModal,
   showIMEIList,
   closeIMEIModal,
-  searchProducts,
+  searchProductsWithIMEI,
   addProductWithIMEIs,
   searchCustomers,
   addNewCustomer,
@@ -670,8 +658,6 @@ const {
 
 const isCreatingInvoice = ref(false);
 const isCreatingOrder = ref(false);
-
-
 
 const handleScroll = (event) => {
   const element = event.target;
@@ -754,8 +740,6 @@ td {
   border-bottom: 1px solid #e5e7eb;
 }
 
-/* From Uiverse.io by gharsh11032000 */
-/* The switch - the box around the slider */
 .switch {
   font-size: 17px;
   position: relative;
@@ -764,14 +748,12 @@ td {
   height: 2em;
 }
 
-/* Hide default HTML checkbox */
 .switch input {
   opacity: 0;
   width: 0;
   height: 0;
 }
 
-/* The slider */
 .slider {
   position: absolute;
   cursor: pointer;

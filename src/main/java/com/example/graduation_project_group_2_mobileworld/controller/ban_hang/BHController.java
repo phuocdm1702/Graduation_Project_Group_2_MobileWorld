@@ -142,6 +142,8 @@ public class BHController {
             dto.setGiaBan(chiTietSanPham.getGiaBan());
             dto.setImei(imei);
             dto.setMauSac(chiTietSanPham.getIdMauSac() != null ? chiTietSanPham.getIdMauSac().getMauSac() : "N/A");
+            dto.setRam(chiTietSanPham.getIdRam() != null ? chiTietSanPham.getIdRam().getDungLuongRam() : "N/A");
+            dto.setBoNhoTrong(chiTietSanPham.getIdBoNhoTrong() != null ? chiTietSanPham.getIdBoNhoTrong().getDungLuongBoNhoTrong() : "N/A");
             return ResponseEntity.ok(dto);
         } catch (Exception e) {
             System.out.println("Lỗi khi lấy chi tiết sản phẩm bằng IMEI: " + e.getMessage());
