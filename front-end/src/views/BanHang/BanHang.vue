@@ -713,6 +713,28 @@ table {
   width: 100%;
   table-layout: auto;
 }
+table td:nth-child(2) { /* Cột "Sản phẩm" */
+  max-width: 400px; /* Tăng chiều rộng tối đa để tránh tràn */
+  white-space: nowrap; /* Giữ trên một dòng */
+  overflow: hidden; /* Ẩn nội dung thừa */
+  text-overflow: ellipsis; /* Thêm dấu ... nếu quá dài */
+  padding: 0.75rem;
+  transition: background-color 0.2s ease; /* Hiệu ứng hover */
+}
+
+table td:nth-child(2):hover {
+  background-color: #fff7ed; /* Nền cam nhạt khi hover */
+  cursor: pointer;
+}
+
+/* Điều chỉnh biểu tượng và văn bản */
+table td:nth-child(2) span:last-child i {
+  vertical-align: middle; /* Căn giữa icon và văn bản */
+}
+
+table td:nth-child(2) span:last-child {
+  letter-spacing: 0.5px; /* Tăng khoảng cách giữa các ký tự nhẹ */
+}
 
 th,
 td {
@@ -790,4 +812,5 @@ td {
   height: 2em;
   bottom: 0;
 }
+
 </style>
