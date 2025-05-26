@@ -430,6 +430,15 @@ public class BanHangService {
                     itemDTO.setTenSanPham(hdct.getIdChiTietSanPham().getIdSanPham().getTenSanPham());
                     itemDTO.setImei(hdct.getIdChiTietSanPham().getIdImel().getImel());
                     itemDTO.setGiaBan(hdct.getGia());
+                    itemDTO.setMauSac(hdct.getIdChiTietSanPham().getIdMauSac() != null
+                            ? hdct.getIdChiTietSanPham().getIdMauSac().getMauSac()
+                            : "N/A");
+                    itemDTO.setRam(hdct.getIdChiTietSanPham().getIdRam() != null
+                            ? hdct.getIdChiTietSanPham().getIdRam().getDungLuongRam()
+                            : "N/A");
+                    itemDTO.setBoNhoTrong(hdct.getIdChiTietSanPham().getIdBoNhoTrong() != null
+                            ? hdct.getIdChiTietSanPham().getIdBoNhoTrong().getDungLuongBoNhoTrong()
+                            : "N/A");
                     return itemDTO;
                 })
                 .collect(Collectors.toList());
@@ -460,6 +469,9 @@ public class BanHangService {
         dto.setIdChiTietSanPham(chiTietGioHang.getIdChiTietSanPham().getId());
         dto.setMa(chiTietGioHang.getMa());
         dto.setTenSanPham(chiTietGioHang.getIdChiTietSanPham().getIdSanPham().getTenSanPham());
+        dto.setMauSac(chiTietGioHang.getIdChiTietSanPham().getIdMauSac().getMauSac());
+        dto.setBoNhoTrong(chiTietGioHang.getIdChiTietSanPham().getIdBoNhoTrong().getDungLuongBoNhoTrong());
+        dto.setRam(chiTietGioHang.getIdChiTietSanPham().getIdRam().getDungLuongRam());
         dto.setImei(chiTietGioHang.getIdChiTietSanPham().getIdImel().getImel());
         dto.setGiaBan(chiTietGioHang.getIdChiTietSanPham().getGiaBan());
         dto.setTongTien(chiTietGioHang.getTongTien());

@@ -7,6 +7,9 @@ public class HDCTban_hangDTO {
     private String tenSanPham;
     private String imei;
     private BigDecimal giaBan;
+    private String mauSac;
+    private String ram;
+    private String boNhoTrong;
 
     public HDCTban_hangDTO() {
     }
@@ -41,5 +44,29 @@ public class HDCTban_hangDTO {
 
     public void setGiaBan(BigDecimal giaBan) {
         this.giaBan = giaBan;
+    }
+
+    public String getMauSac() {
+        return mauSac;
+    }
+
+    public void setMauSac(String mauSac) {
+        this.mauSac = mauSac;
+    }
+
+    public String getRam() {
+        return ram;
+    }
+
+    public void setRam(String ram) {
+        this.ram = ram;
+    }
+
+    public String getBoNhoTrong() {
+        return boNhoTrong;
+    }
+
+    public void setBoNhoTrong(String boNhoTrong) {
+        this.boNhoTrong = boNhoTrong;
     }
 }

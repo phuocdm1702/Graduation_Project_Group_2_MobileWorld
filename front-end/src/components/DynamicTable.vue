@@ -24,8 +24,8 @@
                 </button>
                 <ToggleSwitch
                   v-if="!item.displayStatus.isHiddenToggle"
-                  :checked="!item.trangThai"
-                  :value="!item.trangThai"
+                  :checked="item.trangThai"
+                  :value="item.trangThai"
                   @change="toggleStatus(item)"
                   :id="item.id"
                 />
