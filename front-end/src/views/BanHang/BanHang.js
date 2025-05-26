@@ -599,9 +599,9 @@ export default function useBanHang() {
         receiver.value = {
           name: customer.value.name,
           phone: customer.value.phone,
-          city: customer.value.city || "Tỉnh Phú Thọ",
-          district: customer.value.district || "Huyện Lâm Thao",
-          ward: customer.value.ward || "Xã Xuân Lũng",
+          city: customer.value.city || "",
+          district: customer.value.district || "",
+          ward: customer.value.ward || "",
           address: customer.value.address || "",
         };
         await fetchDiscountCodes();

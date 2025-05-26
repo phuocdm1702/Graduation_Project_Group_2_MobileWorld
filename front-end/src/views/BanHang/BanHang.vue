@@ -780,7 +780,7 @@ td {
   position: absolute;
   cursor: pointer;
   inset: 0;
-  background: #f59e0b;
+  background: #6b7280;
   border-radius: 50px;
   transition: all 0.4s cubic-bezier(0.23, 1, 0.320, 1);
 }
