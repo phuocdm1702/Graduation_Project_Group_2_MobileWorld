@@ -52,18 +52,18 @@ public class PhieuGiamGiaService {
 
         for (PhieuGiamGia pgg : listPgg) {
             if (pgg.getNgayBatDau() != null && pgg.getNgayKetThuc() != null) {
-                // Đã bắt đầu (ngayBatDau <= now) và chưa hết hạn (ngayKetThuc >= now)
-                if ((pgg.getNgayBatDau().before(now) || pgg.getNgayBatDau().equals(now)) &&
-                        (pgg.getNgayKetThuc().after(now) || pgg.getNgayKetThuc().equals(now))) {
-                    if (pgg.getTrangThai() == null || !pgg.getTrangThai()) {
-                        pgg.setTrangThai(false); // Cập nhật thành Hoạt động
-                        phieuGiamGiaRepository.save(pgg);
-                    }
-                } else {
-                    if (pgg.getTrangThai() == null || pgg.getTrangThai()) {
-                        pgg.setTrangThai(true); // Cập nhật thành Không hoạt động
-                        phieuGiamGiaRepository.save(pgg);
-                    }
+                boolean isActive = (pgg.getNgayBatDau().before(now) || pgg.getNgayBatDau().equals(now)) &&
+                        (pgg.getNgayKetThuc().after(now) || pgg.getNgayKetThuc().equals(now));
+                boolean currentStatus = pgg.getTrangThai() != null && pgg.getTrangThai();
+
+                if (isActive && !currentStatus) {
+                    pgg.setTrangThai(true); // Cập nhật thành Hoạt động
+                    phieuGiamGiaRepository.save(pgg);
+                    System.out.println("Updated PGG " + pgg.getMa() + " to Hoạt động");
+                } else if (!isActive && currentStatus) {
+                    pgg.setTrangThai(false); // Cập nhật thành Không hoạt động
+                    phieuGiamGiaRepository.save(pgg);
+                    System.out.println("Updated PGG " + pgg.getMa() + " to Không hoạt động");
                 }
             }
         }
@@ -91,9 +91,9 @@ public class PhieuGiamGiaService {
         Boolean trangThaiBoolean = null;
         if (trangThai != null && !trangThai.trim().isEmpty()) {
             if ("Hoạt động".equals(trangThai)) {
-                trangThaiBoolean = false;
-            } else if ("Không hoạt động".equals(trangThai)) {
                 trangThaiBoolean = true;
+            } else if ("Không hoạt động".equals(trangThai)) {
+                trangThaiBoolean = false;
             }
         }
 
@@ -109,7 +109,8 @@ public class PhieuGiamGiaService {
         }
 
         System.out.println("Filter params - loaiPhieu: " + loaiPhieu + ", trangThai: " + trangThaiBoolean +
-                ", ngayBatDau: " + ngayBatDau + ", ngayKetThuc: " + ngayKetThuc);
+                ", ngayBatDau: " + ngayBatDau + ", ngayKetThuc: " + ngayKetThuc +
+                ", minOrder: " + minOrder + ", valueFilter: " + valueFilter);
 
         Page<PhieuGiamGia> result = phieuGiamGiaRepository.filterPhieuGiamGia(
                 loaiPhieu,
@@ -124,7 +125,7 @@ public class PhieuGiamGiaService {
 
         System.out.println("Filter result size: " + result.getContent().size());
         result.getContent().forEach(voucher ->
-                System.out.println("Voucher: " + voucher.getMa() + ", TrangThai: " + voucher.getTrangThai() +
+                System.out.println("Voucher: " + voucher.getMa() + ", TrangThai: " + (voucher.getTrangThai() ? "Hoạt động" : "Không hoạt động") +
                         ", NgayBatDau: " + voucher.getNgayBatDau() + ", NgayKetThuc: " + voucher.getNgayKetThuc())
         );
 
@@ -162,10 +163,10 @@ public class PhieuGiamGiaService {
         }
 
         PhieuGiamGia pgg = optionalPgg.get();
-        pgg.setTrangThai(trangThai);
+        pgg.setTrangThai(trangThai); // true = Hoạt động, false = Không hoạt động
         PhieuGiamGia updatePGG = phieuGiamGiaRepository.save(pgg);
+        System.out.println("Updated PGG " + updatePGG.getMa() + " to TrangThai: " + (trangThai ? "Hoạt động" : "Không hoạt động"));
         return convertToDTO(updatePGG);
-
     }
 
     public PhieuGiamGiaDTO getDetailPGG(Integer id) {
