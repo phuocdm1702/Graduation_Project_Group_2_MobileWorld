@@ -151,19 +151,36 @@ public class BanHangService {
                 .orElse(null);
     }
 
+    @Transactional
     public ChiTietGioHangDTO addChiTietGioHang(Integer gioHangId, Integer chiTietSanPhamId, Integer hoaDonId) {
+        System.out.println("Adding ChiTietGioHang - GioHangId: " + gioHangId + ", ChiTietSanPhamId: " + chiTietSanPhamId + ", HoaDonId: " + hoaDonId);
         GioHang gioHang = gioHangRepository.findById(gioHangId)
-                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy giỏ hàng với ID: " + gioHangId));
+                .orElseThrow(() -> {
+                    System.out.println("GioHang not found for ID: " + gioHangId);
+                    return new IllegalArgumentException("Không tìm thấy giỏ hàng với ID: " + gioHangId);
+                });
         ChiTietSanPham chiTietSanPham = chiTietSanPhamRepository.findById(chiTietSanPhamId)
-                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy chi tiết sản phẩm với ID: " + chiTietSanPhamId));
+                .orElseThrow(() -> {
+                    System.out.println("ChiTietSanPham not found for ID: " + chiTietSanPhamId);
+                    return new IllegalArgumentException("Không tìm thấy chi tiết sản phẩm với ID: " + chiTietSanPhamId);
+                });
         HoaDon hoaDon = hoaDonRepository.findById(hoaDonId)
-                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy hóa đơn với ID: " + hoaDonId));
+                .orElseThrow(() -> {
+                    System.out.println("HoaDon not found for ID: " + hoaDonId);
+                    return new IllegalArgumentException("Không tìm thấy hóa đơn với ID: " + hoaDonId);
+                });
+
+        if (chiTietSanPham.getDeleted()) {
+            System.out.println("ChiTietSanPham ID " + chiTietSanPhamId + " is already marked as deleted.");
+            throw new IllegalStateException("Sản phẩm này đã được bán hoặc không khả dụng.");
+        }
 
         BigDecimal giaBan = chiTietSanPham.getGiaBan();
         BigDecimal tongTien = giaBan;
 
-        chiTietSanPham.setDeleted(true);
-        chiTietSanPhamRepository.save(chiTietSanPham);
+        chiTietSanPham.setDeleted(true); // Đánh dấu sản phẩm đã được thêm vào giỏ
+        chiTietSanPham = chiTietSanPhamRepository.save(chiTietSanPham);
+        System.out.println("Updated ChiTietSanPham deleted status to true for ID: " + chiTietSanPhamId);
 
         ChiTietGioHang chiTietGioHang = new ChiTietGioHang();
         chiTietGioHang.setIdGioHang(gioHang);
@@ -173,6 +190,7 @@ public class BanHangService {
         chiTietGioHang.setTongTien(tongTien);
         chiTietGioHang.setDeleted(false);
         chiTietGioHang = chiTietGioHangRepository.save(chiTietGioHang);
+        System.out.println("Saved ChiTietGioHang with ID: " + chiTietGioHang.getId());
 
         HoaDonChiTiet hoaDonChiTiet = HoaDonChiTiet.builder()
                 .hoaDon(hoaDon)
@@ -182,38 +200,46 @@ public class BanHangService {
                 .trangThai((short) 0)
                 .deleted(false)
                 .build();
-        hoaDonChiTietRepository.save(hoaDonChiTiet);
+        hoaDonChiTiet = hoaDonChiTietRepository.save(hoaDonChiTiet);
+        System.out.println("Saved HoaDonChiTiet with ID: " + hoaDonChiTiet.getId());
 
         return convertToChiTietGioHangDTO(chiTietGioHang);
     }
 
     public List<ChiTietGioHangDTO> getChiTietGioHangByGioHangId(Integer gioHangId) {
-        return chiTietGioHangRepository.findAll().stream()
+        System.out.println("Fetching ChiTietGioHang for GioHang ID: " + gioHangId);
+        List<ChiTietGioHang> chiTietGioHangs = chiTietGioHangRepository.findAll().stream()
                 .filter(ctgh -> ctgh.getIdGioHang().getId().equals(gioHangId) && !ctgh.getDeleted())
+                .collect(Collectors.toList());
+        System.out.println("Found " + chiTietGioHangs.size() + " non-deleted ChiTietGioHang items for GioHang ID: " + gioHangId);
+        if (chiTietGioHangs.isEmpty()) {
+            System.out.println("No matching ChiTietGioHang found. Checking GioHang existence...");
+            gioHangRepository.findById(gioHangId).ifPresentOrElse(
+                    gioHang -> System.out.println("GioHang exists but has no items."),
+                    () -> System.out.println("GioHang ID " + gioHangId + " does not exist.")
+            );
+        }
+        return chiTietGioHangs.stream()
                 .map(this::convertToChiTietGioHangDTO)
                 .collect(Collectors.toList());
     }
 
     public void deleteChiTietGioHang(Integer chiTietGioHangId) {
-        System.out.println("Attempting to delete ChiTietGioHang with ID: " + chiTietGioHangId); // Thêm log để debug
+        System.out.println("Attempting to delete ChiTietGioHang with ID: " + chiTietGioHangId);
         ChiTietGioHang chiTietGioHang = chiTietGioHangRepository.findById(chiTietGioHangId)
-                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy chi tiết giỏ hàng với ID: " + chiTietGioHangId));
-
-        // Kiểm tra trạng thái deleted trước khi thực hiện xóa
+                .orElseThrow(() -> {
+                    System.out.println("ChiTietGioHang not found for ID: " + chiTietGioHangId);
+                    return new IllegalArgumentException("Không tìm thấy chi tiết giỏ hàng với ID: " + chiTietGioHangId);
+                });
         if (chiTietGioHang.getDeleted()) {
+            System.out.println("ChiTietGioHang already deleted for ID: " + chiTietGioHangId);
             throw new IllegalArgumentException("Chi tiết giỏ hàng với ID: " + chiTietGioHangId + " đã được xóa trước đó.");
         }
-
-        // Đánh dấu xóa
         chiTietGioHang.setDeleted(true);
         chiTietGioHangRepository.save(chiTietGioHang);
-
-        // Khôi phục trạng thái ChiTietSanPham
         ChiTietSanPham chiTietSanPham = chiTietGioHang.getIdChiTietSanPham();
         chiTietSanPham.setDeleted(false);
         chiTietSanPhamRepository.save(chiTietSanPham);
-
-        // Cập nhật HoaDonChiTiet liên quan
         List<HoaDonChiTiet> hoaDonChiTiets = hoaDonChiTietRepository.findAll().stream()
                 .filter(hdct -> hdct.getIdChiTietSanPham().getId().equals(chiTietSanPham.getId()) && !hdct.getDeleted())
                 .collect(Collectors.toList());
@@ -221,6 +247,7 @@ public class BanHangService {
             hoaDonChiTiet.setDeleted(true);
             hoaDonChiTietRepository.save(hoaDonChiTiet);
         }
+        System.out.println("Successfully deleted ChiTietGioHang with ID: " + chiTietGioHangId);
     }
 
     public HoaDon addHD(HoaDon hoaDon) {
