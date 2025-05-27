@@ -190,7 +190,7 @@ export default function usePhieuGiamGia() {
         }
         return "N/A";
       },
-      width: "100px",
+      width: "50px",
     },
     {
       key: "soTienGiamToiDa",

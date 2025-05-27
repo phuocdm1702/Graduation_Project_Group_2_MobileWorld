@@ -195,15 +195,25 @@ public class BanHangService {
     }
 
     public void deleteChiTietGioHang(Integer chiTietGioHangId) {
+        System.out.println("Attempting to delete ChiTietGioHang with ID: " + chiTietGioHangId); // Thêm log để debug
         ChiTietGioHang chiTietGioHang = chiTietGioHangRepository.findById(chiTietGioHangId)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy chi tiết giỏ hàng với ID: " + chiTietGioHangId));
+
+        // Kiểm tra trạng thái deleted trước khi thực hiện xóa
+        if (chiTietGioHang.getDeleted()) {
+            throw new IllegalArgumentException("Chi tiết giỏ hàng với ID: " + chiTietGioHangId + " đã được xóa trước đó.");
+        }
+
+        // Đánh dấu xóa
         chiTietGioHang.setDeleted(true);
         chiTietGioHangRepository.save(chiTietGioHang);
 
+        // Khôi phục trạng thái ChiTietSanPham
         ChiTietSanPham chiTietSanPham = chiTietGioHang.getIdChiTietSanPham();
         chiTietSanPham.setDeleted(false);
         chiTietSanPhamRepository.save(chiTietSanPham);
 
+        // Cập nhật HoaDonChiTiet liên quan
         List<HoaDonChiTiet> hoaDonChiTiets = hoaDonChiTietRepository.findAll().stream()
                 .filter(hdct -> hdct.getIdChiTietSanPham().getId().equals(chiTietSanPham.getId()) && !hdct.getDeleted())
                 .collect(Collectors.toList());
