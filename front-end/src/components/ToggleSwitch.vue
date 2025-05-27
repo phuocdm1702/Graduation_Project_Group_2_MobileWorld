@@ -39,7 +39,6 @@ const uniqueId = computed(() => `toggle-${props.id}`);
   left: 0;
   width: 40px;
   height: 24px;
-  background-color: #E32636; /* Màu đỏ khi Công khai/Không hoạt động (false) */
   border-radius: 34px;
   cursor: pointer;
   transition: background-color 0.3s;
@@ -59,7 +58,7 @@ const uniqueId = computed(() => `toggle-${props.id}`);
 }
 
 .toggle-switch .toggle-input:checked + .toggle-label {
-  background-color: #4CAF50; /* Màu xanh khi Riêng tư/Hoạt động (true) */
+  background-color: #f97316; /* Màu xanh khi Riêng tư/Hoạt động (true) */
 }
 
 .toggle-switch .toggle-input:checked + .toggle-label::before {
