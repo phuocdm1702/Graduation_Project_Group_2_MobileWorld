@@ -333,4 +333,8 @@ public class PhieuGiamGiaController {
         PhieuGiamGiaDTO updatedPgg = phieuGiamGiaService.updateTrangthai(id, trangThai);
         return ResponseEntity.ok(updatedPgg);
     }
+    @GetMapping("/Pgg/Getall")
+    public List<PhieuGiamGia> getall(){
+        return phieuGiamGiaService.getall();
+    }
 }
