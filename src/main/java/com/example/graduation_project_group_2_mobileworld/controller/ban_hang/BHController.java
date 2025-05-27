@@ -190,10 +190,10 @@ public class BHController {
             banHangService.deleteChiTietGioHang(chiTietGioHangId);
             return ResponseEntity.ok("Xóa chi tiết giỏ hàng thành công!");
         } catch (IllegalArgumentException e) {
-            System.out.println("Lỗi dữ liệu: " + e.getMessage());
-            return ResponseEntity.badRequest().body("Lỗi: " + e.getMessage());
+            System.out.println("Lỗi dữ liệu chi tiết: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Lỗi: " + e.getMessage());
         } catch (Exception e) {
-            System.out.println("Lỗi server: " + e.getMessage());
+            System.out.println("Lỗi server chi tiết: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Lỗi server: " + e.getMessage());
         }
     }

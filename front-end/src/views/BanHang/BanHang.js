@@ -426,16 +426,49 @@ export default function useBanHang() {
     }
   };
 
+  const reloadCartItems = async () => {
+    if (gioHangId.value) {
+      try {
+        const response = await axios.get(`http://localhost:8080/ban-hang/gio-hang/${gioHangId.value}/chi-tiet`);
+        if (response.status === 200 && response.data) {
+          cartItems.value = response.data.map(item => ({
+            id: item.id,
+            name: item.tenSanPham,
+            color: item.mauSac || 'N/A',
+            ram: item.ram || 'N/A',
+            capacity: item.boNhoTrong || 'N/A',
+            price: item.giaBan,
+            imei: item.imei,
+          }));
+          // Cập nhật lại pendingInvoices
+          const invoice = pendingInvoices.value.find((inv) => inv.id === activeInvoiceId.value);
+          if (invoice) {
+            invoice.items = [...cartItems.value];
+          }
+        } else {
+          toast.value.kshowToast('error', 'Không thể tải danh sách sản phẩm trong giỏ hàng.');
+        }
+      } catch (error) {
+        console.error('Error reloading cart items:', error);
+        toast.value.kshowToast('error', 'Lỗi khi tải giỏ hàng: ' + (error.response?.data || error.message));
+      }
+    }
+  };
+
   const removeItem = async (item) => {
+    console.log('Attempting to remove item with ID:', item.id); // Thêm log để kiểm tra ID
     try {
       const response = await axios.delete(`http://localhost:8080/ban-hang/gio-hang/chi-tiet/${item.id}`);
       if (response.status === 200) {
-        cartItems.value = cartItems.value.filter((cartItem) => cartItem.id !== item.id);
+        await reloadCartItems(); // Đồng bộ lại dữ liệu sau khi xóa thành công
         toast.value.kshowToast('success', 'Đã xóa sản phẩm khỏi giỏ hàng!');
       }
     } catch (error) {
-      console.error('Error removing item:', error);
-      toast.value.kshowToast('error', 'Không thể xóa sản phẩm.');
+      console.error('Error removing item:', error.response?.data || error.message);
+      const errorMessage = error.response?.data || 'Không thể xóa sản phẩm khỏi giỏ hàng.';
+      toast.value.kshowToast('error', errorMessage);
+      // Luôn đồng bộ lại dữ liệu sau khi xóa thất bại để đảm bảo tính nhất quán
+      await reloadCartItems();
     }
   };
 

@@ -375,7 +375,7 @@
               </button>
             </div>
             <button
-              @click="openAddModal('  mauSac')"
+              @click="openAddModal('mauSac')"
               class="ml-2 px-2 py-1 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition"
             >
               +
@@ -385,7 +385,6 @@
 
         <!-- Danh sách biến thể đã thêm -->
         <div v-if="productVariants.length > 0" class="mt-6">
-
           <div v-if="productVariants && productVariants.length > 0" class="col-span-3">
             <div v-for="(group, groupIndex) in groupVariantsByRamAndRom" :key="groupIndex">
               <div class="flex justify-between m-2 items-center">
@@ -468,16 +467,16 @@
                       (variantImeis && variantImeis[group.startIndex + variantIndex]) ? variantImeis[group.startIndex + variantIndex].length : 0
                     }}
                   </td>
-                  <td class="border border-gray-300 p-2 flex justify-center gap-2">
+                  <td class="border border-gray-300 p-2 text-center">
                     <button
                       @click="openImeiModal(group.startIndex + variantIndex)"
-                      class="px-2 py-1 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition"
+                      class="px-2 py-1 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition m-1"
                     >
                       Nhập IMEI
                     </button>
                     <button
                       @click="removeVariant(group.startIndex + variantIndex)"
-                      class="px-2 py-1 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition"
+                      class="px-2 py-1 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition m-1"
                     >
                       Xóa
                     </button>
@@ -881,6 +880,14 @@
               class="input-field p-2 border border-gray-300"
               placeholder="Nhập IMEI, mỗi IMEI trên một dòng..."
             ></textarea>
+            <div class="mt-2 text-sm text-gray-700">
+              <p v-for="(imei, index) in filteredImeiList" :key="index">
+                IMEI {{ index + 1 }}: {{ imei.length }} chữ số
+                <span v-if="imei.length === 15" class="text-green-500"> (Đủ 15 số)</span>
+                <span v-else class="text-red-500"> (Cần 15 số)</span>
+              </p>
+              <p v-if="!imeiInput.trim()">Chưa nhập IMEI</p>
+            </div>
           </div>
           <div class="mb-4 flex items-center gap-4">
             <div class="w-3/4">
@@ -1169,6 +1176,13 @@ export default defineComponent({
       }, 200);
     };
 
+    const filteredImeiList = computed(() => {
+      return imeiInput.value
+        .split('\n')
+        .map(imei => imei.trim())
+        .filter(imei => imei.length > 0);
+    });
+
     const confirmColorSelection = () => {
       if (addVariant()) {
         showImageSection.value = true;
@@ -1328,6 +1342,7 @@ export default defineComponent({
       productNameOptions,
       filteredProductNameOptions,
       showProductDropdown,
+      filteredImeiList,
       toggleDropdown,
       addVariant,
       removeVariant,

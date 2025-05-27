@@ -19,7 +19,7 @@
           <template v-if="column.cellSlot === 'actionsSlot'">
             <slot name="actionsSlot" :item="item">
               <div class="flex items-center justify-center space-x-2">
-                <button @click="editItem(item)" class="bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600 transition">
+                <button @click="editItem(item)" class="text-orange-500 hover:text-orange-500 transition">
                   <i class="fa-solid fa-edit"></i>
                 </button>
                 <ToggleSwitch
