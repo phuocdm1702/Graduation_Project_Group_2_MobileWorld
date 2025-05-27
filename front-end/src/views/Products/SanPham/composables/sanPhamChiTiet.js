@@ -38,6 +38,7 @@ export default function useSanPhamChiTiet() {
   const columns = [
     { key: '#', label: 'STT', formatter: (value, item, index) => currentPage.value * 5 + index + 1 },
     { key: 'maSanPham', label: 'Mã Sản Phẩm' },
+    { key: 'tenSanPham', label: 'Tên Sản Phẩm' },
     {
       key: 'variants[0].mauSac',
       label: 'Màu Sắc',
