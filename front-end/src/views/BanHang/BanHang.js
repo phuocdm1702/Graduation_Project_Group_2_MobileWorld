@@ -1,7 +1,7 @@
-import { ref, computed, onMounted, watch } from 'vue';
-import { useRouter } from 'vue-router';
+import {ref, computed, onMounted, watch} from 'vue';
+import {useRouter} from 'vue-router';
 import axios from 'axios';
-import { debounce } from 'lodash';
+import {debounce} from 'lodash';
 
 export default function useBanHang() {
   const router = useRouter();
@@ -13,34 +13,48 @@ export default function useBanHang() {
 
   const cartItems = ref([]);
   const cartColumns = ref([
-    { key: 'index', formatter: (_, __, index) => index + 1, label: 'STT' },
-    { key: 'name', label: 'Sản phẩm' },
-    { key: 'color', label: 'Màu', formatter: (value) => value || 'N/A' },
-    { key: 'price', label: 'Đơn giá', formatter: (value) => `${value.toLocaleString()} đ` },
-    { key: 'imei', label: 'IMEI', formatter: (value) => value || 'N/A' },
-    { key: 'actions', label: 'Xóa', cellSlot: 'actionsSlot' },
+    {key: 'index', formatter: (_, __, index) => index + 1, label: 'STT'},
+    {
+      key: 'name',
+      label: 'Sản phẩm',
+      formatter: (value, row) => {
+        const color = row.color || 'N/A';
+        const ram = row.ram || 'N/A';
+        const capacity = row.capacity || 'N/A';
+        return `
+        <span style="font-weight: bold; color: #1f2937;">${value}</span>
+        <span > (${color} | ${ram} | ${capacity})</span>
+      `;
+      }
+    },
+    // { key: 'color', label: 'Màu', formatter: (value) => value || 'N/A' },
+    // { key: 'ram', label: 'Ram', formatter: (value) => value || 'N/A' },
+    // { key: 'capacity', label: 'Bộ nhớ', formatter: (value) => value || 'N/A' },
+    {key: 'price', label: 'Đơn giá', formatter: (value) => `${value.toLocaleString()} đ`},
+    {key: 'imei', label: 'IMEI', formatter: (value) => value || 'N/A'},
+    {key: 'actions', label: 'Xóa', cellSlot: 'actionsSlot'},
   ]);
 
   const productColumns = ref([
-    { key: 'index', formatter: (_, __, index) => index + 1, label: 'STT' },
-    { key: 'tenSanPham', label: 'Tên sản phẩm' },
-    { key: 'ma', label: 'Mã' },
-    { key: 'mauSac', label: 'Màu', formatter: (value) => value || 'N/A' },
-    { key: 'dungLuongRam', label: 'Ram', formatter: (value) => value || 'N/A' },
-    { key: 'dungLuongBoNhoTrong', label: 'Bộ nhớ trong', formatter: (value) => value || 'N/A' },
-    { key: 'soLuong', label: 'Số lượng', formatter: (value) => value || 0 },
-    { key: 'giaBan', label: 'Giá', formatter: (value) => `${value.toLocaleString()} đ` },
-    { key: 'actions', label: 'Thao tác', cellSlot: 'productActionsSlot' },
+    {key: 'index', formatter: (_, __, index) => index + 1, label: 'STT'},
+    {key: 'tenSanPham', label: 'Tên sản phẩm'},
+    {key: 'ma', label: 'Mã'},
+    {key: 'mauSac', label: 'Màu', formatter: (value) => value || 'N/A'},
+    {key: 'dungLuongRam', label: 'Ram', formatter: (value) => value || 'N/A'},
+    {key: 'dungLuongBoNhoTrong', label: 'Bộ nhớ trong', formatter: (value) => value || 'N/A'},
+    {key: 'soLuong', label: 'Số lượng', formatter: (value) => value || 0},
+    {key: 'giaBan', label: 'Giá', formatter: (value) => `${value.toLocaleString()} đ`},
+    {key: 'actions', label: 'Thao tác', cellSlot: 'productActionsSlot'},
   ]);
 
   const imeiColumns = ref([
-    { key: 'imei', label: 'IMEI' },
-    { key: 'actions', label: 'Chọn', cellSlot: 'imeiActionsSlot' },
+    {key: 'imei', label: 'IMEI'},
+    {key: 'actions', label: 'Chọn', cellSlot: 'imeiActionsSlot'},
   ]);
 
   const searchCustomer = ref('');
   const selectedCustomer = ref(null);
-  const customer = ref({ name: '', phone: '', city: '', district: '', ward: '', address: '' });
+  const customer = ref({name: '', phone: '', city: '', district: '', ward: '', address: ''});
   const receiver = ref({
     name: '',
     phone: '',
@@ -100,6 +114,9 @@ export default function useBanHang() {
           items: hd.items ? hd.items.map((item) => ({
             id: item.id,
             name: item.tenSanPham,
+            color: item.mauSac,
+            ram: item.ram,
+            capacity: item.boNhoTrong,
             price: item.giaBan,
             imei: item.imei,
           })) : [],
@@ -217,9 +234,9 @@ export default function useBanHang() {
         },
       });
       if (response.status === 200 && response.data) {
-        availableIMEIs.value = response.data.map((imei) => ({ imei }));
+        availableIMEIs.value = response.data.map((imei) => ({imei}));
         if (searchedIMEI.value && !availableIMEIs.value.some((item) => item.imei === searchedIMEI.value)) {
-          availableIMEIs.value.push({ imei: searchedIMEI.value });
+          availableIMEIs.value.push({imei: searchedIMEI.value});
         }
         if (searchedIMEI.value) {
           selectedIMEIs.value = [searchedIMEI.value];
@@ -227,7 +244,7 @@ export default function useBanHang() {
         showIMEIModal.value = true;
       } else {
         if (searchedIMEI.value) {
-          availableIMEIs.value = [{ imei: searchedIMEI.value }];
+          availableIMEIs.value = [{imei: searchedIMEI.value}];
           selectedIMEIs.value = [searchedIMEI.value];
           showIMEIModal.value = true;
         } else {
@@ -237,7 +254,7 @@ export default function useBanHang() {
     } catch (error) {
       console.error('Error fetching IMEIs:', error);
       if (searchedIMEI.value) {
-        availableIMEIs.value = [{ imei: searchedIMEI.value }];
+        availableIMEIs.value = [{imei: searchedIMEI.value}];
         selectedIMEIs.value = [searchedIMEI.value];
         showIMEIModal.value = true;
       } else {
@@ -260,8 +277,8 @@ export default function useBanHang() {
           giaBan: response.data.giaBan,
           imei,
           mauSac: response.data.mauSac || 'N/A',
-          dungLuongRam: response.data.dungLuongRam || 'N/A',
-          dungLuongBoNhoTrong: response.data.dungLuongBoNhoTrong || 'N/A',
+          dungLuongRam: response.data.ram || 'N/A',
+          dungLuongBoNhoTrong: response.data.boNhoTrong || 'N/A',
         };
       }
       return null;
@@ -307,10 +324,14 @@ export default function useBanHang() {
             id: addResponse.data.id,
             name: productDetails.tenSanPham,
             color: productDetails.mauSac || 'N/A',
+            ram: productDetails.dungLuongRam || 'N/A',
+            capacity: productDetails.dungLuongBoNhoTrong || 'N/A',
             price: productDetails.giaBan,
             imei: imei,
           };
           cartItems.value.push(cartItem);
+          console.log('productDetails:', productDetails);
+          console.log('addResponse.data:', addResponse.data);
           toast.value.kshowToast('success', `Đã thêm sản phẩm ${productDetails.tenSanPham} (IMEI: ${imei}) vào giỏ hàng!`);
         } else {
           toast.value.kshowToast('error', `Không thể thêm sản phẩm với IMEI ${imei} vào giỏ hàng.`);
@@ -536,8 +557,8 @@ export default function useBanHang() {
         payOnDelivery.value = false;
         tienChuyenKhoan.value = 0;
         tienMat.value = 0;
-        customer.value = { name: '', phone: '', city: '', district: '', ward: '', address: '' };
-        receiver.value = { name: '', phone: '', city: '', district: '', ward: '', address: '', email: '' };
+        customer.value = {name: '', phone: '', city: '', district: '', ward: '', address: ''};
+        receiver.value = {name: '', phone: '', city: '', district: '', ward: '', address: '', email: ''};
         await fetchPendingInvoices();
         router.push(`/show-hoa-don/${invoiceId}`);
       }
@@ -552,8 +573,8 @@ export default function useBanHang() {
   const searchCustomers = debounce(async () => {
     if (!searchCustomer.value.trim()) {
       selectedCustomer.value = null;
-      customer.value = { name: "", phone: "", city: "", district: "", ward: "", address: "" };
-      receiver.value = { name: "", phone: "", city: "", district: "", ward: "", address: "" };
+      customer.value = {name: "", phone: "", city: "", district: "", ward: "", address: ""};
+      receiver.value = {name: "", phone: "", city: "", district: "", ward: "", address: ""};
       idKhachHang.value = null;
       discountCodes.value = [];
       discountCodeInput.value = '';
@@ -586,8 +607,8 @@ export default function useBanHang() {
         await fetchDiscountCodes();
       } else {
         selectedCustomer.value = null;
-        customer.value = { name: "", phone: "", city: "", district: "", ward: "", address: "" };
-        receiver.value = { name: "", phone: "", city: "", district: "", ward: "", address: "" };
+        customer.value = {name: "", phone: "", city: "", district: "", ward: "", address: ""};
+        receiver.value = {name: "", phone: "", city: "", district: "", ward: "", address: ""};
         idKhachHang.value = null;
         discountCodes.value = [];
         discountCodeInput.value = '';
@@ -598,8 +619,8 @@ export default function useBanHang() {
     } catch (error) {
       console.error("Lỗi khi tìm kiếm khách hàng:", error);
       selectedCustomer.value = null;
-      customer.value = { name: "", phone: "", city: "", district: "", ward: "", address: "" };
-      receiver.value = { name: "", phone: "", city: "", district: "", ward: "", address: "" };
+      customer.value = {name: "", phone: "", city: "", district: "", ward: "", address: ""};
+      receiver.value = {name: "", phone: "", city: "", district: "", ward: "", address: ""};
       idKhachHang.value = null;
       discountCodes.value = [];
       discountCodeInput.value = '';
@@ -779,7 +800,7 @@ export default function useBanHang() {
     }
     try {
       const response = await axios.post('http://localhost:8080/khach-hang/addBh', customerData, {
-        headers: { 'Content-Type': 'application/json' },
+        headers: {'Content-Type': 'application/json'},
       });
       if (response.status === 200 && response.data) {
         selectedCustomer.value = true;
@@ -960,7 +981,7 @@ export default function useBanHang() {
     if (!isDelivery.value) {
       resetReceiver();
     } else {
-      receiver.value = { ...customer.value };
+      receiver.value = {...customer.value};
       if (!customer.value.name && !customer.value.phone) {
         toast.value.kshowToast('info', 'Vui lòng chọn hoặc thêm khách hàng để điền thông tin người nhận.');
       }

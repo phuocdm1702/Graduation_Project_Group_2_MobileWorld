@@ -74,7 +74,7 @@ public class AddKhachHangPGGController {
         pgg.setNgayBatDau(dtoPGG.getNgayBatDau());
         pgg.setNgayKetThuc(dtoPGG.getNgayKetThuc());
         pgg.setTrangThai(false);
-        pgg.setRiengTu(Objects.equals(dtoPGG.getRiengTu(), 1));
+        pgg.setRiengTu(Objects.equals(dtoPGG.getRiengTu(), 0));
         pgg.setMoTa(dtoPGG.getMoTa());
         pgg.setDeleted(false);
 

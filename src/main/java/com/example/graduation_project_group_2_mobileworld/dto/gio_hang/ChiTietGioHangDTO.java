@@ -9,17 +9,11 @@ public class ChiTietGioHangDTO {
     private String ma;
     private String tenSanPham;
     private String mauSac;
+    private String boNhoTrong;
+    private String ram;
     private String imei;
     private BigDecimal giaBan;
     private BigDecimal tongTien;
-
-    public String getMauSac() {
-        return mauSac;
-    }
-
-    public void setMauSac(String mauSac) {
-        this.mauSac = mauSac;
-    }
 
     public Integer getId() {
         return id;
@@ -59,6 +53,30 @@ public class ChiTietGioHangDTO {
 
     public void setTenSanPham(String tenSanPham) {
         this.tenSanPham = tenSanPham;
+    }
+
+    public String getMauSac() {
+        return mauSac;
+    }
+
+    public void setMauSac(String mauSac) {
+        this.mauSac = mauSac;
+    }
+
+    public String getRam() {
+        return ram;
+    }
+
+    public void setRam(String ram) {
+        this.ram = ram;
+    }
+
+    public String getBoNhoTrong() {
+        return boNhoTrong;
+    }
+
+    public void setBoNhoTrong(String boNhoTrong) {
+        this.boNhoTrong = boNhoTrong;
     }
 
     public String getImei() {

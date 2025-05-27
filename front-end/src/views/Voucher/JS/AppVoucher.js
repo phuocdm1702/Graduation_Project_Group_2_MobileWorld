@@ -33,17 +33,17 @@ export default function usePhieuGiamGia() {
     } else if (endDate >= currentDate) {
       if (item.trangThai) {
         return {
-          text: "Không hoạt động",
+          text: "Đang diễn ra",
           isActive: true,
-          cssClass: "badge-inactive",
+          cssClass: "badge-active",
           isToggleDisabled: false,
           isHiddenToggle: false,
         };
       } else {
         return {
-          text: "Đang diễn ra",
+          text: "Không hoạt động",
           isActive: false,
-          cssClass: "badge-active",
+          cssClass: "badge-inactive",
           isToggleDisabled: false,
           isHiddenToggle: false,
         };
@@ -116,11 +116,11 @@ export default function usePhieuGiamGia() {
 
       if (trangThaiValue) {
         if (["Đang diễn ra", "active"].includes(trangThaiValue)) {
-          trangThaiValue = "Hoạt động"; // trangThai = false
+          trangThaiValue = true; // trangThai = true
           tempStartDate = null;
           tempEndDate = null;
         } else if (["Không hoạt động", "inactive"].includes(trangThaiValue)) {
-          trangThaiValue = "Không hoạt động"; // trangThai = true
+          trangThaiValue = false; // trangThai = false
           tempStartDate = null;
           tempEndDate = null;
         } else if (trangThaiValue === "Chưa diễn ra") {
@@ -160,7 +160,7 @@ export default function usePhieuGiamGia() {
         console.log(`Cannot toggle ${item.ma}: ToggleSwitch is disabled`);
         return;
       }
-      const newStatus = !item.trangThai;
+      const newStatus = !item.trangThai; // true -> Hoạt động, false -> Không hoạt động
       await axios.put(`${baseURL}/update-trang-thai/${item.id}`, { trangThai: newStatus });
 
       const index = vouchers.value.findIndex((v) => v.id === item.id);

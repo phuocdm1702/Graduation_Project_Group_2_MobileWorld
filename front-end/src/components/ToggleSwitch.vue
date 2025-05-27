@@ -11,13 +11,12 @@
 import { defineProps, defineEmits, computed } from 'vue';
 
 const props = defineProps({
-  checked: { type: Boolean, default: false },
-  id: { type: [String, Number], default: '' } 
+  checked: { type: Boolean, default: false }, // true = Riêng tư/Hoạt động (xanh), false = Công khai/Không hoạt động (đỏ)
+  id: { type: [String, Number], default: '' }
 });
 
 defineEmits(['change']);
 
-// Sử dụng props.id để truy cập
 const uniqueId = computed(() => `toggle-${props.id}`);
 </script>
 
@@ -40,7 +39,7 @@ const uniqueId = computed(() => `toggle-${props.id}`);
   left: 0;
   width: 40px;
   height: 24px;
-  background-color: #E32636;
+  background-color: #E32636; /* Màu đỏ khi Công khai/Không hoạt động (false) */
   border-radius: 34px;
   cursor: pointer;
   transition: background-color 0.3s;
@@ -60,7 +59,7 @@ const uniqueId = computed(() => `toggle-${props.id}`);
 }
 
 .toggle-switch .toggle-input:checked + .toggle-label {
-  background-color: #4CAF50;
+  background-color: #4CAF50; /* Màu xanh khi Riêng tư/Hoạt động (true) */
 }
 
 .toggle-switch .toggle-input:checked + .toggle-label::before {
