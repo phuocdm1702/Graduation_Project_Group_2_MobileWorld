@@ -224,4 +224,7 @@ public class PhieuGiamGiaService {
         return phieuGiamGiaRepository.save(editPGG);
     }
 
+    public List<PhieuGiamGia> getall() {
+        return phieuGiamGiaRepository.findAll();
+    }
 }

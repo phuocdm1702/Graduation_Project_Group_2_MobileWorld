@@ -360,15 +360,15 @@
                   :disabled="!isReceiverEditable"
                 />
               </div>
-            </div>
-            <div class="mt-4">
-              <label class="block text-sm font-medium text-gray-700">Địa chỉ cụ thể</label>
-              <input
-                v-model="receiver.address"
-                type="text"
-                class="mt-1 p-2 w-full border rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
-                :disabled="!isReceiverEditable"
-              />
+              <div>
+                <label class="block text-sm font-medium text-gray-700">Địa chỉ cụ thể</label>
+                <input
+                  v-model="receiver.address"
+                  type="text"
+                  class="mt-1 p-2 w-full border rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  :disabled="!isReceiverEditable"
+                />
+              </div>
             </div>
             <div class="mt-4">
               <label class="block text-sm font-medium text-gray-700">Ghi chú</label>
