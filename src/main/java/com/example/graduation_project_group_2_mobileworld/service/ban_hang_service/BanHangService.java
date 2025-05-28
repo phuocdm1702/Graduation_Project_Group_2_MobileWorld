@@ -11,6 +11,7 @@ import com.example.graduation_project_group_2_mobileworld.entity.*;
 import com.example.graduation_project_group_2_mobileworld.entity.SanPham.ChiTietSanPham;
 import com.example.graduation_project_group_2_mobileworld.entity.SanPham.ImelDaBan;
 import com.example.graduation_project_group_2_mobileworld.repository.giam_gia.PhieuGiamGiaCaNhanRepository;
+import com.example.graduation_project_group_2_mobileworld.repository.giam_gia.PhieuGiamGiaRepository;
 import com.example.graduation_project_group_2_mobileworld.repository.gio_hang.ChiTietGioHangRepository;
 import com.example.graduation_project_group_2_mobileworld.repository.gio_hang.GioHangRepository;
 import com.example.graduation_project_group_2_mobileworld.repository.hinh_thuc_thanh_toan_repo.HinhThucThanhToanRepository;
@@ -84,6 +85,8 @@ public class BanHangService {
     private EmailSendBH emailSendBH;
     @Autowired
     private TaiKhoanRepository taiKhoanRepository;
+    @Autowired
+    private PhieuGiamGiaRepository phieuGiamGiaRepository;
 
     public List<HDban_hangDTO> getAllHD() {
         List<HoaDon> listHD = hoaDonRepository.findAllHDNotConfirm();
@@ -259,7 +262,9 @@ public class BanHangService {
     public void thanhToan(Integer hoaDonId, ThanhToanRequestDTO request) {
         HoaDon hoaDon = hoaDonRepository.findById(hoaDonId)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy hóa đơn với ID: " + hoaDonId));
-
+        PhieuGiamGia phieuGiamGia = phieuGiamGiaRepository.findByma(request.getMaGiamGia())
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy phiếu giảm giá với mã: " + request.getMaGiamGia()));
+        hoaDon.setIdPhieuGiamGia(phieuGiamGia);
         hoaDon.setTongTien(BigDecimal.valueOf(request.getTotalPrice()));
         hoaDon.setTongTienSauGiam(BigDecimal.valueOf(request.getTotalPrice() - request.getDiscount()));
         hoaDon.setTrangThai((short) 1);
