@@ -53,6 +53,17 @@ public class HoaDonController {
         return ResponseEntity.ok(Arrays.asList("Online", "Trực tiếp"));
     }
 
+    // API cập nhật trạng thái hóa đơn
+    @PutMapping("/update-status/{id}")
+    public ResponseEntity<HoaDonDTO> updateHoaDonStatus(
+            @PathVariable("id") Integer id,
+            @RequestBody Map<String, Object> payload) {
+        Short newStatus = Short.valueOf(payload.get("trangThai").toString());
+        String action = payload.get("hanhDong").toString();
+        HoaDonDTO updatedHoaDon = hoaDonService.updateHoaDonStatus(id, newStatus, action);
+        return ResponseEntity.ok(updatedHoaDon);
+    }
+
     // API lấy chi tiết hóa đơn theo ID
     @GetMapping("/detail/{id}")
     public ResponseEntity<HoaDonDTO> getFullHoaDonDetail(@PathVariable("id") Integer id) {

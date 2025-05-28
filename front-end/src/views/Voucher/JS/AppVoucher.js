@@ -206,7 +206,12 @@ export default function usePhieuGiamGia() {
       },
       width: "120px",
     },
-    { key: "soLuongDung", label: "Số lượng", width: "80px" },
+    { key: "soLuongDung", 
+      label: "Số lượng", 
+      formatter: (value, item) => {
+        return item.soLuongDung == -1 ? "Vô hạn" : value;
+      }, 
+      width: "80px" },
     { key: "hoaDonToiThieu", label: "Hóa\nĐơn\nTối\nThiểu", formatter: (value) => value.toLocaleString("vi-VN") + " VND", width: "100px" },
     { key: "ngayBatDau", label: "Bắt đầu", formatter: (value) => new Date(value).toLocaleDateString("vi-VN"), width: "100px" },
     { key: "ngayKetThuc", label: "Kết thúc", formatter: (value) => new Date(value).toLocaleDateString("vi-VN"), width: "100px" },

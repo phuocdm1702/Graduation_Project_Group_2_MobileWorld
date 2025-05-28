@@ -9,6 +9,7 @@ import org.hibernate.annotations.Nationalized;
 
 import java.sql.Date;
 import java.sql.Time;
+import java.sql.Timestamp;
 import java.time.Instant;
 
 @Getter
@@ -41,7 +42,7 @@ public class LichSuHoaDon {
     private String hanhDong;
 
     @Column(name = "thoi_gian")
-    private Date thoiGian;
+    private Timestamp thoiGian;
 
     @Column(name = "deleted")
     private Boolean deleted;

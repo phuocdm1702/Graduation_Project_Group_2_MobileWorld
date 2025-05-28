@@ -360,7 +360,7 @@
                   :disabled="!isReceiverEditable"
                 />
               </div>
-              <div>
+              <div >
                 <label class="block text-sm font-medium text-gray-700">Địa chỉ cụ thể</label>
                 <input
                   v-model="receiver.address"
@@ -389,7 +389,7 @@
                   v-model="discountCodeInput"
                   class="p-2 w-full border rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
                   list="languages"
-                  placeholder="Chọn hoặc nhập mã giảm giá"
+                  placeholder="Chọn mã riêng hoặc nhập mã công khai"
                   @focus="fetchDiscountCodes"
                 />
                 <datalist id="languages">
@@ -402,6 +402,9 @@
                   Áp dụng
                 </button>
               </div>
+              <p v-if="discountCodes.length === 0 && idKhachHang" class="mt-2 text-sm text-gray-600">
+                Không có mã giảm giá riêng. Vui lòng nhập mã công khai nếu có.
+              </p>
               <div class="mt-2 text-right">
                 <p>Tổng tiền hàng: {{ totalPrice.toLocaleString() }} đ</p>
                 <p>Giảm giá: -{{ discount.toLocaleString() }} đ</p>

@@ -6,6 +6,7 @@ import com.example.graduation_project_group_2_mobileworld.dto.hoa_don.HoaDonDTO;
 import com.example.graduation_project_group_2_mobileworld.dto.hoa_don.HoaDonDTOGet;
 import com.example.graduation_project_group_2_mobileworld.dto.hoa_don.LichSuHoaDonDTO;
 import com.example.graduation_project_group_2_mobileworld.entity.HoaDon;
+import com.example.graduation_project_group_2_mobileworld.entity.LichSuHoaDon;
 import com.example.graduation_project_group_2_mobileworld.repository.hoa_don.HoaDonRepository;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -75,6 +76,33 @@ public class HoaDonService {
     public HoaDonDTO getFullHoaDonDetails(Integer id) {
         HoaDon hoaDon = hoaDonRepository.findHoaDonWithDetailsAndHistoryById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy hóa đơn"));
+        return toDTO(hoaDon);
+    }
+
+    // Cập nhật trạng thái hóa đơn và thêm lịch sử hóa đơn
+    public HoaDonDTO updateHoaDonStatus(Integer id, Short newStatus, String action) {
+        HoaDon hoaDon = hoaDonRepository.findHoaDonWithDetailsAndHistoryById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy hóa đơn với ID: " + id));
+
+        // Cập nhật trạng thái
+        hoaDon.setTrangThai(newStatus);
+
+        // Thêm bản ghi lịch sử hóa đơn
+        LichSuHoaDon lichSu = new LichSuHoaDon();
+        lichSu.setHoaDon(hoaDon);
+        lichSu.setIdNhanVien(hoaDon.getIdNhanVien());
+        lichSu.setMa("LSHD_" + System.currentTimeMillis());
+        lichSu.setHanhDong(action);
+        lichSu.setThoiGian(new Timestamp(System.currentTimeMillis()));
+
+        if (hoaDon.getLichSuHoaDon() == null) {
+            hoaDon.setLichSuHoaDon(new ArrayList<>());
+        }
+        hoaDon.getLichSuHoaDon().add(lichSu);
+
+        // Lưu vào DB
+        hoaDonRepository.save(hoaDon);
+
         return toDTO(hoaDon);
     }
 
@@ -187,6 +215,13 @@ public class HoaDonService {
             }).collect(Collectors.toList()));
         }
     }
+
+//    // Chuyển đổi String ngày thành Timestamp
+//    private Timestamp parseDateToTimestamp(String date) {
+//        return (date != null && !date.isEmpty())
+//                ? Timestamp.valueOf(LocalDate.parse(date, DateTimeFormatter.ofPattern("yyyy-MM-dd")).atStartOfDay())
+//                : null;
+//    }
 
     // Chuyển đổi String ngày thành Timestamp
     private Timestamp parseDateToTimestamp(String date) {
