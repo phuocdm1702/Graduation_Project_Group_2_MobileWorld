@@ -13,6 +13,7 @@ import com.example.graduation_project_group_2_mobileworld.service.tai_khoan.TaiK
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.text.SimpleDateFormat;
@@ -61,6 +62,7 @@ public class AddKhachHangPGGController {
         return ResponseEntity.ok(listSearch);
     }
 
+    @Transactional
     @PostMapping("/addPhieuGiamGia")
     public ResponseEntity<PhieuGiamGia> addPGG(@RequestBody PhieuGiamGiaDTO dtoPGG) {
         PhieuGiamGia pgg = new PhieuGiamGia();
@@ -74,7 +76,7 @@ public class AddKhachHangPGGController {
         pgg.setNgayBatDau(dtoPGG.getNgayBatDau());
         pgg.setNgayKetThuc(dtoPGG.getNgayKetThuc());
         pgg.setTrangThai(false);
-        pgg.setRiengTu(Objects.equals(dtoPGG.getRiengTu(), 0));
+        pgg.setRiengTu(Objects.equals(dtoPGG.getRiengTu(), 1));
         pgg.setMoTa(dtoPGG.getMoTa());
         pgg.setDeleted(false);
 

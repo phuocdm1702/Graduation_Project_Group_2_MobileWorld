@@ -361,6 +361,16 @@ export default function useBanHang() {
   };
 
   const createNewPendingInvoice = async () => {
+    // Đếm số hóa đơn có trạng thái "Chờ"
+    const pendingCount = pendingInvoices.value.filter(invoice => invoice.status === 'Chờ').length;
+
+    // Kiểm tra nếu số hóa đơn chờ đã đạt tối đa 5
+    if (pendingCount >= 5) {
+      toast.value.kshowToast('error', 'Đã đạt tối đa 5 hóa đơn chờ. Vui lòng thanh toán hoặc hủy bớt hóa đơn để tạo mới.');
+      return;
+    }
+
+    // Tiếp tục tạo hóa đơn mới nếu chưa đạt giới hạn
     isCreatingInvoice.value = true;
     try {
       const response = await axios.post('http://localhost:8080/ban-hang/addHD', {
