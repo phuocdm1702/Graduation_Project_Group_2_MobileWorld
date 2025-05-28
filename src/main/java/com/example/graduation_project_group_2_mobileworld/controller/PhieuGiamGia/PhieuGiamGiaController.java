@@ -337,4 +337,36 @@ public class PhieuGiamGiaController {
     public List<PhieuGiamGia> getall(){
         return phieuGiamGiaService.getall();
     }
+    @GetMapping("/check-public")
+    public ResponseEntity<?> checkPublicDiscountCode(@RequestParam("ma") String ma) {
+        Optional<PhieuGiamGia> optionalPGG = phieuGiamGiaRepository.findByma(ma);
+
+        if (!optionalPGG.isPresent()) {
+            return ResponseEntity.status(404).body("Mã giảm giá không tồn tại.");
+        }
+
+        PhieuGiamGia pgg = optionalPGG.get();
+
+        // Kiểm tra trạng thái
+        if (!pgg.getTrangThai() || pgg.getDeleted()) {
+            return ResponseEntity.status(400).body("Mã giảm giá không hợp lệ hoặc đã bị vô hiệu hóa.");
+        }
+
+        // Kiểm tra ngày hết hạn
+        if (pgg.getNgayKetThuc() != null && pgg.getNgayKetThuc().before(new Date())) {
+            return ResponseEntity.status(400).body("Mã giảm giá đã hết hạn.");
+        }
+
+        // Kiểm tra số lượng sử dụng
+        if (pgg.getSoLuongDung() != null && pgg.getSoLuongDung() <= 0) {
+            return ResponseEntity.status(400).body("Mã giảm giá đã hết lượt sử dụng.");
+        }
+
+        // Kiểm tra mã công khai (riengTu = false)
+        if (pgg.getRiengTu()) {
+            return ResponseEntity.status(400).body("Đây không phải mã giảm giá công khai.");
+        }
+
+        return ResponseEntity.ok(pgg);
+    }
 }
