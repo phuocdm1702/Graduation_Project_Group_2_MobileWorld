@@ -34,6 +34,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -361,7 +362,7 @@ public class BanHangService {
         lichSuHoaDon.setHoaDon(hoaDon);
         lichSuHoaDon.setMa("LSHD" + System.currentTimeMillis());
         lichSuHoaDon.setHanhDong("Thanh toán hóa đơn");
-        lichSuHoaDon.setThoiGian(new java.sql.Date(new java.util.Date().getTime()));
+        lichSuHoaDon.setThoiGian(new Timestamp(System.currentTimeMillis()));
         lichSuHoaDon.setDeleted(false);
         lichSuHoaDonRepository.save(lichSuHoaDon);
 
