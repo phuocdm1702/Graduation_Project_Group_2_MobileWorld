@@ -131,14 +131,14 @@
                 <thead>
                 <tr class="bg-gray-100">
                   <th class="p-4 text-left">STT</th>
-                  <th class="p-4 text-left min-w-[200px]">Tên sản phẩm</th>
                   <th class="p-4 text-left min-w-[150px]">Mã</th>
+                  <th class="p-4 text-left min-w-[200px]">Tên sản phẩm</th>
                   <th class="p-4 text-left min-w-[150px]">Màu</th>
                   <th class="p-4 text-left min-w-[150px]">Ram</th>
                   <th class="p-4 text-left min-w-[150px]">Bộ nhớ trong</th>
                   <th class="p-4 text-left min-w-[120px]">Số lượng</th>
                   <th class="p-4 text-left min-w-[150px]">Giá</th>
-                  <th class="p-4 text-right min-w-[120px]"></th>
+                  <th class="p-4 text-right min-w-[120px]">Chọn Imel</th>
                 </tr>
                 </thead>
                 <tbody>

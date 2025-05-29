@@ -37,8 +37,8 @@ export default function useBanHang() {
 
   const productColumns = ref([
     {key: 'index', formatter: (_, __, index) => index + 1, label: 'STT'},
-    {key: 'tenSanPham', label: 'Tên sản phẩm'},
     {key: 'ma', label: 'Mã'},
+    {key: 'tenSanPham', label: 'Tên sản phẩm'},
     {key: 'mauSac', label: 'Màu', formatter: (value) => value || 'N/A'},
     {key: 'dungLuongRam', label: 'Ram', formatter: (value) => value || 'N/A'},
     {key: 'dungLuongBoNhoTrong', label: 'Bộ nhớ trong', formatter: (value) => value || 'N/A'},
