@@ -216,40 +216,80 @@ public class BanHangService {
                 .filter(ctgh -> ctgh.getIdGioHang().getId().equals(gioHangId) && !ctgh.getDeleted())
                 .collect(Collectors.toList());
         System.out.println("Found " + chiTietGioHangs.size() + " non-deleted ChiTietGioHang items for GioHang ID: " + gioHangId);
-        if (chiTietGioHangs.isEmpty()) {
-            System.out.println("No matching ChiTietGioHang found. Checking GioHang existence...");
-            gioHangRepository.findById(gioHangId).ifPresentOrElse(
-                    gioHang -> System.out.println("GioHang exists but has no items."),
-                    () -> System.out.println("GioHang ID " + gioHangId + " does not exist.")
-            );
-        }
         return chiTietGioHangs.stream()
                 .map(this::convertToChiTietGioHangDTO)
                 .collect(Collectors.toList());
     }
 
-    public void deleteChiTietGioHang(Integer chiTietGioHangId) {
-        System.out.println("Attempting to delete ChiTietGioHang with ID: " + chiTietGioHangId);
+//    public List<ChiTietGioHangDTO> getChiTietGioHangByGioHangId(Integer gioHangId) {
+//        System.out.println("Fetching ChiTietGioHang for GioHang ID: " + gioHangId);
+//        List<ChiTietGioHang> chiTietGioHangs = chiTietGioHangRepository.findAll().stream()
+//                .filter(ctgh -> ctgh.getIdGioHang().getId().equals(gioHangId) && !ctgh.getDeleted())
+//                .collect(Collectors.toList());
+//        System.out.println("Found " + chiTietGioHangs.size() + " non-deleted ChiTietGioHang items for GioHang ID: " + gioHangId);
+//        if (chiTietGioHangs.isEmpty()) {
+//            System.out.println("No matching ChiTietGioHang found. Checking GioHang existence...");
+//            gioHangRepository.findById(gioHangId).ifPresentOrElse(
+//                    gioHang -> System.out.println("GioHang exists but has no items."),
+//                    () -> System.out.println("GioHang ID " + gioHangId + " does not exist.")
+//            );
+//        }
+//        return chiTietGioHangs.stream()
+//                .map(this::convertToChiTietGioHangDTO)
+//                .collect(Collectors.toList());
+//    }
+
+    //    public void deleteChiTietGioHang(Integer chiTietGioHangId) {
+//        System.out.println("Attempting to delete ChiTietGioHang with ID: " + chiTietGioHangId);
+//        ChiTietGioHang chiTietGioHang = chiTietGioHangRepository.findById(chiTietGioHangId)
+//                .orElseThrow(() -> {
+//                    System.out.println("ChiTietGioHang not found for ID: " + chiTietGioHangId);
+//                    return new IllegalArgumentException("Không tìm thấy chi tiết giỏ hàng với ID: " + chiTietGioHangId);
+//                });
+//        if (chiTietGioHang.getDeleted()) {
+//            System.out.println("ChiTietGioHang already deleted for ID: " + chiTietGioHangId);
+//            throw new IllegalArgumentException("Chi tiết giỏ hàng với ID: " + chiTietGioHangId + " đã được xóa trước đó.");
+//        }
+//        chiTietGioHang.setDeleted(true);
+//        chiTietGioHangRepository.save(chiTietGioHang);
+//        ChiTietSanPham chiTietSanPham = chiTietGioHang.getIdChiTietSanPham();
+//        chiTietSanPham.setDeleted(false);
+//        chiTietSanPhamRepository.save(chiTietSanPham);
+//        List<HoaDonChiTiet> hoaDonChiTiets = hoaDonChiTietRepository.findAll().stream()
+//                .filter(hdct -> hdct.getIdChiTietSanPham().getId().equals(chiTietSanPham.getId()) && !hdct.getDeleted())
+//                .collect(Collectors.toList());
+//        for (HoaDonChiTiet hoaDonChiTiet : hoaDonChiTiets) {
+//            hoaDonChiTiet.setDeleted(true);
+//            hoaDonChiTietRepository.save(hoaDonChiTiet);
+//        }
+//        System.out.println("Successfully deleted ChiTietGioHang with ID: " + chiTietGioHangId);
+//    }
+    //Done
+    @Transactional
+    public void deleteChiTietGioHang(Integer chiTietGioHangId, Integer gioHangId) {
+        System.out.println("Attempting to delete ChiTietGioHang with ID: " + chiTietGioHangId + ", GioHangId: " + gioHangId);
         ChiTietGioHang chiTietGioHang = chiTietGioHangRepository.findById(chiTietGioHangId)
-                .orElseThrow(() -> {
-                    System.out.println("ChiTietGioHang not found for ID: " + chiTietGioHangId);
-                    return new IllegalArgumentException("Không tìm thấy chi tiết giỏ hàng với ID: " + chiTietGioHangId);
-                });
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy chi tiết giỏ hàng với ID: " + chiTietGioHangId));
+        if (!chiTietGioHang.getIdGioHang().getId().equals(gioHangId)) {
+            throw new IllegalArgumentException("Chi tiết giỏ hàng không thuộc giỏ hàng được chỉ định.");
+        }
         if (chiTietGioHang.getDeleted()) {
-            System.out.println("ChiTietGioHang already deleted for ID: " + chiTietGioHangId);
             throw new IllegalArgumentException("Chi tiết giỏ hàng với ID: " + chiTietGioHangId + " đã được xóa trước đó.");
         }
         chiTietGioHang.setDeleted(true);
         chiTietGioHangRepository.save(chiTietGioHang);
+        System.out.println("Marked ChiTietGioHang as deleted: " + chiTietGioHangId);
+
         ChiTietSanPham chiTietSanPham = chiTietGioHang.getIdChiTietSanPham();
         chiTietSanPham.setDeleted(false);
         chiTietSanPhamRepository.save(chiTietSanPham);
-        List<HoaDonChiTiet> hoaDonChiTiets = hoaDonChiTietRepository.findAll().stream()
-                .filter(hdct -> hdct.getIdChiTietSanPham().getId().equals(chiTietSanPham.getId()) && !hdct.getDeleted())
-                .collect(Collectors.toList());
+        System.out.println("Marked ChiTietSanPham as not deleted: " + chiTietSanPham.getId());
+
+        List<HoaDonChiTiet> hoaDonChiTiets = hoaDonChiTietRepository.findByIdChiTietSanPhamIdAndDeletedFalse(chiTietSanPham.getId());
         for (HoaDonChiTiet hoaDonChiTiet : hoaDonChiTiets) {
             hoaDonChiTiet.setDeleted(true);
             hoaDonChiTietRepository.save(hoaDonChiTiet);
+            System.out.println("Marked HoaDonChiTiet as deleted: " + hoaDonChiTiet.getId());
         }
         System.out.println("Successfully deleted ChiTietGioHang with ID: " + chiTietGioHangId);
     }
@@ -287,9 +327,12 @@ public class BanHangService {
             String email = receiver.getEmail() != null && !receiver.getEmail().isEmpty() ? receiver.getEmail() : null;
             StringBuilder diaChi = new StringBuilder();
             if (receiver.getCity() != null && !receiver.getCity().isEmpty()) diaChi.append(receiver.getCity());
-            if (receiver.getDistrict() != null && !receiver.getDistrict().isEmpty()) diaChi.append(", ").append(receiver.getDistrict());
-            if (receiver.getWard() != null && !receiver.getWard().isEmpty()) diaChi.append(", ").append(receiver.getWard());
-            if (receiver.getAddress() != null && !receiver.getAddress().isEmpty()) diaChi.append(", ").append(receiver.getAddress());
+            if (receiver.getDistrict() != null && !receiver.getDistrict().isEmpty())
+                diaChi.append(", ").append(receiver.getDistrict());
+            if (receiver.getWard() != null && !receiver.getWard().isEmpty())
+                diaChi.append(", ").append(receiver.getWard());
+            if (receiver.getAddress() != null && !receiver.getAddress().isEmpty())
+                diaChi.append(", ").append(receiver.getAddress());
             String diaChiKhachHang = diaChi.length() > 0 ? diaChi.toString() : "N/A";
 
             List<TaiKhoan> taiKhoanList = taiKhoanRepository.findBySoDienThoai(soDienThoai);
@@ -533,6 +576,7 @@ public class BanHangService {
         dto.setIdSanPham(((Number) result[7]).intValue());
         return dto;
     }
+
     public List<PhieuGiamGiaCaNhan> findByKhachHangId(Integer idKhachHang) {
         return phieuGiamGiaCaNhanRepository.findByIdKhachHangId(idKhachHang);
     }
