@@ -3,11 +3,37 @@ public class ThanhToanRequestDTO {
     private Long totalPrice;
     private Long discount;
     private String paymentMethod;
+    private String maGiamGia;
+    private Integer idPhieuGiamGia;
     private Long tienChuyenKhoan;
     private Long tienMat;
     private Boolean isDelivery;
     private ReceiverDTO receiver;
     private CustomerDTO customer;
+
+    public Integer getIdPhieuGiamGia() {
+        return idPhieuGiamGia;
+    }
+
+    public void setIdPhieuGiamGia(Integer idPhieuGiamGia) {
+        this.idPhieuGiamGia = idPhieuGiamGia;
+    }
+
+    public String getMaGiamGia() {
+        return maGiamGia;
+    }
+
+    public void setMaGiamGia(String maGiamGia) {
+        this.maGiamGia = maGiamGia;
+    }
+
+    public Boolean getDelivery() {
+        return isDelivery;
+    }
+
+    public void setDelivery(Boolean delivery) {
+        isDelivery = delivery;
+    }
 
     public Long getTotalPrice() {
         return totalPrice;

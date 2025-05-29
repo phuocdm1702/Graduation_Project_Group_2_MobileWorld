@@ -89,9 +89,10 @@
       <!-- Modal chọn sản phẩm -->
       <div
         v-if="showProductModal"
-        class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50"
+        class="modal-overlay"
+        @click.self="closeProductModal"
       >
-        <div class="bg-white rounded-lg shadow-lg w-full max-w-fit p-6">
+        <div class="modal-content bg-white rounded-lg shadow-lg w-full max-w-fit p-6">
           <div class="flex justify-between items-center mb-4">
             <h2 class="text-lg font-semibold text-orange-500">Chọn sản phẩm</h2>
             <div class="flex space-x-2">
@@ -177,9 +178,10 @@
       <!-- Modal chọn IMEI -->
       <div
         v-if="showIMEIModal"
-        class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50"
+        class="modal-overlay"
+        @click.self="closeIMEIModal"
       >
-        <div class="bg-white rounded-lg shadow-lg w-full max-w-2xl p-6">
+        <div class="modal-content bg-white rounded-lg shadow-lg w-full max-w-2xl p-6">
           <div class="flex justify-between items-center mb-4">
             <h2 class="text-lg font-semibold text-orange-500">
               Chọn IMEI cho {{ selectedProduct?.tenSanPham }} ({{ selectedProduct?.mauSac }}, {{ selectedProduct?.dungLuongRam }}, {{ selectedProduct?.dungLuongBoNhoTrong }})
@@ -224,20 +226,20 @@
             <h3 class="text-md font-semibold text-gray-700 mb-2">IMEI đã chọn:</h3>
             <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 max-h-40 overflow-y-auto">
               <div class="flex flex-wrap gap-2">
-          <span
-            v-for="imei in selectedIMEIs"
-            :key="imei"
-            class="inline-flex items-center px-3 py-1 bg-orange-100 text-orange-800 rounded-full text-sm font-medium transition-all hover:bg-orange-200"
-          >
-            {{ imei }}
-            <button
-              @click="removeIMEI(imei)"
-              class="ml-2 text-orange-600 hover:text-orange-800 focus:outline-none"
-              title="Xóa IMEI"
-            >
-              <i class="fas fa-times text-xs"></i>
-            </button>
-          </span>
+                <span
+                  v-for="imei in selectedIMEIs"
+                  :key="imei"
+                  class="inline-flex items-center px-3 py-1 bg-orange-100 text-orange-800 rounded-full text-sm font-medium transition-all hover:bg-orange-200"
+                >
+                  {{ imei }}
+                  <button
+                    @click="removeIMEI(imei)"
+                    class="ml-2 text-orange-600 hover:text-orange-800 focus:outline-none"
+                    title="Xóa IMEI"
+                  >
+                    <i class="fas fa-times text-xs"></i>
+                  </button>
+                </span>
               </div>
             </div>
           </div>
@@ -360,7 +362,7 @@
                   :disabled="!isReceiverEditable"
                 />
               </div>
-              <div >
+              <div>
                 <label class="block text-sm font-medium text-gray-700">Địa chỉ cụ thể</label>
                 <input
                   v-model="receiver.address"
@@ -419,8 +421,8 @@
                 <button
                   @click="selectPayment('transfer')"
                   :class="{
-                  'bg-orange-100 border-orange-500 text-orange-600': paymentMethod === 'transfer',
-                  'bg-transparent border-orange-400 text-orange-500': paymentMethod !== 'transfer'}"
+                    'bg-orange-100 border-orange-500 text-orange-600': paymentMethod === 'transfer',
+                    'bg-transparent border-orange-400 text-orange-500': paymentMethod !== 'transfer'}"
                   class="px-4 py-2 border rounded transition hover:bg-orange-100">
                   Chuyển khoản
                 </button>
@@ -428,8 +430,8 @@
                 <button
                   @click="selectPayment('cash')"
                   :class="{
-                   'bg-orange-100 border-orange-500 text-orange-600': paymentMethod === 'cash',
-                   'bg-transparent border-orange-400 text-orange-500': paymentMethod !== 'cash'}"
+                    'bg-orange-100 border-orange-500 text-orange-600': paymentMethod === 'cash',
+                    'bg-transparent border-orange-400 text-orange-500': paymentMethod !== 'cash'}"
                   class="px-4 py-2 border rounded transition hover:bg-orange-100">
                   Tiền mặt
                 </button>
@@ -437,8 +439,8 @@
                 <button
                   @click="selectPayment('both')"
                   :class="{
-                  'bg-orange-100 border-orange-500 text-orange-600': paymentMethod === 'both',
-                  'bg-transparent border-orange-400 text-orange-500': paymentMethod !== 'both'}"
+                    'bg-orange-100 border-orange-500 text-orange-600': paymentMethod === 'both',
+                    'bg-transparent border-orange-400 text-orange-500': paymentMethod !== 'both'}"
                   class="px-4 py-2 border rounded transition hover:bg-orange-100">
                   Cả hai
                 </button>
@@ -578,6 +580,239 @@
   />
 </template>
 
+<style scoped>
+/* Thay đổi màu hover của cursor-pointer */
+.cursor-pointer:hover {
+  background-color: #e0e0e0; /* Nền xám nhạt nhẹ hơn để tương phản */
+}
+
+/* Giữ màu cam cho các phần nổi bật */
+.bg-orange-100 {
+  background-color: #ffedd5;
+  border-color: #fdba74;
+}
+
+/* Thanh cuộn */
+.overflow-x-auto {
+  scrollbar-width: thin;
+  scrollbar-color: #333333 #000000; /* Thanh cuộn màu đen để đồng bộ */
+}
+
+.overflow-x-auto::-webkit-scrollbar {
+  height: 8px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb {
+  background-color: #333333; /* Thanh cuộn màu xám đậm */
+  border-radius: 4px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-track {
+  background-color: #000000; /* Nền thanh cuộn màu đen */
+}
+
+/* Bảng */
+table {
+  border-collapse: collapse;
+  width: 100%;
+  table-layout: auto;
+}
+
+table td:nth-child(2) {
+  max-width: 400px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 0.75rem;
+  transition: background-color 0.2s ease;
+}
+
+table td:nth-child(2):hover {
+  background-color: #fff7ed; /* Nền cam nhạt khi hover */
+  cursor: pointer;
+}
+
+/* Điều chỉnh biểu tượng và văn bản */
+table td:nth-child(2) span:last-child i {
+  vertical-align: middle;
+}
+
+table td:nth-child(2) span:last-child {
+  letter-spacing: 0.5px;
+}
+
+th,
+td {
+  padding: 1rem;
+  text-align: left;
+  vertical-align: middle;
+  color: #000000; /* Chuyển màu chữ thành đen */
+}
+
+th {
+  background-color: #e0e0e0; /* Nền tiêu đề bảng sáng hơn một chút */
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+tr {
+  transition: background-color 0.2s;
+}
+
+tr:hover {
+  background-color: #f0f0f0; /* Nền sáng hơn khi hover */
+}
+
+td {
+  border-bottom: 1px solid #000000; /* Viền đen để đồng bộ */
+}
+
+/* Công tắc */
+.switch {
+  font-size: 17px;
+  position: relative;
+  display: inline-block;
+  width: 3.5em;
+  height: 2em;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  inset: 0;
+  background: #333333; /* Đổi màu xám thành xám đậm để phù hợp với nền đen */
+  border-radius: 50px;
+  transition: all 0.4s cubic-bezier(0.23, 1, 0.320, 1);
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 1.4em;
+  width: 1.4em;
+  left: 0.3em;
+  bottom: 0.3em;
+  background-color: white;
+  border-radius: 50px;
+  box-shadow: 0 0px 20px rgba(0, 0, 0, 0.4);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.switch input:checked + .slider {
+  background: #f59e0b;
+}
+
+.switch input:focus + .slider {
+  box-shadow: 0 0 1px #f59e0b;
+}
+
+.switch input:checked + .slider:before {
+  transform: translateX(1.6em);
+  width: 2em;
+  height: 2em;
+  bottom: 0;
+}
+
+/* Các phần tử khác có màu xám trong template */
+.text-gray-500 {
+  color: #000000 !important; /* Đổi màu xám thành đen */
+}
+
+.text-gray-600 {
+  color: #000000 !important; /* Đổi màu xám thành đen */
+}
+
+.text-gray-700 {
+  color: #000000 !important; /* Đổi màu xám thành đen */
+}
+
+.text-gray-800 {
+  color: #000000 !important; /* Đổi màu xám thành đen */
+}
+
+.bg-gray-100 {
+  background-color: #ffffff; /* Đổi nền xám nhạt thành trắng để tương phản */
+}
+
+.bg-gray-50 {
+  background-color: #f5f5f5; /* Nền sáng hơn một chút */
+}
+
+.border-gray-200 {
+  border-color: #000000; /* Viền đen */
+}
+
+.border-gray-300 {
+  border-color: #000000; /* Viền đen */
+}
+
+/* Điều chỉnh màu nền của modal overlay */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Overlay mờ nhỏ hơn và nhẹ hơn */
+.modal-overlay::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 110%; /* Kích thước lớn hơn modal một chút */
+  height: 110%;
+  transform: translate(-50%, -50%);
+  background-color: #000000; /* Màu đen */
+  opacity: 0.2; /* Độ mờ 20% */
+  z-index: 40;
+  border-radius: 10px; /* Bo góc nhẹ */
+}
+
+/* Modal content */
+.modal-content {
+  position: relative;
+  z-index: 50;
+}
+
+/* Nút đóng modal */
+button.text-gray-500:hover {
+  color: #333333 !important; /* Đổi màu hover của nút đóng thành xám đậm */
+}
+
+/* Đảm bảo các nhãn và văn bản trong form đều là màu đen */
+label.text-gray-700 {
+  color: #000000 !important;
+}
+
+/* Đổi màu nền của các phần tử trong giỏ hàng và hóa đơn */
+.bg-white {
+  background-color: #ffffff; /* Giữ màu trắng cho nền */
+}
+
+/* Đảm bảo tổng tiền và các văn bản quan trọng nổi bật */
+.text-lg.font-semibold {
+  color: #000000 !important; /* Tổng tiền màu đen */
+}
+
+/* Thanh toán và các nút */
+button:disabled.bg-gray-400 {
+  background-color: #666666 !important; /* Đổi màu xám của nút disabled thành xám đậm */
+}
+</style>
+
 <script setup>
 import { ref } from 'vue';
 import ConfirmModal from "@/components/ConfirmModal.vue";
@@ -682,138 +917,3 @@ const ThanhToan = () => {
   showConfirmModal.value = true;
 }
 </script>
-
-<style scoped>
-.cursor-pointer:hover {
-  background-color: #f3f4f6;
-}
-
-.bg-orange-100 {
-  background-color: #ffedd5;
-  border-color: #fdba74;
-}
-
-.overflow-x-auto {
-  scrollbar-width: thin;
-  scrollbar-color: #f3f4f6 #e5e7eb;
-}
-
-.overflow-x-auto::-webkit-scrollbar {
-  height: 8px;
-}
-
-.overflow-x-auto::-webkit-scrollbar-thumb {
-  background-color: #f3f4f6;
-  border-radius: 4px;
-}
-
-.overflow-x-auto::-webkit-scrollbar-track {
-  background-color: #e5e7eb;
-}
-
-table {
-  border-collapse: collapse;
-  width: 100%;
-  table-layout: auto;
-}
-table td:nth-child(2) { /* Cột "Sản phẩm" */
-  max-width: 400px; /* Tăng chiều rộng tối đa để tránh tràn */
-  white-space: nowrap; /* Giữ trên một dòng */
-  overflow: hidden; /* Ẩn nội dung thừa */
-  text-overflow: ellipsis; /* Thêm dấu ... nếu quá dài */
-  padding: 0.75rem;
-  transition: background-color 0.2s ease; /* Hiệu ứng hover */
-}
-
-table td:nth-child(2):hover {
-  background-color: #fff7ed; /* Nền cam nhạt khi hover */
-  cursor: pointer;
-}
-
-/* Điều chỉnh biểu tượng và văn bản */
-table td:nth-child(2) span:last-child i {
-  vertical-align: middle; /* Căn giữa icon và văn bản */
-}
-
-table td:nth-child(2) span:last-child {
-  letter-spacing: 0.5px; /* Tăng khoảng cách giữa các ký tự nhẹ */
-}
-
-th,
-td {
-  padding: 1rem;
-  text-align: left;
-  vertical-align: middle;
-}
-
-th {
-  background-color: #f3f4f6;
-  position: sticky;
-  top: 0;
-  z-index: 1;
-}
-
-tr {
-  transition: background-color 0.2s;
-}
-
-tr:hover {
-  background-color: #f9fafb;
-}
-
-td {
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.switch {
-  font-size: 17px;
-  position: relative;
-  display: inline-block;
-  width: 3.5em;
-  height: 2em;
-}
-
-.switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-.slider {
-  position: absolute;
-  cursor: pointer;
-  inset: 0;
-  background: #6b7280;
-  border-radius: 50px;
-  transition: all 0.4s cubic-bezier(0.23, 1, 0.320, 1);
-}
-
-.slider:before {
-  position: absolute;
-  content: "";
-  height: 1.4em;
-  width: 1.4em;
-  left: 0.3em;
-  bottom: 0.3em;
-  background-color: white;
-  border-radius: 50px;
-  box-shadow: 0 0px 20px rgba(0,0,0,0.4);
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-.switch input:checked + .slider {
-  background: #f59e0b;
-}
-
-.switch input:focus + .slider {
-  box-shadow: 0 0 1px #f59e0b;
-}
-
-.switch input:checked + .slider:before {
-  transform: translateX(1.6em);
-  width: 2em;
-  height: 2em;
-  bottom: 0;
-}
-
-</style>
