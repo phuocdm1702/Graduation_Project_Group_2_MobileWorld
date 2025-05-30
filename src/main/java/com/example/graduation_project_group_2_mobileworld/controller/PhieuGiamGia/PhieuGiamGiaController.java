@@ -369,4 +369,8 @@ public class PhieuGiamGiaController {
 
         return ResponseEntity.ok(pgg);
     }
+//    @GetMapping("/Pgg/Getall")
+//    public List<PhieuGiamGia> getall(){
+//        return phieuGiamGiaRepository.findAll();
+//    }
 }

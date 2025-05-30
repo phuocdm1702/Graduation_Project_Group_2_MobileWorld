@@ -89,10 +89,9 @@
       <!-- Modal chọn sản phẩm -->
       <div
         v-if="showProductModal"
-        class="modal-overlay"
-        @click.self="closeProductModal"
+        class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50"
       >
-        <div class="modal-content bg-white rounded-lg shadow-lg w-full max-w-fit p-6">
+        <div class="bg-white rounded-lg shadow-lg w-full max-w-fit p-6">
           <div class="flex justify-between items-center mb-4">
             <h2 class="text-lg font-semibold text-orange-500">Chọn sản phẩm</h2>
             <div class="flex space-x-2">
@@ -132,14 +131,14 @@
                 <thead>
                 <tr class="bg-gray-100">
                   <th class="p-4 text-left">STT</th>
-                  <th class="p-4 text-left min-w-[150px]">Mã</th>
                   <th class="p-4 text-left min-w-[200px]">Tên sản phẩm</th>
+                  <th class="p-4 text-left min-w-[150px]">Mã</th>
                   <th class="p-4 text-left min-w-[150px]">Màu</th>
                   <th class="p-4 text-left min-w-[150px]">Ram</th>
                   <th class="p-4 text-left min-w-[150px]">Bộ nhớ trong</th>
                   <th class="p-4 text-left min-w-[120px]">Số lượng</th>
                   <th class="p-4 text-left min-w-[150px]">Giá</th>
-                  <th class="p-4 text-right min-w-[120px]">Chọn Imel</th>
+                  <th class="p-4 text-right min-w-[120px]"></th>
                 </tr>
                 </thead>
                 <tbody>
@@ -178,10 +177,9 @@
       <!-- Modal chọn IMEI -->
       <div
         v-if="showIMEIModal"
-        class="modal-overlay"
-        @click.self="closeIMEIModal"
+        class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50"
       >
-        <div class="modal-content bg-white rounded-lg shadow-lg w-full max-w-2xl p-6">
+        <div class="bg-white rounded-lg shadow-lg w-full max-w-2xl p-6">
           <div class="flex justify-between items-center mb-4">
             <h2 class="text-lg font-semibold text-orange-500">
               Chọn IMEI cho {{ selectedProduct?.tenSanPham }} ({{ selectedProduct?.mauSac }}, {{ selectedProduct?.dungLuongRam }}, {{ selectedProduct?.dungLuongBoNhoTrong }})
@@ -226,20 +224,20 @@
             <h3 class="text-md font-semibold text-gray-700 mb-2">IMEI đã chọn:</h3>
             <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 max-h-40 overflow-y-auto">
               <div class="flex flex-wrap gap-2">
-                <span
-                  v-for="imei in selectedIMEIs"
-                  :key="imei"
-                  class="inline-flex items-center px-3 py-1 bg-orange-100 text-orange-800 rounded-full text-sm font-medium transition-all hover:bg-orange-200"
-                >
-                  {{ imei }}
-                  <button
-                    @click="removeIMEI(imei)"
-                    class="ml-2 text-orange-600 hover:text-orange-800 focus:outline-none"
-                    title="Xóa IMEI"
-                  >
-                    <i class="fas fa-times text-xs"></i>
-                  </button>
-                </span>
+          <span
+            v-for="imei in selectedIMEIs"
+            :key="imei"
+            class="inline-flex items-center px-3 py-1 bg-orange-100 text-orange-800 rounded-full text-sm font-medium transition-all hover:bg-orange-200"
+          >
+            {{ imei }}
+            <button
+              @click="removeIMEI(imei)"
+              class="ml-2 text-orange-600 hover:text-orange-800 focus:outline-none"
+              title="Xóa IMEI"
+            >
+              <i class="fas fa-times text-xs"></i>
+            </button>
+          </span>
               </div>
             </div>
           </div>
@@ -362,15 +360,15 @@
                   :disabled="!isReceiverEditable"
                 />
               </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700">Địa chỉ cụ thể</label>
-                <input
-                  v-model="receiver.address"
-                  type="text"
-                  class="mt-1 p-2 w-full border rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
-                  :disabled="!isReceiverEditable"
-                />
-              </div>
+            </div>
+            <div class="mt-4">
+              <label class="block text-sm font-medium text-gray-700">Địa chỉ cụ thể</label>
+              <input
+                v-model="receiver.address"
+                type="text"
+                class="mt-1 p-2 w-full border rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
+                :disabled="!isReceiverEditable"
+              />
             </div>
             <div class="mt-4">
               <label class="block text-sm font-medium text-gray-700">Ghi chú</label>
@@ -390,22 +388,18 @@
                 <input
                   v-model="discountCodeInput"
                   class="p-2 w-full border rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
-                  list="languages"
-                  placeholder="Chọn mã riêng hoặc nhập mã công khai"
+                  placeholder="Nhập mã giảm giá công khai hoặc chọn mã"
                   @focus="fetchDiscountCodes"
                 />
-                <datalist id="languages">
-                  <option v-for="code in discountCodes" :key="code.id" :value="code.ma" />
-                </datalist>
                 <button
-                  @click="applyDiscount"
+                  @click="openPggModal"
                   class="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600 transition"
                 >
-                  Áp dụng
+                  Chọn mã
                 </button>
               </div>
               <p v-if="discountCodes.length === 0 && idKhachHang" class="mt-2 text-sm text-gray-600">
-                Không có mã giảm giá riêng. Vui lòng nhập mã công khai nếu có.
+                Không có mã giảm giá riêng. Vui lòng chọn hoặc nhập mã công khai nếu có.
               </p>
               <div class="mt-2 text-right">
                 <p>Tổng tiền hàng: {{ totalPrice.toLocaleString() }} đ</p>
@@ -421,8 +415,8 @@
                 <button
                   @click="selectPayment('transfer')"
                   :class="{
-                    'bg-orange-100 border-orange-500 text-orange-600': paymentMethod === 'transfer',
-                    'bg-transparent border-orange-400 text-orange-500': paymentMethod !== 'transfer'}"
+                  'bg-orange-100 border-orange-500 text-orange-600': paymentMethod === 'transfer',
+                  'bg-transparent border-orange-400 text-orange-500': paymentMethod !== 'transfer'}"
                   class="px-4 py-2 border rounded transition hover:bg-orange-100">
                   Chuyển khoản
                 </button>
@@ -430,8 +424,8 @@
                 <button
                   @click="selectPayment('cash')"
                   :class="{
-                    'bg-orange-100 border-orange-500 text-orange-600': paymentMethod === 'cash',
-                    'bg-transparent border-orange-400 text-orange-500': paymentMethod !== 'cash'}"
+                   'bg-orange-100 border-orange-500 text-orange-600': paymentMethod === 'cash',
+                   'bg-transparent border-orange-400 text-orange-500': paymentMethod !== 'cash'}"
                   class="px-4 py-2 border rounded transition hover:bg-orange-100">
                   Tiền mặt
                 </button>
@@ -439,8 +433,8 @@
                 <button
                   @click="selectPayment('both')"
                   :class="{
-                    'bg-orange-100 border-orange-500 text-orange-600': paymentMethod === 'both',
-                    'bg-transparent border-orange-400 text-orange-500': paymentMethod !== 'both'}"
+                  'bg-orange-100 border-orange-500 text-orange-600': paymentMethod === 'both',
+                  'bg-transparent border-orange-400 text-orange-500': paymentMethod !== 'both'}"
                   class="px-4 py-2 border rounded transition hover:bg-orange-100">
                   Cả hai
                 </button>
@@ -482,6 +476,180 @@
       </div>
     </div>
   </div>
+
+  <FormModal
+    :show="isPggOpenModel"
+    entity-name="khách hàng"
+    @close="isPggOpenModel = false"
+  >
+    
+    <div
+      v-if="isPggOpenModel"
+      class="modal-overlay fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 transition-opacity duration-300"
+      @click.self="isPggOpenModel = false"
+    >
+      <div
+        class="modal-content bg-white rounded-2xl shadow-xl w-full p-6 mx-4 max-h-[90vh] overflow-y-auto transform transition-all duration-500 ease-out"
+        style="max-width: 800px;"
+        :class="{ 'scale-100 opacity-100': isPggOpenModel, 'scale-95 opacity-0': !isPggOpenModel }"
+      >
+      <!-- Header -->
+        <div class="flex justify-between items-center mb-6 pb-4 border-b border-orange-100">
+          <h2 class="w-full text-3xl font-semibold text-orange-600 text-center">Chọn Mã Giảm Giá</h2>
+          <button
+            @click="isPggOpenModel = false"
+            class="text-gray-500 hover:text-orange-600 transition-colors duration-200 text-2xl"
+            title="Đóng"
+          >
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+
+        <div v-if="!isLoadingDiscounts" class="mb-8">
+          <h3 class="text-xl font-semibold text-orange-500 mb-4 pb-2 border-b border-orange-100">
+            Top 3 Phiếu Giảm Giá Ưu Đãi Nhất
+          </h3>
+          <div v-if="getTopDiscountCodes().length === 0" class="text-gray-600 text-center italic p-4 bg-orange-50 rounded-lg">
+            Không có mã giảm giá nào phù hợp với đơn hàng hiện tại.
+          </div>
+          <div class="grid grid-cols-1 gap-4">
+            <div
+              v-for="code in getTopDiscountCodes()"
+              :key="code.id"
+              @click="selectDiscountCode(code.ma)"
+              class="p-5 border border-orange-200 rounded-lg cursor-pointer bg-white hover:bg-orange-50 hover:shadow-md transition-all duration-300 flex items-center justify-between group"
+            >
+              <div>
+                <p class="font-bold text-orange-700 text-lg">{{ code.ma }}</p>
+                <p class="text-gray-800 text-md mt-1">{{ code.tenPhieuGiamGia }}</p>
+                <p class="text-sm text-gray-600 mt-2">
+                <span class="font-semibold text-orange-600">
+                  Giảm {{ code.discountAmount.toLocaleString() }} đ
+                </span>
+                  <span class="ml-2">| {{ code.loaiPhieuGiamGia === 'Phần trăm' ? `${code.phanTramGiamGia}%` : `${code.soTienGiamToiDa.toLocaleString()} đ` }}</span>
+                  <span class="ml-2">| Đơn tối thiểu: {{ code.hoaDonToiThieu.toLocaleString() }} đ</span>
+                </p>
+                <p class="text-xs text-red-500 mt-2">Hết hạn: {{ formatDate(code.ngayHetHan) }}</p>
+                <p class="text-xs text-blue-500 mt-1" v-if="code.isPersonal">[Mã cá nhân]</p>
+              </div>
+              <div class="text-orange-400 group-hover:text-orange-600 transition-colors duration-200 text-xl">
+                <i class="fas fa-star"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Loading State -->
+        <div v-if="isLoadingDiscounts" class="text-center py-12">
+          <div class="animate-spin rounded-full h-10 w-10 border-t-4 border-orange-500 mx-auto"></div>
+          <p class="text-gray-600 text-lg mt-4">Đang tải mã giảm giá...</p>
+        </div>
+        
+        
+
+        <!-- No Discounts Available -->
+        <div v-else-if="publicDiscountCodes.length === 0 && discountCodes.length === 0" class="text-center py-12">
+          <img
+            src="https://via.placeholder.com/150/FF8C00/FFFFFF?text=Không+Có+Voucher"
+            alt="No vouchers"
+            class="mx-auto mb-6 opacity-80"
+          >
+          <p class="text-gray-600 text-lg font-medium">Không có mã giảm giá nào khả dụng vào lúc này.</p>
+        </div>
+
+        <!-- Discount Codes -->
+        <div v-else class="max-h-96 overflow-y-auto pr-3 custom-scrollbar">
+          <!-- Option to not use discount -->
+
+          <!-- Private Discount Codes -->
+          <h3 class="text-xl font-semibold text-orange-500 mb-4 pb-2 border-b border-orange-100">Mã Giảm Giá Riêng</h3>
+          <div
+            v-if="discountCodes.length === 0"
+            class="text-gray-600 text-center italic mb-6 p-4 bg-orange-50 rounded-lg"
+          >
+            Bạn chưa có mã giảm giá riêng nào.
+          </div>
+          <div class="grid grid-cols-1 gap-4 mb-8">
+            <div
+              v-for="code in discountCodes"
+              :key="code.id"
+              @click="selectDiscountCode(code.ma)"
+              class="p-5 border border-orange-200 rounded-lg cursor-pointer bg-white hover:bg-orange-50 hover:shadow-md transition-all duration-300 flex items-center justify-between group"
+            >
+              <div>
+                <p class="font-bold text-orange-700 text-lg">{{ code.ma }}</p>
+                <p class="text-gray-800 text-md mt-1">{{ code.idPhieuGiamGia?.tenPhieuGiamGia }}</p>
+                <p class="text-sm text-gray-600 mt-2">
+                <span class="font-semibold text-orange-600">
+                  {{ code.idPhieuGiamGia?.loaiPhieuGiamGia === 'Phần trăm' ? `${code.idPhieuGiamGia.phanTramGiamGia}%` : `${code.idPhieuGiamGia.soTienGiamToiDa.toLocaleString()} đ` }}
+                </span>
+                  <span class="ml-2">| Đơn tối thiểu: {{ code.idPhieuGiamGia.hoaDonToiThieu.toLocaleString() }} đ</span>
+                </p>
+                <p class="text-xs text-red-500 mt-2">Hết hạn: {{ formatDate(code.ngayHetHan) }}</p>
+              </div>
+              <div class="text-orange-400 group-hover:text-orange-600 transition-colors duration-200 text-xl">
+                <i class="fas fa-tag"></i>
+              </div>
+            </div>
+          </div>
+
+          <!-- Public Discount Codes -->
+          <h3 class="text-xl font-semibold text-orange-500 mb-4 pb-2 border-b border-orange-100">Mã Giảm Giá Công Khai</h3>
+          <div
+            v-if="publicDiscountCodes.length === 0"
+            class="text-gray-600 text-center italic mb-6 p-4 bg-orange-50 rounded-lg"
+          >
+            Không có mã giảm giá công khai nào hiện có.
+          </div>
+          <div class="grid grid-cols-1 gap-4">
+            <div
+              v-for="code in publicDiscountCodes"
+              :key="code.id"
+              @click="selectDiscountCode(code.ma)"
+              class="p-5 border border-orange-200 rounded-lg cursor-pointer bg-white hover:bg-orange-50 hover:shadow-md transition-all duration-300 flex items-center justify-between group"
+            >
+              <div>
+                <p class="font-bold text-orange-700 text-lg">{{ code.ma }}</p>
+                <p class="text-gray-800 text-md mt-1">{{ code.tenPhieuGiamGia }}</p>
+                <p class="text-sm text-gray-600 mt-2">
+                <span class="font-semibold text-orange-600">
+                  {{ code.loaiPhieuGiamGia === 'Phần trăm' ? `${code.phanTramGiamGia}%` : `${code.soTienGiamToiDa.toLocaleString()} đ` }}
+                </span>
+                  <span class="ml-2">| Đơn tối thiểu: {{ code.hoaDonToiThieu.toLocaleString() }} đ</span>
+                </p>
+                <p class="text-xs text-red-500 mt-2">Hết hạn: {{ formatDate(code.ngayKetThuc) }}</p>
+              </div>
+              <div class="text-orange-400 group-hover:text-orange-600 transition-colors duration-200 text-xl">
+                <i class="fas fa-ticket-alt"></i>
+              </div>
+            </div>
+          </div>
+          <div 
+            @click="selectDiscountCode('')"
+            class="p-5 border border-orange-200 rounded-lg cursor-pointer bg-white hover:bg-orange-50 hover:shadow-md transition-all duration-300 flex items-center justify-between group mt-4"
+          >
+            <div>
+              <p class="font-bold text-orange-700 text-lg">Không áp dụng mã giảm giá</p>
+              <p class="text-gray-600 text-sm mt-2">Tiếp tục thanh toán mà không sử dụng mã giảm giá.</p>
+            </div>
+            <div class="text-orange-400 group-hover:text-orange-600 transition-colors duration-200 text-xl">
+              <i class="fas fa-times-circle"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="mt-8 pt-4 border-t border-orange-100 text-right">
+          <button
+            @click="isPggOpenModel = false"
+            class="px-8 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors duration-300 font-semibold shadow-md"
+          >
+            Đóng
+          </button>
+        </div>
+      </div>
+    </div>
+  </FormModal>
 
   <!-- FormModal -->
   <FormModal
@@ -580,239 +748,6 @@
   />
 </template>
 
-<style scoped>
-/* Thay đổi màu hover của cursor-pointer */
-.cursor-pointer:hover {
-  background-color: #e0e0e0; /* Nền xám nhạt nhẹ hơn để tương phản */
-}
-
-/* Giữ màu cam cho các phần nổi bật */
-.bg-orange-100 {
-  background-color: #ffedd5;
-  border-color: #fdba74;
-}
-
-/* Thanh cuộn */
-.overflow-x-auto {
-  scrollbar-width: thin;
-  scrollbar-color: #333333 #000000; /* Thanh cuộn màu đen để đồng bộ */
-}
-
-.overflow-x-auto::-webkit-scrollbar {
-  height: 8px;
-}
-
-.overflow-x-auto::-webkit-scrollbar-thumb {
-  background-color: #333333; /* Thanh cuộn màu xám đậm */
-  border-radius: 4px;
-}
-
-.overflow-x-auto::-webkit-scrollbar-track {
-  background-color: #000000; /* Nền thanh cuộn màu đen */
-}
-
-/* Bảng */
-table {
-  border-collapse: collapse;
-  width: 100%;
-  table-layout: auto;
-}
-
-table td:nth-child(2) {
-  max-width: 400px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  padding: 0.75rem;
-  transition: background-color 0.2s ease;
-}
-
-table td:nth-child(2):hover {
-  background-color: #fff7ed; /* Nền cam nhạt khi hover */
-  cursor: pointer;
-}
-
-/* Điều chỉnh biểu tượng và văn bản */
-table td:nth-child(2) span:last-child i {
-  vertical-align: middle;
-}
-
-table td:nth-child(2) span:last-child {
-  letter-spacing: 0.5px;
-}
-
-th,
-td {
-  padding: 1rem;
-  text-align: left;
-  vertical-align: middle;
-  color: #000000; /* Chuyển màu chữ thành đen */
-}
-
-th {
-  background-color: #e0e0e0; /* Nền tiêu đề bảng sáng hơn một chút */
-  position: sticky;
-  top: 0;
-  z-index: 1;
-}
-
-tr {
-  transition: background-color 0.2s;
-}
-
-tr:hover {
-  background-color: #f0f0f0; /* Nền sáng hơn khi hover */
-}
-
-td {
-  border-bottom: 1px solid #000000; /* Viền đen để đồng bộ */
-}
-
-/* Công tắc */
-.switch {
-  font-size: 17px;
-  position: relative;
-  display: inline-block;
-  width: 3.5em;
-  height: 2em;
-}
-
-.switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-.slider {
-  position: absolute;
-  cursor: pointer;
-  inset: 0;
-  background: #333333; /* Đổi màu xám thành xám đậm để phù hợp với nền đen */
-  border-radius: 50px;
-  transition: all 0.4s cubic-bezier(0.23, 1, 0.320, 1);
-}
-
-.slider:before {
-  position: absolute;
-  content: "";
-  height: 1.4em;
-  width: 1.4em;
-  left: 0.3em;
-  bottom: 0.3em;
-  background-color: white;
-  border-radius: 50px;
-  box-shadow: 0 0px 20px rgba(0, 0, 0, 0.4);
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-.switch input:checked + .slider {
-  background: #f59e0b;
-}
-
-.switch input:focus + .slider {
-  box-shadow: 0 0 1px #f59e0b;
-}
-
-.switch input:checked + .slider:before {
-  transform: translateX(1.6em);
-  width: 2em;
-  height: 2em;
-  bottom: 0;
-}
-
-/* Các phần tử khác có màu xám trong template */
-.text-gray-500 {
-  color: #000000 !important; /* Đổi màu xám thành đen */
-}
-
-.text-gray-600 {
-  color: #000000 !important; /* Đổi màu xám thành đen */
-}
-
-.text-gray-700 {
-  color: #000000 !important; /* Đổi màu xám thành đen */
-}
-
-.text-gray-800 {
-  color: #000000 !important; /* Đổi màu xám thành đen */
-}
-
-.bg-gray-100 {
-  background-color: #ffffff; /* Đổi nền xám nhạt thành trắng để tương phản */
-}
-
-.bg-gray-50 {
-  background-color: #f5f5f5; /* Nền sáng hơn một chút */
-}
-
-.border-gray-200 {
-  border-color: #000000; /* Viền đen */
-}
-
-.border-gray-300 {
-  border-color: #000000; /* Viền đen */
-}
-
-/* Điều chỉnh màu nền của modal overlay */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 40;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* Overlay mờ nhỏ hơn và nhẹ hơn */
-.modal-overlay::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 110%; /* Kích thước lớn hơn modal một chút */
-  height: 110%;
-  transform: translate(-50%, -50%);
-  background-color: #000000; /* Màu đen */
-  opacity: 0.2; /* Độ mờ 20% */
-  z-index: 40;
-  border-radius: 10px; /* Bo góc nhẹ */
-}
-
-/* Modal content */
-.modal-content {
-  position: relative;
-  z-index: 50;
-}
-
-/* Nút đóng modal */
-button.text-gray-500:hover {
-  color: #333333 !important; /* Đổi màu hover của nút đóng thành xám đậm */
-}
-
-/* Đảm bảo các nhãn và văn bản trong form đều là màu đen */
-label.text-gray-700 {
-  color: #000000 !important;
-}
-
-/* Đổi màu nền của các phần tử trong giỏ hàng và hóa đơn */
-.bg-white {
-  background-color: #ffffff; /* Giữ màu trắng cho nền */
-}
-
-/* Đảm bảo tổng tiền và các văn bản quan trọng nổi bật */
-.text-lg.font-semibold {
-  color: #000000 !important; /* Tổng tiền màu đen */
-}
-
-/* Thanh toán và các nút */
-button:disabled.bg-gray-400 {
-  background-color: #666666 !important; /* Đổi màu xám của nút disabled thành xám đậm */
-}
-</style>
-
 <script setup>
 import { ref } from 'vue';
 import ConfirmModal from "@/components/ConfirmModal.vue";
@@ -892,6 +827,12 @@ const {
   selectDiscountCode,
   isDelivery,
   toggleDelivery,
+  isPggOpenModel,
+  openPggModal,
+  publicDiscountCodes,
+  isLoadingDiscounts,
+  formatDate,
+  getTopDiscountCodes,
 } = useBanHang();
 
 const isCreatingInvoice = ref(false);
@@ -917,3 +858,138 @@ const ThanhToan = () => {
   showConfirmModal.value = true;
 }
 </script>
+
+<style scoped>
+.cursor-pointer:hover {
+  background-color: #f3f4f6;
+}
+
+.bg-orange-100 {
+  background-color: #ffedd5;
+  border-color: #fdba74;
+}
+
+.overflow-x-auto {
+  scrollbar-width: thin;
+  scrollbar-color: #f3f4f6 #e5e7eb;
+}
+
+.overflow-x-auto::-webkit-scrollbar {
+  height: 8px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb {
+  background-color: #f3f4f6;
+  border-radius: 4px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-track {
+  background-color: #e5e7eb;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  table-layout: auto;
+}
+table td:nth-child(2) { /* Cột "Sản phẩm" */
+  max-width: 400px; /* Tăng chiều rộng tối đa để tránh tràn */
+  white-space: nowrap; /* Giữ trên một dòng */
+  overflow: hidden; /* Ẩn nội dung thừa */
+  text-overflow: ellipsis; /* Thêm dấu ... nếu quá dài */
+  padding: 0.75rem;
+  transition: background-color 0.2s ease; /* Hiệu ứng hover */
+}
+
+table td:nth-child(2):hover {
+  background-color: #fff7ed; /* Nền cam nhạt khi hover */
+  cursor: pointer;
+}
+
+/* Điều chỉnh biểu tượng và văn bản */
+table td:nth-child(2) span:last-child i {
+  vertical-align: middle; /* Căn giữa icon và văn bản */
+}
+
+table td:nth-child(2) span:last-child {
+  letter-spacing: 0.5px; /* Tăng khoảng cách giữa các ký tự nhẹ */
+}
+
+th,
+td {
+  padding: 1rem;
+  text-align: left;
+  vertical-align: middle;
+}
+
+th {
+  background-color: #f3f4f6;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+tr {
+  transition: background-color 0.2s;
+}
+
+tr:hover {
+  background-color: #f9fafb;
+}
+
+td {
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.switch {
+  font-size: 17px;
+  position: relative;
+  display: inline-block;
+  width: 3.5em;
+  height: 2em;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  inset: 0;
+  background: #f59e0b;
+  border-radius: 50px;
+  transition: all 0.4s cubic-bezier(0.23, 1, 0.320, 1);
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 1.4em;
+  width: 1.4em;
+  left: 0.3em;
+  bottom: 0.3em;
+  background-color: white;
+  border-radius: 50px;
+  box-shadow: 0 0px 20px rgba(0,0,0,0.4);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.switch input:checked + .slider {
+  background: #f59e0b;
+}
+
+.switch input:focus + .slider {
+  box-shadow: 0 0 1px #f59e0b;
+}
+
+.switch input:checked + .slider:before {
+  transform: translateX(1.6em);
+  width: 2em;
+  height: 2em;
+  bottom: 0;
+}
+
+</style>

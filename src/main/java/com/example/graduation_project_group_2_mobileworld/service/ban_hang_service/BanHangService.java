@@ -302,8 +302,11 @@ public class BanHangService {
     public void thanhToan(Integer hoaDonId, ThanhToanRequestDTO request) {
         HoaDon hoaDon = hoaDonRepository.findById(hoaDonId)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy hóa đơn với ID: " + hoaDonId));
-        PhieuGiamGia phieuGiamGia = phieuGiamGiaRepository.findByma(request.getMaGiamGia())
-                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy phiếu giảm giá với mã: " + request.getMaGiamGia()));
+        PhieuGiamGia phieuGiamGia = null;
+        if (request.getMaGiamGia() != null && !request.getMaGiamGia().isEmpty()) {
+            phieuGiamGia = phieuGiamGiaRepository.findByma(request.getMaGiamGia())
+                    .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy phiếu giảm giá với mã: " + request.getMaGiamGia()));
+        }
         hoaDon.setIdPhieuGiamGia(phieuGiamGia);
         hoaDon.setTongTien(BigDecimal.valueOf(request.getTotalPrice()));
         hoaDon.setTongTienSauGiam(BigDecimal.valueOf(request.getTotalPrice() - request.getDiscount()));

@@ -251,8 +251,8 @@ public class BHController {
             @PathVariable Integer hoaDonId,
             @RequestBody ThanhToanRequestDTO request) {
         try {
-            if (request.getTotalPrice() == null || request.getDiscount() == null) {
-                return ResponseEntity.badRequest().body("Tổng tiền và giảm giá không được để trống");
+            if (request.getTotalPrice() == null) {
+                return ResponseEntity.badRequest().body("Tổng tiền không được để trống");
             }
             if (request.getIsDelivery() != null && request.getIsDelivery() && request.getReceiver() != null) {
                 ThanhToanRequestDTO.ReceiverDTO receiver = request.getReceiver();
