@@ -142,18 +142,19 @@ public interface thongKeRepository extends JpaRepository<HoaDon, Integer> {
     @Query("SELECT new com.example.graduation_project_group_2_mobileworld.dto.thongKe.SanPhamHetHangDTO(sp.tenSanPham, COUNT(ctsp)) " +
             "FROM ChiTietSanPham ctsp " +
             "JOIN ctsp.idSanPham sp " +
+            "WHERE ctsp.deleted = false "+
             "GROUP BY sp.id, sp.tenSanPham " +
-            "HAVING COUNT(ctsp) < 6 " +
-            "ORDER BY COUNT(ctsp) ASC")
+            "HAVING COUNT(ctsp) < 10 " +
+            "ORDER BY sp.tenSanPham ASC")
     Page<SanPhamHetHangDTO> thongKeSanPhamHetHang(Pageable pageable);
 
-    // Sản phẩm sắp hết hàng (toàn bộ dữ liệu)
     @Query("SELECT new com.example.graduation_project_group_2_mobileworld.dto.thongKe.SanPhamHetHangDTO(sp.tenSanPham, COUNT(ctsp)) " +
             "FROM ChiTietSanPham ctsp " +
             "JOIN ctsp.idSanPham sp " +
+            "WHERE ctsp.deleted = false "+
             "GROUP BY sp.id, sp.tenSanPham " +
-            "HAVING COUNT(ctsp) < 6 " +
-            "ORDER BY COUNT(ctsp) ASC")
+            "HAVING COUNT(ctsp) < 10 " +
+            "ORDER BY sp.tenSanPham ASC")
     List<SanPhamHetHangDTO> thongKeSanPhamHetHangNoPage();
 
     // Phân phối đa kênh
