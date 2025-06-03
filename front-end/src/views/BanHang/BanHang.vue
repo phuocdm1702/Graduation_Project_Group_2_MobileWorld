@@ -360,15 +360,15 @@
                   :disabled="!isReceiverEditable"
                 />
               </div>
-              <div >
-                <label class="block text-sm font-medium text-gray-700">Địa chỉ cụ thể</label>
-                <input
-                  v-model="receiver.address"
-                  type="text"
-                  class="mt-1 p-2 w-full border rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
-                  :disabled="!isReceiverEditable"
-                />
-              </div>
+            </div>
+            <div class="mt-4">
+              <label class="block text-sm font-medium text-gray-700">Địa chỉ cụ thể</label>
+              <input
+                v-model="receiver.address"
+                type="text"
+                class="mt-1 p-2 w-full border rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
+                :disabled="!isReceiverEditable"
+              />
             </div>
             <div class="mt-4">
               <label class="block text-sm font-medium text-gray-700">Ghi chú</label>
@@ -388,22 +388,18 @@
                 <input
                   v-model="discountCodeInput"
                   class="p-2 w-full border rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
-                  list="languages"
-                  placeholder="Chọn mã riêng hoặc nhập mã công khai"
+                  placeholder="Nhập mã giảm giá công khai hoặc chọn mã"
                   @focus="fetchDiscountCodes"
                 />
-                <datalist id="languages">
-                  <option v-for="code in discountCodes" :key="code.id" :value="code.ma" />
-                </datalist>
                 <button
-                  @click="applyDiscount"
+                  @click="openPggModal"
                   class="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600 transition"
                 >
-                  Áp dụng
+                  Chọn mã
                 </button>
               </div>
               <p v-if="discountCodes.length === 0 && idKhachHang" class="mt-2 text-sm text-gray-600">
-                Không có mã giảm giá riêng. Vui lòng nhập mã công khai nếu có.
+                Không có mã giảm giá riêng. Vui lòng chọn hoặc nhập mã công khai nếu có.
               </p>
               <div class="mt-2 text-right">
                 <p>Tổng tiền hàng: {{ totalPrice.toLocaleString() }} đ</p>
@@ -480,6 +476,180 @@
       </div>
     </div>
   </div>
+
+  <FormModal
+    :show="isPggOpenModel"
+    entity-name="khách hàng"
+    @close="isPggOpenModel = false"
+  >
+    
+    <div
+      v-if="isPggOpenModel"
+      class="modal-overlay fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 transition-opacity duration-300"
+      @click.self="isPggOpenModel = false"
+    >
+      <div
+        class="modal-content bg-white rounded-2xl shadow-xl w-full p-6 mx-4 max-h-[90vh] overflow-y-auto transform transition-all duration-500 ease-out"
+        style="max-width: 800px;"
+        :class="{ 'scale-100 opacity-100': isPggOpenModel, 'scale-95 opacity-0': !isPggOpenModel }"
+      >
+      <!-- Header -->
+        <div class="flex justify-between items-center mb-6 pb-4 border-b border-orange-100">
+          <h2 class="w-full text-3xl font-semibold text-orange-600 text-center">Chọn Mã Giảm Giá</h2>
+          <button
+            @click="isPggOpenModel = false"
+            class="text-gray-500 hover:text-orange-600 transition-colors duration-200 text-2xl"
+            title="Đóng"
+          >
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+
+        <div v-if="!isLoadingDiscounts" class="mb-8">
+          <h3 class="text-xl font-semibold text-orange-500 mb-4 pb-2 border-b border-orange-100">
+            Top 3 Phiếu Giảm Giá Ưu Đãi Nhất
+          </h3>
+          <div v-if="getTopDiscountCodes().length === 0" class="text-gray-600 text-center italic p-4 bg-orange-50 rounded-lg">
+            Không có mã giảm giá nào phù hợp với đơn hàng hiện tại.
+          </div>
+          <div class="grid grid-cols-1 gap-4">
+            <div
+              v-for="code in getTopDiscountCodes()"
+              :key="code.id"
+              @click="selectDiscountCode(code.ma)"
+              class="p-5 border border-orange-200 rounded-lg cursor-pointer bg-white hover:bg-orange-50 hover:shadow-md transition-all duration-300 flex items-center justify-between group"
+            >
+              <div>
+                <p class="font-bold text-orange-700 text-lg">{{ code.ma }}</p>
+                <p class="text-gray-800 text-md mt-1">{{ code.tenPhieuGiamGia }}</p>
+                <p class="text-sm text-gray-600 mt-2">
+                <span class="font-semibold text-orange-600">
+                  Giảm {{ code.discountAmount.toLocaleString() }} đ
+                </span>
+                  <span class="ml-2">| {{ code.loaiPhieuGiamGia === 'Phần trăm' ? `${code.phanTramGiamGia}%` : `${code.soTienGiamToiDa.toLocaleString()} đ` }}</span>
+                  <span class="ml-2">| Đơn tối thiểu: {{ code.hoaDonToiThieu.toLocaleString() }} đ</span>
+                </p>
+                <p class="text-xs text-red-500 mt-2">Hết hạn: {{ formatDate(code.ngayHetHan) }}</p>
+                <p class="text-xs text-blue-500 mt-1" v-if="code.isPersonal">[Mã cá nhân]</p>
+              </div>
+              <div class="text-orange-400 group-hover:text-orange-600 transition-colors duration-200 text-xl">
+                <i class="fas fa-star"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Loading State -->
+        <div v-if="isLoadingDiscounts" class="text-center py-12">
+          <div class="animate-spin rounded-full h-10 w-10 border-t-4 border-orange-500 mx-auto"></div>
+          <p class="text-gray-600 text-lg mt-4">Đang tải mã giảm giá...</p>
+        </div>
+        
+        
+
+        <!-- No Discounts Available -->
+        <div v-else-if="publicDiscountCodes.length === 0 && discountCodes.length === 0" class="text-center py-12">
+          <img
+            src="https://via.placeholder.com/150/FF8C00/FFFFFF?text=Không+Có+Voucher"
+            alt="No vouchers"
+            class="mx-auto mb-6 opacity-80"
+          >
+          <p class="text-gray-600 text-lg font-medium">Không có mã giảm giá nào khả dụng vào lúc này.</p>
+        </div>
+
+        <!-- Discount Codes -->
+        <div v-else class="max-h-96 overflow-y-auto pr-3 custom-scrollbar">
+          <!-- Option to not use discount -->
+
+          <!-- Private Discount Codes -->
+          <h3 class="text-xl font-semibold text-orange-500 mb-4 pb-2 border-b border-orange-100">Mã Giảm Giá Riêng</h3>
+          <div
+            v-if="discountCodes.length === 0"
+            class="text-gray-600 text-center italic mb-6 p-4 bg-orange-50 rounded-lg"
+          >
+            Bạn chưa có mã giảm giá riêng nào.
+          </div>
+          <div class="grid grid-cols-1 gap-4 mb-8">
+            <div
+              v-for="code in discountCodes"
+              :key="code.id"
+              @click="selectDiscountCode(code.ma)"
+              class="p-5 border border-orange-200 rounded-lg cursor-pointer bg-white hover:bg-orange-50 hover:shadow-md transition-all duration-300 flex items-center justify-between group"
+            >
+              <div>
+                <p class="font-bold text-orange-700 text-lg">{{ code.ma }}</p>
+                <p class="text-gray-800 text-md mt-1">{{ code.idPhieuGiamGia?.tenPhieuGiamGia }}</p>
+                <p class="text-sm text-gray-600 mt-2">
+                <span class="font-semibold text-orange-600">
+                  {{ code.idPhieuGiamGia?.loaiPhieuGiamGia === 'Phần trăm' ? `${code.idPhieuGiamGia.phanTramGiamGia}%` : `${code.idPhieuGiamGia.soTienGiamToiDa.toLocaleString()} đ` }}
+                </span>
+                  <span class="ml-2">| Đơn tối thiểu: {{ code.idPhieuGiamGia.hoaDonToiThieu.toLocaleString() }} đ</span>
+                </p>
+                <p class="text-xs text-red-500 mt-2">Hết hạn: {{ formatDate(code.ngayHetHan) }}</p>
+              </div>
+              <div class="text-orange-400 group-hover:text-orange-600 transition-colors duration-200 text-xl">
+                <i class="fas fa-tag"></i>
+              </div>
+            </div>
+          </div>
+
+          <!-- Public Discount Codes -->
+          <h3 class="text-xl font-semibold text-orange-500 mb-4 pb-2 border-b border-orange-100">Mã Giảm Giá Công Khai</h3>
+          <div
+            v-if="publicDiscountCodes.length === 0"
+            class="text-gray-600 text-center italic mb-6 p-4 bg-orange-50 rounded-lg"
+          >
+            Không có mã giảm giá công khai nào hiện có.
+          </div>
+          <div class="grid grid-cols-1 gap-4">
+            <div
+              v-for="code in publicDiscountCodes"
+              :key="code.id"
+              @click="selectDiscountCode(code.ma)"
+              class="p-5 border border-orange-200 rounded-lg cursor-pointer bg-white hover:bg-orange-50 hover:shadow-md transition-all duration-300 flex items-center justify-between group"
+            >
+              <div>
+                <p class="font-bold text-orange-700 text-lg">{{ code.ma }}</p>
+                <p class="text-gray-800 text-md mt-1">{{ code.tenPhieuGiamGia }}</p>
+                <p class="text-sm text-gray-600 mt-2">
+                <span class="font-semibold text-orange-600">
+                  {{ code.loaiPhieuGiamGia === 'Phần trăm' ? `${code.phanTramGiamGia}%` : `${code.soTienGiamToiDa.toLocaleString()} đ` }}
+                </span>
+                  <span class="ml-2">| Đơn tối thiểu: {{ code.hoaDonToiThieu.toLocaleString() }} đ</span>
+                </p>
+                <p class="text-xs text-red-500 mt-2">Hết hạn: {{ formatDate(code.ngayKetThuc) }}</p>
+              </div>
+              <div class="text-orange-400 group-hover:text-orange-600 transition-colors duration-200 text-xl">
+                <i class="fas fa-ticket-alt"></i>
+              </div>
+            </div>
+          </div>
+          <div 
+            @click="selectDiscountCode('')"
+            class="p-5 border border-orange-200 rounded-lg cursor-pointer bg-white hover:bg-orange-50 hover:shadow-md transition-all duration-300 flex items-center justify-between group mt-4"
+          >
+            <div>
+              <p class="font-bold text-orange-700 text-lg">Không áp dụng mã giảm giá</p>
+              <p class="text-gray-600 text-sm mt-2">Tiếp tục thanh toán mà không sử dụng mã giảm giá.</p>
+            </div>
+            <div class="text-orange-400 group-hover:text-orange-600 transition-colors duration-200 text-xl">
+              <i class="fas fa-times-circle"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="mt-8 pt-4 border-t border-orange-100 text-right">
+          <button
+            @click="isPggOpenModel = false"
+            class="px-8 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors duration-300 font-semibold shadow-md"
+          >
+            Đóng
+          </button>
+        </div>
+      </div>
+    </div>
+  </FormModal>
 
   <!-- FormModal -->
   <FormModal
@@ -657,6 +827,12 @@ const {
   selectDiscountCode,
   isDelivery,
   toggleDelivery,
+  isPggOpenModel,
+  openPggModal,
+  publicDiscountCodes,
+  isLoadingDiscounts,
+  formatDate,
+  getTopDiscountCodes,
 } = useBanHang();
 
 const isCreatingInvoice = ref(false);
@@ -783,7 +959,7 @@ td {
   position: absolute;
   cursor: pointer;
   inset: 0;
-  background: #6b7280;
+  background: #f59e0b;
   border-radius: 50px;
   transition: all 0.4s cubic-bezier(0.23, 1, 0.320, 1);
 }

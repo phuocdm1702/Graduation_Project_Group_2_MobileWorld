@@ -40,17 +40,52 @@ public class BHController {
     @Autowired
     private PhieuGiamGiaCaNhanService phieuGiamGiaCaNhanService;
 
+    //    @GetMapping("/gio-hang/by-hoa-don/{hoaDonId}")
+//    public ResponseEntity<?> getGioHangByHoaDonId(@PathVariable Integer hoaDonId) {
+//        try {
+//            Optional<GioHang> gioHang = gioHangRepository.findByHoaDonId(hoaDonId);
+//            return ResponseEntity.ok(gioHang.orElse(null));
+//        } catch (Exception e) {
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+//                    .body("Lỗi khi lấy giỏ hàng: " + e.getMessage());
+//        }
+//    }
+//    @GetMapping("/gio-hang/by-hoa-don/{hoaDonId}")
+//    public ResponseEntity<?> getGioHangByHoaDonId(@PathVariable Integer hoaDonId) {
+//        try {
+//            System.out.println("Fetching GioHang for HoaDonId: " + hoaDonId);
+//            Optional<GioHang> gioHang = gioHangRepository.findByHoaDonId(hoaDonId);
+//            if (gioHang.isPresent()) {
+//                System.out.println("GioHang found: " + gioHang.get().getId());
+//            } else {
+//                System.out.println("No GioHang found for HoaDonId: " + hoaDonId);
+//            }
+//            return ResponseEntity.ok(gioHang.orElse(null));
+//        } catch (Exception e) {
+//            System.err.println("Error fetching GioHang for HoaDonId " + hoaDonId + ": " + e.getMessage());
+//            e.printStackTrace();
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+//                    .body("Lỗi khi lấy giỏ hàng: " + e.getMessage());
+//        }
+//    }
     @GetMapping("/gio-hang/by-hoa-don/{hoaDonId}")
-    public ResponseEntity<?> getGioHangByHoaDonId(@PathVariable Long hoaDonId) {
+    public ResponseEntity<?> getGioHangByHoaDonId(@PathVariable Integer hoaDonId) {
         try {
+            System.out.println("Fetching GioHang for HoaDonId: " + hoaDonId);
             Optional<GioHang> gioHang = gioHangRepository.findByHoaDonId(hoaDonId);
+            if (gioHang.isPresent()) {
+                System.out.println("GioHang found: " + gioHang.get().getId());
+            } else {
+                System.out.println("No GioHang found for HoaDonId: " + hoaDonId);
+            }
             return ResponseEntity.ok(gioHang.orElse(null));
         } catch (Exception e) {
+            System.err.println("Error fetching GioHang for HoaDonId " + hoaDonId + ": " + e.getMessage());
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Lỗi khi lấy giỏ hàng: " + e.getMessage());
         }
     }
-
     @GetMapping("/data")
     public ResponseEntity<List<HDban_hangDTO>> fetchDataHD() {
         try {
@@ -184,10 +219,23 @@ public class BHController {
         }
     }
 
-    @DeleteMapping("/gio-hang/chi-tiet/{chiTietGioHangId}")
-    public ResponseEntity<String> deleteChiTietGioHang(@PathVariable Integer chiTietGioHangId) {
+    //    @DeleteMapping("/gio-hang/chi-tiet/{chiTietGioHangId}")
+//    public ResponseEntity<String> deleteChiTietGioHang(@PathVariable Integer chiTietGioHangId) {
+//        try {
+//            banHangService.deleteChiTietGioHang(chiTietGioHangId);
+//            return ResponseEntity.ok("Xóa chi tiết giỏ hàng thành công!");
+//        } catch (IllegalArgumentException e) {
+//            System.out.println("Lỗi dữ liệu chi tiết: " + e.getMessage());
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Lỗi: " + e.getMessage());
+//        } catch (Exception e) {
+//            System.out.println("Lỗi server chi tiết: " + e.getMessage());
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Lỗi server: " + e.getMessage());
+//        }
+//    }
+    @DeleteMapping("/gio-hang/{gioHangId}/chi-tiet/{chiTietGioHangId}")
+    public ResponseEntity<String> deleteChiTietGioHang(@PathVariable Integer gioHangId, @PathVariable Integer chiTietGioHangId) {
         try {
-            banHangService.deleteChiTietGioHang(chiTietGioHangId);
+            banHangService.deleteChiTietGioHang(chiTietGioHangId, gioHangId);
             return ResponseEntity.ok("Xóa chi tiết giỏ hàng thành công!");
         } catch (IllegalArgumentException e) {
             System.out.println("Lỗi dữ liệu chi tiết: " + e.getMessage());
@@ -203,8 +251,8 @@ public class BHController {
             @PathVariable Integer hoaDonId,
             @RequestBody ThanhToanRequestDTO request) {
         try {
-            if (request.getTotalPrice() == null || request.getDiscount() == null) {
-                return ResponseEntity.badRequest().body("Tổng tiền và giảm giá không được để trống");
+            if (request.getTotalPrice() == null) {
+                return ResponseEntity.badRequest().body("Tổng tiền không được để trống");
             }
             if (request.getIsDelivery() != null && request.getIsDelivery() && request.getReceiver() != null) {
                 ThanhToanRequestDTO.ReceiverDTO receiver = request.getReceiver();
@@ -223,15 +271,18 @@ public class BHController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Lỗi server: " + e.getMessage());
         }
     }
+
     @GetMapping("/PGG")
-    public List<PhieuGiamGiaCaNhan> getall(){
+    public List<PhieuGiamGiaCaNhan> getall() {
         return phieuGiamGiaCaNhanService.getall();
     }
+
     @GetMapping("/by-khach-hang/{idKhachHang}")
     public ResponseEntity<List<PhieuGiamGiaCaNhan>> getByKhachHang(@PathVariable Integer idKhachHang) {
         List<PhieuGiamGiaCaNhan> phieuGiamGias = banHangService.findByKhachHangId(idKhachHang);
         return ResponseEntity.ok(phieuGiamGias);
     }
+
     @GetMapping("/pgg/check")
     public ResponseEntity<PhieuGiamGiaCaNhan> checkDiscountCode(@RequestParam("ma") String ma) {
         Optional<PhieuGiamGiaCaNhan> optional = phieuGiamGiaCaNhanService.checkDiscountCode(ma);

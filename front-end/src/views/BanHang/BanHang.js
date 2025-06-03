@@ -27,9 +27,6 @@ export default function useBanHang() {
       `;
       }
     },
-    // { key: 'color', label: 'Màu', formatter: (value) => value || 'N/A' },
-    // { key: 'ram', label: 'Ram', formatter: (value) => value || 'N/A' },
-    // { key: 'capacity', label: 'Bộ nhớ', formatter: (value) => value || 'N/A' },
     {key: 'price', label: 'Đơn giá', formatter: (value) => `${value.toLocaleString()} đ`},
     {key: 'imei', label: 'IMEI', formatter: (value) => value || 'N/A'},
     {key: 'actions', label: 'Xóa', cellSlot: 'actionsSlot'},
@@ -37,8 +34,8 @@ export default function useBanHang() {
 
   const productColumns = ref([
     {key: 'index', formatter: (_, __, index) => index + 1, label: 'STT'},
-    {key: 'tenSanPham', label: 'Tên sản phẩm'},
     {key: 'ma', label: 'Mã'},
+    {key: 'tenSanPham', label: 'Tên sản phẩm'},
     {key: 'mauSac', label: 'Màu', formatter: (value) => value || 'N/A'},
     {key: 'dungLuongRam', label: 'Ram', formatter: (value) => value || 'N/A'},
     {key: 'dungLuongBoNhoTrong', label: 'Bộ nhớ trong', formatter: (value) => value || 'N/A'},
@@ -360,7 +357,54 @@ export default function useBanHang() {
     return `HD${randomCode}`;
   };
 
+  // const createNewPendingInvoice = async () => {
+  //   const pendingCount = pendingInvoices.value.filter(invoice => invoice.status === 'Chờ').length;
+  //   if (pendingCount >= 5) {
+  //     toast.value.kshowToast('error', 'Đã đạt tối đa 5 hóa đơn chờ. Vui lòng thanh toán hoặc hủy bớt hóa đơn để tạo mới.');
+  //     return;
+  //   }
+  //   isCreatingInvoice.value = true;
+  //   try {
+  //     const response = await axios.post('http://localhost:8080/ban-hang/addHD', {
+  //       maHoaDon: generateRandomCode(),
+  //       trangThai: 0,
+  //     });
+  //     if (response.status === 200 && response.data) {
+  //       const newInvoice = {
+  //         id: response.data.id,
+  //         code: response.data.ma,
+  //         status: 'Chờ',
+  //         items: [],
+  //       };
+  //       pendingInvoices.value.push(newInvoice);
+  //       activeInvoiceId.value = newInvoice.id;
+  //       localStorage.setItem('activeInvoiceId', newInvoice.id);
+  //       const gioHangResponse = await axios.post('http://localhost:8080/ban-hang/addGioHang', {
+  //         ma: `GH${Date.now()}`,
+  //         idKhachHang: 1,
+  //         hoaDonId: newInvoice.id,
+  //       });
+  //       if (gioHangResponse.status === 200 && gioHangResponse.data) {
+  //         gioHangId.value = gioHangResponse.data.id;
+  //         console.log('New GioHang created with ID:', gioHangId.value);
+  //       } else {
+  //         throw new Error('Không tạo được giỏ hàng');
+  //       }
+  //       toast.value.kshowToast('success', 'Tạo hóa đơn mới thành công!');
+  //     }
+  //   } catch (error) {
+  //     console.error('Error creating invoice:', error);
+  //     toast.value.kshowToast('error', 'Không thể tạo hóa đơn mới: ' + error.message);
+  //   } finally {
+  //     isCreatingInvoice.value = false;
+  //   }
+  // };
   const createNewPendingInvoice = async () => {
+    const pendingCount = pendingInvoices.value.filter(invoice => invoice.status === 'Chờ').length;
+    if (pendingCount >= 5) {
+      toast.value.kshowToast('error', 'Đã đạt tối đa 5 hóa đơn chờ. Vui lòng thanh toán hoặc hủy bớt hóa đơn để tạo mới.');
+      return;
+    }
     isCreatingInvoice.value = true;
     try {
       const response = await axios.post('http://localhost:8080/ban-hang/addHD', {
@@ -377,6 +421,8 @@ export default function useBanHang() {
         pendingInvoices.value.push(newInvoice);
         activeInvoiceId.value = newInvoice.id;
         localStorage.setItem('activeInvoiceId', newInvoice.id);
+
+        // Tạo giỏ hàng
         const gioHangResponse = await axios.post('http://localhost:8080/ban-hang/addGioHang', {
           ma: `GH${Date.now()}`,
           idKhachHang: 1,
@@ -398,16 +444,42 @@ export default function useBanHang() {
     }
   };
 
+  // const loadPendingInvoice = async (invoice) => {
+  //   activeInvoiceId.value = invoice.id;
+  //   localStorage.setItem('activeInvoiceId', invoice.id);
+  //
+  //   try {
+  //     const response = await axios.get(`http://localhost:8080/ban-hang/gio-hang/by-hoa-don/${invoice.id}`);
+  //     if (response.status === 200 && response.data) {
+  //       gioHangId.value = response.data.id;
+  //       console.log('Loaded existing GioHang ID:', gioHangId.value);
+  //       await reloadCartItems();
+  //     } else {
+  //       gioHangId.value = null;
+  //       cartItems.value = [...invoice.items];
+  //       console.log('No GioHang found for invoice ID:', invoice.id);
+  //       toast.value.kshowToast('warning', 'Không tìm thấy giỏ hàng cho hóa đơn này. Sử dụng dữ liệu từ hóa đơn.');
+  //     }
+  //   } catch (error) {
+  //     console.error('Error loading cart:', error);
+  //     gioHangId.value = null;
+  //     cartItems.value = [...invoice.items];
+  //     const errorMessage = error.response?.data || error.message || 'Lỗi không xác định';
+  //     toast.value.kshowToast('error', `Không thể tải giỏ hàng cho hóa đơn ${invoice.id}: ${errorMessage}`);
+  //   }
+  // };
   const loadPendingInvoice = async (invoice) => {
     activeInvoiceId.value = invoice.id;
     localStorage.setItem('activeInvoiceId', invoice.id);
-    cartItems.value = [...invoice.items];
+
     try {
       const response = await axios.get(`http://localhost:8080/ban-hang/gio-hang/by-hoa-don/${invoice.id}`);
       if (response.status === 200 && response.data) {
         gioHangId.value = response.data.id;
-        console.log('Loaded GioHang ID:', gioHangId.value);
+        console.log('Loaded existing GioHang ID:', gioHangId.value);
+        await reloadCartItems();
       } else {
+        // Nếu không tìm thấy giỏ hàng, tạo mới
         const gioHangResponse = await axios.post('http://localhost:8080/ban-hang/addGioHang', {
           ma: `GH${Date.now()}`,
           idKhachHang: 1,
@@ -416,16 +488,77 @@ export default function useBanHang() {
         if (gioHangResponse.status === 200 && gioHangResponse.data) {
           gioHangId.value = gioHangResponse.data.id;
           console.log('Created new GioHang with ID:', gioHangId.value);
+          await reloadCartItems();
         } else {
-          throw new Error('Không thể tải hoặc tạo giỏ hàng');
+          throw new Error('Không tạo được giỏ hàng');
         }
       }
     } catch (error) {
       console.error('Error loading cart:', error);
-      toast.value.kshowToast('error', 'Không thể tải giỏ hàng.');
+      gioHangId.value = null;
+      cartItems.value = [...invoice.items];
+      const errorMessage = error.response?.data || error.message || 'Lỗi không xác định';
+      toast.value.kshowToast('error', `Không thể tải giỏ hàng cho hóa đơn ${invoice.id}: ${errorMessage}`);
     }
   };
+  // const loadPendingInvoice = async (invoice) => {
+  //   activeInvoiceId.value = invoice.id;
+  //   localStorage.setItem('activeInvoiceId', invoice.id);
+  //
+  //   try {
+  //     // Kiểm tra giỏ hàng hiện có
+  //     const response = await axios.get(`http://localhost:8080/ban-hang/gio-hang/by-hoa-don/${invoice.id}`);
+  //     if (response.status === 200 && response.data) {
+  //       // Nếu giỏ hàng tồn tại, sử dụng giỏ hàng hiện có
+  //       gioHangId.value = response.data.id;
+  //       console.log('Loaded existing GioHang ID:', gioHangId.value);
+  //
+  //       // Tải lại danh sách sản phẩm trong giỏ hàng
+  //       await reloadCartItems();
+  //     } else {
+  //       // Nếu không tìm thấy giỏ hàng, sử dụng dữ liệu từ invoice.items
+  //       gioHangId.value = null;
+  //       cartItems.value = [...invoice.items];
+  //       console.log('No GioHang found for invoice ID:', invoice.id);
+  //       toast.value.kshowToast('warning', 'Không tìm thấy giỏ hàng cho hóa đơn này. Sử dụng dữ liệu từ hóa đơn.');
+  //     }
+  //   } catch (error) {
+  //     console.error('Error loading cart:', error);
+  //     // Nếu có lỗi (bao gồm lỗi 500), không tạo giỏ hàng mới, chỉ sử dụng invoice.items
+  //     gioHangId.value = null;
+  //     cartItems.value = [...invoice.items];
+  //     toast.value.kshowToast('error', 'Không thể tải giỏ hàng: ' + (error.response?.data?.message || error.message));
+  //   }
+  // };
 
+  // const reloadCartItems = async () => {
+  //   if (gioHangId.value) {
+  //     try {
+  //       const response = await axios.get(`http://localhost:8080/ban-hang/gio-hang/${gioHangId.value}/chi-tiet`);
+  //       if (response.status === 200 && response.data) {
+  //         cartItems.value = response.data.map(item => ({
+  //           id: item.id,
+  //           name: item.tenSanPham,
+  //           color: item.mauSac || 'N/A',
+  //           ram: item.ram || 'N/A',
+  //           capacity: item.boNhoTrong || 'N/A',
+  //           price: item.giaBan,
+  //           imei: item.imei,
+  //         }));
+  //         // Cập nhật lại pendingInvoices
+  //         const invoice = pendingInvoices.value.find((inv) => inv.id === activeInvoiceId.value);
+  //         if (invoice) {
+  //           invoice.items = [...cartItems.value];
+  //         }
+  //       } else {
+  //         toast.value.kshowToast('error', 'Không thể tải danh sách sản phẩm trong giỏ hàng.');
+  //       }
+  //     } catch (error) {
+  //       console.error('Error reloading cart items:', error);
+  //       toast.value.kshowToast('error', 'Lỗi khi tải giỏ hàng: ' + (error.response?.data || error.message));
+  //     }
+  //   }
+  // };
   const reloadCartItems = async () => {
     if (gioHangId.value) {
       try {
@@ -440,7 +573,6 @@ export default function useBanHang() {
             price: item.giaBan,
             imei: item.imei,
           }));
-          // Cập nhật lại pendingInvoices
           const invoice = pendingInvoices.value.find((inv) => inv.id === activeInvoiceId.value);
           if (invoice) {
             invoice.items = [...cartItems.value];
@@ -454,24 +586,95 @@ export default function useBanHang() {
       }
     }
   };
-
+  // const removeItem = async (item) => {
+  //   console.log('Attempting to remove item with ID:', item.id);
+  //   try {
+  //     const response = await axios.delete(`http://localhost:8080/ban-hang/gio-hang/chi-tiet/${item.id}`);
+  //     if (response.status === 200) {
+  //       await reloadCartItems();
+  //       toast.value.kshowToast('success', 'Đã xóa sản phẩm khỏi giỏ hàng!');
+  //     }
+  //   } catch (error) {
+  //     console.error('Error removing item:', error.response?.data || error.message);
+  //     const errorMessage = error.response?.data || 'Không thể xóa sản phẩm khỏi giỏ hàng.';
+  //     toast.value.kshowToast('error', errorMessage);
+  //     await reloadCartItems();
+  //   }
+  // };
+  // const removeItem = async (item) => {
+  //   console.log('Attempting to remove item with ID:', item.id);
+  //   try {
+  //     if (gioHangId.value) {
+  //       const response = await axios.delete(`http://localhost:8080/ban-hang/gio-hang/${gioHangId.value}/chi-tiet/${item.id}`);
+  //       if (response.status === 200) {
+  //         cartItems.value = cartItems.value.filter((cartItem) => cartItem.id !== item.id);
+  //         const invoice = pendingInvoices.value.find((inv) => inv.id === activeInvoiceId.value);
+  //         if (invoice) {
+  //           invoice.items = [...cartItems.value];
+  //         }
+  //         toast.value.kshowToast('success', 'Đã xóa sản phẩm khỏi giỏ hàng!');
+  //       } else {
+  //         throw new Error('Không thể xóa sản phẩm khỏi giỏ hàng.');
+  //       }
+  //     } else {
+  //       cartItems.value = cartItems.value.filter((cartItem) => cartItem.id !== item.id);
+  //       const invoice = pendingInvoices.value.find((inv) => inv.id === activeInvoiceId.value);
+  //       if (invoice) {
+  //         invoice.items = [...cartItems.value];
+  //       }
+  //       toast.value.kshowToast('success', 'Đã xóa sản phẩm khỏi danh sách!');
+  //     }
+  //   } catch (error) {
+  //     console.error('Error removing item:', error.response?.data || error.message);
+  //     let errorMessage = 'Không thể xóa sản phẩm.';
+  //     if (error.response?.status === 400) {
+  //       errorMessage = error.response.data || 'Dữ liệu không hợp lệ.';
+  //     } else if (error.response?.status === 404) {
+  //       errorMessage = 'Sản phẩm không tồn tại trong giỏ hàng.';
+  //     } else if (error.response?.status === 500) {
+  //       errorMessage = 'Lỗi server khi xóa sản phẩm.';
+  //     }
+  //     toast.value.kshowToast('error', errorMessage);
+  //     if (gioHangId.value) {
+  //       await reloadCartItems();
+  //     }
+  //   }
+  // };
   const removeItem = async (item) => {
-    console.log('Attempting to remove item with ID:', item.id); // Thêm log để kiểm tra ID
+    console.log('Attempting to remove item with ID:', item.id);
     try {
-      const response = await axios.delete(`http://localhost:8080/ban-hang/gio-hang/chi-tiet/${item.id}`);
-      if (response.status === 200) {
-        await reloadCartItems(); // Đồng bộ lại dữ liệu sau khi xóa thành công
-        toast.value.kshowToast('success', 'Đã xóa sản phẩm khỏi giỏ hàng!');
+      if (gioHangId.value) {
+        const response = await axios.delete(`http://localhost:8080/ban-hang/gio-hang/${gioHangId.value}/chi-tiet/${item.id}`);
+        if (response.status === 200) {
+          await reloadCartItems(); // Làm mới giỏ hàng từ API
+          toast.value.kshowToast('success', 'Đã xóa sản phẩm khỏi giỏ hàng!');
+        } else {
+          throw new Error('Không thể xóa sản phẩm khỏi giỏ hàng.');
+        }
+      } else {
+        cartItems.value = cartItems.value.filter((cartItem) => cartItem.id !== item.id);
+        const invoice = pendingInvoices.value.find((inv) => inv.id === activeInvoiceId.value);
+        if (invoice) {
+          invoice.items = [...cartItems.value];
+        }
+        toast.value.kshowToast('success', 'Đã xóa sản phẩm khỏi danh sách!');
       }
     } catch (error) {
       console.error('Error removing item:', error.response?.data || error.message);
-      const errorMessage = error.response?.data || 'Không thể xóa sản phẩm khỏi giỏ hàng.';
+      let errorMessage = 'Không thể xóa sản phẩm.';
+      if (error.response?.status === 400) {
+        errorMessage = error.response.data || 'Dữ liệu không hợp lệ.';
+      } else if (error.response?.status === 404) {
+        errorMessage = 'Sản phẩm không tồn tại trong giỏ hàng.';
+      } else if (error.response?.status === 500) {
+        errorMessage = 'Lỗi server khi xóa sản phẩm.';
+      }
       toast.value.kshowToast('error', errorMessage);
-      // Luôn đồng bộ lại dữ liệu sau khi xóa thất bại để đảm bảo tính nhất quán
-      await reloadCartItems();
+      if (gioHangId.value) {
+        await reloadCartItems();
+      }
     }
   };
-
   const openProductModal = () => {
     showProductModal.value = true;
     fetchProducts();
@@ -513,7 +716,6 @@ export default function useBanHang() {
 
   const discountCodeId = ref(null);
 
-// Cập nhật createOrder để gửi idPhieuGiamGia
   const createOrder = async () => {
     if (!paymentMethod.value && !payOnDelivery.value) {
       toast.value.kshowToast('error', 'Vui lòng chọn phương thức thanh toán hoặc thanh toán khi nhận hàng');
@@ -548,7 +750,7 @@ export default function useBanHang() {
         totalPrice: totalPrice.value,
         discount: discount.value,
         maGiamGia: discountCode.value || null,
-        idPhieuGiamGia: discountCodeId.value || null, 
+        idPhieuGiamGia: discountCodeId.value || null,
         paymentMethod: paymentMethod.value,
         tienChuyenKhoan: tienChuyenKhoan.value,
         tienMat: tienMat.value,
@@ -572,7 +774,7 @@ export default function useBanHang() {
             district: customer.value.district,
             ward: customer.value.ward,
             address: customer.value.address,
-            id: idKhachHang.value // Thêm idKhachHang
+            id: idKhachHang.value
           }
           : null,
         orderNotes: orderNotes.value || '',
@@ -597,8 +799,8 @@ export default function useBanHang() {
         payOnDelivery.value = false;
         tienChuyenKhoan.value = 0;
         tienMat.value = 0;
-        customer.value = { name: '', phone: '', city: '', district: '', ward: '', address: '' };
-        receiver.value = { name: '', phone: '', city: '', district: '', ward: '', address: '', email: '' };
+        customer.value = {name: '', phone: '', city: '', district: '', ward: '', address: ''};
+        receiver.value = {name: '', phone: '', city: '', district: '', ward: '', address: '', email: ''};
         await fetchPendingInvoices();
         router.push(`/show-hoa-don/${invoiceId}`);
       }
@@ -669,7 +871,6 @@ export default function useBanHang() {
       if (toast.value) toast.value.kshowToast("error", "Không thể tìm kiếm khách hàng: " + (error.response?.data?.error || error.message));
     }
   }, 300);
-  
 
   const provinces = ref([]);
   const districts = ref([]);
@@ -830,11 +1031,257 @@ export default function useBanHang() {
   const openCustomerModal = () => {
     isCustomerModalOpen.value = true;
   };
+  
+  const isPggOpenModel = ref(false);
+  const publicDiscountCodes = ref([]);
+  const isLoadingDiscounts = ref(false);
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  };
+  
+  const openPggModal = async () => {
+    isPggOpenModel.value = true;
+    isLoadingDiscounts.value = true;
+    try {
+      // Lấy mã giảm giá riêng
+      await fetchDiscountCodes();
+
+      // Lấy mã giảm giá công khai (thêm idKhachHang nếu cần)
+      const response = await axios.get('http://localhost:8080/phieu-giam-gia/Pgg/Getall', {
+        params: {
+          idKhachHang: idKhachHang.value, // Thêm nếu API yêu cầu
+        },
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`, // Thêm nếu cần xác thực
+        },
+      });
+      if (response.status === 200 && response.data) {
+        publicDiscountCodes.value = response.data.map(item => ({
+          id: item.id,
+          ma: item.ma,
+          tenPhieuGiamGia: item.tenPhieuGiamGia,
+          loaiPhieuGiamGia: item.loaiPhieuGiamGia,
+          phanTramGiamGia: item.phanTramGiamGia,
+          soTienGiamToiDa: item.soTienGiamToiDa,
+          hoaDonToiThieu: item.hoaDonToiThieu,
+          trangThai: item.trangThai,
+          ngayKetThuc: item.ngayKetThuc,
+        }));
+      } else {
+        publicDiscountCodes.value = [];
+        toast.value.kshowToast('info', 'Không tìm thấy mã giảm giá công khai.');
+      }
+    } catch (error) {
+      console.error('Lỗi khi tải mã giảm giá:', error);
+      if (error.response) {
+        console.error('Response data:', error.response.data);
+        console.error('Response status:', error.response.status);
+        console.error('Response headers:', error.response.headers);
+        toast.value.kshowToast('error', `Lỗi khi tải mã giảm giá: ${error.response.data.message || error.message}`);
+      } else {
+        toast.value.kshowToast('error', 'Không thể kết nối đến server.');
+      }
+      publicDiscountCodes.value = [];
+    } finally {
+      isLoadingDiscounts.value = false;
+    }
+  };
+
+  const applyDiscount = async () => {
+    if (!discountCodeInput.value.trim()) {
+      discount.value = 0;
+      discountCode.value = '';
+      discountCodeId.value = null;
+      toast.value.kshowToast('info', 'Không có mã giảm giá được áp dụng.');
+      return;
+    }
+
+    try {
+      const codeInput = discountCodeInput.value.trim();
+      const customerDiscount = discountCodes.value.find(code => code.ma === codeInput);
+      console.log('Customer Discount:', customerDiscount);
+
+      if (customerDiscount) {
+        const pgg = customerDiscount.idPhieuGiamGia;
+
+        if (!customerDiscount.trangThai || !pgg?.trangThai) {
+          toast.value.kshowToast('error', 'Mã giảm giá không hợp lệ hoặc đã bị vô hiệu hóa.');
+          discount.value = 0;
+          discountCode.value = '';
+          discountCodeId.value = null;
+          return;
+        }
+
+        const ngayHetHan = new Date(customerDiscount.ngayHetHan);
+        if (ngayHetHan < new Date()) {
+          toast.value.kshowToast('error', 'Mã giảm giá đã hết hạn.');
+          discount.value = 0;
+          discountCode.value = '';
+          discountCodeId.value = null;
+          return;
+        }
+
+        const hoaDonToiThieu = pgg.hoaDonToiThieu || 0;
+        if (totalPrice.value < hoaDonToiThieu) {
+          toast.value.kshowToast('error', `Đơn hàng phải từ ${hoaDonToiThieu.toLocaleString()} đ để áp dụng mã này.`);
+          discount.value = 0;
+          discountCode.value = '';
+          discountCodeId.value = null;
+          return;
+        }
+
+        let discountAmount = 0;
+        if (pgg.loaiPhieuGiamGia === 'Phần trăm' && pgg.phanTramGiamGia) {
+          const calculatedDiscount = (totalPrice.value * pgg.phanTramGiamGia) / 100;
+          discountAmount = Math.min(calculatedDiscount, pgg.soTienGiamToiDa || Infinity);
+        } else {
+          discountAmount = pgg.soTienGiamToiDa || 0;
+        }
+
+        discount.value = discountAmount;
+        discountCode.value = pgg.ma;
+        discountCodeInput.value = customerDiscount.ma;
+        discountCodeId.value = pgg.id;
+        toast.value.kshowToast('success', `Áp dụng mã giảm giá thành công! Giảm ${discountAmount.toLocaleString()} đ.`);
+        return;
+      }
+
+      const response = await axios.get(`http://localhost:8080/phieu-giam-gia/check-public?ma=${encodeURIComponent(codeInput)}`);
+      if (response.status === 200 && response.data) {
+        const pgg = response.data;
+
+        if (!pgg.trangThai) {
+          toast.value.kshowToast('error', 'Mã giảm giá không hợp lệ hoặc đã bị vô hiệu hóa.');
+          discount.value = 0;
+          discountCode.value = '';
+          discountCodeId.value = null;
+          return;
+        }
+
+        const ngayHetHan = new Date(pgg.ngayKetThuc);
+        if (ngayHetHan < new Date()) {
+          toast.value.kshowToast('error', 'Mã giảm giá đã hết hạn.');
+          discount.value = 0;
+          discountCode.value = '';
+          discountCodeId.value = null;
+          return;
+        }
+
+        const hoaDonToiThieu = pgg.hoaDonToiThieu || 0;
+        if (totalPrice.value < hoaDonToiThieu) {
+          toast.value.kshowToast('error', `Đơn hàng phải từ ${hoaDonToiThieu.toLocaleString()} đ để áp dụng mã này.`);
+          discount.value = 0;
+          discountCode.value = '';
+          discountCodeId.value = null;
+          return;
+        }
+
+        let discountAmount = 0;
+        if (pgg.loaiPhieuGiamGia === 'Phần trăm' && pgg.phanTramGiamGia) {
+          const calculatedDiscount = (totalPrice.value * pgg.phanTramGiamGia) / 100;
+          discountAmount = Math.min(calculatedDiscount, pgg.soTienGiamToiDa || Infinity);
+        } else {
+          discountAmount = pgg.soTienGiamToiDa || 0;
+        }
+
+        discount.value = discountAmount;
+        discountCode.value = pgg.ma;
+        discountCodeInput.value = pgg.ma;
+        discountCodeId.value = pgg.id;
+        toast.value.kshowToast('success', `Áp dụng mã giảm giá công khai thành công! Giảm ${discountAmount.toLocaleString()} đ.`);
+      } else {
+        toast.value.kshowToast('error', 'Mã giảm giá không hợp lệ.');
+        discount.value = 0;
+        discountCode.value = '';
+        discountCodeId.value = null;
+      }
+    } catch (error) {
+      console.error('Lỗi khi áp dụng mã giảm giá:', error);
+      toast.value.kshowToast('error', 'Lỗi khi áp dụng mã giảm giá: ' + (error.response?.data || error.message));
+      discount.value = 0;
+      discountCode.value = '';
+      discountCodeId.value = null;
+    }
+  };
+
+  const getTopDiscountCodes = () => {
+    const allDiscounts = [];
+
+    // Xử lý mã giảm giá cá nhân
+    discountCodes.value.forEach(code => {
+      if (
+        code.trangThai &&
+        code.idPhieuGiamGia?.trangThai &&
+        new Date(code.ngayHetHan) >= new Date() &&
+        totalPrice.value >= (code.idPhieuGiamGia.hoaDonToiThieu || 0)
+      ) {
+        let discountAmount = 0;
+        if (code.idPhieuGiamGia.loaiPhieuGiamGia === 'Phần trăm' && code.idPhieuGiamGia.phanTramGiamGia) {
+          const calculatedDiscount = (totalPrice.value * code.idPhieuGiamGia.phanTramGiamGia) / 100;
+          discountAmount = Math.min(calculatedDiscount, code.idPhieuGiamGia.soTienGiamToiDa || Infinity);
+        } else {
+          discountAmount = code.idPhieuGiamGia.soTienGiamToiDa || 0;
+        }
+        allDiscounts.push({
+          id: code.id,
+          ma: code.ma, // Mã của PhieuGiamGiaCaNhan
+          pggMa: code.idPhieuGiamGia.ma, // Mã của PhieuGiamGia
+          tenPhieuGiamGia: code.idPhieuGiamGia.tenPhieuGiamGia,
+          loaiPhieuGiamGia: code.idPhieuGiamGia.loaiPhieuGiamGia,
+          phanTramGiamGia: code.idPhieuGiamGia.phanTramGiamGia,
+          soTienGiamToiDa: code.idPhieuGiamGia.soTienGiamToiDa,
+          hoaDonToiThieu: code.idPhieuGiamGia.hoaDonToiThieu,
+          ngayHetHan: code.ngayHetHan,
+          discountAmount,
+          isPersonal: true
+        });
+      }
+    });
+
+    // Xử lý mã giảm giá công khai
+    publicDiscountCodes.value.forEach(code => {
+      if (
+        code.trangThai &&
+        new Date(code.ngayKetThuc) >= new Date() &&
+        totalPrice.value >= (code.hoaDonToiThieu || 0)
+      ) {
+        let discountAmount = 0;
+        if (code.loaiPhieuGiamGia === 'Phần trăm' && code.phanTramGiamGia) {
+          const calculatedDiscount = (totalPrice.value * code.phanTramGiamGia) / 100;
+          discountAmount = Math.min(calculatedDiscount, code.soTienGiamToiDa || Infinity);
+        } else {
+          discountAmount = code.soTienGiamToiDa || 0;
+        }
+        allDiscounts.push({
+          id: code.id,
+          ma: code.ma, // Mã của PhieuGiamGia
+          pggMa: code.ma,
+          tenPhieuGiamGia: code.tenPhieuGiamGia,
+          loaiPhieuGiamGia: code.loaiPhieuGiamGia,
+          phanTramGiamGia: code.phanTramGiamGia,
+          soTienGiamToiDa: code.soTienGiamToiDa,
+          hoaDonToiThieu: code.hoaDonToiThieu,
+          ngayHetHan: code.ngayKetThuc,
+          discountAmount,
+          isPersonal: false
+        });
+      }
+    });
+
+    // Sắp xếp theo discountAmount giảm dần và lấy top 3
+    return allDiscounts
+      .sort((a, b) => b.discountAmount - a.discountAmount)
+      .slice(0, 3);
+  };
+
   const selectBestDiscountCode = async () => {
     if (!discountCodes.value.length) {
       discountCodeInput.value = '';
       discount.value = 0;
       discountCode.value = '';
+      discountCodeId.value = null;
       if (toast.value) toast.value.kshowToast('info', 'Không có mã giảm giá riêng nào khả dụng cho khách hàng này. Vui lòng nhập mã công khai nếu có.');
       return;
     }
@@ -842,6 +1289,7 @@ export default function useBanHang() {
       discountCodeInput.value = '';
       discount.value = 0;
       discountCode.value = '';
+      discountCodeId.value = null;
       if (toast.value) toast.value.kshowToast('info', 'Vui lòng thêm sản phẩm vào giỏ hàng để áp dụng mã giảm giá.');
       return;
     }
@@ -867,10 +1315,12 @@ export default function useBanHang() {
         invalidReasons.add(`Mã ${code.ma} yêu cầu tổng tiền hóa đơn tối thiểu ${hoaDonToiThieu.toLocaleString()} đ.`);
         continue;
       }
-      let discountAmount = code.idPhieuGiamGia.soTienGiamToiDa || 0;
+      let discountAmount = 0;
       if (code.idPhieuGiamGia.loaiPhieuGiamGia === 'Phần trăm' && code.idPhieuGiamGia.phanTramGiamGia) {
         const calculatedDiscount = (totalPrice.value * code.idPhieuGiamGia.phanTramGiamGia) / 100;
-        discountAmount = Math.min(calculatedDiscount, code.idPhieuGiamGia.soTienGiamToiDa);
+        discountAmount = Math.min(calculatedDiscount, code.idPhieuGiamGia.soTienGiamToiDa || Infinity);
+      } else {
+        discountAmount = code.idPhieuGiamGia.soTienGiamToiDa || 0;
       }
       if (discountAmount > maxDiscountAmount) {
         maxDiscountAmount = discountAmount;
@@ -884,104 +1334,13 @@ export default function useBanHang() {
       discountCodeInput.value = '';
       discount.value = 0;
       discountCode.value = '';
+      discountCodeId.value = null;
       if (invalidReasons.size > 0) {
         const reasonMessage = Array.from(invalidReasons).join(' ');
         if (toast.value) toast.value.kshowToast('warning', `Không thể áp dụng mã giảm giá riêng: ${reasonMessage}`);
       } else {
         if (toast.value) toast.value.kshowToast('info', 'Không có mã giảm giá riêng nào phù hợp. Vui lòng nhập mã công khai nếu có.');
       }
-    }
-  };
-
-  const applyDiscount = async () => {
-    if (!discountCodeInput.value.trim()) {
-      toast.value.kshowToast('error', 'Vui lòng nhập hoặc chọn mã giảm giá.');
-      return;
-    }
-    try {
-      // Kiểm tra mã trong danh sách mã riêng của khách hàng
-      const customerDiscount = discountCodes.value.find(code => code.ma === discountCodeInput.value.trim());
-      console.log('Customer Discount:', customerDiscount);
-      if (customerDiscount) {
-        if (!customerDiscount.trangThai || !customerDiscount.idPhieuGiamGia?.trangThai) {
-          toast.value.kshowToast('error', 'Mã giảm giá không hợp lệ hoặc đã bị vô hiệu hóa.');
-          discount.value = 0;
-          discountCode.value = '';
-          return;
-        }
-        const ngayHetHan = new Date(customerDiscount.ngayHetHan);
-        if (ngayHetHan < new Date()) {
-          toast.value.kshowToast('error', 'Mã giảm giá đã hết hạn.');
-          discount.value = 0;
-          discountCode.value = '';
-          return;
-        }
-        const hoaDonToiThieu = customerDiscount.idPhieuGiamGia.hoaDonToiThieu || 0;
-        if (totalPrice.value < hoaDonToiThieu) {
-          toast.value.kshowToast('error', `Đơn hàng phải từ ${hoaDonToiThieu.toLocaleString()} đ để áp dụng mã này.`);
-          discount.value = 0;
-          discountCode.value = '';
-          return;
-        }
-        let discountAmount = customerDiscount.idPhieuGiamGia.soTienGiamToiDa || 0;
-        if (customerDiscount.idPhieuGiamGia.loaiPhieuGiamGia === 'Phần trăm' && customerDiscount.idPhieuGiamGia.phanTramGiamGia) {
-          const calculatedDiscount = (totalPrice.value * customerDiscount.idPhieuGiamGia.phanTramGiamGia) / 100;
-          discountAmount = Math.min(calculatedDiscount, customerDiscount.idPhieuGiamGia.soTienGiamToiDa);
-        }
-        discount.value = discountAmount;
-        discountCode.value = customerDiscount.idPhieuGiamGia.ma; // Sử dụng ma từ PhieuGiamGia
-        discountCodeInput.value = customerDiscount.idPhieuGiamGia.ma;
-        // Lưu idPhieuGiamGia
-        discountCodeId.value = customerDiscount.idPhieuGiamGia.id; // Thêm biến mới
-        toast.value.kshowToast('success', `Áp dụng mã giảm giá thành công! Giảm ${discountAmount.toLocaleString()} đ.`);
-        return;
-      }
-
-      // Kiểm tra mã công khai
-      const response = await axios.get(`http://localhost:8080/phieu-giam-gia/check-public?ma=${encodeURIComponent(discountCodeInput.value.trim())}`);
-      if (response.status === 200 && response.data) {
-        const pgg = response.data;
-        if (!pgg.trangThai) {
-          toast.value.kshowToast('error', 'Mã giảm giá không hợp lệ hoặc đã bị vô hiệu hóa.');
-          discount.value = 0;
-          discountCode.value = '';
-          return;
-        }
-        const ngayHetHan = new Date(pgg.ngayKetThuc);
-        if (ngayHetHan < new Date()) {
-          toast.value.kshowToast('error', 'Mã giảm giá đã hết hạn.');
-          discount.value = 0;
-          discountCode.value = '';
-          return;
-        }
-        const hoaDonToiThieu = pgg.hoaDonToiThieu || 0;
-        if (totalPrice.value < hoaDonToiThieu) {
-          toast.value.kshowToast('error', `Đơn hàng phải từ ${hoaDonToiThieu.toLocaleString()} đ để áp dụng mã này.`);
-          discount.value = 0;
-          discountCode.value = '';
-          return;
-        }
-        let discountAmount = pgg.soTienGiamToiDa || 0;
-        if (pgg.loaiPhieuGiamGia === 'Phần trăm' && pgg.phanTramGiamGia) {
-          const calculatedDiscount = (totalPrice.value * pgg.phanTramGiamGia) / 100;
-          discountAmount = Math.min(calculatedDiscount, pgg.soTienGiamToiDa);
-        }
-        discount.value = discountAmount;
-        discountCode.value = discountCodeInput.value;
-        discountCodeId.value = pgg.id; // Lưu id cho PGG công khai
-        toast.value.kshowToast('success', `Áp dụng mã giảm giá công khai thành công! Giảm ${discountAmount.toLocaleString()} đ.`);
-      } else {
-        toast.value.kshowToast('error', 'Mã giảm giá không hợp lệ.');
-        discount.value = 0;
-        discountCode.value = '';
-        discountCodeId.value = null;
-      }
-    } catch (error) {
-      console.error('Lỗi khi áp dụng mã giảm giá:', error);
-      toast.value.kshowToast('error', 'Lỗi khi áp dụng mã giảm giá: ' + (error.response?.data || error.message));
-      discount.value = 0;
-      discountCode.value = '';
-      discountCodeId.value = null;
     }
   };
 
@@ -1045,7 +1404,7 @@ export default function useBanHang() {
 
   const toggleDelivery = (value) => {
     isDelivery.value = value;
-    payOnDelivery.value = value; // Đồng bộ payOnDelivery với isDelivery
+    payOnDelivery.value = value;
     if (!isDelivery.value) {
       resetReceiver();
     } else {
@@ -1136,5 +1495,11 @@ export default function useBanHang() {
     refreshProducts,
     isDelivery,
     toggleDelivery,
+    isPggOpenModel,
+    openPggModal,
+    publicDiscountCodes,
+    isLoadingDiscounts,
+    formatDate,
+    getTopDiscountCodes,
   };
 }

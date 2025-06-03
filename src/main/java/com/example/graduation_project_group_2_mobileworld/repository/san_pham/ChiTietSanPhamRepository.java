@@ -70,7 +70,7 @@ public interface ChiTietSanPhamRepository extends JpaRepository<ChiTietSanPham, 
     @Query("SELECT COUNT(c) FROM ChiTietSanPham c WHERE c.idSanPham.id = :sanPhamId AND c.deleted = false AND NOT EXISTS (SELECT i FROM ImelDaBan i WHERE i.imel = c.idImel.imel AND i.deleted = false)")
     Long countByIdSanPhamIdAndDeletedFalseAndNotSold(@Param("sanPhamId") Integer sanPhamId);
 
-    @Query("SELECT sp.tenSanPham AS tenSanPham, MIN(c.ma) AS ma, ms.mauSac AS mauSac, r.dungLuongRam AS dungLuongRam, bnt.dungLuongBoNhoTrong AS dungLuongBoNhoTrong, COUNT(DISTINCT c.idImel.imel) AS soLuong, MIN(c.giaBan) AS giaBan, sp.id AS idSanPham " +
+    @Query("SELECT MIN(sp.ma) AS ma, sp.tenSanPham AS tenSanPham , ms.mauSac AS mauSac, r.dungLuongRam AS dungLuongRam, bnt.dungLuongBoNhoTrong AS dungLuongBoNhoTrong, COUNT(DISTINCT c.idImel.imel) AS soLuong, MIN(c.giaBan) AS giaBan, sp.id AS idSanPham " +
             "FROM ChiTietSanPham c " +
             "JOIN c.idSanPham sp " +
             "LEFT JOIN c.idMauSac ms " +
